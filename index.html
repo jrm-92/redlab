@@ -1211,7 +1211,25 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
               <div class="db-section-title">Records personnels</div>
               <div class="db-section-badge">Allure &amp; %VMA</div>
             </div>
+            <button class="btn-road-apply" onclick="ffaOpen()" style="width:100%;margin-bottom:14px;padding:13px">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importer depuis une fiche (FFA / lepistard)
+            </button>
             <div id="db-records"></div>
+          </div>
+
+          <!-- Historique des courses -->
+          <div class="db-section" id="db-history-section">
+            <div class="db-section-hd">
+              <div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg></div>
+              <div class="db-section-title">Historique des courses</div>
+              <div class="db-section-badge">Importé de la FFA</div>
+            </div>
+            <div class="card" style="padding:20px">
+              <div id="hist-empty" style="text-align:center;color:var(--muted2);font-size:13px;padding:18px 10px;line-height:1.6">Aucune course importée. Utilise <strong style="color:var(--orange)">Importer depuis une fiche</strong> ci-dessus : toutes les courses de la fiche s'afficheront ici (graphique + liste).</div>
+              <div id="hist-chart-wrap" style="position:relative;height:300px;display:none"><canvas id="hist-chart"></canvas></div>
+              <div id="hist-list"></div>
+            </div>
           </div>
 
           <!-- Graphique de performance -->
@@ -1221,7 +1239,7 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
                 <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
               </div>
               <div class="db-section-title">Courbe de performance</div>
-              <div class="db-section-badge">Prédictions vs Records</div>
+              <div class="db-section-badge">Prédictions vs résultats &lt; 6 mois</div>
             </div>
             <div class="card" style="padding:20px">
               <div id="perf-legend" class="perf-legend"></div>
@@ -1256,6 +1274,22 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
     </div><!-- /scroll -->
   </div><!-- /main -->
 </div><!-- /app -->
+
+<div id="ffa-overlay" style="display:none;position:fixed;inset:0;background:rgba(6,10,20,0.72);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)ffaClose()">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;padding:26px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--text)">Importer une fiche FFA / lepistard</div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:3px;line-height:1.55">Ouvre la fiche de l'athlète, sélectionne le tableau de records / bilans, copie-le (Ctrl+C) et colle-le ci-dessous.</div>
+      </div>
+      <button onclick="ffaClose()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:24px;line-height:1;padding:0 4px;flex-shrink:0">&times;</button>
+    </div>
+    <textarea id="ffa-input" placeholder="Colle ici le contenu copie depuis la fiche...&#10;&#10;Ex :&#10;1500 m   4:05.30&#10;5 km     15:32&#10;10 km    32:10&#10;Semi     1:11:45&#10;Marathon 2:34:18" style="width:100%;min-height:150px;margin-top:16px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:13px;line-height:1.5;padding:12px;resize:vertical;outline:none"></textarea>
+    <button onclick="ffaParse()" class="btn-generate" style="margin-top:12px;font-size:15px;padding:13px">Analyser</button>
+    <div id="ffa-preview" style="margin-top:18px"></div>
+    <button id="ffa-apply" onclick="ffaApply()" class="btn-generate" style="display:none;margin-top:16px;background:var(--green);box-shadow:0 4px 20px rgba(16,185,129,0.32)">Remplir mes records</button>
+  </div>
+</div>
 
 <div class="prog-overlay" id="prog-overlay" onclick="if(event.target===this)closeProgress()">
   <div class="prog-modal" id="prog-modal-body"></div>
@@ -1638,7 +1672,7 @@ function loadLS(){
 }
 function resetAll(){
   try{localStorage.removeItem(LS_KEY);}catch(e){}
-  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},csPts:null});
+  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},csPts:null,raceHistory:[]});
   tmiSec=null;
   raceRef={id:'',mm:'',ss:''};
   const ids=['pseudo-inp','vma-inp','fc-max','fc-rest'];
@@ -1677,6 +1711,7 @@ function renderDashboard(){
   renderRecords();
   buildRaces();
   renderChart();
+  renderRaceHistory();
 }
 
 /* ── Profile ── */
@@ -2088,6 +2123,17 @@ function recSeconds(id){
   const T=(+r.hh||0)*3600+(+r.mm||0)*60+(+r.ss||0);
   return T>=30?T:null;
 }
+const PERF_WINDOW_DAYS=183; // ~6 mois
+function chartSeconds(id){
+  const rh=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id);
+  if(rh.length){
+    const cutoff=Date.now()-PERF_WINDOW_DAYS*24*3600*1000;
+    const recent=rh.filter(r=>r.ts>=cutoff&&r.sec>=30);
+    if(!recent.length)return null;
+    return Math.min.apply(null,recent.map(r=>r.sec));
+  }
+  return recSeconds(id);
+}
 function renderChart(){
   const cv=document.getElementById('perf-chart');
   if(!cv||typeof Chart==='undefined'||!S.vma)return;
@@ -2095,9 +2141,16 @@ function renderChart(){
   const labels=CHART_DISTS.map(r=>r.nm);
   const paceHi=CHART_DISTS.map(r=>Math.round(1000/(r.vmaHi*vmaMs)));
   const paceLo=CHART_DISTS.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
-  const recPace=CHART_DISTS.map(r=>{const T=recSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
+  const recPace=CHART_DISTS.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
   const hasRec=recPace.some(v=>v!=null);
-  const emptyEl=document.getElementById('perf-empty');if(emptyEl)emptyEl.style.display=hasRec?'none':'block';
+  const emptyEl=document.getElementById('perf-empty');
+  if(emptyEl){
+    emptyEl.style.display=hasRec?'none':'block';
+    const hasHist=(S.raceHistory||[]).some(r=>r&&r.ts!=null);
+    emptyEl.textContent=hasHist
+      ? "Aucun résultat de moins de 6 mois : la courbe reflète la forme récente. Importe une fiche à jour ou saisis un record."
+      : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.";
+  }
   const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
   const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
   const data={labels,datasets:[
@@ -2326,6 +2379,7 @@ function saveCurrentAthlete(){
     d3:S.d3,d6:S.d6,d12:S.d12,fc3:S.fc3,fc6:S.fc6,fc12:S.fc12,
     testDate:S.testDate,
     records:S.records||{},
+    raceHistory:S.raceHistory||[],
     goal:S.goal||null,
     csPts:S.csPts||null,
   };
@@ -2369,6 +2423,7 @@ function loadAthlete(id){
     fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,
     testDate:ath.testDate,
     records:ath.records||{},
+    raceHistory:ath.raceHistory||[],
     goal:ath.goal||{id:'',t:null,date:''},
     csPts:ath.csPts||null,
   });
@@ -2407,6 +2462,35 @@ function exportData(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function exportOneAthlete(id){
+  const ath=getAthletes().find(a=>a.id===id);
+  if(!ath){alert('Athlète introuvable.');return;}
+  const data={app:'RedLab',type:'athlete',version:1,exportedAt:new Date().toISOString(),athlete:ath};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const d=new Date();
+  const stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const slug=(ath.pseudo||'athlete').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  const a=document.createElement('a');
+  a.href=url;a.download='redlab-athlete-'+slug+'-'+stamp+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importOneAthlete(ath){
+  if(!ath||!ath.pseudo||ath.vma==null){throw new Error('athlete');}
+  const athletes=getAthletes();
+  const idx=athletes.findIndex(a=>a.pseudo===ath.pseudo);
+  if(idx>=0){
+    if(!confirm('« '+ath.pseudo+' » existe déjà. Remplacer son profil par celui du fichier ?'))return false;
+    ath.id=athletes[idx].id;
+    athletes[idx]=ath;
+  } else {
+    if(typeof ath.id!=='number'||athletes.some(a=>a.id===ath.id))ath.id=Date.now();
+    athletes.unshift(ath);
+  }
+  _saveAthletes(athletes);
+  return true;
+}
 function importData(input){
   const file=input.files&&input.files[0];
   if(!file){return;}
@@ -2415,6 +2499,14 @@ function importData(input){
     try{
       const data=JSON.parse(e.target.result);
       if(!data||(data.app&&data.app!=='RedLab')) throw new Error('format');
+      if(data.type==='athlete'&&data.athlete){
+        if(importOneAthlete(data.athlete)){
+          renderAthletes();
+          alert('Athlète « '+data.athlete.pseudo+' » importé.');
+        }
+        input.value='';
+        return;
+      }
       const hasProfile=data.profile&&typeof data.profile==='object';
       const hasAth=Array.isArray(data.athletes);
       if(!hasProfile&&!hasAth) throw new Error('vide');
@@ -2443,7 +2535,7 @@ function renderAthletes(){
     <div class="data-card">
       <div class="data-card-txt">
         <div class="data-card-title">Sauvegarde de vos données</div>
-        <div class="data-card-sub">Exportez un fichier de toutes vos données (profil + athlètes). Rangez-le où vous voulez (ex : Google Drive) et réimportez-le sur n'importe quel appareil.</div>
+        <div class="data-card-sub">Exportez toutes vos données (profil + athlètes), ou un seul athlète via le bouton orange de sa carte. L'import reconnaît les deux types de fichiers.</div>
       </div>
       <div class="data-actions">
         <button class="data-btn" onclick="exportData()">
@@ -2491,6 +2583,9 @@ function renderAthletes(){
         <button class="btn-load" onclick="loadAthlete(${a.id})">
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           Charger le profil
+        </button>
+        <button class="btn-del" onclick="exportOneAthlete(${a.id})" title="Exporter cet athlète" style="border-color:rgba(255,107,26,0.3);color:var(--orange)">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </button>
         <button class="btn-del" onclick="deleteAthlete(${a.id})" title="Supprimer">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -2584,10 +2679,13 @@ function updGoal(){
   const gv=x=>{const e=document.getElementById(x);return e?(+e.value||0):0;};
   const t=(gv('goal-h')*3600+gv('goal-m')*60+gv('goal-s'))||null;
   const de2=document.getElementById('goal-date');
-  S.goal={id:id,t:t,date:de2?de2.value:''};
+  const ne=document.getElementById('goal-name');
+  const ue=document.getElementById('goal-url');
+  S.goal={id:id,t:t,date:de2?de2.value:'',name:ne?ne.value.trim():'',url:ue?ue.value.trim():''};
   renderPredCards();
   saveLS();
 }
+function goalLinkRefresh(){ renderGoalSection(); }
 
 /* ══ FICHE PDF ══ */
 function _pdfData(src){return {pseudo:src.pseudo||S.pseudo,vma:src.vma,csKmh:src.csKmh||null,dp:src.dp||null,fcMax:src.fcMax||null,fcRest:src.fcRest||null,records:src.records||{},testDate:src.testDate||S.testDate,goal:src.goal||null,csPts:src.csPts||null};}
@@ -3239,16 +3337,26 @@ function renderGoalSection(){
   const gh=g.t?Math.floor(g.t/3600):'';
   const gm=g.t?Math.floor((g.t%3600)/60):'';
   const gs=g.t?g.t%60:'';
+  const nm=(g.name||'').replace(/"/g,'&quot;');
+  const ur=(g.url||'').replace(/"/g,'&quot;');
+  let safeUrl='';
+  if(g.url){ safeUrl=/^https?:\/\//i.test(g.url)?g.url:'https://'+g.url; }
   box.innerHTML='<div class="goal-bar">'+
     '<span class="goal-lbl">Course visée</span>'+
     '<input type="hidden" id="goal-dist" value="'+g.id+'">'+
     '<div class="cdd" id="cdd-goal" style="width:210px;flex:none"></div>'+
+    '<input id="goal-name" type="text" class="goal-date" maxlength="80" placeholder="Nom de la course (ex : 10 km de Paris)" value="'+nm+'" oninput="updGoal()" style="flex:1;min-width:170px">'+
     '<span class="goal-time">'+
       '<input id="goal-h" type="number" min="0" max="9" placeholder="h" value="'+gh+'" oninput="updGoal()">:'+
       '<input id="goal-m" type="number" min="0" max="59" placeholder="min" value="'+gm+'" oninput="updGoal()">:'+
       '<input id="goal-s" type="number" min="0" max="59" placeholder="sec" value="'+gs+'" oninput="updGoal()">'+
     '</span>'+
     '<input id="goal-date" type="date" class="goal-date" value="'+(g.date||'')+'" onchange="updGoal()">'+
+    '</div>'+
+    '<div class="goal-bar" style="border-left-color:rgba(255,107,26,0.35);margin-top:-8px">'+
+      '<span class="goal-lbl" style="color:var(--muted2)">Lien</span>'+
+      '<input id="goal-url" type="url" class="goal-date" maxlength="300" placeholder="https://... (site d\'inscription, parcours)" value="'+ur+'" oninput="updGoal()" onchange="goalLinkRefresh()" style="flex:1;min-width:200px">'+
+      (safeUrl?'<a href="'+safeUrl.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:12px;font-weight:700;text-decoration:none;border:1px solid rgba(255,107,26,0.35);border-radius:8px;padding:8px 13px;white-space:nowrap">Ouvrir <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>':'')+
     '</div>'+
     (!g.id?'<div class="goal-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Ajoute ta prochaine course pour suivre ton objectif</div>':'');
   cddBuild('goal-dist','cdd-goal',[{v:'',l:'— Aucune —'},{v:'5k',l:'5 km'},{v:'10k',l:'10 km'},{v:'semi',l:'Semi-marathon'},{v:'mara',l:'Marathon'}],function(){updGoal();});
@@ -3263,10 +3371,15 @@ function exportAthleteView(){
   if(!src){alert('Dashboard introuvable.');return;}
   const clone=src.cloneNode(true);
 
-  // 1) Retirer la section "Courbe de performance" et le modèle CS (coach)
-  const pc=clone.querySelector('#perf-chart'); if(pc){const sec=pc.closest('.db-section'); if(sec) sec.remove();}
+  // 0) Figer les valeurs saisies (la propriété .value n'est pas sérialisée par cloneNode)
+  clone.querySelectorAll('input').forEach(el=>{
+    if(!el.id)return;
+    const orig=document.getElementById(el.id);
+    if(orig&&orig.value!=null&&el.type!=='file')el.setAttribute('value',orig.value);
+  });
+
+  // 1) Retirer le modèle CS (outil coach) — courbe de perf et historique restent visibles
   const csm=clone.querySelector('#db-csmodel-section'); if(csm) csm.remove();
-  clone.querySelectorAll('canvas').forEach(cv=>cv.remove());
 
   // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
@@ -3286,13 +3399,23 @@ function exportAthleteView(){
 
   // 3) JS embarqué : réutilise les fonctions EXACTES de l'app (zéro divergence)
   const embedJS=[
-    'var S='+JSON.stringify({vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0})+';',
+    'var S='+JSON.stringify({vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0,pseudo:S.pseudo,records:S.records||{},raceHistory:S.raceHistory||[]})+';',
     'var ZONES_VC='+JSON.stringify(ZONES_VC)+';',
     'var ZONES_VMA='+JSON.stringify(ZONES_VMA)+';',
     'var RACES='+JSON.stringify(RACES)+';',
+    'var CHART_DISTS='+JSON.stringify(CHART_DISTS)+';',
+    'var DIST_M='+JSON.stringify(DIST_M)+';',
+    'var HIST_COL='+JSON.stringify(HIST_COL)+';',
+    'var HIST_LBL='+JSON.stringify(HIST_LBL)+';',
+    'var PERF_WINDOW_DAYS='+PERF_WINDOW_DAYS+';',
+    'var perfChart=null;var histChart=null;',
+    'function saveLS(){}',
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
-    'document.addEventListener("DOMContentLoaded",function(){var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});});'
+    recSeconds.toString(), chartSeconds.toString(),
+    renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
+    renderRaceHistory.toString(),
+    'document.addEventListener("DOMContentLoaded",function(){var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}});'
   ].join('\n');
 
   // 4) CSS de l'app + surcouche autonome
@@ -3323,8 +3446,9 @@ function exportAthleteView(){
     +'<div class="export-h-sub">Profil transmis par ton coach · '+today+'</div></div>'
     +'<div class="export-badge">Lecture seule</div></div>'
     +clone.outerHTML
-    +'<div class="export-foot">Généré avec <b>RedLab</b> · Reding Running<br>Profil figé au '+today+' — les calculateurs d\'allure sont interactifs.</div>'
+    +'<div class="export-foot">Généré avec <b>RedLab</b> · Reding Running<br>Profil transmis le '+today+' — calculateurs d\'allure et records interactifs.</div>'
     +'</div>'
+    +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>'
     +'<script>'+embedJS+'<\/script>'
     +'</body></html>';
 
@@ -3343,6 +3467,179 @@ function exportAthleteView(){
     const orig=btn.innerHTML;
     btn.innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg><span>Fichier prêt !</span>';
     setTimeout(()=>{btn.innerHTML=orig;},2200);
+  }
+}
+
+/* ══ IMPORT FICHE FFA / LEPISTARD (par collage) ══ */
+const FFA_DISTS=[
+  {id:'semi', label:'Semi-marathon', hasH:true, det:/semi|half|½\s*-?\s*marathon|1\s*\/\s*2\s*-?\s*marathon|21[\s.,]?097|21[\s.,]?100|21097|21100/i},
+  {id:'mara', label:'Marathon', hasH:true,  det:/marathon|42[\s.,]?195|42195/i},
+  {id:'10k',  label:'10 km',    hasH:false, det:/(?<![\d.,])10[\s.]?000(?!\d)|(?<![\d.,])10\s?km/i},
+  {id:'5k',   label:'5 km',     hasH:false, det:/(?<![\d.,])5[\s.]?000(?!\d)|(?<![\d.,])5\s?km/i},
+  {id:'3000', label:'3 000 m',  hasH:false, det:/(?<![\d.,])3[\s.]?000(?!\d)|(?<![\d.,])3\s?km(?!\/)/i},
+  {id:'1500', label:'1 500 m',  hasH:false, det:/(?<![\d.,])1[\s.]?500(?!\d)|1[.,]5\s?km/i},
+];
+function ffaOpen(){
+  const ov=document.getElementById('ffa-overlay');if(!ov)return;
+  document.getElementById('ffa-input').value='';
+  document.getElementById('ffa-preview').innerHTML='';
+  document.getElementById('ffa-apply').style.display='none';
+  ov.style.display='flex';
+  setTimeout(()=>{const t=document.getElementById('ffa-input');if(t)t.focus();},60);
+}
+function ffaClose(){const ov=document.getElementById('ffa-overlay');if(ov)ov.style.display='none';}
+function ffaTimeToSec(str){
+  const re=/(\d{1,2})\s*[:hH’'′]\s*(\d{1,2})(?:\s*[:’'′"″]\s*(\d{1,2}))?(?:[.,](\d{1,2}))?/;
+  const m=str.match(re);if(!m)return null;
+  let h=0,mn=0,s=0;
+  if(m[3]!=null){h=+m[1];mn=+m[2];s=+m[3];}
+  else{mn=+m[1];s=+m[2];}
+  const frac=m[4]!=null?parseFloat('0.'+m[4]):0;
+  const T=h*3600+mn*60+s+frac;
+  return T>0?Math.round(T):null;
+}
+function ffaChooseTime(line){
+  const parens=line.match(/\(([^)]*)\)/g);
+  if(parens){for(const p of parens){const t=ffaTimeToSec(p);if(t!=null)return t;}}
+  return ffaTimeToSec(line);
+}
+function ffaParse(){
+  const txt=(document.getElementById('ffa-input').value||'');
+  const best={};
+  const races=[];
+  txt.split(/[\n\r]+/).forEach(line=>{
+    for(const d of FFA_DISTS){
+      if(d.det.test(line)){
+        const sec=ffaChooseTime(line);
+        if(sec!=null){
+          if(best[d.id]==null||sec<best[d.id])best[d.id]=sec;
+          const ts=ffaParseDate(line);
+          if(ts!=null) races.push({ts:ts,dist:d.id,label:d.label,sec:sec,kmh:+((DIST_M[d.id]||0)/sec*3.6).toFixed(2),loc:ffaLoc(line)});
+        }
+        break;
+      }
+    }
+  });
+  window._ffaBest=best;
+  window._ffaRaces=races.sort((a,b)=>a.ts-b.ts);
+  const found=Object.keys(best).length;
+  const box=document.getElementById('ffa-preview');
+  if(found===0){
+    box.innerHTML='<div class="info-box error"><strong>Aucun temps détecté.</strong> Vérifie que le texte collé contient bien des distances (5 km, 10 km, semi…) suivies de chronos (ex : 15:32).</div>';
+    document.getElementById('ffa-apply').style.display='none';
+    return;
+  }
+  const rows=FFA_DISTS.slice().reverse().map(d=>{
+    const sec=best[d.id];const has=sec!=null;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border:1px solid var(--border);border-radius:9px;margin-bottom:7px;background:'+(has?'rgba(255,107,26,0.06)':'transparent')+'">'
+      +'<span style="font-size:13px;font-weight:700;color:'+(has?'var(--text)':'var(--muted2)')+'">'+d.label+'</span>'
+      +'<span style="font-size:15px;font-weight:800;color:'+(has?'var(--orange)':'var(--muted2)')+'">'+(has?fHMS(sec):'—')+'</span></div>';
+  }).join('');
+  box.innerHTML='<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Détecté ('+found+') · vérifie avant de valider</div>'+rows;
+  document.getElementById('ffa-apply').style.display='';
+}
+function ffaSecToParts(sec,hasH){
+  sec=Math.round(sec);
+  if(hasH)return{hh:String(Math.floor(sec/3600)),mm:String(Math.floor((sec%3600)/60)),ss:String(sec%60)};
+  return{hh:'',mm:String(Math.floor(sec/60)),ss:String(sec%60)};
+}
+function ffaApply(){
+  const best=window._ffaBest||{};
+  if(!S.records)S.records={};
+  let n=0;
+  FFA_DISTS.forEach(d=>{if(best[d.id]!=null){S.records[d.id]=ffaSecToParts(best[d.id],d.hasH);n++;}});
+  S.raceHistory=window._ffaRaces||[];
+  if(typeof renderRecords==='function')renderRecords();
+  if(typeof renderChart==='function')renderChart();
+  if(typeof renderRaceHistory==='function')renderRaceHistory();
+  if(typeof saveLS==='function')saveLS();
+  ffaClose();
+}
+
+/* ══ HISTORIQUE DES COURSES (issu de l'import FFA) ══ */
+const DIST_M={'1500':1500,'3000':3000,'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
+const HIST_COL={'1500':'#EC4899','3000':'#F59E0B','5k':'#3B82F6','10k':'#FF6B1A','semi':'#10B981','mara':'#8B5CF6'};
+const HIST_LBL={'1500':'1 500 m','3000':'3 000 m','5k':'5 km','10k':'10 km','semi':'Semi','mara':'Marathon'};
+function ffaMonth(w){
+  w=w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').trim();
+  if(w.indexOf('janv')===0||w==='jan')return 0;
+  if(w.indexOf('fev')===0)return 1;
+  if(w.indexOf('mars')===0||w==='mar')return 2;
+  if(w.indexOf('avr')===0)return 3;
+  if(w==='mai')return 4;
+  if(w.indexOf('juil')===0)return 6;
+  if(w.indexOf('juin')===0||w==='jui')return 5;
+  if(w.indexOf('aou')===0)return 7;
+  if(w.indexOf('sep')===0)return 8;
+  if(w.indexOf('oct')===0)return 9;
+  if(w.indexOf('nov')===0)return 10;
+  if(w.indexOf('dec')===0)return 11;
+  return null;
+}
+function ffaParseDate(line){
+  const m=line.match(/(\d{1,2})\s+([A-Za-zÀ-ÿ.]+)\s+(20\d{2})/);
+  if(!m)return null;
+  const mo=ffaMonth(m[2]);if(mo==null)return null;
+  const dt=new Date(+m[3],mo,+m[1]);
+  return isNaN(dt.getTime())?null:dt.getTime();
+}
+function ffaLoc(line){
+  const parts=line.split(/\t| {2,}/).map(p=>p.trim()).filter(p=>p.length);
+  const last=parts.length?parts[parts.length-1]:'';
+  if(!/[A-Za-zÀ-ÿ]/.test(last))return '';
+  if(/H\.Stade/i.test(last)||/SE\)\s*$/.test(last)||/^D\d+$/.test(last))return '';
+  return last;
+}
+let histChart=null;
+function renderRaceHistory(){
+  const sec=document.getElementById('db-history-section');if(!sec)return;
+  const list=(S.raceHistory||[]).filter(r=>r&&r.ts!=null);
+  const wrap=document.getElementById('hist-chart-wrap');
+  const empty=document.getElementById('hist-empty');
+  const box=document.getElementById('hist-list');
+  const cv=document.getElementById('hist-chart');
+  if(!list.length){
+    if(empty)empty.style.display='block';
+    if(wrap)wrap.style.display='none';
+    if(box)box.innerHTML='';
+    if(histChart){histChart.destroy();histChart=null;}
+    return;
+  }
+  if(empty)empty.style.display='none';
+  if(wrap)wrap.style.display='block';
+  const byDist={};
+  list.forEach(r=>{(byDist[r.dist]=byDist[r.dist]||[]).push(r);});
+  const order=['1500','3000','5k','10k','semi','mara'];
+  const datasets=order.filter(k=>byDist[k]).map(k=>{
+    const pts=byDist[k].slice().sort((a,b)=>a.ts-b.ts).map(r=>{const pace=r.sec/((DIST_M[r.dist]||1)/1000);return {x:r.ts,y:pace,r_:r,pace:pace};});
+    return {label:HIST_LBL[k],data:pts,borderColor:HIST_COL[k],backgroundColor:HIST_COL[k],showLine:true,tension:0,pointRadius:4,pointHoverRadius:6,borderWidth:2};
+  });
+  if(cv&&typeof Chart!=='undefined'){
+    if(histChart)histChart.destroy();
+    histChart=new Chart(cv,{type:'scatter',data:{datasets},options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#CBD5E1',boxWidth:12,usePointStyle:true,font:{size:11}}},
+        tooltip:{callbacks:{label:function(c){const r=c.raw.r_;const ds=new Date(r.ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});return r.label+' · '+fHMS(r.sec)+' · '+fAll(c.raw.pace)+'/km · '+ds+(r.loc?' · '+r.loc:'');}}}
+      },
+      scales:{
+        x:{type:'linear',ticks:{color:'#94A3B8',font:{size:10},maxRotation:0,callback:function(v){return new Date(v).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});}},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:10}},ticks:{color:'#94A3B8',font:{size:10},callback:function(v){return fAll(v);}},grid:{color:'rgba(255,255,255,0.05)'}}
+      }
+    }});
+  }
+  if(box){
+    const rows=list.slice().sort((a,b)=>b.ts-a.ts).map(function(r){
+      const dt=new Date(r.ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12.5px">'
+        +'<span style="width:8px;height:8px;border-radius:50%;background:'+HIST_COL[r.dist]+';flex-shrink:0"></span>'
+        +'<span style="width:92px;color:var(--muted2);flex-shrink:0">'+dt+'</span>'
+        +'<span style="flex:1;font-weight:700;color:var(--text2)">'+r.label+'</span>'
+        +'<span style="font-weight:800;color:'+HIST_COL[r.dist]+';white-space:nowrap">'+fHMS(r.sec)+'</span>'
+        +'<span style="width:120px;text-align:right;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.loc||'')+'</span>'
+        +'</div>';
+    }).join('');
+    box.innerHTML='<div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden">'+rows+'</div>';
   }
 }
 
