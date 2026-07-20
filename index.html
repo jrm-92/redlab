@@ -40,9 +40,9 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
 .logo{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.5px;line-height:1}
 .logo span{color:var(--orange)}
-.logo-sub{font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
+.logo-sub{font-size:11.5px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
 .sidebar-nav{padding:16px 12px;flex:1;overflow-y:auto}
-.nav-section{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);padding:0 10px;margin:20px 0 8px}
+.nav-section{font-size:10.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);padding:0 10px;margin:20px 0 8px}
 .nav-section:first-child{margin-top:0}
 .nav-btn{
   display:flex;align-items:center;gap:10px;width:100%;
@@ -55,13 +55,13 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .nav-btn:hover{background:rgba(255,255,255,0.05);color:var(--text2)}
 .nav-btn.active{background:rgba(255,107,26,0.12);color:var(--orange);border:1px solid rgba(255,107,26,0.2)}
 .sidebar-footer{padding:16px;border-top:1px solid var(--border)}
-.sf-brand{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
-.sf-sub{font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:12px}
+.sf-brand{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.sf-sub{font-size:12px;color:var(--muted2);line-height:1.5;margin-bottom:12px}
 .back-btn{
   display:flex;align-items:center;gap:6px;width:100%;
   padding:9px 12px;border:1px solid var(--border2);
   background:transparent;cursor:pointer;color:var(--muted);
-  font-family:var(--font);font-size:11px;font-weight:600;
+  font-family:var(--font);font-size:12px;font-weight:600;
   border-radius:8px;transition:all .18s;text-decoration:none;
 }
 .back-btn:hover{border-color:var(--orange);color:var(--orange)}
@@ -80,7 +80,7 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .tb-results{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-left:2px}
 .tb-res-item{font-size:15px;font-weight:600;color:var(--muted2)}
 .tb-res-item strong{color:var(--text);font-weight:700}
-.tb-res-sep{font-size:12px;color:var(--muted2);opacity:0.4;user-select:none}
+.tb-res-sep{font-size:13px;color:var(--muted2);opacity:0.4;user-select:none}
 .tb-res-method{font-size:14px;font-weight:700;color:var(--orange);letter-spacing:0.3px;border-left:1px solid var(--border2);padding-left:10px;margin-left:2px}
 .tb-avatar{
   width:44px;height:44px;border-radius:50%;
@@ -106,7 +106,7 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .tb-icon-btn.tb-danger:hover{border-color:#F87171;color:#F87171}
 .topbar-badge{
   background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);
-  color:var(--orange);font-size:10px;font-weight:700;
+  color:var(--orange);font-size:11.5px;font-weight:700;
   padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;
 }
 .scroll{flex:1;overflow-y:auto;scroll-behavior:smooth}
@@ -116,7 +116,7 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 /* ── FIELDS ── */
 .field{margin-bottom:18px}
 .field:last-child{margin-bottom:0}
-label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+label{display:block;font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
 .iw{
   display:flex;align-items:center;
   background:var(--input-bg);border:1.5px solid var(--input-border);
@@ -133,9 +133,11 @@ label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-tra
 }
 .iw select{cursor:pointer}
 .iw select option{background:var(--bg3)}
+select option{background:var(--bg3);color:var(--text)}
+input::placeholder,textarea::placeholder{color:var(--muted2)!important;opacity:.32!important;font-weight:500!important;font-style:italic}
 .iw input::-webkit-inner-spin-button,.iw input::-webkit-outer-spin-button{-webkit-appearance:none}
-.iu{padding-right:14px;font-size:12px;font-weight:600;color:var(--muted2);white-space:nowrap}
-.fhint{font-size:11px;color:var(--muted2);margin-top:6px}
+.iu{padding-right:14px;font-size:13px;font-weight:600;color:var(--muted2);white-space:nowrap}
+.fhint{font-size:13px;color:var(--muted2);margin-top:6px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
 /* ── CARDS ── */
@@ -146,7 +148,7 @@ label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-tra
 .card:last-child{margin-bottom:0}
 .card-hd{
   display:flex;align-items:center;gap:10px;
-  font-size:10px;font-weight:700;letter-spacing:2px;
+  font-size:11.5px;font-weight:700;letter-spacing:2px;
   text-transform:uppercase;color:var(--muted);margin-bottom:24px;
 }
 .card-hd-icon{
@@ -179,7 +181,7 @@ label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-tra
 
 /* ── SECTION LABEL ── */
 .slabel{
-  font-size:9px;font-weight:700;letter-spacing:2.5px;
+  font-size:10.5px;font-weight:700;letter-spacing:2.5px;
   text-transform:uppercase;color:var(--orange);
   margin-top:32px;margin-bottom:16px;
   display:flex;align-items:center;gap:6px;
@@ -201,18 +203,18 @@ label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-tra
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-family:var(--font)}
 thead th{
-  text-align:left;padding:12px 16px;font-size:9px;font-weight:700;
+  text-align:left;padding:12px 16px;font-size:11.5px;font-weight:700;
   letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);
   background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);white-space:nowrap;
 }
 tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,0.02)}
-tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;color:var(--text2)}
+tbody td{padding:13px 16px;font-size:14.5px;vertical-align:middle;color:var(--text2)}
 .col-num{width:1%;padding-left:4px!important;padding-right:4px!important;white-space:nowrap}
 .zb{
   display:inline-block;padding:3px 9px;border-radius:20px;
-  font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;
+  font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;
 }
 .z1{background:rgba(148,163,184,0.15);color:#94A3B8}
 .z2{background:rgba(59,130,246,0.15);color:#60A5FA}
@@ -226,9 +228,9 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;color:var(--text
   background:var(--card);border:1px solid var(--border);
   border-radius:12px;padding:18px 16px;border-top:2px solid var(--orange);
 }
-.sc-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.sc-lbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
 .sc-val{font-size:30px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:-0.5px}
-.sc-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.sc-sub{font-size:13px;color:var(--muted2);margin-top:3px}
 
 /* ── RESULT HERO ── */
 .rhero{
@@ -237,13 +239,13 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;color:var(--text
   border-radius:14px;padding:24px 28px;
   display:flex;align-items:center;gap:28px;flex-wrap:wrap;
 }
-.rh-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
+.rh-lbl{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px}
 .rh-val{font-size:52px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:-2px}
-.rh-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.rh-sub{font-size:13px;color:var(--muted);margin-top:2px}
 .rh-tags{display:flex;gap:8px;flex-wrap:wrap}
 .rh-tag{
   background:rgba(255,107,26,0.1);border:1px solid rgba(255,107,26,0.2);
-  border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--orange);
+  border-radius:20px;padding:4px 12px;font-size:13px;font-weight:600;color:var(--orange);
 }
 
 /* ── SLIDER ── */
@@ -263,7 +265,7 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;color:var(--text
 input[type=range].sl{-webkit-appearance:none;appearance:none;flex:1;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer;border:none;padding:0}
 input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 0 2px var(--orange)}
 input[type=range].sl::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg)}
-.sl-bnds{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--muted2);margin-top:2px;margin-bottom:8px}
+.sl-bnds{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted2);margin-top:2px;margin-bottom:8px}
 .zbar{position:relative;height:16px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.04)}
 
 /* ── RACE CARDS ── */
@@ -275,20 +277,20 @@ input[type=range].sl::-moz-range-thumb{width:20px;height:20px;border-radius:50%;
 .race-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),transparent)}
 .rc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
 .rc-name{font-size:20px;font-weight:900;color:var(--text);text-transform:uppercase;line-height:1}
-.rc-dist{font-size:11px;font-weight:600;color:var(--muted2);margin-top:2px}
-.rc-allure-lbl{font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;text-align:right;margin-bottom:2px}
-.rc-allure{font-size:14px;font-weight:800;color:var(--orange);text-align:right}
+.rc-dist{font-size:12px;font-weight:600;color:var(--muted2);margin-top:2px}
+.rc-allure-lbl{font-size:10.5px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;text-align:right;margin-bottom:2px}
+.rc-allure{font-size:16px;font-weight:800;color:var(--orange);text-align:right}
 .rc-time{font-size:34px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:-1px;margin-bottom:14px}
 .rc-sl-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
 input[type=range].rsl{-webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,0.06);outline:none;cursor:pointer;border:none;padding:0}
 input[type=range].rsl::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 0 2px var(--orange)}
 input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg)}
-.rc-sl-bnds{display:flex;justify-content:space-between;font-size:9px;font-weight:600;color:var(--muted2);margin-bottom:12px}
+.rc-sl-bnds{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:12px}
 .rc-splits{border-top:1px solid var(--border);padding-top:10px}
 .spl-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
 .spl-row:last-child{border-bottom:none}
-.spl-lbl{font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px}
-.spl-t{font-size:13px;font-weight:700;color:var(--text2)}
+.spl-lbl{font-size:13px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px}
+.spl-t{font-size:15px;font-weight:700;color:var(--text2)}
 
 /* ── RECORDS ── */
 .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -297,20 +299,20 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .rec-name{font-size:20px;font-weight:900;text-transform:uppercase;line-height:1}
-.rec-dist{font-size:11px;font-weight:600;color:var(--muted2);margin-top:3px}
-.rec-badge{padding:3px 9px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.rec-dist{font-size:12px;font-weight:600;color:var(--muted2);margin-top:3px}
+.rec-badge{padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .rec-tw{display:flex;align-items:center;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;overflow:hidden;transition:border-color .18s}
 .rec-tw:focus-within{border-color:rgba(255,107,26,0.5);background:rgba(255,107,26,0.03)}
 .rec-tw input{width:100%;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:16px;font-weight:800;padding:9px 2px 9px 8px;text-align:center;-moz-appearance:textfield;-webkit-appearance:none}
 .rec-tw input::-webkit-inner-spin-button,.rec-tw input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.rec-tw .u{font-size:10px;color:var(--muted2);padding-right:7px;flex-shrink:0}
+.rec-tw .u{font-size:11.5px;color:var(--muted2);padding-right:7px;flex-shrink:0}
 .rec-colon{color:var(--muted2);font-weight:900;font-size:15px;text-align:center;flex-shrink:0}
 .rec-out{border-top:1px solid var(--border);padding-top:14px;margin-top:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;min-height:30px}
-.rec-out-empty{font-size:11px;color:var(--muted2);text-align:center;width:100%;line-height:1.5}
-.rec-metric-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px}
+.rec-out-empty{font-size:12px;color:var(--muted2);text-align:center;width:100%;line-height:1.5}
+.rec-metric-lbl{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px}
 .rec-pace{font-size:24px;font-weight:900;line-height:1}
-.rec-pace span{font-size:12px;font-weight:500;color:var(--muted2)}
-.rec-kmh{font-size:11px;color:var(--muted2);margin-top:3px}
+.rec-pace span{font-size:13px;font-weight:500;color:var(--muted2)}
+.rec-kmh{font-size:13px;color:var(--muted2);margin-top:3px}
 .rec-pct{font-size:24px;font-weight:900;line-height:1}
 
 /* ── PREDICTOR ── */
@@ -323,16 +325,16 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .pred-c:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.3)}
 .pred-c-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
 .pred-name{font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-0.3px;line-height:1}
-.pred-dist{font-size:10px;color:var(--muted2);margin-top:3px;font-weight:600;letter-spacing:.5px}
-.pred-pct-badge{padding:3px 9px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.pred-dist{font-size:11.5px;color:var(--muted2);margin-top:3px;font-weight:600;letter-spacing:.5px}
+.pred-pct-badge{padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .pred-time{font-size:28px;font-weight:900;line-height:1;letter-spacing:-1px;text-align:center;margin:4px 0 6px}
-.pred-pace{font-size:13px;font-weight:700;color:var(--text2);text-align:center}
-.pred-kmh{font-size:10px;color:var(--muted2);text-align:center;margin-top:2px;margin-bottom:14px}
+.pred-pace{font-size:15px;font-weight:700;color:var(--text2);text-align:center}
+.pred-kmh{font-size:13px;color:var(--muted2);text-align:center;margin-top:2px;margin-bottom:14px}
 .pred-range{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)}
 .pred-range-bar{position:relative;height:4px;border-radius:2px;margin-bottom:7px;overflow:visible}
 .pred-range-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2)}
-.pred-range-lbl{display:flex;justify-content:space-between;font-size:9px;font-weight:600;color:var(--muted2)}
-.pred-pct{font-size:9px;color:var(--muted2);margin-top:2px}
+.pred-range-lbl{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--muted2)}
+.pred-pct{font-size:12px;color:var(--muted2);margin-top:2px}
 
 /* ── EMPTY ── */
 .empty{text-align:center;padding:48px 20px;color:var(--muted2);font-size:14px}
@@ -357,7 +359,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .mode-card.active .mode-card-ico svg{stroke:var(--orange)}
 .mode-card-title{font-size:14px;font-weight:800;color:var(--text2);margin-bottom:4px;letter-spacing:-0.2px;transition:color .2s}
 .mode-card.active .mode-card-title{color:var(--text)}
-.mode-card-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.mode-card-desc{font-size:13px;color:var(--muted);line-height:1.5}
 .mode-check{
   position:absolute;top:14px;right:14px;
   width:18px;height:18px;border-radius:50%;
@@ -398,14 +400,14 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   width:100%;padding:11px 14px;
   border:1.5px solid rgba(255,107,26,0.4);border-radius:10px;
   background:rgba(255,107,26,0.08);color:var(--orange);
-  font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;
+  font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;
   transition:all .18s;
 }
 .btn-road-apply:hover{background:rgba(255,107,26,0.18);border-color:rgba(255,107,26,0.6)}
 .btn-road-apply svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .input-hero{margin-bottom:36px}
 .input-desc-mob{display:none}
-.tool-eyebrow{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.tool-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .tool-eyebrow::before{content:'';width:12px;height:2px;background:var(--orange)}
 .input-hero-title{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-0.7px;margin-bottom:8px}
 .input-hero-sub{font-size:14px;color:var(--muted);line-height:1.6}
@@ -418,7 +420,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   font-size:16px;font-weight:900;color:#fff;
 }
-.test-live{font-size:12px;color:var(--muted);text-align:right;font-weight:600}
+.test-live{font-size:13px;color:var(--muted);text-align:right;font-weight:600}
 
 /* ══ PROFILE HERO (DASHBOARD) ══ */
 .profile-hero{
@@ -434,25 +436,25 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   margin-right:24px;
 }
 .ph-block:last-child{border-right:none;margin-right:0;padding-right:0}
-.ph-b-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.ph-b-lbl{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
 .ph-b-val{font-size:23px;font-weight:900;line-height:1.1;letter-spacing:-0.5px;margin-bottom:5px}
-.ph-b-desc{font-size:11px;color:var(--muted2);line-height:1.5;max-width:220px}
-.ph-b-sub{font-size:13px;color:var(--muted);font-weight:500;margin-top:2px}
+.ph-b-desc{font-size:12px;color:var(--muted2);line-height:1.5;max-width:220px}
+.ph-b-sub{font-size:14px;color:var(--muted);font-weight:500;margin-top:2px}
 .ph-b-calc{margin-top:9px;padding:12px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:9px}
 .calc-eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;font-weight:800;color:var(--orange);line-height:1.45;margin-bottom:8px}
-.calc-eq sup{font-size:9px}
-.calc-sub{font-size:11.5px;color:var(--text2);line-height:1.75;margin-bottom:9px}
-.calc-sub sup{font-size:8px}
+.calc-eq sup{font-size:10.5px}
+.calc-sub{font-size:13.5px;color:var(--text2);line-height:1.75;margin-bottom:9px}
+.calc-sub sup{font-size:10px}
 .calc-sub b{color:var(--text);font-weight:800}
-.calc-exp{font-size:11px;color:var(--muted2);line-height:1.7}
-.csm-formula-exp{font-size:12.5px;color:var(--text2);line-height:1.65;margin:9px 2px 14px}
+.calc-exp{font-size:12px;color:var(--muted2);line-height:1.7}
+.csm-formula-exp{font-size:13.5px;color:var(--text2);line-height:1.65;margin:9px 2px 14px}
 .ph-b-fc-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
 .ph-b-fc-val{font-size:20px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-0.5px}
-.ph-b-fc-lbl{font-size:11px;color:var(--muted2)}
+.ph-b-fc-lbl{font-size:12px;color:var(--muted2)}
 .ph-badge{
   display:inline-flex;align-items:center;
   padding:4px 10px;border-radius:20px;
-  font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   margin-top:10px;
 }
 
@@ -467,7 +469,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   display:inline-flex;align-items:center;gap:6px;
   background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);
   border-radius:8px;padding:4px 12px;
-  font-size:10px;font-weight:800;letter-spacing:1px;
+  font-size:11.5px;font-weight:800;letter-spacing:1px;
   color:var(--orange);white-space:nowrap;
 }
 .cs-badge svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
@@ -485,9 +487,9 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .db-section-ico svg{width:13px;height:13px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.db-section-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1}
+.db-section-title{font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1}
 .db-section-badge{
-  font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   padding:3px 9px;border-radius:20px;
   background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.18);
   color:var(--orange);
@@ -527,19 +529,19 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .mh-btn{
     flex:1;padding:9px 10px;border:1px solid var(--border);
     background:transparent;color:var(--muted);font-family:var(--font);
-    font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;text-align:center;
+    font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;text-align:center;
     transition:all .18s;
   }
   .mh-btn.active{background:rgba(255,107,26,0.12);color:var(--orange);border-color:rgba(255,107,26,0.3)}
 
   .mh-ctx{flex:1;min-width:0;text-align:right;padding-left:10px}
   .mh-ctx:empty{display:none}
-  .mh-ctx-title{font-weight:800;font-size:10.5px;color:rgba(241,245,249,0.82);text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;margin-bottom:3px}
-  .mh-ctx-desc{font-size:9px;color:rgba(241,245,249,0.3);line-height:1.45;text-wrap:balance}
+  .mh-ctx-title{font-weight:800;font-size:12px;color:rgba(241,245,249,0.82);text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;margin-bottom:3px}
+  .mh-ctx-desc{font-size:10.5px;color:rgba(241,245,249,0.3);line-height:1.45;text-wrap:balance}
   .mh-ctx-name{font-weight:800;font-size:13px;color:var(--orange);text-transform:uppercase;letter-spacing:0.5px;line-height:1;margin-bottom:4px}
-  .mh-ctx-tests{font-size:9px;color:rgba(241,245,249,0.42);line-height:1.75}
+  .mh-ctx-tests{font-size:10.5px;color:rgba(241,245,249,0.42);line-height:1.75}
   .mh-ctx-tests span{display:block}
-  .mh-ctx-model{font-size:8.5px;color:rgba(255,107,26,0.65);font-weight:700;margin-top:1px;letter-spacing:0.5px}
+  .mh-ctx-model{font-size:11px;color:rgba(255,107,26,0.65);font-weight:700;margin-top:1px;letter-spacing:0.5px}
 
   .btn-reset{display:inline-flex;align-items:center;gap:8px}
   .input-hero{display:none}
@@ -559,10 +561,10 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .ph-3col{grid-template-columns:repeat(3,1fr)!important}
   .ph-3col .ph-b-val{font-size:16px!important}
   .ph-3col .ph-b-fc-val{font-size:15px!important}
-  .ph-3col .ph-b-sub{font-size:10px!important}
-  .ph-3col .ph-b-lbl{font-size:8px!important}
+  .ph-3col .ph-b-sub{font-size:11.5px!important}
+  .ph-3col .ph-b-lbl{font-size:11px!important}
   .ph-b-val{font-size:20px}
-  .ph-b-sub{font-size:11px}
+  .ph-b-sub{font-size:12px}
   .ph-b-desc{max-width:none}
 .test-row{grid-template-columns:48px 250px 1fr;gap:10px}
   .test-live{display:none}
@@ -573,8 +575,8 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .sc{padding:14px 12px}.sc-val{font-size:24px}
   .race-grid{grid-template-columns:1fr 1fr;gap:10px}
   .race-card{padding:14px}.rc-time{font-size:26px}
-  thead th{padding:10px 12px;font-size:8px}
-  tbody td{padding:10px 12px;font-size:12px}
+  thead th{padding:10px 12px;font-size:11px}
+  tbody td{padding:10px 12px;font-size:13.5px}
   .slabel{margin-top:24px}
   .db-section{margin-bottom:28px}
 }
@@ -583,8 +585,8 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .race-grid{grid-template-columns:1fr}
   .pred-grid{grid-template-columns:1fr 1fr}
   .ph-b-val{font-size:20px}
-  .ph-b-sub{font-size:11px}
-  .ph-b-lbl{font-size:8px}
+  .ph-b-sub{font-size:12px}
+  .ph-b-lbl{font-size:11px}
   .test-row{grid-template-columns:48px 1fr}
   .test-row .field:nth-child(3){grid-column:2}
 }
@@ -605,16 +607,16 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   font-size:16px;font-weight:900;color:var(--orange);flex-shrink:0;margin-bottom:14px;
 }
 .ath-name{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.3px;margin-bottom:4px}
-.ath-date{font-size:11px;color:var(--muted2);margin-bottom:14px}
+.ath-date{font-size:12px;color:var(--muted2);margin-bottom:14px}
 .ath-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .ath-metric{background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.18);border-radius:8px;padding:6px 12px}
-.ath-metric-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:2px}
+.ath-metric-lbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:2px}
 .ath-metric-val{font-size:16px;font-weight:900;color:var(--orange);line-height:1}
 .ath-actions{display:flex;gap:8px}
 .btn-load{
   flex:1;padding:9px 14px;border-radius:8px;
   background:rgba(255,107,26,0.1);border:1px solid rgba(255,107,26,0.3);
-  color:var(--orange);font-family:var(--font);font-size:12px;font-weight:700;
+  color:var(--orange);font-family:var(--font);font-size:13px;font-weight:700;
   cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;
 }
 .btn-load:hover{background:rgba(255,107,26,0.2);border-color:var(--orange)}
@@ -657,7 +659,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .rh-val{font-size:68px}
   .pred-time{font-size:32px}
   .pred-grid{gap:18px}
-  thead th{padding:14px 20px;font-size:10px;letter-spacing:2px}
+  thead th{padding:14px 20px;font-size:11.5px;letter-spacing:2px}
   tbody td{padding:14px 20px;font-size:14px}
   .sl-card{padding:30px 36px}
   .sl-out{font-size:28px}
@@ -670,7 +672,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 
 /* ── Légende graphique ── */
 .perf-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px}
-.cl-chip{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:30px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.03);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;line-height:1}
+.cl-chip{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:30px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.03);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;line-height:1}
 .cl-chip:hover{border-color:var(--c);background:rgba(255,255,255,0.07);color:var(--text)}
 .cl-chip.off{opacity:0.38;text-decoration:line-through;text-decoration-thickness:1px}
 .cl-swatch{position:relative;width:26px;height:3px;border-radius:3px;background:var(--c);flex-shrink:0}
@@ -680,7 +682,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 /* ── Sauvegarde / export-import ── */
 .data-card{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:14px;padding:18px 22px;margin-bottom:28px}
 .data-card-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px}
-.data-card-sub{font-size:12px;color:var(--muted2);line-height:1.55;max-width:560px}
+.data-card-sub{font-size:13px;color:var(--muted2);line-height:1.55;max-width:560px}
 .data-actions{display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
 .data-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:1.5px solid rgba(255,107,26,0.45);background:rgba(255,107,26,0.10);color:var(--orange);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s}
 .data-btn:hover{background:rgba(255,107,26,0.20);border-color:var(--orange);transform:translateY(-1px)}
@@ -707,101 +709,101 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .prog-head{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(255,107,26,0.13),rgba(255,107,26,0.02));border:1px solid rgba(255,107,26,0.22);border-radius:14px;padding:16px 18px;padding-right:52px;margin-bottom:20px}
 .prog-ava{width:48px;height:48px;border-radius:50%;background:rgba(255,107,26,0.15);border:1px solid rgba(255,107,26,0.32);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:var(--orange);flex-shrink:0}
 .prog-title{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.4px;line-height:1.1}
-.prog-sub{font-size:12px;color:var(--muted2)}
-.prog-pdf{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;border:1.5px solid rgba(255,107,26,0.45);background:rgba(255,107,26,0.1);color:var(--orange);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;flex-shrink:0}
+.prog-sub{font-size:13px;color:var(--muted2)}
+.prog-pdf{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;border:1.5px solid rgba(255,107,26,0.45);background:rgba(255,107,26,0.1);color:var(--orange);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;flex-shrink:0}
 .prog-pdf:hover{background:rgba(255,107,26,0.2);border-color:var(--orange)}
 .prog-pdf svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .prog-block{margin-bottom:22px}
 .prog-block:last-child{margin-bottom:0}
-.prog-block-hd{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-left:2px}
+.prog-block-hd{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-left:2px}
 .prog-delta-up{color:#34D399;font-weight:800}
 .prog-delta-down{color:#F87171;font-weight:800}
 .prog-delta-flat{color:var(--muted2);font-weight:700}
 /* COURSE A VENIR */
 .goal-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:12px;padding:13px 18px;margin-bottom:16px}
-.goal-hint{display:flex;align-items:center;gap:8px;margin:-6px 0 16px 2px;font-size:12px;color:var(--muted2)}
+.goal-hint{display:flex;align-items:center;gap:8px;margin:-6px 0 16px 2px;font-size:13px;color:var(--muted2)}
 .goal-hint svg{width:15px;height:15px;stroke:var(--orange);stroke-width:2;fill:none;flex-shrink:0}
-.goal-lbl{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange)}
+.goal-lbl{font-size:11.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange)}
 .goal-sel,.goal-date{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;padding:8px 10px;outline:none}
 .goal-sel:focus,.goal-date:focus{border-color:rgba(255,107,26,0.5)}
 .goal-time{display:inline-flex;align-items:center;gap:5px;color:var(--muted2);font-weight:800}
-.goal-time input{width:48px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;text-align:center;padding:7px 4px;outline:none;-moz-appearance:textfield}
+.goal-time input{width:48px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:15px;font-weight:700;text-align:center;padding:7px 4px;outline:none;-moz-appearance:textfield}
 .goal-time input:focus{border-color:rgba(255,107,26,0.5)}
 .goal-time input::-webkit-inner-spin-button,.goal-time input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 /* BIBLIOTHEQUE */
 .lib-toolbar{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:24px}
 .lib-chips{display:flex;flex-wrap:wrap;gap:8px}
-.lib-chip{padding:8px 14px;border:1.5px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:700;border-radius:20px;cursor:pointer;transition:all .16s}
+.lib-chip{padding:8px 14px;border:1.5px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:700;border-radius:20px;cursor:pointer;transition:all .16s}
 .lib-chip:hover{border-color:rgba(255,107,26,0.4);color:var(--text2)}
 .lib-chip.active{background:rgba(255,107,26,0.12);border-color:rgba(255,107,26,0.4);color:var(--orange)}
-.lib-theme-hd{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:28px 0 14px;display:flex;align-items:center;gap:8px}
+.lib-theme-hd{font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:28px 0 14px;display:flex;align-items:center;gap:8px}
 .lib-theme-hd::before{content:'';width:14px;height:3px;border-radius:2px;background:var(--thc,var(--orange))}
 .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
 .lib-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
 .lib-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
-.lib-badge{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:8px}
+.lib-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:8px}
 .lib-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.2px;line-height:1.2}
-.lib-tag{font-size:10px;font-weight:800;color:var(--orange);text-align:right;white-space:nowrap;flex-shrink:0;background:rgba(255,107,26,0.1);padding:4px 10px;border-radius:20px}
-.lib-desc{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px}
+.lib-tag{font-size:11.5px;font-weight:800;color:var(--orange);text-align:right;white-space:nowrap;flex-shrink:0;background:rgba(255,107,26,0.1);padding:4px 10px;border-radius:20px}
+.lib-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px}
 .lib-steps{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px}
 .lib-step{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:baseline}
-.lib-step-k{font-size:9px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted2)}
-.lib-step-v{font-size:12.5px;color:var(--text2);line-height:1.5}
+.lib-step-k{font-size:10.5px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted2)}
+.lib-step-v{font-size:13.5px;color:var(--text2);line-height:1.5}
 .lib-step-v b{color:var(--text);font-weight:700}
 .lib-calc{color:var(--orange);font-weight:700;white-space:nowrap}
-.lib-rec{color:var(--muted2);font-size:11px}
+.lib-rec{color:var(--muted2);font-size:12px}
 @media(max-width:860px){.lib-grid{grid-template-columns:1fr}.lib-step{grid-template-columns:78px 1fr}}
 @media(max-width:860px){.prog-modal{padding:18px 14px 24px}.prog-title{font-size:18px}.prog-head{flex-wrap:wrap;padding-right:44px}.prog-pdf{order:3;width:100%;justify-content:center;margin-top:4px}.goal-bar{gap:8px}}
-.formula{font-size:11.5px;color:var(--text2);margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2px;line-height:1.65;white-space:pre-line;background:rgba(255,255,255,0.035);border-left:2.5px solid rgba(255,107,26,0.6);border-radius:0 8px 8px 0;padding:9px 14px}
-.csm-h{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+.formula{font-size:12.5px;color:var(--text2);margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2px;line-height:1.65;white-space:pre-line;background:rgba(255,255,255,0.035);border-left:2.5px solid rgba(255,107,26,0.6);border-radius:0 8px 8px 0;padding:9px 14px}
+.csm-h{font-size:11.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
 .csm-h:first-child{margin-top:0}
-.csm-exp{font-size:12px;color:var(--text2);line-height:1.6;margin:0 0 10px}
+.csm-exp{font-size:13px;color:var(--text2);line-height:1.6;margin:0 0 10px}
 .csm-exp b{color:var(--text);font-weight:700}
 .csm-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
 .csm-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--c);border-radius:12px;padding:11px 14px}
-.cc-k{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
-.cc-v{font-size:20px;font-weight:900;color:var(--c);margin-top:4px;line-height:1}.cc-v small{font-size:12px;color:var(--muted);font-weight:600}
-.cc-s{font-size:11px;color:var(--muted2);margin-top:4px}
+.cc-k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.cc-v{font-size:20px;font-weight:900;color:var(--c);margin-top:4px;line-height:1}.cc-v small{font-size:13px;color:var(--muted);font-weight:600}
+.cc-s{font-size:12px;color:var(--muted2);margin-top:4px}
 .csm-formula-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:rgba(255,107,26,0.06);border:1px solid rgba(255,107,26,0.18);border-radius:10px;padding:12px 16px;margin-bottom:14px}
 .csm-eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:17px;font-weight:800;color:var(--text);letter-spacing:.2px}
-.csm-toggle{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--orange);font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer}
+.csm-toggle{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--orange);font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer}
 .csm-toggle svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}.csm-toggle.open svg{transform:rotate(180deg)}
 .csm-detail{border-left:3px solid var(--border2);padding-left:14px;margin-bottom:16px}
-.csm-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:11px;color:var(--muted2);font-weight:600}
+.csm-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:12px;color:var(--muted2);font-weight:600}
 .csm-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle}.csm-legend i.band{background:rgba(255,107,26,0.25);border:1px solid rgba(255,107,26,0.45)}
 .csm-gauge{margin-top:18px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:14px 16px}
-.cg-top{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--muted2);margin-bottom:8px}.cg-top b{font-size:14px}
+.cg-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted2);margin-bottom:8px}.cg-top b{font-size:14px}
 .cg-bar{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,#334155,#A855F7)}
 .cg-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px;background:linear-gradient(90deg,#6366F1,#A855F7)}
 .cg-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:#A855F7;border:3px solid var(--bg2)}
-.cg-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted2);font-weight:600;margin-top:7px}
+.cg-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted2);font-weight:600;margin-top:7px}
 @media(max-width:720px){.csm-cards{grid-template-columns:1fr}}
 .csm-read{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
 .cr-item{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-.cr-k{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:7px}
-.cr-badge{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;margin-bottom:7px}
-.cr-d{font-size:11px;color:var(--text2);line-height:1.5}
+.cr-k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:7px}
+.cr-badge{display:inline-block;font-size:13px;font-weight:800;padding:3px 10px;border-radius:20px;margin-bottom:7px}
+.cr-d{font-size:12px;color:var(--text2);line-height:1.5}
 .cg-zones{position:relative;display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:2px}
 .cz{height:100%}
-.cg-zlbl{display:flex;font-size:9px;color:var(--muted2);font-weight:700;margin-top:6px}.cg-zlbl span{flex:1;text-align:center}
-.cg-interp{font-size:11.5px;color:var(--text2);margin-top:10px;line-height:1.5;font-weight:600}
+.cg-zlbl{display:flex;font-size:10.5px;color:var(--muted2);font-weight:700;margin-top:6px}.cg-zlbl span{flex:1;text-align:center}
+.cg-interp{font-size:12.5px;color:var(--text2);margin-top:10px;line-height:1.5;font-weight:600}
 @media(max-width:720px){.csm-read{grid-template-columns:1fr}}
 .csm-analyse{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px}
-.ca-h{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.ca-h{font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
 .ca-list{list-style:none;padding:0;margin:0}
-.ca-list li{display:flex;gap:9px;font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:11px}
+.ca-list li{display:flex;gap:9px;font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:11px}
 .ca-dot{flex-shrink:0;width:7px;height:7px;border-radius:50%;background:#38BDF8;margin-top:6px}
 .ca-arr{flex-shrink:0;color:#FF6B1A;font-weight:900}
 .ca-list li b{color:var(--text);font-weight:700}
-.ca-mut{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;background:rgba(148,163,184,0.16);padding:1px 6px;border-radius:4px;margin-right:3px}
-.cg-zlbl i{font-style:normal;color:var(--muted2);opacity:.7;font-size:8px}
+.ca-mut{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;background:rgba(148,163,184,0.16);padding:1px 6px;border-radius:4px;margin-right:3px}
+.cg-zlbl i{font-style:normal;color:var(--muted2);opacity:.7;font-size:11px}
 @media(max-width:720px){.csm-analyse{grid-template-columns:1fr}}
 .csm-f{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--text2);line-height:1.65}
 .csm-line{padding:2px 0}
 .csm-line b{color:var(--text);font-weight:700}
-.csm-mut{color:var(--muted2);font-size:12px}
+.csm-mut{color:var(--muted2);font-size:13px}
 .csm-res{margin-top:7px;font-size:17px;font-weight:900;color:var(--orange);letter-spacing:-0.3px}
-.csm-note{font-size:12px;color:var(--muted2);margin-top:8px;line-height:1.6}
+.csm-note{font-size:13px;color:var(--muted2);margin-top:8px;line-height:1.6}
 .cs-race label{margin-bottom:6px}
 .goal-sel{color:var(--text);font-size:15px;font-weight:700;padding:11px 14px;border-radius:10px;transition:border-color .18s}
 .goal-sel:hover{border-color:rgba(255,107,26,0.4)}
@@ -818,31 +820,31 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .cdd-item{padding:10px 12px;border-radius:7px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;transition:background .12s}
 .cdd-item:hover{background:rgba(255,107,26,0.12);color:var(--text)}
 .cdd-item.sel{background:rgba(255,107,26,0.16);color:var(--orange);font-weight:800}
-.csm-synth{display:flex;flex-wrap:wrap;gap:8px;margin:-2px 0 16px}.sy{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;border:1px solid var(--border)}.sy.ok{color:#34D399;background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.28)}.sy.warn{color:#FBBF24;background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.28)}.sy.tip{color:#FF6B1A;background:rgba(255,107,26,0.1);border-color:rgba(255,107,26,0.3)}.csm-tt{width:100%;border-collapse:collapse;margin-top:6px}.csm-tt th{text-align:left;font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);font-weight:800;padding:6px 8px;border-bottom:1px solid var(--border)}.csm-tt td{font-size:12px;color:var(--text2);padding:7px 8px;border-bottom:1px solid var(--border)}.csm-tt tr:last-child td{border-bottom:none}.csm-tt tr.tt-out td{background:rgba(248,113,113,0.09);color:#F87171}.csm-mini{font-size:10px;color:var(--muted2);margin-top:8px;line-height:1.5}.csm-sim{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:6px}.sim-ctrl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}.sim-lbl{font-size:11px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px}.sim-ctrl input[type=range]{flex:1;min-width:160px;accent-color:#FF6B1A}.sim-vval{font-size:14px;font-weight:900;color:var(--text);min-width:170px;text-align:right}.sim-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.sim-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px}.sim-k{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)}.sim-v2{font-size:19px;font-weight:900;color:var(--text);margin-top:4px;line-height:1}.sim-v2 small{font-size:11px;color:var(--muted);font-weight:600}.sim-barwrap{margin-top:14px}.sim-bar{height:9px;border-radius:5px;background:var(--input-bg);overflow:hidden}.sim-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#F87171,#FF6B1A,#34D399)}.sim-barlbl{font-size:9px;color:var(--muted2);margin-top:5px;font-weight:600}.sim-note{font-size:12.5px;color:var(--text2);line-height:1.5}
+.csm-synth{display:flex;flex-wrap:wrap;gap:8px;margin:-2px 0 16px}.sy{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:20px;border:1px solid var(--border)}.sy.ok{color:#34D399;background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.28)}.sy.warn{color:#FBBF24;background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.28)}.sy.tip{color:#FF6B1A;background:rgba(255,107,26,0.1);border-color:rgba(255,107,26,0.3)}.csm-tt{width:100%;border-collapse:collapse;margin-top:6px}.csm-tt th{text-align:left;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);font-weight:800;padding:6px 8px;border-bottom:1px solid var(--border)}.csm-tt td{font-size:13px;color:var(--text2);padding:7px 8px;border-bottom:1px solid var(--border)}.csm-tt tr:last-child td{border-bottom:none}.csm-tt tr.tt-out td{background:rgba(248,113,113,0.09);color:#F87171}.csm-mini{font-size:11.5px;color:var(--muted2);margin-top:8px;line-height:1.5}.csm-sim{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:6px}.sim-ctrl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}.sim-lbl{font-size:12px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px}.sim-ctrl input[type=range]{flex:1;min-width:160px;accent-color:#FF6B1A}.sim-vval{font-size:14px;font-weight:900;color:var(--text);min-width:170px;text-align:right}.sim-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.sim-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px}.sim-k{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)}.sim-v2{font-size:19px;font-weight:900;color:var(--text);margin-top:4px;line-height:1}.sim-v2 small{font-size:12px;color:var(--muted);font-weight:600}.sim-barwrap{margin-top:14px}.sim-bar{height:9px;border-radius:5px;background:var(--input-bg);overflow:hidden}.sim-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#F87171,#FF6B1A,#34D399)}.sim-barlbl{font-size:10.5px;color:var(--muted2);margin-top:5px;font-weight:600}.sim-note{font-size:13.5px;color:var(--text2);line-height:1.5}
 .sim-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;background:linear-gradient(90deg,#34D399 0%,#FBBF24 45%,#F97316 72%,#EF4444 100%);outline:none;margin:4px 0 2px;cursor:pointer}
 .sim-range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--thumb,#FF6B1A);border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.45);cursor:pointer;transition:background .15s}
 .sim-range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--thumb,#FF6B1A);border:3px solid #fff;cursor:pointer}
 .sim-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
 .sim-unit{display:inline-flex;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:2px}
-.sim-unit button{border:none;background:none;color:var(--muted2);font-size:11px;font-weight:800;padding:4px 13px;border-radius:6px;cursor:pointer;transition:all .12s}
+.sim-unit button{border:none;background:none;color:var(--muted2);font-size:12px;font-weight:800;padding:4px 13px;border-radius:6px;cursor:pointer;transition:all .12s}
 .sim-unit button.su-on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .sim-vmut{color:var(--muted2);font-weight:700}
-.sim-track-lbl{display:flex;justify-content:space-between;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
+.sim-track-lbl{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px}
 .sim-main{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 .sim-hero{background:var(--card);border:1px solid var(--border);border-left-width:3px;border-radius:11px;padding:12px 14px}
 .sim-hero-v{font-size:30px;font-weight:900;line-height:1;margin:5px 0 3px;transition:color .15s}
-.sim-hero-s{font-size:11px;color:var(--text2);font-weight:600}
+.sim-hero-s{font-size:12px;color:var(--text2);font-weight:600}
 .sim-cells{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.sim-sub{font-size:9.5px;color:var(--muted2);margin-top:3px}
+.sim-sub{font-size:11px;color:var(--muted2);margin-top:3px}
 .sim-reserve{margin-top:12px}
-.sim-rlbl{display:flex;justify-content:space-between;font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px}
+.sim-rlbl{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px}
 .sim-bar-fill{height:100%;border-radius:5px;transition:width .18s ease,background .18s ease}
-.sim-domain{font-size:10.5px;color:var(--muted2);margin-top:10px;line-height:1.5;padding:7px 10px;background:var(--input-bg);border-radius:8px}
+.sim-domain{font-size:12px;color:var(--muted2);margin-top:10px;line-height:1.5;padding:7px 10px;background:var(--input-bg);border-radius:8px}
 .sim-domain.warn{color:#FBBF24;background:rgba(251,191,36,.08)}
 .sim-canvaswrap{position:relative;width:100%;margin-top:2px}
 .sim-dwrap-o{margin-top:12px}
 @media(max-width:680px){.sim-main{grid-template-columns:1fr}}
-.sim-note b{color:#34D399}.csm-limites{font-size:11px;color:var(--muted2);line-height:1.6;margin-top:16px;border-left:3px solid var(--border2);padding-left:12px}.csm-limites b{color:var(--text2)}@media(max-width:720px){.sim-grid{grid-template-columns:1fr 1fr}}</style>
+.sim-note b{color:#34D399}.csm-limites{font-size:12px;color:var(--muted2);line-height:1.6;margin-top:16px;border-left:3px solid var(--border2);padding-left:12px}.csm-limites b{color:var(--text2)}@media(max-width:720px){.sim-grid{grid-template-columns:1fr 1fr}}</style>
 </head>
 <body>
 
@@ -857,6 +859,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
     <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')">Dashboard</button>
     <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')">Athlètes</button>
     <button class="mh-btn" id="mbn-library" onclick="go('library')">Séances</button>
+    <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')">Potentiel</button>
   </div>
 </header>
 
@@ -881,6 +884,10 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
       <button class="nav-btn" id="sbn-library" onclick="go('library')">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         Bibliothèque
+      </button>
+      <button class="nav-btn" id="sbn-extrapol" onclick="go('extrapol')">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
+        Extrapolation
       </button>
       <div class="nav-section">Gestion</div>
       <button class="nav-btn" id="sbn-athletes" onclick="go('athletes')">
@@ -1033,7 +1040,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
               <div style="display:flex;align-items:center;gap:10px">
                 <div class="card-hd-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
                 <span>Valider votre VMA · Test TMI</span>
-                <span style="font-size:10px;font-weight:600;color:var(--muted2);letter-spacing:1px;text-transform:uppercase">optionnel</span>
+                <span style="font-size:11.5px;font-weight:600;color:var(--muted2);letter-spacing:1px;text-transform:uppercase">optionnel</span>
               </div>
               <svg id="tmi-chev" viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -1094,7 +1101,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
               <div style="display:flex;align-items:center;gap:10px">
                 <div class="card-hd-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
                 <span>Données cardiaques</span>
-                <span style="font-size:10px;font-weight:600;color:var(--muted2);letter-spacing:1px;text-transform:uppercase">optionnel</span>
+                <span style="font-size:11.5px;font-weight:600;color:var(--muted2);letter-spacing:1px;text-transform:uppercase">optionnel</span>
               </div>
               <svg id="fc-chev" viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -1185,10 +1192,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
               <div class="db-section-badge" id="db-pred-badge">Follador 2022</div>
             </div>
             <div id="db-cs"></div>
-              <div class="formula">Comment ces temps sont estimés à partir de ta vitesse critique (VC) :
-• 5 km et 10 km → t = (D − D′) ÷ VC
-• Semi et marathon → t = D ÷ (f × VC), car on ne tient pas la VC aussi longtemps (f = fraction de VC : semi ≈ 92–96 %, marathon ≈ 84–91 %)
-La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
+              <div class="formula" id="pred-explain"></div>
           </div>
 
           <!-- Temps de passage -->
@@ -1227,7 +1231,7 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
             </div>
             <div class="card" style="padding:20px">
               <div id="hist-add-form" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.02)">
-                <span style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);margin-right:2px">Ajouter</span>
+                <span style="font-size:11.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);margin-right:2px">Ajouter</span>
                 <input id="mr-date" type="date" class="goal-date" style="padding:7px 9px">
                 <select id="mr-dist" class="goal-date" style="padding:7px 9px;cursor:pointer">
                   <option value="1500">1 500 m</option><option value="3000">3 000 m</option>
@@ -1260,7 +1264,7 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
             <div class="card" style="padding:20px">
               <div id="perf-legend" class="perf-legend"></div>
               <div style="position:relative;height:340px"><canvas id="perf-chart"></canvas></div>
-              <div id="perf-empty" style="display:none;text-align:center;color:var(--muted2);font-size:12px;padding:10px 0 0;line-height:1.5">Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.</div>
+              <div id="perf-empty" style="display:none;text-align:center;color:var(--muted2);font-size:13px;padding:10px 0 0;line-height:1.5">Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.</div>
             </div>
           </div>
 
@@ -1287,6 +1291,11 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
         <div id="library-wrap" style="padding:36px 28px 80px"></div>
       </div>
 
+      <!-- ══════════ PANEL EXTRAPOLATION ══════════ -->
+      <div id="p-extrapol" class="panel">
+        <div id="extrapol-wrap" style="padding:36px 28px 80px"></div>
+      </div>
+
     </div><!-- /scroll -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1296,7 +1305,7 @@ La fourchette min–max : marge de VC ±1 % et D′ ±20 %.</div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
       <div>
         <div style="font-size:18px;font-weight:800;color:var(--text)">Importer une fiche FFA / lepistard</div>
-        <div style="font-size:12px;color:var(--muted2);margin-top:3px;line-height:1.55">Ouvre la fiche de l'athlète, sélectionne le tableau de records / bilans, copie-le (Ctrl+C) et colle-le ci-dessous.</div>
+        <div style="font-size:13px;color:var(--muted2);margin-top:3px;line-height:1.55">Ouvre la fiche de l'athlète, sélectionne le tableau de records / bilans, copie-le (Ctrl+C) et colle-le ci-dessous.</div>
       </div>
       <button onclick="ffaClose()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:24px;line-height:1;padding:0 4px;flex-shrink:0">&times;</button>
     </div>
@@ -1336,6 +1345,7 @@ function go(id){
   if(id==='dashboard'&&S.vma&&typeof renderChart==='function')renderChart();if(id==='dashboard'&&S.vma&&typeof renderCsModel==='function')renderCsModel();
   if(id==='athletes') renderAthletes();
   if(id==='library') renderLibrary();
+  if(id==='extrapol') renderExtrapol();
   updMhCtx(id);
   const sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1418,7 +1428,7 @@ function liveTests(){
       txt+='<div class="formula">VC = (D₁₂ − D₃) / (t₁₂ − t₃)  ·  D′ = D₃ − VC × t₃</div>';
     }
   } else {
-    txt+='<br><span style="font-size:11px;color:var(--muted2)">Renseignez les tests <strong>3 min</strong> et <strong>12 min</strong>.</span>';
+    txt+='<br><span style="font-size:12px;color:var(--muted2)">Renseignez les tests <strong>3 min</strong> et <strong>12 min</strong>.</span>';
   }
   txt+='</div>';
   prev.style.display='block'; prev.innerHTML=txt;
@@ -1605,20 +1615,27 @@ function renderPredCards(){
   const badgeEl=document.getElementById('db-pred-badge');
   if(!vma){el.innerHTML='';if(badgeEl)badgeEl.textContent='';return;}
   if(badgeEl) badgeEl.textContent=S.csKmh?'Modèle CS · D′':'Fourchette VMA';
+  const expl=document.getElementById('pred-explain');
+  if(expl){
+    expl.innerHTML=S.csKmh
+      ? 'Comment ces temps sont estimés à partir de ta vitesse critique (VC) :<br>• 5 km et 10 km → t = (D − D′) ÷ VC<br>• Semi et marathon → t = D ÷ (f × VC), car on ne tient pas la VC aussi longtemps (f = fraction de VC : semi ≈ 92–96 %, marathon ≈ 84–91 %)<br>La fourchette min–max : marge de VC ±1 % et D′ ±20 %.'
+      : 'Comment ces temps sont estimés à partir de ta VMA :<br>chaque distance se court à une fraction typique de la VMA — 5 km ≈ 90–95 %, 10 km ≈ 85–90 %, semi ≈ 80–85 %, marathon ≈ 75–80 %.<br>La fourchette min–max correspond à ces bornes ; la médiane est le milieu de la plage. Pour des prédictions plus précises, réalise les tests de vitesse critique (mode VC).';
+  }
   const g=S.goal||{id:'',t:null,date:''};
   const M={vma:vma,csKmh:S.csKmh||null,dp:S.dp||0};
   const cards=PRED_RC.map(r=>{
     const rg=perfRange(r,M);
-    const tF=rg.tFast,tM=rg.tMed,tS=rg.tSlow;
+    // médiane quantifiée à la seconde/km : identique aux cartes Temps de passage
+    const tF=rg.tFast,tM=Math.round(rg.tMed/r.d*1000)*r.d/1000,tS=rg.tSlow;
     const paceF=fAll(tF/r.d*1000),paceM=fAll(tM/r.d*1000),paceS=fAll(tS/r.d*1000);
     const pctLo=Math.round(r.vmaLo*100), pctHi=Math.round(r.vmaHi*100);
     const vcBadge=M.csKmh?`<div class="pred-pct-badge" style="background:rgba(${r.rgb},0.12);border:1px solid rgba(${r.rgb},0.25);color:${r.col}">${Math.round(r.d*3.6/(tS*M.csKmh)*100)}–${Math.round(r.d*3.6/(tF*M.csKmh)*100)}% VC</div>`:'';
-    const topRight=(r.id==='mara')?`<div style="text-align:right"><div style="font-size:15px;font-weight:900;color:${r.col};line-height:1.15">${fHMS(tM)}<span style="font-size:10px;font-weight:600;color:var(--muted2)"> · ${paceM}/km</span></div>${vcBadge}</div>`:vcBadge;
+    const topRight=(r.id==='mara')?`<div style="text-align:right"><div style="font-size:15px;font-weight:900;color:${r.col};line-height:1.15">${fHMS(tM)}<span style="font-size:11.5px;font-weight:600;color:var(--muted2)"> · ${paceM}/km</span></div>${vcBadge}</div>`:vcBadge;
     let goalHtml='',extraStyle='';
     if(g.id===r.id && g.t){
       const frac=Math.max(0,Math.min(1,(g.t-tF)/(tS-tF)));
       extraStyle=`box-shadow:0 0 0 1.5px ${r.col}66`;
-      goalHtml=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)"><div style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Chrono visé</div><div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(${r.rgb},0.5),rgba(${r.rgb},0.15));margin-bottom:6px"><div style="position:absolute;left:${(frac*100).toFixed(1)}%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:${r.col};border:2px solid var(--bg2);box-shadow:0 0 0 1.5px ${r.col}"></div></div><div style="font-size:16px;font-weight:900;color:${r.col}">${fHMS(g.t)} <span style="font-size:11px;font-weight:600;color:var(--muted2)">· ${fAll(g.t/r.d*1000)}/km</span></div></div>`;
+      goalHtml=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)"><div style="font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">Chrono visé</div><div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(${r.rgb},0.5),rgba(${r.rgb},0.15));margin-bottom:6px"><div style="position:absolute;left:${(frac*100).toFixed(1)}%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:${r.col};border:2px solid var(--bg2);box-shadow:0 0 0 1.5px ${r.col}"></div></div><div style="font-size:16px;font-weight:900;color:${r.col}">${fHMS(g.t)} <span style="font-size:12px;font-weight:600;color:var(--muted2)">· ${fAll(g.t/r.d*1000)}/km</span></div></div>`;
     }
     return `<div class="pred-c" style="border-top:3px solid ${r.col};${extraStyle}">
       <div class="pred-c-top">
@@ -1821,7 +1838,7 @@ function renderProfile(){
     const warns=checkCoherence(vma,csKmh,dp,S.csR2);
     if(warns.length){
       warnHtml=`<div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">`
-        +warns.map(w=>`<div style="background:rgba(234,179,8,0.07);border:1px solid rgba(234,179,8,0.28);border-left:3px solid #FCD34D;border-radius:10px;padding:12px 16px;font-size:12px;color:var(--text2);line-height:1.6"><strong style="color:#FCD34D">⚠ Attention :</strong> ${w}</div>`).join('')
+        +warns.map(w=>`<div style="background:rgba(234,179,8,0.07);border:1px solid rgba(234,179,8,0.28);border-left:3px solid #FCD34D;border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text2);line-height:1.6"><strong style="color:#FCD34D">⚠ Attention :</strong> ${w}</div>`).join('')
         +`</div>`;
     }
   }
@@ -1847,10 +1864,10 @@ function renderZones(){
     if(!hasFc) return '';
     const flo=Math.round(fcRest+loP/100*fcReserve);
     const fhi=Math.round(fcRest+hiP/100*fcReserve);
-    return `<td class="hide-mob" style="color:var(--muted2)">${loP}–${hiP}%</td><td><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:10px;color:var(--muted2)">bpm</span></td>`;
+    return `<td class="hide-mob" style="color:var(--muted2)">${loP}–${hiP}%</td><td><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
   }
 
-  const vcBadge=`<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--orange)"><span class="hide-mob">VC${isReal?'':' est.'} = ${vc.toFixed(2)} km/h · ${fAll(3600/vc)}/km</span><span class="show-mob" style="display:none">VC ${fAll(3600/vc)}/km</span></span>`;
+  const vcBadge=`<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--orange)"><span class="hide-mob">VC${isReal?'':' est.'} = ${vc.toFixed(2)} km/h · ${fAll(3600/vc)}/km</span><span class="show-mob" style="display:none">VC ${fAll(3600/vc)}/km</span></span>`;
 
   const pctCol=isReal?'% VC':'% VMA';
 
@@ -1867,8 +1884,8 @@ function renderZones(){
       <td class="col-num" style="color:var(--muted2)">${pctStr}</td>
       <td class="col-num" style="font-weight:600;color:${z.col}">${vStr}</td>
       <td style="color:var(--text2)">${aStr}</td>
-      <td style="color:var(--muted2);font-size:11px">${z.talk}</td>
-      <td style="color:var(--muted2);font-size:11px;font-weight:600">${z.rpe}</td>
+      <td style="color:var(--muted2);font-size:12px">${z.talk}</td>
+      <td style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
       ${fcC(z.fcLo,z.fcHi,z.col)}
     </tr>`;
   });
@@ -1900,7 +1917,7 @@ function renderSlider(){
   document.getElementById('db-slider').innerHTML=`
     <div class="sl-card">
       <div class="sl-hd">
-        <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px">Vitesse → Allure</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px">Vitesse → Allure</div>
         <div class="sl-out">
           <span id="sl-v" style="color:var(--orange)">${ref.toFixed(1)}</span>
           <span class="sl-sep">km/h →</span>
@@ -1948,7 +1965,7 @@ function bldZbar(slo,shi){
     if(ze<=slo||zs>=shi)return;
     const l=((zs-slo)/rng)*100,w=((ze-zs)/rng)*100;
     html+=`<div style="position:absolute;left:${l}%;width:${w}%;height:100%;background:${z.col};opacity:0.22"></div>`;
-    html+=`<div style="position:absolute;left:${l+w/2}%;transform:translateX(-50%);top:50%;margin-top:-6px;font-size:9px;font-weight:800;color:${z.col}">Z${z.z}</div>`;
+    html+=`<div style="position:absolute;left:${l+w/2}%;transform:translateX(-50%);top:50%;margin-top:-6px;font-size:10.5px;font-weight:800;color:${z.col}">Z${z.z}</div>`;
   });
   bar.innerHTML=html;
 }
@@ -1976,11 +1993,15 @@ function buildRaces(){
   const dRef=vma*100;
   function defPace(r){
     let tSec;
-    if(csMs){
+    // Calé sur les Plages de performance : médiane de perfRange (même modèle, mêmes coefficients)
+    const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===r.id):null;
+    if(pr&&(csKmh||vma)){
+      tSec=perfRange(pr,{vma:vma,csKmh:csKmh||null,dp:dp||0}).tMed;
+    } else if(csMs){
       if(r.id==='5k'||r.id==='10k'){
         tSec=(r.d-(dp||0))/csMs;
         if(tSec<=0) tSec=r.d/csMs;
-      } else if(r.id==='semi'){tSec=r.d/(csMs*0.95);}
+      } else if(r.id==='semi'){tSec=r.d/(csMs*0.94);}
       else{tSec=r.d/(csMs*0.88);}
     } else {
       tSec=360*Math.pow(r.d/dRef,1.06);
@@ -2186,7 +2207,7 @@ function renderChart(){
       }}}
     },
     scales:{
-      y:{reverse:true,title:{display:true,text:'Allure (min/km) — plus haut = plus rapide',color:'#94A3B8',font:{size:11}},
+      y:{reverse:true,title:{display:true,text:'Allure (min/km) — plus haut = plus rapide',color:'#94A3B8',font:{size:12}},
          ticks:{color:'#94A3B8',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.06)'}},
       x:{ticks:{color:'#CBD5E1',font:{family:'Manrope',weight:'700'}},grid:{color:'rgba(255,255,255,0.04)'}}
     }
@@ -2243,17 +2264,17 @@ function calcRoad(){
     <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
-          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">Vitesse</div>
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">Vitesse</div>
           <div style="font-size:22px;font-weight:900;color:var(--orange);line-height:1">${kmh.toFixed(1)}</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:2px">km/h · ${pace}/km</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:2px">km/h · ${pace}/km</div>
         </div>
         <div>
-          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">VMA estimée</div>
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px">VMA estimée</div>
           <div style="font-size:22px;font-weight:900;color:var(--text);line-height:1">${vmaEst.toFixed(1)}</div>
-          <div style="font-size:11px;color:var(--muted2);margin-top:2px">km/h · Riegel</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:2px">km/h · Riegel</div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--muted2);margin-bottom:14px">VC estimée (82–92% VMA) : <span style="color:var(--text2);font-weight:600">${vcLo}–${vcHi} km/h</span></div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:14px">VC estimée (82–92% VMA) : <span style="color:var(--text2);font-weight:600">${vcLo}–${vcHi} km/h</span></div>
       <div class="formula" style="margin-bottom:12px">VMA = Distance / (100 × (temps/360)^(1/1,06))  ·  modèle de Riegel</div>
       <button class="btn-road-apply" onclick="applyRoadVMA(${vmaEst.toFixed(2)})">
         Utiliser ${vmaEst.toFixed(1)} km/h comme VMA
@@ -2333,7 +2354,7 @@ function updTMICard(){
   const ph=document.getElementById('vma-pace-hint'); if(ph) ph.textContent=(v&&v>=6&&v<=35)?('Allure VMA : '+fAll(3600/v)+' /km'):'';
   const spd=document.getElementById('tmi-speed');if(!spd)return;
   if(!v||v<6||v>35){
-    spd.innerHTML=`<span style="color:var(--muted2);font-size:12px">Renseignez votre VMA pour obtenir l'allure cible.</span>`;
+    spd.innerHTML=`<span style="color:var(--muted2);font-size:13px">Renseignez votre VMA pour obtenir l'allure cible.</span>`;
     return;
   }
   const pace=fAll(3600/v);
@@ -2637,7 +2658,7 @@ function _drawProgChart(h){
     responsive:true,maintainAspectRatio:false,
     plugins:{legend:{labels:{color:'#CBD5E1',usePointStyle:true,boxWidth:8,font:{family:'Manrope',weight:'700',size:12}}},
       tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+' km/h'+(c.parsed.y?' · '+fAll(3600/c.parsed.y)+'/km':'')}}},
-    scales:{y:{suggestedMin:mn-pad,suggestedMax:mx+pad,title:{display:true,text:'km/h',color:'#94A3B8',font:{size:11}},ticks:{color:'#94A3B8'},grid:{color:'rgba(255,255,255,0.06)'}},
+    scales:{y:{suggestedMin:mn-pad,suggestedMax:mx+pad,title:{display:true,text:'km/h',color:'#94A3B8',font:{size:12}},ticks:{color:'#94A3B8'},grid:{color:'rgba(255,255,255,0.06)'}},
       x:{ticks:{color:'#CBD5E1',font:{family:'Manrope',weight:'700'}},grid:{color:'rgba(255,255,255,0.04)'}}}
   }});
 }
@@ -2665,7 +2686,7 @@ function openProgress(id){
     +'<div class="sc" style="border-top-color:'+gTop+'"><div class="sc-lbl">Évolution VMA</div><div class="sc-val" style="color:'+gCol+'">'+gTxt+'</div><div class="sc-sub">km/h depuis le 1er test</div></div>'
     +'<div class="sc"><div class="sc-lbl">Évaluations</div><div class="sc-val">'+h.length+'</div><div class="sc-sub">tests enregistrés</div></div>'
     +fourth+'</div>';
-  const chartNote=h.length<2?'<div style="text-align:center;font-size:11.5px;color:var(--muted2);margin-top:12px;line-height:1.5">Un seul test pour l’instant. Enregistre une nouvelle évaluation à une autre date pour voir la courbe se dessiner.</div>':'';
+  const chartNote=h.length<2?'<div style="text-align:center;font-size:12.5px;color:var(--muted2);margin-top:12px;line-height:1.5">Un seul test pour l’instant. Enregistre une nouvelle évaluation à une autre date pour voir la courbe se dessiner.</div>':'';
   const chartHtml='<div class="prog-block"><div class="prog-block-hd">Évolution de la VMA'+(last.csKmh?' / VC':'')+'</div><div class="card" style="padding:18px"><div style="position:relative;height:260px"><canvas id="prog-chart"></canvas></div>'+chartNote+'</div></div>';
   let rows='';
   h.forEach((sp,i)=>{
@@ -2680,7 +2701,7 @@ function openProgress(id){
   const table='<div class="prog-block"><div class="prog-block-hd">Détail des évaluations</div><div class="tbl-wrap"><table><thead><tr><th>Date du test</th><th>VMA</th><th>VC</th><th>Allure</th><th>FC max</th><th>Δ VMA</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
   const best={};
   h.forEach(sp=>{const rc=sp.records||{};REC_DISTS.forEach(r=>{const v=rc[r.id];if(!v)return;const T=(+v.hh||0)*3600+(+v.mm||0)*60+(+v.ss||0);if(T>=30 && (best[r.id]==null||T<best[r.id]))best[r.id]=T;});});
-  const recCards=REC_DISTS.filter(r=>best[r.id]!=null).map(r=>{const T=best[r.id];return '<div style="background:var(--card);border:1px solid var(--border);border-top:2px solid '+r.col+';border-radius:10px;padding:12px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">'+r.nm+'</div><div style="font-size:18px;font-weight:900;color:'+r.col+';margin-top:3px">'+fHMS(T)+'</div><div style="font-size:10px;color:var(--muted2)">'+fAll(T/r.d*1000)+'/km</div></div>';}).join('');
+  const recCards=REC_DISTS.filter(r=>best[r.id]!=null).map(r=>{const T=best[r.id];return '<div style="background:var(--card);border:1px solid var(--border);border-top:2px solid '+r.col+';border-radius:10px;padding:12px 14px"><div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">'+r.nm+'</div><div style="font-size:18px;font-weight:900;color:'+r.col+';margin-top:3px">'+fHMS(T)+'</div><div style="font-size:11.5px;color:var(--muted2)">'+fAll(T/r.d*1000)+'/km</div></div>';}).join('');
   const recHtml=recCards?'<div class="prog-block"><div class="prog-block-hd">Meilleures marques</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">'+recCards+'</div></div>':'';
   body.innerHTML=closeBtn+header+cards+chartHtml+table+recHtml;
   document.getElementById('prog-overlay').classList.add('open');
@@ -2779,41 +2800,41 @@ function _buildPDF(d){
   const html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Fiche coureur – '+d.pseudo+'</title>'+
     '<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet"><style>'+
     '*{margin:0;padding:0;box-sizing:border-box}html{-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
-    "body{font-family:'Manrope','Segoe UI',Arial,sans-serif;color:#1b2334;font-size:12px;background:#e9edf3;-webkit-print-color-adjust:exact;print-color-adjust:exact}"+
+    "body{font-family:'Manrope','Segoe UI',Arial,sans-serif;color:#1b2334;font-size:13px;background:#e9edf3;-webkit-print-color-adjust:exact;print-color-adjust:exact}"+
     '.sheet{max-width:780px;margin:0 auto;background:#fff;box-shadow:0 12px 44px rgba(0,0,0,.16)}'+
     '.hero{background:linear-gradient(135deg,#16203A,#243458);color:#fff;padding:24px 42px 22px;position:relative;overflow:hidden}'+
     '.hero::after{content:"";position:absolute;top:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,26,.30),transparent 70%)}'+
     '.htop{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}.hero img{height:34px}'+
-    '.coach{text-align:right;font-size:10px;color:#aab6c9;line-height:1.6}.coach b{color:#fff;font-size:12px}'+
-    '.eyebrow{margin-top:18px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#ff8a4d;font-weight:800;position:relative;z-index:1}'+
+    '.coach{text-align:right;font-size:11.5px;color:#aab6c9;line-height:1.6}.coach b{color:#fff;font-size:13px}'+
+    '.eyebrow{margin-top:18px;font-size:11.5px;letter-spacing:3px;text-transform:uppercase;color:#ff8a4d;font-weight:800;position:relative;z-index:1}'+
     '.aname{font-size:36px;font-weight:900;letter-spacing:-1px;margin-top:4px;position:relative;z-index:1}'+
-    '.adate{font-size:11px;color:#8ea0ba;margin-top:6px;position:relative;z-index:1}'+
+    '.adate{font-size:12px;color:#8ea0ba;margin-top:6px;position:relative;z-index:1}'+
     '.hstats{display:flex;gap:38px;margin-top:16px;flex-wrap:wrap;position:relative;z-index:1}'+
-    '.hk{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:#8ea0ba;font-weight:800}'+
-    '.hv{font-size:27px;font-weight:900;color:#ff8a4d;margin-top:4px;line-height:1}.hv small{font-size:12px;color:#c7d0de;font-weight:600}'+
-    '.hs{font-size:10px;color:#8ea0ba;margin-top:4px}'+
+    '.hk{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:#8ea0ba;font-weight:800}'+
+    '.hv{font-size:27px;font-weight:900;color:#ff8a4d;margin-top:4px;line-height:1}.hv small{font-size:13px;color:#c7d0de;font-weight:600}'+
+    '.hs{font-size:11.5px;color:#8ea0ba;margin-top:4px}'+
     '.body{padding:18px 42px 6px}.sec{margin-bottom:12px}'+
-    '.sec-t{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#FF6B1A;font-weight:800;margin-bottom:8px}'+
+    '.sec-t{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#FF6B1A;font-weight:800;margin-bottom:8px}'+
     '.sec-rule{height:2px;background:#f0f2f6;margin-bottom:11px;position:relative}.sec-rule::after{content:"";position:absolute;left:0;top:0;width:38px;height:2px;background:#FF6B1A}'+
     '.objcard{display:flex;justify-content:space-between;align-items:center;gap:20px;border:1px solid #f2e4da;border-radius:14px 14px 0 0;padding:18px 24px;background:linear-gradient(135deg,#fff7f2,#fff)}'+
-    '.obj-k{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#b08968;font-weight:800}'+
-    '.obj-race{font-size:17px;font-weight:800;color:#16203A;margin-top:3px}.obj-note{font-size:11px;color:#8a7a6a;margin-top:5px}'+
-    '.obj-t{font-size:32px;font-weight:900;color:#FF6B1A;letter-spacing:-1px;text-align:right;line-height:1}.obj-p{font-size:11px;color:#b08968;text-align:right;margin-top:4px}'+
+    '.obj-k{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#b08968;font-weight:800}'+
+    '.obj-race{font-size:17px;font-weight:800;color:#16203A;margin-top:3px}.obj-note{font-size:12px;color:#8a7a6a;margin-top:5px}'+
+    '.obj-t{font-size:32px;font-weight:900;color:#FF6B1A;letter-spacing:-1px;text-align:right;line-height:1}.obj-p{font-size:12px;color:#b08968;text-align:right;margin-top:4px}'+
     '.plan{display:flex;align-items:center;gap:22px;border:1px solid #f2e4da;border-top:none;border-radius:0 0 14px 14px;padding:14px 24px;background:#fffdfb;flex-wrap:wrap}'+
-    '.plan-lbl{font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:#b08968;font-weight:800}.plan-pace{font-size:20px;font-weight:900;color:#FF6B1A;letter-spacing:-.5px}'+
-    '.plan-splits{display:flex;gap:22px;flex-wrap:wrap;margin-left:auto}.plan-sp{font-size:13px;font-weight:800;color:#16203A}.plan-sp .l{display:block;font-size:8px;color:#b08968;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}'+
+    '.plan-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#b08968;font-weight:800}.plan-pace{font-size:20px;font-weight:900;color:#FF6B1A;letter-spacing:-.5px}'+
+    '.plan-splits{display:flex;gap:22px;flex-wrap:wrap;margin-left:auto}.plan-sp{font-size:13px;font-weight:800;color:#16203A}.plan-sp .l{display:block;font-size:11px;color:#b08968;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}'+
     '.ztable{width:100%;border-collapse:collapse}.ztable td{padding:8px 8px;border-bottom:1px solid #f2f4f7;vertical-align:middle}.ztable tr:last-child td{border-bottom:none}'+
     '.z-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:9px;vertical-align:middle}'+
-    '.z-nm{font-weight:800;color:#1b2334;font-size:12.5px}.z-ress{display:block;font-size:9.5px;color:#94a3b8;font-weight:600;margin-top:2px;margin-left:18px}'+
-    '.z-pace{font-weight:800;color:#16203A;font-size:13px;white-space:nowrap}.z-pace span{font-weight:600;color:#94a3b8;font-size:10px}'+
-    '.z-fc{color:#e11d48;font-weight:700;white-space:nowrap;font-size:12px}.z-fc span{color:#cbd5e1;font-weight:600;font-size:9px}'+
-    '.z-use{color:#475569;font-size:11px;font-weight:600;line-height:1.4}'+
+    '.z-nm{font-weight:800;color:#1b2334;font-size:13.5px}.z-ress{display:block;font-size:11px;color:#94a3b8;font-weight:600;margin-top:2px;margin-left:18px}'+
+    '.z-pace{font-weight:800;color:#16203A;font-size:13px;white-space:nowrap}.z-pace span{font-weight:600;color:#94a3b8;font-size:11.5px}'+
+    '.z-fc{color:#e11d48;font-weight:700;white-space:nowrap;font-size:13px}.z-fc span{color:#cbd5e1;font-weight:600;font-size:10.5px}'+
+    '.z-use{color:#475569;font-size:12px;font-weight:600;line-height:1.4}'+
     '.rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.rcard{border:1px solid #eef1f5;border-radius:12px;padding:16px 12px;text-align:center}'+
-    '.rc-d{font-size:15px;font-weight:900}.rc-sub{font-size:9px;color:#94a3b8;font-weight:600;margin-top:1px}'+
-    '.rc-t{font-size:15px;font-weight:900;color:#16203A;margin-top:12px;letter-spacing:-.3px;white-space:nowrap}.rc-t span{color:#cbd5e1;font-weight:600}.rc-p{font-size:9.5px;color:#64748b;margin-top:3px}'+
-    '.evgrid{display:flex;gap:12px}.ev{flex:1;border:1px solid #eef1f5;border-radius:10px;padding:11px 16px}.ev-n{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#94a3b8}.ev-v{font-size:20px;font-weight:900;color:#16203A;margin-top:4px}.ev-p{font-size:10px;color:#64748b;margin-top:2px}.ev-res{border-color:rgba(255,107,26,0.4);background:linear-gradient(135deg,#fff7f2,#fff)}.ev-res .ev-n{color:#b08968}.ev-res-row{display:flex;align-items:baseline;gap:6px;margin-top:4px}.ev-res-v{font-size:18px;font-weight:900;color:#FF6B1A;line-height:1.1}.ev-res-u{font-size:9.5px;color:#94a3b8;font-weight:700}'+
-    '.hint{font-size:10px;color:#94a3b8;margin-top:12px;line-height:1.5}.cv-leg{display:flex;gap:20px;font-size:10px;color:#64748b;font-weight:700;margin-top:8px}.cv-leg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle}'+
-    '.foot{background:#16203A;color:#8ea0ba;padding:16px 42px;font-size:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}.foot b{color:#fff}.sig{color:#FF6B1A;font-weight:800;letter-spacing:1px;text-transform:uppercase;font-size:9px}'+
+    '.rc-d{font-size:15px;font-weight:900}.rc-sub{font-size:10.5px;color:#94a3b8;font-weight:600;margin-top:1px}'+
+    '.rc-t{font-size:15px;font-weight:900;color:#16203A;margin-top:12px;letter-spacing:-.3px;white-space:nowrap}.rc-t span{color:#cbd5e1;font-weight:600}.rc-p{font-size:11px;color:#64748b;margin-top:3px}'+
+    '.evgrid{display:flex;gap:12px}.ev{flex:1;border:1px solid #eef1f5;border-radius:10px;padding:11px 16px}.ev-n{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#94a3b8}.ev-v{font-size:20px;font-weight:900;color:#16203A;margin-top:4px}.ev-p{font-size:11.5px;color:#64748b;margin-top:2px}.ev-res{border-color:rgba(255,107,26,0.4);background:linear-gradient(135deg,#fff7f2,#fff)}.ev-res .ev-n{color:#b08968}.ev-res-row{display:flex;align-items:baseline;gap:6px;margin-top:4px}.ev-res-v{font-size:18px;font-weight:900;color:#FF6B1A;line-height:1.1}.ev-res-u{font-size:11px;color:#94a3b8;font-weight:700}'+
+    '.hint{font-size:11.5px;color:#94a3b8;margin-top:12px;line-height:1.5}.cv-leg{display:flex;gap:20px;font-size:11.5px;color:#64748b;font-weight:700;margin-top:8px}.cv-leg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle}'+
+    '.foot{background:#16203A;color:#8ea0ba;padding:16px 42px;font-size:11.5px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}.foot b{color:#fff}.sig{color:#FF6B1A;font-weight:800;letter-spacing:1px;text-transform:uppercase;font-size:10.5px}'+
     '.toolbar{max-width:780px;margin:0 auto;padding:14px 0;text-align:center}.printbtn{background:#FF6B1A;color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}'+
     '@media print{.toolbar{display:none}body{background:#fff}.sheet{box-shadow:none;max-width:none}@page{margin:0;size:A4}.sec{break-inside:avoid}}'+
     '</style></head><body>'+
@@ -2895,7 +2916,117 @@ const LIB_SESSIONS=[
   {theme:'marathon',title:'2 × 8 km allure marathon',tag:'~80% VMA',desc:'Ancrer l’allure marathon sur un gros volume fractionné.',warm:'20 min',blocks:[{r:2,d:8000,pct:80,rec:"3'"}],cool:'10 min'},
   {theme:'marathon',title:'Sortie longue + 3 × 15 min AM',tag:'2h · allure marathon',desc:'Endurance spécifique : blocs à l’allure marathon dans le long.',warm:'40 min footing',blocks:[{r:3,m:15,pct:80,rec:"5'"}],cool:'reste en endurance'},
   {theme:'marathon',title:'30 km progressif',tag:'finish ~80% VMA',desc:'Sortie longue progressive, terminée à l’allure marathon.',warm:'—',blocks:[{r:1,m:120,pct:[70,80]}],cool:'—'},
+  {theme:'seuil',title:'Tempo 20 min à allure T',tag:'seuil · le classique',desc:'LE tempo de référence : 20 minutes continues à l’allure T (≈ 88 % VMA), « confortablement difficile ». À maîtriser avant les variantes plus longues.',warm:'20 min',blocks:[{r:1,m:20,pct:88}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (tempo run)'},
+  {theme:'seuil',title:'Progressif 45 min (fin au seuil)',tag:'progressif · 70→88%',desc:'Course progressive à la kényane : départ facile, accélération continue jusqu’au seuil sur le dernier quart. Développe le contrôle d’allure et l’endurance au seuil sans traumatisme.',warm:'—',blocks:[{r:1,m:35,pct:[70,80]},{r:1,m:10,pct:88}],cool:'5 min',src:'Renato Canova / entraînement kényan — progressive run'},
+  {theme:'5k',title:'Affûtage 5K : 4 × 400 m allure course',tag:'J-4 à J-6 · volume réduit',desc:'Rappel d’allure la semaine de course : volume divisé, intensité conservée. Jambes vives sans fatigue résiduelle.',warm:'15 min + 2 lignes',blocks:[{r:4,d:400,pct:[95,97],rec:'2’ marche/trot'}],cool:'10 min',src:'Mujika & Padilla / Bosquet et al. 2007 (méta-analyse du tapering)'},
+  {theme:'10k',title:'Affûtage 10K : 3 × 1000 m allure course',tag:'J-4 à J-6 · rappel d’allure',desc:'Trois fractions à l’allure objectif, récup généreuse : entretenir la vitesse spécifique pendant la décharge, sans entamer la fraîcheur.',warm:'15 min',blocks:[{r:3,d:1000,pct:90,rec:'3’'}],cool:'10 min',src:'Mujika & Padilla / Bosquet et al. 2007 (méta-analyse du tapering)'},
+  {theme:'semi',title:'Affûtage semi : 3 × 2 km allure course',tag:'J-5 à J-7 · volume réduit',desc:'Dernier rappel de l’allure semi avant la course, volume minimal. La méta-analyse du tapering : réduire le volume de 40-60 % sur 8-14 jours en gardant l’intensité.',warm:'15 min',blocks:[{r:3,d:2000,pct:[86,88],rec:'3’'}],cool:'10 min',src:'Bosquet et al. 2007, Med Sci Sports Exerc (méta-analyse du tapering)'},
+  {theme:'marathon',title:'Répétition générale (J-14)',tag:'dress rehearsal · 13 km',desc:'Deux semaines avant : 13 km dont 8-10 km à l’allure marathon, en tenue et ravitaillement de course. Valide l’allure, l’équipement et la nutrition.',warm:'—',blocks:[{r:1,d:4000,pct:70},{r:1,d:9000,pct:80}],cool:'—',src:'Pete Pfitzinger — Advanced Marathoning (dress rehearsal)'},
 ];
+const LIB_PHASES=[
+  {id:'gen',lbl:'Début — base générale',short:'Début de prépa',col:'#94A3B8'},
+  {id:'dev',lbl:'Milieu — développement',short:'Milieu de prépa',col:'#FB923C'},
+  {id:'spe',lbl:'Fin — spécifique',short:'Fin de prépa',col:'#34D399'},
+  {id:'aff',lbl:'Affûtage — semaine de course',short:'Affûtage',col:'#A855F7'},
+];
+const LIB_PHASE={
+  'Endurance faible intensité (MAF)':'gen','Sortie longue foncière (base Lydiard)':'gen','Footing endurance fondamentale':'gen','Footing + lignes droites':'gen','Fartlek nature':'gen','Progressif 45 min (fin au seuil)':'gen',
+  '5 × 1000 m à allure I':'dev','Billat 30-30 (2 blocs)':'dev','6 × 1000 m à allure 5K':'dev','30/30 classique':'dev','10 × 400 m':'dev','5 × 1000 m':'dev','Mona Fartlek (20 min)':'dev',
+  'Cruise intervals à allure T':'dev','Double seuil (méthode norvégienne)':'dev','Seuil continu 2 × 15 min':'dev','3 × 10 min au seuil':'dev','4 × 2000 m au seuil':'dev','Tempo 20 min à allure T':'dev',
+  'Répétitions à allure R':'spe','2 × 2000 m à allure 5K':'spe','6 × 500 m allure 5K':'spe','5 × 1000 m allure 5K':'spe','2 × (6 × 300 m)':'spe',
+  'Tempo continu au seuil':'spe','5 × 1000 m à allure 10K':'spe','5 × 2000 m allure 10K':'spe','3 × 3000 m':'spe','2 × 4 km allure 10K':'spe',
+  'Bloc allure spécifique semi':'spe','Sortie longue + 2 × 4 km à allure semi':'spe','2 × 5 km allure semi':'spe','3 × 4 km':'spe','Sortie longue + 2 × 20 min':'spe',
+  'Bloc spécifique Canova':'spe','Tempo à allure marathon (Hansons)':'spe','Yasso 800s':'spe','2 × 8 km allure marathon':'spe','Sortie longue + 3 × 15 min AM':'spe','30 km progressif':'spe','Répétition générale (J-14)':'aff',
+  'Affûtage 5K : 4 × 400 m allure course':'aff','Affûtage 10K : 3 × 1000 m allure course':'aff','Affûtage semi : 3 × 2 km allure course':'aff',
+};
+function libPhaseOf(sess){return LIB_PHASE[sess.title]||'dev';}
+const LIB_ORDER={
+  // Entretien : transversal, toute la prépa
+  'Footing endurance fondamentale':{n:1,when:'Toute la prépa'},
+  'Footing + lignes droites':{n:2,when:'Toute la prépa'},
+  'Fartlek nature':{n:3,when:'Toute la prépa'},
+  'Endurance faible intensité (MAF)':{n:4,when:'Toute la prépa'},
+  'Sortie longue foncière (base Lydiard)':{n:5,when:'Toute la prépa'},
+  'Mona Fartlek (20 min)':{n:6,when:'Entretien qualité'},
+  // VO2max : bloc développement
+  '30/30 classique':{n:1,when:'S-10 · pour débuter'},
+  'Billat 30-30 (2 blocs)':{n:2,when:'S-9'},
+  '10 × 400 m':{n:3,when:'S-9 → S-8'},
+  '5 × 1000 m':{n:4,when:'S-8'},
+  '5 × 1000 m à allure I':{n:5,when:'S-7'},
+  '6 × 1000 m à allure 5K':{n:6,when:'S-6'},
+  // Seuil : progression douce → avancé
+  'Progressif 45 min (fin au seuil)':{n:1,when:'S-12 → S-10 · pour débuter'},
+  'Tempo 20 min à allure T':{n:2,when:'S-11 → S-9'},
+  '3 × 10 min au seuil':{n:3,when:'S-10 → S-8'},
+  'Seuil continu 2 × 15 min':{n:4,when:'S-9 → S-7'},
+  'Cruise intervals à allure T':{n:5,when:'S-8 → S-7'},
+  '4 × 2000 m au seuil':{n:6,when:'S-7 → S-6'},
+  'Double seuil (méthode norvégienne)':{n:7,when:'S-8 → S-6 · avancé'},
+  // Spé 5K
+  'Répétitions à allure R':{n:1,when:'S-6 · pour débuter le bloc'},
+  '2 × (6 × 300 m)':{n:2,when:'S-5'},
+  '6 × 500 m allure 5K':{n:3,when:'S-4'},
+  '5 × 1000 m allure 5K':{n:4,when:'S-3'},
+  '2 × 2000 m à allure 5K':{n:5,when:'J-10 · dernière grosse spé'},
+  'Affûtage 5K : 4 × 400 m allure course':{n:6,when:'J-4 → J-6'},
+  // Spé 10K
+  'Tempo continu au seuil':{n:1,when:'S-6 · pour débuter le bloc'},
+  '5 × 1000 m à allure 10K':{n:2,when:'S-5'},
+  '3 × 3000 m':{n:3,when:'S-4'},
+  '5 × 2000 m allure 10K':{n:4,when:'S-3'},
+  '2 × 4 km allure 10K':{n:5,when:'J-10 · dernière grosse spé'},
+  'Affûtage 10K : 3 × 1000 m allure course':{n:6,when:'J-4 → J-6'},
+  // Spé semi
+  '3 × 4 km':{n:1,when:'S-6 · pour débuter le bloc'},
+  '2 × 5 km allure semi':{n:2,when:'S-5'},
+  'Sortie longue + 2 × 4 km à allure semi':{n:3,when:'S-4'},
+  'Sortie longue + 2 × 20 min':{n:4,when:'S-3'},
+  'Bloc allure spécifique semi':{n:5,when:'J-10 · dernière grosse spé'},
+  'Affûtage semi : 3 × 2 km allure course':{n:6,when:'J-5 → J-7'},
+  // Spé marathon
+  'Tempo à allure marathon (Hansons)':{n:1,when:'S-8 → S-6 · pour débuter le bloc'},
+  '2 × 8 km allure marathon':{n:2,when:'S-6'},
+  'Sortie longue + 3 × 15 min AM':{n:3,when:'S-5'},
+  'Yasso 800s':{n:4,when:'S-4 · séance repère'},
+  'Bloc spécifique Canova':{n:5,when:'S-4'},
+  '30 km progressif':{n:6,when:'S-3 · dernière très longue'},
+  'Répétition générale (J-14)':{n:7,when:'J-14 · dernière grosse spé'},
+};
+function libOrderOf(sess){return LIB_ORDER[sess.title]||null;}
+const LIB_VARS={
+  // ── Spé 5K ──
+  'Répétitions à allure R':{same:'10 × 300 m à R récup 2′ · 6 × 400 m + 4 × 200 m',easy:'6 × 300 m à R, récup complète 2′30'},
+  '2 × (6 × 300 m)':{same:'3 × (4 × 300 m) · 12 × 300 m récup 45″',easy:'2 × (4 × 300 m), récup 1′ / 4′ entre blocs'},
+  '6 × 500 m allure 5K':{same:'5 × 600 m récup 1′30 · 8 × 400 m récup 1′',easy:'4 × 500 m récup 2′'},
+  '5 × 1000 m allure 5K':{same:'4 × 1200 m récup 2′30 · 3 × 1000 m + 2 × 500 m (finish vite)',easy:'4 × 800 m récup 2′30'},
+  '2 × 2000 m à allure 5K':{same:'3 × 1600 m récup 4′ · 2000 m + 2 × 1000 m',easy:'2 × 1500 m récup 4′'},
+  'Affûtage 5K : 4 × 400 m allure course':{same:'3 × 500 m allure course récup 2′',easy:'3 × 300 m + 4 lignes droites'},
+  // ── Spé 10K ──
+  'Tempo continu au seuil':{same:'2 × 5 km au seuil récup 3′',easy:'Tempo 6 km · ou 2 × 3 km récup 3′'},
+  '5 × 1000 m à allure 10K':{same:'6 × 1000 m récup 1′15 · 4 × 1200 m récup 1′30',easy:'4 × 1000 m récup 2′'},
+  '3 × 3000 m':{same:'4000 + 3000 + 2000 m (récup 3′) · 2 × 4000 m',easy:'3 × 2000 m récup 3′'},
+  '5 × 2000 m allure 10K':{same:'4 × 2500 m récup 2′ · 3 × 3000 m récup 2′30',easy:'4 × 1600 m récup 2′30'},
+  '2 × 4 km allure 10K':{same:'3 × 3 km récup 3′ · 8 km continu à AS10 + 5″/km',easy:'2 × 3 km récup 4′'},
+  'Affûtage 10K : 3 × 1000 m allure course':{same:'2 × 1500 m allure course récup 3′',easy:'2 × 1000 m récup 3′'},
+  // ── Spé semi ──
+  '3 × 4 km':{same:'2 × 6 km récup 3′ · 4-4-3-3 km récup 2′30',easy:'3 × 3 km récup 3′'},
+  '2 × 5 km allure semi':{same:'10 km continu à AS21 + 5″/km',easy:'2 × 4 km récup 4′'},
+  'Sortie longue + 2 × 4 km à allure semi':{same:'Sortie longue + 3 × 3 km AS21',easy:'Sortie longue 1h15 + 1 × 5 km AS21 en fin'},
+  'Sortie longue + 2 × 20 min':{same:'Sortie longue + 40 min continu AS21 en fin de sortie',easy:'Sortie longue + 2 × 12 min AS21'},
+  'Bloc allure spécifique semi':{same:'12 km continu à AS21 (répétition générale)',easy:'2 × 5 km récup 4′'},
+  'Affûtage semi : 3 × 2 km allure course':{same:'4 × 1500 m AS21 récup 2′30',easy:'2 × 2 km récup 3′'},
+  // ── Spé marathon ──
+  'Tempo à allure marathon (Hansons)':{same:'Progression Hansons : monter jusqu\u2019à 16 km AM',easy:'8\u201310 km AM continu'},
+  '2 × 8 km allure marathon':{same:'3 × 6 km AM, récup 1 km footing',easy:'2 × 6 km AM récup 1 km'},
+  'Sortie longue + 3 × 15 min AM':{same:'Sortie longue 2h dont 2 × 25 min AM',easy:'Sortie longue 1h45 dont 2 × 10 min AM'},
+  'Yasso 800s':{same:'8 × 1000 m même logique de temps',easy:'6 × 800 m (progresser vers 10 au fil de la prépa)'},
+  'Bloc spécifique Canova':{same:'2 × 10 km à AM + 3″/km, récup 1 km AM',easy:'3 × 5 km légèrement plus vite qu\u2019AM, récup 1 km footing'},
+  '30 km progressif':{same:'32\u201335 km dont 3 derniers km à AM (confirmés)',easy:'24\u201326 km progressif, finish à AM + 10″/km'},
+  'Répétition générale (J-14)':{same:'15 km dont 10 km AM',easy:'10 km dont 6 km AM'},
+};
+let libPhase='all';
+function setLibPhase(p){libPhase=p;renderLibrary();}
 let libTheme='all';
 function libVmaVal(){const e=document.getElementById('lib-vma');let v=e?parseFloat(e.value):null;if(!v||v<6||v>35)v=null;return v;}
 function setLibTheme(t){libTheme=t;renderLibrary();}
@@ -2916,14 +3047,18 @@ function libBlock(b,vma,lbl){
 }
 function libCard(s,vma){
   const t=LIB_THEMES.find(x=>x.id===s.theme);
+  const ph=LIB_PHASES.find(p=>p.id===libPhaseOf(s))||LIB_PHASES[1];
+  const od=libOrderOf(s);
+  const phTxt=od?('Étape '+od.n+' · '+od.when):ph.short;
   const blocks=s.blocks.map((b,i)=>libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
   const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
   return '<div class="lib-card" style="border-top:3px solid '+t.col+'">'+
-    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div><div class="lib-title">'+s.title+'</div></div><div class="lib-tag">'+s.tag+'</div></div>'+
+    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div><div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
-    (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
+    (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
+    (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
 }
 function renderLibCards(){
@@ -2932,18 +3067,115 @@ function renderLibCards(){
   let html='';
   LIB_THEMES.forEach(t=>{
     if(libTheme!=='all'&&libTheme!==t.id)return;
-    const ss=LIB_SESSIONS.filter(s=>s.theme===t.id);
+    let ss=LIB_SESSIONS.filter(s=>s.theme===t.id);
+    if(libPhase!=='all') ss=ss.filter(s=>libPhaseOf(s)===libPhase);
+    const ORD={gen:0,dev:1,spe:2,aff:3};
+    ss=ss.slice().sort((a,b)=>{
+      const oa=libOrderOf(a),ob=libOrderOf(b);
+      if(oa&&ob)return oa.n-ob.n;
+      if(oa)return -1; if(ob)return 1;
+      return ORD[libPhaseOf(a)]-ORD[libPhaseOf(b)];
+    });
     if(!ss.length)return;
     html+='<div class="lib-theme-hd" style="--thc:'+t.col+'">'+t.lbl+'</div>';
     html+='<div class="lib-grid">'+ss.map(s=>libCard(s,vma)).join('')+'</div>';
   });
   box.innerHTML=html||'<div class="empty">Aucune séance.</div>';
 }
+function libExtrapolHTML(){
+  const IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 9px;outline:none';
+  const tIn=(id,k)=>{
+    const n=(sfx,ph,mx)=>'<input id="ext-t'+sfx+'-'+k+'" type="number" min="0" max="'+mx+'" placeholder="'+ph+'" oninput="extUpd(\''+k+'\')" style="'+IS+';width:56px;text-align:center;padding:7px 4px">';
+    return '<span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;color:var(--muted2)">'+n('h','h',9)+':'+n('m','min',59)+':'+n('s','sec',59)+'</span>';
+  };
+  const out=(id)=>'<span id="'+id+'" style="font-size:14px;font-weight:800;margin-left:2px"></span>';
+  const row=(c)=>'<div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:9px">'+c+'</div>';
+  const srcSel=(k,opts)=>'<select id="ext-s-'+k+'" onchange="extUpd(\''+k+'\')" style="'+IS+';cursor:pointer">'+opts.map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('')+'</select>';
+  const volSel=(k)=>'<select id="ext-vol-'+k+'" onchange="extUpd(\''+k+'\')" style="'+IS+';cursor:pointer"><option value="p">&lt; 40 km/sem</option><option value="m" selected>40\u201370 km/sem</option><option value="g">&gt; 70 km/sem</option></select>';
+
+  const card=(title,color,items,note)=>'<div class="card" style="padding:22px;border-top:3px solid '+color+'">'
+    +'<div style="font-size:18px;font-weight:900;color:'+color+';text-transform:uppercase;margin-bottom:4px">'+title+'</div>'
+    +'<div style="font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:14px">M\u00e9thodes par ordre de fiabilit\u00e9</div>'
+    +'<ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:14px">'
+    +items.map(x=>'<li style="font-size:13.5px;color:var(--text2);line-height:1.65">'+x+'</li>').join('')
+    +'</ol>'
+    +(note?'<div style="margin-top:14px;padding:10px 13px;background:rgba(255,107,26,0.06);border-left:3px solid var(--orange);border-radius:8px;font-size:13.5px;color:var(--text2);line-height:1.6">'+note+'</div>':'')
+    +'</div>';
+
+  const c5=card('5 km','#3B82F6',[
+    '<b>Une course r\u00e9cente</b> convertie (Riegel, exposant 1,06) : entre distances proches, les \u00e9quivalences sont tr\u00e8s fiables. Ex : 10 km \u00f7 2,085 \u2248 5 km \u00b7 3 km \u00d7 1,72 \u2248 5 km.'
+      +row(srcSel('5k',[[3000,'3 000 m'],[10000,'10 km']])+tIn('ext-t1-5k','5k')+'\u2192 '+out('ext-o1-5k')),
+    '<b>La VC \u00d7 100\u2013105 %</b> : le 5 km se court au-dessus de la VC en puisant dans le D\u2032 \u2014 d\u2019o\u00f9 le calcul t = (D \u2212 D\u2032) \u00f7 VC des plages de performance du Dashboard (Jones &amp; Vanhatalo, 2017). Fiable si les tests datent de moins de 6\u20138 semaines.',
+    '<b>S\u00e9ance repère</b> : 2 \u00d7 2000 m \u00e0 l\u2019allure cible (r\u00e9cup 3\u20134\u2019) pass\u00e9s confortablement en fin de pr\u00e9pa \u2192 l\u2019objectif est cr\u00e9dible.'
+  ],'Rep\u00e8re : le 5 km se court \u00e0 \u2248 93\u201397 % de VMA (coureurs 15\u201325 min).<br><b>Strat\u00e9gie de course :</b> sur 32 records du monde du 5000 m, le 1er et le dernier km sont les plus rapides \u2014 tout le milieu se court \u00e0 allure r\u00e9guli\u00e8re. Ne pas c\u00e9der aux \u00e0-coups des km 2\u20134 (Tucker, Lambert &amp; Noakes, 2006).');
+  const c10=card('10 km','#FF6B1A',[
+    '<b>Un 5 km ou un semi r\u00e9cent</b> converti par Riegel : le domaine 5 km \u2194 semi est celui o\u00f9 la formule est la mieux calibr\u00e9e (Vickers &amp; Vertosick, 2016). Ex : 5 km \u00d7 2,085 \u2248 10 km \u00b7 semi \u00f7 2,21 \u2248 10 km.'
+      +row(srcSel('10k',[[5000,'5 km'],[21097.5,'Semi']])+tIn('ext-t1-10k','10k')+'\u2192 '+out('ext-o1-10k')),
+    '<b>La VC \u00d7 95\u2013100 %</b> : le 10 km se court autour de la VC \u2014 juste dessous pour la plupart, l\u00e9g\u00e8rement dessus chez les \u00e9lites (Jones &amp; Vanhatalo, 2017). Le calcul t = (D \u2212 D\u2032) \u00f7 VC du Dashboard devient optimiste au-del\u00e0 de ~45 min : vise la borne lente.',
+    '<b>S\u00e9ance repère</b> : tempo continu de 8 km au seuil (\u2248 88 % VMA) ma\u00eetris\u00e9, ou 5\u20136 \u00d7 1000 m \u00e0 l\u2019allure cible r\u00e9cup 90 s bien dig\u00e9r\u00e9s.'
+  ],'Rep\u00e8re : le 10 km se court \u00e0 \u2248 88\u201392 % de VMA.<br><b>Strat\u00e9gie de course :</b> m\u00eame profil sur 34 records du monde du 10 000 m \u2014 d\u00e9part rapide, long milieu parfaitement r\u00e9gulier, acc\u00e9l\u00e9ration sur le dernier km (Tucker, Lambert &amp; Noakes, 2006).');
+  const csm=card('Semi-marathon','#10B981',[
+    '<b>Un 10 km r\u00e9cent \u00d7 \u2248 2,21</b> (Riegel) : encore bien calibr\u00e9 jusqu\u2019au semi \u2014 c\u2019est au-del\u00e0 que \u00e7a se g\u00e2te (Vickers &amp; Vertosick, 2016).'
+      +row('<span style="font-size:13px;color:var(--muted2)">Temps 10 km</span>'+tIn('ext-t1-semi','semi')+'\u2192 '+out('ext-o1-semi')),
+    '<b>La VC \u00d7 92\u201396 %</b> (Follador et al., 2022) : gros volume hebdo \u2192 haut de fourchette ; volume modeste \u2192 bas. C\u2019est l\u2019approche des plages de performance du Dashboard.',
+    '<b>Sortie longue sp\u00e9cifique</b> : 12\u201314 km \u00e0 l\u2019allure cible en fin de sortie longue, sans d\u00e9rive cardiaque (d\u00e9couplage FC/allure &lt; 5 %) \u2192 l\u2019objectif tient la route.'
+  ],'Rep\u00e8re : le semi se court \u00e0 \u2248 84\u201388 % de VMA.<br><b>Strat\u00e9gie de course :</b> aux Mondiaux de semi (838 athl\u00e8tes analys\u00e9s), les meilleurs tiennent une allure constante du 5\u1d49 au 15\u1d49 km, et courir en groupe prot\u00e8ge de la baisse d\u2019allure \u2014 les l\u00e2ch\u00e9s ralentissent jusqu\u2019\u00e0 ~91 % de leur vitesse initiale (Hanley, 2015).');
+  const cma=card('Marathon','#8B5CF6',[
+    '<b>Un semi r\u00e9cent</b> : marathon \u2248 2 \u00d7 semi + 8 \u00e0 15 min. Riegel brut (\u00d7 2,085) est trop optimiste de 10 min ou plus pour la moiti\u00e9 des amateurs ; multiplicateur r\u00e9aliste moyen \u2248 2,14, \u00e0 ajuster selon le volume (Vickers &amp; Vertosick, 2016).'
+      +row('<span style="font-size:13px;color:var(--muted2)">Temps semi</span>'+tIn('ext-t1-mara','mara')+volSel('mara')+'\u2192 '+out('ext-o1-mara')),
+    '<b>Le coefficient de VC</b> : 84\u201391 % de la VC selon le volume hebdo \u2014 gros volume : 89\u201391 %, volume modeste : 84\u201386 %. Sur 31 000 marathoniens : moyenne r\u00e9elle 84,8 % de VC, rapides \u2248 93 %, lents \u2248 79 % (Smyth &amp; Muniz-Pumares, 2020).',
+    '<b>Les sorties longues \u00e0 allure marathon</b> : si l\u2019allure cible d\u00e9rive apr\u00e8s 25\u201330 km (FC qui monte \u00e0 allure constante), elle est trop ambitieuse \u2014 la \u00ab durabilit\u00e9 \u00bb distingue ceux qui tiennent l\u2019allure (Smyth et al., 2022).'
+  ],'Strat\u00e9gie de course : partir \u00e0 \u2264 88 % de sa VC prot\u00e8ge de l\u2019effondrement en fin de course (Smyth &amp; Muniz-Pumares, 2020).');
+  const srcs='<div class="card" style="padding:18px 22px;margin-top:2px"><div style="font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Sources</div>'
+    +'<div style="font-size:13px;color:var(--muted);line-height:2">'
+    +'Riegel P.S. (1981). \u00ab Athletic Records and Human Endurance \u00bb, <i>American Scientist</i> \u2014 formule t\u2082 = t\u2081 \u00d7 (d\u2082/d\u2081)\u00b9\u02d9\u2070\u2076<br>'
+    +'Vickers A.J. &amp; Vertosick E.A. (2016). \u00ab An empirical study of race times in recreational endurance runners \u00bb, <i>BMC Sports Science, Medicine &amp; Rehabilitation</i><br>'
+    +'Smyth B. &amp; Muniz-Pumares D. (2020). \u00ab Calculation of Critical Speed from Raw Training Data in Recreational Marathon Runners \u00bb, <i>Medicine &amp; Science in Sports &amp; Exercise</i><br>'
+    +'Smyth B. et al. (2022). \u00ab Decoupling of Internal and External Workload During a Marathon \u00bb, <i>Sports Medicine</i><br>'
+    +'Follador L. et al. (2022) \u2014 fractions de VC tenables sur route (mod\u00e8le des plages de performance de l\u2019outil)<br>'
+    +'Jones A.M. &amp; Vanhatalo A. (2017). \u00ab The \u2018Critical Power\u2019 Concept \u00bb, <i>Sports Medicine</i> \u2014 validit\u00e9 du mod\u00e8le CS/D\u2032 (efforts ~2\u201315 min)<br>'
+    +'Tucker R., Lambert M.I. &amp; Noakes T.D. (2006). \u00ab An Analysis of Pacing Strategies During Men\u2019s World-Record Performances in Track Athletics \u00bb, <i>Int. J. Sports Physiology &amp; Performance</i><br>'
+    +'Hanley B. (2015). \u00ab Pacing profiles and pack running at the IAAF World Half Marathon Championships \u00bb, <i>Journal of Sports Sciences</i><br>'
+    +'Daniels J. \u2014 <i>Daniels\u2019 Running Formula</i> (tables VDOT d\u2019\u00e9quivalence)'
+    +'</div></div>';
+  return '<div class="db-section" style="margin-top:36px">'
+    +'<div class="db-section-hd"><div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg></div>'
+    +'<div class="db-section-title">Extrapolation \u2014 potentiel de course</div>'
+    +'<div class="db-section-badge">Litt\u00e9rature scientifique</div></div>'
+    +'<div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;padding:0 2px">Comment estimer le potentiel d\u2019un athl\u00e8te sur chaque distance, par ordre de fiabilit\u00e9. R\u00e8gle g\u00e9n\u00e9rale : <b style="color:var(--text2)">une course r\u00e9cente bat toujours un mod\u00e8le</b>, et tout mod\u00e8le suppose un entra\u00eenement sp\u00e9cifique \u00e0 la distance vis\u00e9e. Saisis un chrono ou une VC pour obtenir l\u2019estimation.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px">'+c5+c10+csm+cma+'</div>'
+    +srcs+'</div>';
+}
+const EXT_D={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
+const EXT_COL={'5k':'#3B82F6','10k':'#FF6B1A','semi':'#10B981','mara':'#8B5CF6'};
+function extUpd(k){
+  const col=EXT_COL[k], D=EXT_D[k];
+  const gv=id=>{const e=document.getElementById(id);return e?e.value:null;};
+  const setO=(id,html)=>{const e=document.getElementById(id);if(e){e.innerHTML=html;e.style.color=col;}};
+  // M\u00e9thode 1 : course r\u00e9cente
+  const t1=((+gv('ext-th-'+k)||0)*3600)+((+gv('ext-tm-'+k)||0)*60)+(+gv('ext-ts-'+k)||0);
+  if(t1&&t1>=180){
+    if(k==='mara'){
+      const vol=gv('ext-vol-mara')||'m';
+      const MUL={p:[2.15,2.25],m:[2.10,2.16],g:[2.05,2.12]}[vol];
+      setO('ext-o1-mara','entre '+fHMS(t1*MUL[0])+' et '+fHMS(t1*MUL[1])+' <span style="font-size:12px;color:var(--muted2);font-weight:600">(Riegel optimiste : '+fHMS(t1*2.085)+')</span>');
+    } else {
+      const src=+gv('ext-s-'+k)||(k==='semi'?10000:0);
+      if(src>0) setO('ext-o1-'+k,'\u2248 '+fHMS(t1*Math.pow(D/src,1.06)));
+    }
+  } else setO('ext-o1-'+k,'');
+}
+function renderExtrapol(){
+  const wrap=document.getElementById('extrapol-wrap');if(!wrap)return;
+  wrap.innerHTML=
+    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Extrapolation \u2014 potentiel de course</div><div class="input-hero-sub">Estime le potentiel d\u2019un athl\u00e8te sur 5 km, 10 km, semi et marathon \u00e0 partir d\u2019une course r\u00e9cente ou de sa vitesse critique \u2014 m\u00e9thodes issues de la litt\u00e9rature scientifique, class\u00e9es par fiabilit\u00e9.</div></div>'
+    +libExtrapolHTML();
+}
 function renderLibrary(){
   const wrap=document.getElementById('library-wrap');if(!wrap)return;
   const chips=[['all','Toutes']].concat(LIB_THEMES.map(t=>[t.id,t.lbl])).map(c=>'<button class="lib-chip'+(libTheme===c[0]?' active':'')+'" onclick="setLibTheme(\''+c[0]+'\')">'+c[1]+'</button>').join('');
   wrap.innerHTML=
-    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
+    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique et <b>ordonnées dans la prépa</b> : commence par l\u2019Étape 1 de chaque bloc, termine par la dernière grosse spé (J-10 à J-14) puis l\u2019affûtage. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
     '<div class="lib-toolbar">'+
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
       '<div class="lib-chips">'+chips+'</div>'+
@@ -3048,7 +3280,7 @@ function updCsRaces(){
   let plaus='';
   if(cs.dp>500) plaus='D′ anormalement élevé ('+Math.round(cs.dp)+' m) : un des deux efforts n’était probablement pas maximal, ou les durées sont trop proches. Résultat peu fiable.';
   else if(cs.csKmh<9) plaus='VC très basse : vérifiez que les deux efforts sont bien maximaux.';
-  const warns=[v.warn,plaus].filter(Boolean).map(w=>'<span style="color:#FB923C;font-size:11px">⚠ '+w+'</span>').join('<br>');
+  const warns=[v.warn,plaus].filter(Boolean).map(w=>'<span style="color:#FB923C;font-size:12px">⚠ '+w+'</span>').join('<br>');
   box.innerHTML='<div class="info-box'+(plaus?' error':'')+'"><strong>VC</strong> : '+cs.csKmh.toFixed(2)+' km/h ('+fAll(3600/cs.csKmh)+' /km) &nbsp;·&nbsp; <strong>D′</strong> : '+Math.round(cs.dp)+' m &nbsp;·&nbsp; VMA est. : '+vmaEst.toFixed(1)+' km/h'+
     (warns?'<br>'+warns:'')+
     '<div class="formula">VC = (D_long − D_court) / (t_long − t_court)  ·  D′ = D_court − VC × t_court</div></div>';
@@ -3118,18 +3350,6 @@ function drawCsModelChart(pts,csMs,dp,testDate){
   function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
   const ann={id:'csmAnn',afterDatasetsDraw(ch){
     const ctx=ch.ctx, xs=ch.scales.x, ys=ch.scales.y, area=ch.chartArea; if(!xs||!ys)return; ctx.save();
-    const x0=xs.getPixelForValue(0), y0=ys.getPixelForValue(0), yD=ys.getPixelForValue(dp);
-    // D' : grande zone violette + double flèche + gros label
-    const zw=64;
-    ctx.fillStyle='rgba(168,85,247,0.20)'; ctx.fillRect(x0, yD, zw, y0-yD);
-    ctx.strokeStyle='rgba(168,85,247,0.55)';ctx.lineWidth=1; ctx.strokeRect(x0,yD,zw,y0-yD);
-    const ax=x0+zw/2; ctx.strokeStyle=D; ctx.lineWidth=2.5;
-    ctx.beginPath(); ctx.moveTo(ax,yD+2); ctx.lineTo(ax,y0-2); ctx.stroke();
-    ctx.beginPath();ctx.moveTo(ax,yD+2);ctx.lineTo(ax-5,yD+10);ctx.moveTo(ax,yD+2);ctx.lineTo(ax+5,yD+10);ctx.moveTo(ax,y0-2);ctx.lineTo(ax-5,y0-10);ctx.moveTo(ax,y0-2);ctx.lineTo(ax+5,y0-10);ctx.stroke();
-    const ly=Math.max(yD-6,area.top+22);
-    ctx.fillStyle=D; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-    ctx.font='900 15px Manrope,sans-serif'; ctx.fillText('D′ = '+Math.round(dp)+' m', x0+zw+10, ly);
-    ctx.font='700 10px Manrope,sans-serif'; ctx.fillStyle='#c4b5fd'; ctx.fillText('réserve anaérobie', x0+zw+10, ly+14);
     // pastille VC sur la droite
     const mt=tmax*0.58, mx=xs.getPixelForValue(mt), my=ys.getPixelForValue(csMs*mt+dp);
     const txt='VC = '+(csMs*3.6).toFixed(1)+' km/h · '+fp(1000/csMs)+'/km';
@@ -3140,7 +3360,7 @@ function drawCsModelChart(pts,csMs,dp,testDate){
     // résidus
     if(pts.length>=3){ctx.strokeStyle='rgba(148,163,184,0.85)';ctx.lineWidth=1.5;ctx.setLineDash([2,2]);pts.forEach(p=>{const X=xs.getPixelForValue(p.t);ctx.beginPath();ctx.moveTo(X,ys.getPixelForValue(p.d));ctx.lineTo(X,ys.getPixelForValue(csMs*p.t+dp));ctx.stroke();});ctx.setLineDash([]);}
     // étiquettes points
-    ctx.font='700 11px Manrope,sans-serif'; ctx.textBaseline='bottom'; ctx.fillStyle='#E2E8F0';
+    ctx.font='700 13px Manrope,sans-serif'; ctx.textBaseline='bottom'; ctx.fillStyle='#E2E8F0';
     pts.forEach(p=>{const X=xs.getPixelForValue(p.t),Y=ys.getPixelForValue(p.d);const right=X>area.right-100;ctx.textAlign=right?'right':'left';ctx.fillText(Math.round(p.d)+' m · '+fp(p.t), X+(right?-12:12), Y-11);});
     ctx.restore();
   }};
@@ -3149,16 +3369,15 @@ function drawCsModelChart(pts,csMs,dp,testDate){
     {label:'bhi',type:'line',data:[{x:0,y:dHi},{x:xmax,y:csHi*xmax+dHi}],borderColor:'rgba(0,0,0,0)',backgroundColor:'rgba(255,107,26,0.17)',fill:'+1',pointRadius:0,order:6},
     {label:'blo',type:'line',data:[{x:0,y:dLo},{x:xmax,y:csLo*xmax+dLo}],borderColor:'rgba(0,0,0,0)',fill:false,pointRadius:0,order:6},
     {label:'Droite VC',type:'line',data:[{x:0,y:dp},{x:xmax,y:csMs*xmax+dp}],borderColor:V,borderWidth:3,pointRadius:0,fill:false,tension:0,order:4},
-    {label:'Tes tests',data:pts.map(p=>({x:p.t,y:p.d})),backgroundColor:T,borderColor:'#fff',pointRadius:7,pointHoverRadius:9,pointBorderWidth:2,order:1},
-    {label:'D′',data:[{x:0,y:dp}],backgroundColor:D,borderColor:'#fff',pointRadius:7,pointBorderWidth:2,order:2}
+    {label:'Tes tests',data:pts.map(p=>({x:p.t,y:p.d})),backgroundColor:T,borderColor:'#fff',pointRadius:7,pointHoverRadius:9,pointBorderWidth:2,order:1}
   ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:42,right:16,left:6,bottom:2}},
     plugins:{legend:{display:false},
-      tooltip:{filter:c=>c.dataset.label==='Tes tests'||c.dataset.label==='D′',
-        callbacks:{title:()=>'',label:c=>{const t=c.parsed.x,d=c.parsed.y;if(c.dataset.label==='D′')return 'D′ = '+Math.round(d)+' m · réserve anaérobie';
+      tooltip:{filter:c=>c.dataset.label==='Tes tests',
+        callbacks:{title:()=>'',label:c=>{const t=c.parsed.x,d=c.parsed.y;
           const p=pts[c.dataIndex]||{};const v=d/t*3.6;const rows=[(p.lbl||(Math.round(d)+' m')),Math.round(d)+' m en '+fHMS(t),'Vitesse : '+v.toFixed(2)+' km/h','Allure : '+fp(1000/(d/t))+' /km'];
           rows.push('Type : '+(p.kind==='race'?'Course':(p.kind==='test'?'Test terrain':'—')));if(testDate)rows.push('Date : '+testDate);return rows;}}}},
-    scales:{x:{type:'linear',min:0,max:xmax,title:{display:true,text:'Temps (min)',color:'#94A3B8',font:{size:11,weight:'700'}},ticks:{stepSize:180,color:'#94A3B8',callback:v=>Math.round(v/60)},grid:{color:'rgba(255,255,255,0.06)'}},
-      y:{min:0,title:{display:true,text:'Distance (m)',color:'#94A3B8',font:{size:11,weight:'700'}},ticks:{color:'#94A3B8'},grid:{color:'rgba(255,255,255,0.06)'}}}},
+    scales:{x:{type:'linear',min:0,max:xmax,title:{display:true,text:'Temps (min)',color:'#94A3B8',font:{size:12,weight:'700'}},ticks:{stepSize:180,color:'#94A3B8',callback:v=>Math.round(v/60)},grid:{color:'rgba(255,255,255,0.06)'}},
+      y:{min:0,title:{display:true,text:'Distance (m)',color:'#94A3B8',font:{size:12,weight:'700'}},ticks:{color:'#94A3B8'},grid:{color:'rgba(255,255,255,0.06)'}}}},
     plugins:[ann]});
 }
 function renderCsModel(){
@@ -3233,6 +3452,7 @@ function renderCsModel(){
   const sim='<div class="csm-h" style="margin-top:22px">Simulateur — tenue d’allure</div>'+
     '<div class="csm-sim">'+
     '<div class="sim-head"><div class="sim-unit"><button type="button" id="su-kmh" class="su-on" onclick="simUnit(&quot;kmh&quot;)">km/h</button><button type="button" id="su-pace" onclick="simUnit(&quot;pace&quot;)">allure</button></div><div id="sim-vval" class="sim-vval"></div></div>'+
+    '<div class="csm-mini" style="margin:0 0 10px;padding:8px 12px;background:rgba(168,85,247,0.07);border-left:3px solid '+CS_C.dp+';border-radius:6px">Formule : au-dessus de la VC, <b>temps tenable = D\u2032 \u00f7 (vitesse \u2212 VC)</b> — ici D\u2032 = '+R(dp)+' m. Distance max = vitesse \u00d7 temps tenable. \u00c0 la VC ou en dessous, l\u2019autonomie est th\u00e9oriquement illimit\u00e9e.</div>'+
     '<input type="range" id="sim-v" class="sim-range" min="'+simVmin.toFixed(1)+'" max="'+simVmax.toFixed(1)+'" step="0.1" value="'+simVdef.toFixed(1)+'" oninput="csmSim()">'+
     '<div class="sim-track-lbl"><span>← VC '+csKmh.toFixed(1)+'</span><span>Sprint '+simVmax.toFixed(1)+' →</span></div>'+
     '<div id="sim-out"></div></div>';
@@ -3240,8 +3460,8 @@ function renderCsModel(){
   el.innerHTML='<div class="card" style="padding:24px">'+cards+formula+detail+
     '<div class="csm-h" style="margin-top:18px">Graphique du modèle</div>'+
     '<div style="position:relative;height:340px;margin:6px 0 4px"><canvas id="csmodel-chart"></canvas></div>'+
-    '<div class="csm-legend"><span><i style="background:'+CS_C.test+'"></i>Tes tests</span><span><i style="background:'+CS_C.vc+'"></i>Droite (VC = pente)</span><span><i style="background:'+CS_C.dp+'"></i>D′ (réserve)</span><span><i class="band"></i>Marge d’incertitude</span></div>'+
-    sim+testTable+gauge+'</div>';
+    '<div class="csm-legend"><span><i style="background:'+CS_C.test+'"></i>Tes tests</span><span><i style="background:'+CS_C.vc+'"></i>Droite (VC = pente)</span><span><i class="band"></i>Marge d’incertitude</span></div>'+
+    gauge+sim+testTable+'</div>';
   requestAnimationFrame(()=>{drawCsModelChart(pts,csMs,dp,S.testDate);csmSim();});
 }
 function csmSim(){
@@ -3300,13 +3520,13 @@ function drawSimCurve(cs,dp,vCur,vmax,col){
   const Y=vv=>H-padB-((vv-vMin)/Math.max(0.1,(vMax-vMin)))*(H-padT-padB);
   const zones=[[720,Tcap,'rgba(52,211,153,.07)'],[180,720,'rgba(251,146,60,.07)'],[0,180,'rgba(239,68,68,.08)']];
   zones.forEach(z=>{const x1=X(z[1]),x2=X(z[0]); g.fillStyle=z[2]; g.fillRect(Math.min(x1,x2),padT,Math.abs(x2-x1),H-padT-padB);});
-  g.font='9px system-ui,sans-serif';
+  g.font='11px system-ui,sans-serif';
   g.textAlign='left'; g.textBaseline='middle';
   for(let i=0;i<=4;i++){const vv=vMin+(vMax-vMin)*i/4, y=Y(vv); g.strokeStyle='rgba(255,255,255,.05)';g.beginPath();g.moveTo(padL,y);g.lineTo(W-padR,y);g.stroke(); g.fillStyle='rgba(255,255,255,.42)';g.fillText(vv.toFixed(1),W-padR+5,y);}
   g.textAlign='center'; g.textBaseline='alphabetic';
   for(let mn=0;mn<=30;mn+=5){const x=X(mn*60); g.strokeStyle='rgba(255,255,255,.05)';g.beginPath();g.moveTo(x,padT);g.lineTo(x,H-padB);g.stroke(); g.fillStyle='rgba(255,255,255,.4)';g.fillText(mn+"'",x,H-padB+11);}
   const yVC=Y(cs); g.strokeStyle=CS_C.vc; g.setLineDash([4,3]); g.lineWidth=1.2; g.globalAlpha=.75; g.beginPath();g.moveTo(padL,yVC);g.lineTo(W-padR,yVC);g.stroke(); g.setLineDash([]); g.globalAlpha=1;
-  g.fillStyle=CS_C.vc; g.textAlign='left'; g.textBaseline='bottom'; g.font='700 8.5px system-ui'; g.fillText('VC '+cs.toFixed(1),padL+2,yVC-2);
+  g.fillStyle=CS_C.vc; g.textAlign='left'; g.textBaseline='bottom'; g.font='700 10.5px system-ui'; g.fillText('VC '+cs.toFixed(1),padL+2,yVC-2);
   const pts=[];
   for(let vv=cs+0.02; vv<=vMax+1e-6; vv+=(vMax-cs)/160){ const vm=vv/3.6,csm=cs/3.6; let t=dp/(vm-csm); pts.push([X(t),Y(vv)]); }
   g.beginPath(); g.moveTo(pts[0][0],pts[0][1]); pts.forEach(p=>g.lineTo(p[0],p[1])); g.strokeStyle=CS_C.vc; g.lineWidth=2.2; g.lineJoin='round'; g.stroke();
@@ -3314,7 +3534,7 @@ function drawSimCurve(cs,dp,vCur,vmax,col){
   g.strokeStyle='rgba(255,255,255,.28)'; g.setLineDash([3,3]); g.lineWidth=1;
   g.beginPath();g.moveTo(mx,my);g.lineTo(mx,H-padB);g.stroke(); g.beginPath();g.moveTo(mx,my);g.lineTo(W-padR,my);g.stroke(); g.setLineDash([]);
   g.beginPath();g.arc(mx,my,5,0,Math.PI*2); g.fillStyle=col; g.fill(); g.strokeStyle='#fff';g.lineWidth=1.6;g.stroke();
-  g.fillStyle='rgba(255,255,255,.4)';g.textAlign='left';g.textBaseline='alphabetic';g.font='8.5px system-ui';
+  g.fillStyle='rgba(255,255,255,.4)';g.textAlign='left';g.textBaseline='alphabetic';g.font='10.5px system-ui';
   g.fillText('temps (min)',padL,H-2);
   g.save();g.translate(W-3,H-padB);g.rotate(-Math.PI/2);g.textAlign='left';g.fillText('vitesse (km/h)',0,0);g.restore();
 }
@@ -3326,7 +3546,7 @@ function drawDCurve(cs,dp,vCur){
   const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,cssW,cssH);
   const padL=30,padR=8,padT=8,padB=16, W=cssW,H=cssH;
   const Yp=p=>padT+(1-p/100)*(H-padT-padB);
-  g.font='8.5px system-ui,sans-serif'; g.textAlign='right'; g.textBaseline='middle';
+  g.font='10.5px system-ui,sans-serif'; g.textAlign='right'; g.textBaseline='middle';
   [0,50,100].forEach(p=>{const y=Yp(p); g.strokeStyle='rgba(255,255,255,.06)';g.beginPath();g.moveTo(padL,y);g.lineTo(W-padR,y);g.stroke(); g.fillStyle='rgba(255,255,255,.4)';g.fillText(p+'%',padL-4,y);});
   const vm=vCur/3.6,csm=cs/3.6;
   if(vCur<=cs){
@@ -3372,7 +3592,7 @@ function renderGoalSection(){
     '<div class="goal-bar" style="border-left-color:rgba(255,107,26,0.35);margin-top:-8px">'+
       '<span class="goal-lbl" style="color:var(--muted2)">Lien</span>'+
       '<input id="goal-url" type="url" class="goal-date" maxlength="300" placeholder="https://... (site d\'inscription, parcours)" value="'+ur+'" oninput="updGoal()" onchange="goalLinkRefresh()" style="flex:1;min-width:200px">'+
-      (safeUrl?'<a href="'+safeUrl.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:12px;font-weight:700;text-decoration:none;border:1px solid rgba(255,107,26,0.35);border-radius:8px;padding:8px 13px;white-space:nowrap">Ouvrir <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>':'')+
+      (safeUrl?'<a href="'+safeUrl.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:13px;font-weight:700;text-decoration:none;border:1px solid rgba(255,107,26,0.35);border-radius:8px;padding:8px 13px;white-space:nowrap">Ouvrir <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>':'')+
     '</div>'+
     (!g.id?'<div class="goal-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Ajoute ta prochaine course pour suivre ton objectif</div>':'');
   cddBuild('goal-dist','cdd-goal',[{v:'',l:'— Aucune —'},{v:'5k',l:'5 km'},{v:'10k',l:'10 km'},{v:'semi',l:'Semi-marathon'},{v:'mara',l:'Marathon'}],function(){updGoal();});
@@ -3394,14 +3614,20 @@ function exportAthleteView(){
     if(orig&&orig.value!=null&&el.type!=='file')el.setAttribute('value',orig.value);
   });
 
-  // 1) Retirer le modèle CS (outil coach) — courbe de perf et historique restent visibles
-  const csm=clone.querySelector('#db-csmodel-section'); if(csm) csm.remove();
+  // 1) Modèle CS : conservé jusqu'au simulateur inclus (tableau des tests / analyse coach retirés)
+  const csmCard=clone.querySelector('#db-csmodel .card');
+  if(csmCard){
+    let after=false;
+    Array.from(csmCard.children).forEach(ch=>{ if(after) ch.remove(); if(ch.classList&&ch.classList.contains('csm-sim')) after=true; });
+  }
+  const csmBox=clone.querySelector('#db-csmodel');
+  if(csmBox){ Array.from(csmBox.children).forEach((ch,i)=>{ if(i>0) ch.remove(); }); }
   // Réinitialiser les canvas : Chart.js y a écrit les dimensions de l'écran du coach
   clone.querySelectorAll('canvas').forEach(cv=>{cv.removeAttribute('width');cv.removeAttribute('height');cv.removeAttribute('style');});
 
   // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
-  clone.querySelectorAll('button').forEach(b=>{ if(!b.classList.contains('adj')) b.remove(); });
+  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.id==='su-kmh'||b.id==='su-pace'||b.classList.contains('csm-toggle')) return; b.remove(); });
   clone.querySelectorAll('input,select,textarea').forEach(el=>{
     if(el.type==='range') return;
     el.setAttribute('disabled','');
@@ -3411,13 +3637,16 @@ function exportAthleteView(){
   const ATTRS=['onclick','oninput','onchange','onmouseover','onmouseout','onmousedown','onmouseup','onkeydown','onkeyup','onfocus','onblur'];
   clone.querySelectorAll('*').forEach(el=>{
     if(el.classList.contains('adj')||el.classList.contains('sl')||el.classList.contains('rsl')) return;
+    if(el.id==='sim-v'||el.id==='su-kmh'||el.id==='su-pace'||(el.classList&&el.classList.contains('csm-toggle'))) return;
     ATTRS.forEach(a=>el.removeAttribute(a));
   });
   clone.classList.add('active');
 
   // 3) JS embarqué : réutilise les fonctions EXACTES de l'app (zéro divergence)
   const embedJS=[
-    'var S='+JSON.stringify({vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0,pseudo:S.pseudo,records:S.records||{},raceHistory:S.raceHistory||[]})+';',
+    'var S='+JSON.stringify({vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0,pseudo:S.pseudo,records:S.records||{},raceHistory:S.raceHistory||[],csPts:S.csPts||null,testDate:S.testDate||null})+';',
+    'var CS_C='+JSON.stringify(CS_C)+';',
+    'var csModelChart=null;window._csM=null;',
     'var ZONES_VC='+JSON.stringify(ZONES_VC)+';',
     'var ZONES_VMA='+JSON.stringify(ZONES_VMA)+';',
     'var RACES='+JSON.stringify(RACES)+';',
@@ -3433,8 +3662,11 @@ function exportAthleteView(){
     recSeconds.toString(), chartSeconds.toString(),
     renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
-    'document.addEventListener("DOMContentLoaded",function(){var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}});',
-    'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}},250);});'
+    csmToggle.toString(), csmSim.toString(), simUnit.toString(),
+    drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
+    'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
+    'document.addEventListener("DOMContentLoaded",function(){var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}});',
+    'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}},250);});'
   ].join('\n');
 
   // 4) CSS de l'app + surcouche autonome
@@ -3445,15 +3677,15 @@ function exportAthleteView(){
     +'body{padding:0;margin:0}'
     +'.panel{display:block!important}'
     +'.export-wrap{max-width:1120px;margin:0 auto}'
-    +'.export-head{display:flex;align-items:center;gap:16px;padding:22px 28px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}'
+    +'.export-head{display:flex;align-items:center;gap:14px;padding:22px 28px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}'
     +'.export-av{width:46px;height:46px;border-radius:50%;background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--orange);flex-shrink:0}'
     +'.export-h-name{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.3px}'
-    +'.export-h-sub{font-size:12px;color:var(--muted2);margin-top:2px}'
-    +'.export-badge{margin-left:auto;background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);color:var(--orange);font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}'
-    +'.export-foot{text-align:center;padding:26px 20px 44px;color:var(--muted2);font-size:11px;line-height:1.8}'
+    +'.export-h-sub{font-size:13px;color:var(--muted2);margin-top:2px}'
+    +'.export-badge{margin-left:auto;background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);color:var(--orange);font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}'
+    +'.export-foot{text-align:center;padding:26px 20px 44px;color:var(--muted2);font-size:12px;line-height:1.8}'
     +'.export-foot b{color:var(--orange)}'
     +'#hist-add-form,.hist-del{display:none!important}'
-    +'@media(max-width:860px){.export-badge{display:none}.export-head{padding:16px 18px}}';
+    +'@media(max-width:860px){.export-badge{display:none}.export-head{padding:14px 16px;gap:10px}.export-head img{height:30px!important}.export-sep{margin:0 6px 0 0!important}.export-av{width:38px;height:38px;font-size:14px}}';
 
   const doc='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
     +'<meta name="viewport" content="width=device-width, initial-scale=1.0">'
@@ -3461,12 +3693,17 @@ function exportAthleteView(){
     +'<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">'
     +'<style>'+baseCSS+extraCSS+'</style></head><body>'
     +'<div class="export-wrap">'
-    +'<div class="export-head"><div class="export-av">'+initials+'</div>'
-    +'<div><div class="export-h-name">'+S.pseudo+'</div>'
-    +'<div class="export-h-sub">Profil transmis par ton coach · '+today+'</div></div>'
+    +'<div class="export-head">'
+    +'<a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" title="Reding Running" style="display:flex;align-items:center;flex-shrink:0;padding-right:10px"><img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running" style="height:42px;width:auto;display:block"></a>'
+    +'<span class="export-sep" style="width:1px;height:40px;background:var(--border2);flex-shrink:0;margin:0 14px 0 4px"></span>'
+    +'<div style="display:flex;align-items:center;gap:12px;min-width:0">'
+    +'<div class="export-av">'+initials+'</div>'
+    +'<div style="min-width:0"><div class="export-h-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+S.pseudo+'</div>'
+    +'<div class="export-h-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Profil transmis par ton coach · '+today+'</div></div>'
+    +'</div>'
     +'<div class="export-badge">Lecture seule</div></div>'
     +clone.outerHTML
-    +'<div class="export-foot">Généré avec <b>RedLab</b> · Reding Running<br>Profil transmis le '+today+' — calculateurs d\'allure et records interactifs.</div>'
+    +'<div class="export-foot">Généré avec <b>RedLab</b> · <a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-weight:700;text-decoration:none">Reding Running</a><br>Profil transmis le '+today+' — calculateurs d\'allure et records interactifs.</div>'
     +'</div>'
     +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>'
     +'<script>'+embedJS+'<\/script>'
@@ -3555,7 +3792,7 @@ function ffaParse(){
       +'<span style="font-size:13px;font-weight:700;color:'+(has?'var(--text)':'var(--muted2)')+'">'+d.label+'</span>'
       +'<span style="font-size:15px;font-weight:800;color:'+(has?'var(--orange)':'var(--muted2)')+'">'+(has?fHMS(sec):'—')+'</span></div>';
   }).join('');
-  box.innerHTML='<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Détecté ('+found+') · vérifie avant de valider</div>'+rows;
+  box.innerHTML='<div style="font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Détecté ('+found+') · vérifie avant de valider</div>'+rows;
   document.getElementById('ffa-apply').style.display='';
 }
 function ffaSecToParts(sec,hasH){
@@ -3661,19 +3898,19 @@ function renderRaceHistory(){
     histChart=new Chart(cv,{type:'scatter',data:{datasets},options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{labels:{color:'#CBD5E1',boxWidth:12,usePointStyle:true,font:{size:11}}},
+        legend:{labels:{color:'#CBD5E1',boxWidth:12,usePointStyle:true,font:{size:12}}},
         tooltip:{callbacks:{label:function(c){const r=c.raw.r_;const ds=new Date(r.ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});return r.label+' · '+fHMS(r.sec)+' · '+fAll(c.raw.pace)+'/km · '+ds+(r.loc?' · '+r.loc:'');}}}
       },
       scales:{
-        x:{type:'linear',ticks:{color:'#94A3B8',font:{size:10},maxRotation:0,callback:function(v){return new Date(v).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});}},grid:{color:'rgba(255,255,255,0.05)'}},
-        y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:10}},ticks:{color:'#94A3B8',font:{size:10},callback:function(v){return fAll(v);}},grid:{color:'rgba(255,255,255,0.05)'}}
+        x:{type:'linear',ticks:{color:'#94A3B8',font:{size:12},maxRotation:0,callback:function(v){return new Date(v).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});}},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:12}},ticks:{color:'#94A3B8',font:{size:12},callback:function(v){return fAll(v);}},grid:{color:'rgba(255,255,255,0.05)'}}
       }
     }});
   }
   if(box){
     const rows=list.slice().sort((a,b)=>b.ts-a.ts).map(function(r){
       const dt=new Date(r.ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
-      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12.5px">'
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:14px">'
         +'<span style="width:8px;height:8px;border-radius:50%;background:'+HIST_COL[r.dist]+';flex-shrink:0"></span>'
         +'<span style="width:92px;color:var(--muted2);flex-shrink:0">'+dt+'</span>'
         +'<span style="flex:1;font-weight:700;color:var(--text2)">'+r.label+'</span>'
