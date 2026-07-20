@@ -3622,6 +3622,13 @@ function exportAthleteView(){
   }
   const csmBox=clone.querySelector('#db-csmodel');
   if(csmBox){ Array.from(csmBox.children).forEach((ch,i)=>{ if(i>0) ch.remove(); }); }
+  // Retirer les invites coach (test TMI / données cardiaques) si non renseignés
+  clone.querySelectorAll('#db-profile .ph-b-desc').forEach(el=>{
+    const h=el.innerHTML||'';
+    if(h.indexOf('tmi-body')>-1||h.indexOf('fc-opt-body')>-1){
+      const blk=el.closest('.ph-block'); if(blk) blk.remove(); else el.remove();
+    }
+  });
   // Réinitialiser les canvas : Chart.js y a écrit les dimensions de l'écran du coach
   clone.querySelectorAll('canvas').forEach(cv=>{cv.removeAttribute('width');cv.removeAttribute('height');cv.removeAttribute('style');});
 
