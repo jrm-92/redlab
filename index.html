@@ -3631,6 +3631,23 @@ function exportAthleteView(){
   });
   // Réinitialiser les canvas : Chart.js y a écrit les dimensions de l'écran du coach
   clone.querySelectorAll('canvas').forEach(cv=>{cv.removeAttribute('width');cv.removeAttribute('height');cv.removeAttribute('style');});
+  // Images de secours : les visionneuses sans JavaScript (aperçu WhatsApp/iOS) affichent
+  // un instantané des graphiques ; dans un vrai navigateur, le JS les remplace par les
+  // graphiques interactifs.
+  clone.querySelectorAll('canvas').forEach(cv=>{
+    const orig=cv.id?document.getElementById(cv.id):null;
+    if(orig&&orig.width){
+      try{
+        const img=document.createElement('img');
+        img.src=orig.toDataURL('image/png');
+        img.className='cv-fallback';
+        img.style.cssText='width:100%;height:100%;object-fit:contain;display:block';
+        cv.parentNode.insertBefore(img,cv);
+      }catch(e){}
+    }
+    cv.setAttribute('data-live','1');
+    cv.style.display='none';
+  });
 
   // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
@@ -3672,7 +3689,7 @@ function exportAthleteView(){
     csmToggle.toString(), csmSim.toString(), simUnit.toString(),
     drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
     'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
-    'document.addEventListener("DOMContentLoaded",function(){var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}});',
+    'document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("img.cv-fallback").forEach(function(i){if(i.parentNode)i.parentNode.removeChild(i)});document.querySelectorAll("canvas[data-live]").forEach(function(c){c.style.display="block"});var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}});',
     'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}},250);});'
   ].join('\n');
 
