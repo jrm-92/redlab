@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RedLab – Profil Athlète Running</title>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#16203A; --bg2:#1C2840; --bg3:#2A3852; --card:#212E4A;
@@ -37,7 +37,15 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
   width:220px;height:220px;border-radius:50%;
   background:var(--og);filter:blur(60px);pointer-events:none;
 }
-.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.sidebar-logo{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+.side-slogan{margin-top:16px;display:flex;flex-direction:column;gap:5px}
+.ss{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-style:italic;text-transform:uppercase;line-height:1;letter-spacing:1.8px;font-size:20px;color:var(--text)}
+.nav-count{margin-left:auto;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);color:var(--orange);font-size:11px;font-weight:800;border-radius:12px;padding:1px 8px;min-width:22px;text-align:center;line-height:1.5}
+.side-reset{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;color:var(--muted2);font-family:var(--font);font-size:12px;font-weight:600;padding:6px 4px;border-radius:8px;transition:color .15s}
+.side-reset:hover{color:#F87171}
+.side-reset svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.side-version{margin-top:8px;font-size:10.5px;color:var(--muted2);opacity:.6;letter-spacing:1px;padding-left:4px}
+.sidebar-logo img{max-width:150px;height:auto;display:block}
 .logo{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.5px;line-height:1}
 .logo span{color:var(--orange)}
 .logo-sub{font-size:11.5px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
@@ -70,7 +78,7 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 /* ── MAIN ── */
 .main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
 .topbar{
-  height:90px;background:var(--bg2);
+  height:68px;background:var(--bg2);
   border-bottom:1px solid var(--border);
   padding:0 36px;display:flex;align-items:center;
   justify-content:space-between;flex-shrink:0;
@@ -103,6 +111,14 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 }
 .tb-icon-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tb-icon-btn:hover{border-color:var(--orange);color:var(--orange)}
+.tb-ath{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:12px;padding:7px 12px 7px 8px;cursor:pointer;font-family:var(--font);transition:border-color .15s,background .15s}
+.tb-ath:hover{border-color:rgba(255,107,26,0.45);background:rgba(255,107,26,0.05)}
+.tb-ath-av{width:36px;height:36px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--orange);flex-shrink:0}
+.tb-ath-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.tb-ath-name{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.2px}
+.tb-ath-date{font-size:11.5px;color:var(--muted2)}
+.tb-ath-chev{width:14px;height:14px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tb-ath:hover .tb-ath-chev{stroke:var(--orange)}
 .tb-icon-btn.tb-danger:hover{border-color:#F87171;color:#F87171}
 .topbar-badge{
   background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);
@@ -177,7 +193,9 @@ input::placeholder,textarea::placeholder{color:var(--muted2)!important;opacity:.
 }
 .btn-generate:hover{background:var(--orange2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,107,26,0.45)}
 .btn-generate svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.btn-modify,.btn-reset{display:none}
+.btn-modify{display:none}
+.btn-reset{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font);font-weight:800;cursor:pointer;transition:all .18s}
+.btn-reset:hover{background:#DC2626!important;transform:translateY(-1px)}
 
 /* ── SECTION LABEL ── */
 .slabel{
@@ -729,6 +747,27 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .goal-time{display:inline-flex;align-items:center;gap:5px;color:var(--muted2);font-weight:800}
 .goal-time input{width:48px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:15px;font-weight:700;text-align:center;padding:7px 4px;outline:none;-moz-appearance:textfield}
 .goal-time input:focus{border-color:rgba(255,107,26,0.5)}
+.goal-readout-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px;padding:16px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(59,130,246,0.14),rgba(59,130,246,0.03));border:1px solid rgba(59,130,246,0.32)}
+.gr-flag{width:42px;height:42px;border-radius:12px;background:rgba(59,130,246,0.16);border:1px solid rgba(59,130,246,0.32);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gr-flag svg{width:20px;height:20px;stroke:#60A5FA;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gr-mid{flex:0 1 auto;min-width:0}
+.gr-name{font-size:27px;font-weight:900;color:var(--text);letter-spacing:-.4px;line-height:1.05}
+.gr-sub{font-size:13px;font-weight:600;color:var(--muted);margin-top:3px}
+.gr-right{text-align:right;margin-left:4px}
+.gr-time{font-size:30px;font-weight:900;color:#60A5FA;line-height:1;letter-spacing:-1px}
+.gr-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
+.gr-edit{width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:transparent;color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}.gr-edit:hover{border-color:var(--orange);color:var(--orange)}.gr-edit svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gr-link{flex-basis:100%;margin-top:6px;padding-top:11px;border-top:1px solid rgba(59,130,246,0.2)}
+.gr-link a{display:inline-flex;align-items:center;gap:8px;color:#60A5FA;font-size:13.5px;font-weight:700;text-decoration:none}
+.gr-link a:hover{text-decoration:underline;text-underline-offset:3px}
+.gr-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.gr-left{display:flex;align-items:center;gap:16px;min-width:0;flex:1}
+.gr-main{text-align:center;flex:1}
+.gr-zone-r{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:1}
+.gr-count{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gr-weeks{font-size:12px;font-weight:700;color:var(--muted2)}
+.gr-chip{padding:7px 14px;border-radius:20px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.38);color:#60A5FA;font-size:14px;font-weight:900;letter-spacing:.5px}
+@media(max-width:560px){.goal-readout-card{gap:12px}.gr-time{font-size:22px}.gr-name{font-size:20px}.gr-left,.gr-main,.gr-zone-r{flex:1 1 100%;justify-content:center;text-align:center}.gr-left{justify-content:flex-start}}
 .goal-time input::-webkit-inner-spin-button,.goal-time input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 /* BIBLIOTHEQUE */
 .lib-toolbar{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:24px}
@@ -844,7 +883,56 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .sim-canvaswrap{position:relative;width:100%;margin-top:2px}
 .sim-dwrap-o{margin-top:12px}
 @media(max-width:680px){.sim-main{grid-template-columns:1fr}}
-.sim-note b{color:#34D399}.csm-limites{font-size:12px;color:var(--muted2);line-height:1.6;margin-top:16px;border-left:3px solid var(--border2);padding-left:12px}.csm-limites b{color:var(--text2)}@media(max-width:720px){.sim-grid{grid-template-columns:1fr 1fr}}</style>
+.sim-note b{color:#34D399}.csm-limites{font-size:12px;color:var(--muted2);line-height:1.6;margin-top:16px;border-left:3px solid var(--border2);padding-left:12px}.csm-limites b{color:var(--text2)}@media(max-width:720px){.sim-grid{grid-template-columns:1fr 1fr}}
+/* ══════════ UI POLISH ══════════ */
+::selection{background:rgba(255,107,26,.35);color:#fff}
+
+/* Fond avec profondeur */
+.main{background:radial-gradient(1100px 480px at 72% -8%,rgba(255,107,26,0.055),transparent 60%),radial-gradient(800px 400px at -10% 30%,rgba(59,130,246,0.035),transparent 55%),var(--bg)}
+
+/* Scrollbar */
+.scroll::-webkit-scrollbar{width:10px}
+.scroll::-webkit-scrollbar-track{background:transparent}
+.scroll::-webkit-scrollbar-thumb{background:#2A3852;border-radius:6px;border:2px solid var(--bg)}
+.scroll::-webkit-scrollbar-thumb:hover{background:#3A4C6E}
+
+/* Cartes : relief doux + micro-lift */
+.card,.race-card,.rec-card,.pred-c,.sc,.sl-card,.ath-card,.lib-card,.csm-sim,.goal-readout-card,.goal-bar{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 28px -14px rgba(0,0,0,0.55);
+}
+.race-card,.rec-card,.sc{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.race-card:hover,.rec-card:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.04),0 16px 34px -14px rgba(0,0,0,0.6);border-color:var(--border2)}
+
+/* Barre du haut : léger flou de profondeur */
+.topbar{background:linear-gradient(180deg,var(--bg2) 60%,rgba(28,40,64,0.86));backdrop-filter:blur(8px)}
+
+/* Sidebar : nav plus vivante */
+.nav-btn{border:1px solid transparent;transition:background .16s,color .16s}
+.nav-btn.active{background:linear-gradient(90deg,rgba(255,107,26,0.16),rgba(255,107,26,0.04));box-shadow:inset 3px 0 0 var(--orange)}
+.sidebar-logo{position:relative}
+.sidebar-logo::after{content:'';position:absolute;left:18px;bottom:-1px;width:44%;height:2px;background:linear-gradient(90deg,var(--orange),transparent)}
+
+/* Boutons primaires : dégradé + presse */
+.btn-generate,.btn-primary{background:linear-gradient(135deg,#FF7A2E,#F25C05)}
+.btn-generate:active,.btn-primary:active{transform:translateY(0) scale(.985)}
+
+/* Tableaux : survol + zébrage discret */
+tbody tr:nth-child(even){background:rgba(255,255,255,0.012)}
+tbody tr:hover{background:rgba(255,107,26,0.05)}
+
+/* Sections : icône avec lueur */
+.db-section-ico{box-shadow:0 0 14px rgba(255,107,26,0.18)}
+
+/* Chips bibliothèque */
+.lib-chip{transition:all .15s}
+.lib-chip.active{box-shadow:0 4px 16px rgba(255,107,26,0.35)}
+
+/* Accessibilité clavier */
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid rgba(255,107,26,.65);outline-offset:2px}
+
+/* Bannière profil : liseré lumineux */
+.profile-hero{box-shadow:inset 0 1px 0 rgba(255,255,255,0.04),0 12px 32px -16px rgba(0,0,0,0.6),0 0 0 1px rgba(255,107,26,0.06)}
+</style>
 </head>
 <body>
 
@@ -860,6 +948,8 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
     <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')">Athlètes</button>
     <button class="mh-btn" id="mbn-library" onclick="go('library')">Séances</button>
     <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')">Potentiel</button>
+    <button class="mh-btn" id="mbn-planif" onclick="go('planif')">Plan</button>
+    <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')">Savoirs</button>
   </div>
 </header>
 
@@ -868,7 +958,12 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <img src="https://reding-running.fr/logo_running_orange.png" alt="RedLab" style="max-width:140px;height:auto;display:block">
+      <img src="https://reding-running.fr/logo_running_orange.png" alt="RedLab" style="max-width:150px;height:auto;display:block">
+      <div class="side-slogan">
+        <div class="ss ss-o">Coach running</div>
+        <div class="ss ss-w">Tous niveaux</div>
+        <div class="ss ss-s">Courir encadré</div>
+      </div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section">Mon profil</div>
@@ -889,35 +984,32 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
         <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
         Extrapolation
       </button>
+      <button class="nav-btn" id="sbn-planif" onclick="go('planif')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h3M8 18h6"/></svg>
+        Planification
+      </button>
+      <button class="nav-btn" id="sbn-knowledge" onclick="go('knowledge')">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h5"/></svg>
+        Connaissances
+      </button>
       <div class="nav-section">Gestion</div>
       <button class="nav-btn" id="sbn-athletes" onclick="go('athletes')">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Athlètes
+        <span class="nav-count" id="sbn-ath-count"></span>
       </button>
     </nav>
     <div class="sidebar-footer">
-      <button class="nav-btn" onclick="resetAll()" style="width:100%;color:#F87171;border-color:rgba(248,113,113,0.2)" onmouseover="this.style.color='#F87171';this.style.borderColor='#F87171'" onmouseout="this.style.color='#F87171';this.style.borderColor='rgba(248,113,113,0.2)'">
+      <button class="side-reset" onclick="resetAll()">
         <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
-        Réinitialiser
+        Réinitialiser le profil
       </button>
+      <div class="side-version">RedLab · Reding Running · build 2026-07-22 18:45</div>
     </div>
   </aside>
 
   <!-- MAIN -->
   <div class="main">
-    <div class="topbar" id="main-topbar" style="display:none">
-      <div class="tb-profile" id="tb-title"></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button class="btn-save-athlete" id="btn-save-ath" onclick="saveCurrentAthlete()" style="display:none">
-          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          <span>Enregistrer</span>
-        </button>
-        <button class="btn-save-athlete" id="btn-share-ath" onclick="exportAthleteView()" style="display:none">
-          <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          <span>Partager à l'athlète</span>
-        </button>
-      </div>
-    </div>
 
     <div class="scroll">
 
@@ -991,6 +1083,20 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
                 </div>
                 <div class="fhint">Obtenue via Vameval, demi-Cooper, test 6 minutes, ou autre test terrain validé.</div>
                 <div class="fhint" id="vma-pace-hint" style="margin-top:6px;font-weight:800;color:var(--orange)"></div>
+              </div>
+              <div class="field" style="margin-top:18px;margin-bottom:0;padding:14px 16px;border:1px dashed var(--border2);border-radius:10px">
+                <label style="margin-bottom:10px">Demi-Cooper — calculer la VMA depuis le test</label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+                  <div class="iw" style="width:150px;flex:none"><input type="number" id="dc-dist" placeholder="distance en 6 min" min="600" max="3500" step="5" oninput="calcDemiCooper()" style="padding-left:14px;font-size:15px"><span class="iu">m</span></div>
+                  <select id="dc-prof" onchange="calcDemiCooper()" class="goal-date" style="padding:10px;cursor:pointer">
+                    <option value="1.00" selected>Profil standard (×1,00)</option>
+                    <option value="1.03">Explosif — tient VMA &lt; 5′ (×1,03)</option>
+                    <option value="0.98">Endurant — tient VMA &gt; 7′ (×0,98)</option>
+                  </select>
+                  <span id="dc-out" style="font-size:15px;font-weight:800;color:var(--orange)"></span>
+                  <button type="button" id="dc-apply" onclick="applyDemiCooper()" class="btn-road-apply" style="width:auto;margin:0;padding:8px 14px;display:none">Utiliser</button>
+                </div>
+                <div class="fhint" style="margin-top:8px">Vitesse moyenne sur 6 min ≈ VMA (temps de maintien moyen à VMA ≈ 6 min — Billat &amp; Koralsztein, 1996). Le coefficient ajuste selon le profil.</div>
               </div>
             </div>
             <!-- Calcul depuis une performance -->
@@ -1074,22 +1180,23 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
               Définir la vitesse critique
             </div>
             <div id="cs-courses-form">
+              <div id="cs-assistant" style="margin-bottom:18px"></div>
               <div class="info-box" style="margin-bottom:20px">
-                Combine deux <strong>efforts maximaux</strong> — tests terrain (3′/12′) et/ou courses — dont la durée tombe dans <strong>2 à 15 min</strong>. Ex. : Test 3′ + 5 km. Distances longues (10 km, semi, marathon) exclues : réservées à la durabilité.
+                Combine deux <strong>efforts maximaux</strong> pour estimer ta <strong>Vitesse Critique</strong> (VC) et ta réserve <strong>D′</strong>. Idéalement un effort court (~3 min) et un plus long, assez éloignés en durée. <span style="opacity:.85">Modèle 2 points (Monod &amp; Scherrer 1965 ; Jones &amp; Vanhatalo 2017).</span>
               </div>
               <div class="cs-race">
                 <label>Performance 1</label>
                 <input type="hidden" id="csr-type-1" value="t3"><div class="cdd" id="cdd-1" style="margin-bottom:8px"></div>
                 <div id="csr-input-1"></div>
                 <div class="iw" style="margin-top:8px"><input type="number" id="csr-fc-1" placeholder="FC fin (bpm) - optionnel" min="100" max="230" oninput="updCsRaces()" style="padding-left:14px"><span class="iu">bpm</span></div>
-                <div id="csr-badge-1" class="fhint" style="margin-top:6px;font-weight:700"></div>
+                <div id="csr-badge-1" class="fhint" style="margin-top:6px;font-weight:700"></div><div id="cs-sug-1" style="margin-top:8px"></div>
               </div>
               <div class="cs-race" style="margin-top:16px">
                 <label>Performance 2</label>
                 <input type="hidden" id="csr-type-2" value="5000"><div class="cdd" id="cdd-2" style="margin-bottom:8px"></div>
                 <div id="csr-input-2"></div>
                 <div class="iw" style="margin-top:8px"><input type="number" id="csr-fc-2" placeholder="FC fin (bpm) - optionnel" min="100" max="230" oninput="updCsRaces()" style="padding-left:14px"><span class="iu">bpm</span></div>
-                <div id="csr-badge-2" class="fhint" style="margin-top:6px;font-weight:700"></div>
+                <div id="csr-badge-2" class="fhint" style="margin-top:6px;font-weight:700"></div><div id="cs-sug-2" style="margin-top:8px"></div>
               </div>
               <div id="csr-preview" style="display:none;margin-top:16px"></div>
             </div>
@@ -1135,8 +1242,8 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
               Générer mon profil
               <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
-            <button class="btn-reset" onclick="resetAll()" style="white-space:nowrap;padding:14px 22px;font-size:14px;border-radius:12px;border-color:#F87171;color:#F87171;background:rgba(248,113,113,0.08)">
-              <svg style="width:16px;height:16px" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+            <button class="btn-reset" onclick="resetAll()" style="white-space:nowrap;padding:14px 22px;font-size:14px;border-radius:12px;border:none;color:#fff;background:#EF4444;box-shadow:0 4px 18px rgba(239,68,68,0.35)">
+              <svg style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
               Réinitialiser
             </button>
           </div>
@@ -1157,6 +1264,16 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
               <div class="db-section-title">Course à venir</div>
             </div>
             <div id="db-goal"></div>
+          </div>
+
+          <!-- Calendrier préparation -->
+          <div class="db-section" id="db-plan-section" style="display:none">
+            <div class="db-section-hd">
+              <div class="db-section-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div class="db-section-title">Périodisation de la charge</div>
+              <div class="db-section-badge" id="db-plan-badge"></div>
+            </div>
+            <div class="card" style="padding:20px"><div id="db-plan"></div></div>
           </div>
 
 
@@ -1213,7 +1330,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 22 12 19 17 22 15.79 13.88"/></svg>
               </div>
               <div class="db-section-title">Records personnels</div>
-              <div class="db-section-badge">Allure &amp; %VMA</div>
+              <div class="db-section-badge">Allure</div>
             </div>
             <button class="btn-road-apply" onclick="ffaOpen()" style="width:100%;margin-bottom:14px;padding:13px">
               <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -1296,6 +1413,16 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
         <div id="extrapol-wrap" style="padding:36px 28px 80px"></div>
       </div>
 
+      <!-- ══════════ PANEL PLANIFICATION ══════════ -->
+      <div id="p-planif" class="panel">
+        <div id="planif-wrap" style="padding:36px 28px 80px"></div>
+      </div>
+
+      <!-- ══════════ PANEL CONNAISSANCES ══════════ -->
+      <div id="p-knowledge" class="panel">
+        <div id="knowledge-wrap" style="padding:36px 28px 80px"></div>
+      </div>
+
     </div><!-- /scroll -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1337,22 +1464,21 @@ function go(id){
   document.querySelectorAll('.mh-btn').forEach(b=>b.classList.remove('active'));
   const sb=document.getElementById('sbn-'+id);if(sb)sb.classList.add('active');
   const mb=document.getElementById('mbn-'+id);if(mb)mb.classList.add('active');
-  document.getElementById('main-topbar').style.display=id==='input'?'none':'flex';
-  const saveBtn=document.getElementById('btn-save-ath');
-  if(saveBtn) saveBtn.style.display=(id==='dashboard'&&S.vma)?'flex':'none';
-  const shareBtn=document.getElementById('btn-share-ath');
-  if(shareBtn) shareBtn.style.display=(id==='dashboard'&&S.vma)?'flex':'none';
-  if(id==='dashboard'&&S.vma&&typeof renderChart==='function')renderChart();if(id==='dashboard'&&S.vma&&typeof renderCsModel==='function')renderCsModel();
+  if(id==='dashboard'&&S.vma&&typeof renderChart==='function')renderChart();if(id==='dashboard'&&S.vma&&typeof renderCsModel==='function')renderCsModel();if(id==='dashboard'&&typeof renderDashPlan==='function')renderDashPlan();
   if(id==='athletes') renderAthletes();
+  const ac=document.getElementById('sbn-ath-count');
+  if(ac){const n=getAthletes().length;ac.textContent=n>0?n:'';ac.style.display=n>0?'':'none';}
   if(id==='library') renderLibrary();
   if(id==='extrapol') renderExtrapol();
+  if(id==='planif') renderPlanif();
+  if(id==='knowledge') renderKnowledge();
   updMhCtx(id);
   const sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 /* ══ STATE ══ */
-const S={mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''}};
+const S={mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null};
 
 /* ══ MODE ══ */
 function setMode(m){
@@ -1361,6 +1487,7 @@ function setMode(m){
   document.getElementById('mode-tests').classList.toggle('active',m==='tests');
   document.getElementById('form-vma').style.display=m==='vma'?'block':'none';
   document.getElementById('form-tests').style.display=m==='tests'?'block':'none';
+  if(m==='tests'&&typeof csRenderAssistant==='function')csRenderAssistant();
   const tmi=document.getElementById('tmi-card');
   if(tmi){
     if(m!=='vma') tmi.style.display='none';
@@ -1704,8 +1831,9 @@ function loadLS(){
   }catch(e){}
 }
 function resetAll(){
+  if(!confirm('Réinitialiser le profil en cours ? Les données non enregistrées du dashboard seront effacées (les athlètes sauvegardés sont conservés).'))return;
   try{localStorage.removeItem(LS_KEY);}catch(e){}
-  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},csPts:null,raceHistory:[]});
+  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,csPts:null,raceHistory:[]});
   tmiSec=null;
   raceRef={id:'',mm:'',ss:''};
   const ids=['pseudo-inp','vma-inp','fc-max','fc-rest'];
@@ -1719,18 +1847,18 @@ function resetAll(){
 
 /* ══ ZONES ══ */
 const ZONES_VC=[
-  {z:1,n:'Modéré',             pct:'60–80%',  lo:0.60,hi:0.80, fcLo:50, fcHi:68,  cls:'z1',col:'#94A3B8', talk:'Capable de chanter',   rpe:'2–4'},
-  {z:2,n:'Intermédiaire (SV1)',pct:'80–95%',  lo:0.80,hi:0.95, fcLo:68, fcHi:82,  cls:'z2',col:'#60A5FA', talk:'Conversation possible', rpe:'4–6'},
-  {z:3,n:'Élevé / Seuil (SV2)',pct:'95–100%', lo:0.95,hi:1.00, fcLo:82, fcHi:89,  cls:'z3',col:'#34D399', talk:'Quelques mots',         rpe:'6–7'},
-  {z:4,n:'Sévère / VO₂max',   pct:'100–107%',lo:1.00,hi:1.07, fcLo:89, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Parole impossible',     rpe:'7–8'},
-  {z:5,n:'Maximal / Anaérobie',pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'À bout de souffle',     rpe:'9–10'},
+  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile — base aérobie, filière lipidique'},
+  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues, allure marathon'},
+  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, efforts 30 min à 1h30 (2×20 min, 3×15 min)'},
+  {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min (1000-1600 m), allure 10 km — puissance aérobie'},
+  {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m — vitesse neuromusculaire, capacité anaérobie'},
 ];
 const ZONES_VMA=[
-  {z:1,n:'Endurance fondamentale', pct:'60–75%',  lo:0.60,hi:0.75, fcLo:60, fcHi:75,  cls:'z1',col:'#94A3B8', talk:'Capable de chanter',   rpe:'2–3'},
-  {z:2,n:'Endurance active',       pct:'75–80%',  lo:0.75,hi:0.80, fcLo:75, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Conversation possible', rpe:'3–5'},
-  {z:3,n:'Tempo',                  pct:'80–85%',  lo:0.80,hi:0.85, fcLo:80, fcHi:85,  cls:'z3',col:'#34D399', talk:'Quelques mots',         rpe:'5–6'},
-  {z:4,n:'Seuil anaérobie',        pct:'85–90%',  lo:0.85,hi:0.90, fcLo:85, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Parole impossible',     rpe:'7–8'},
-  {z:5,n:'Travail à VMA',          pct:'≥ 90%',   lo:0.90,hi:1.30, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'À bout de souffle',     rpe:'9–10'},
+  {z:1,n:'Récupération',             pct:'60–70%', lo:0.60,hi:0.70, fcLo:55, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Je peux parler sans aucune difficulté',     rpe:'2–3',  use:'Footing très facile, récupération entre séances, décrassage'},
+  {z:2,n:'Endurance fondamentale',   pct:'70–80%', lo:0.70,hi:0.80, fcLo:65, fcHi:75,  cls:'z2',col:'#60A5FA', talk:'Je peux tenir une conversation normale',     rpe:'3–4',  use:'Footings quotidiens, sorties longues, développement de la base aérobie'},
+  {z:3,n:'Endurance active / Tempo', pct:'80–88%', lo:0.80,hi:0.88, fcLo:75, fcHi:83,  cls:'z3',col:'#34D399', talk:'Je peux parler mais je dois faire des pauses', rpe:'5–6',  use:'Footings soutenus, blocs d’endurance active, travail d’allure marathon'},
+  {z:4,n:'Seuil',                    pct:'88–93%', lo:0.88,hi:0.94, fcLo:83, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Je peux dire seulement quelques mots',       rpe:'7–8',  use:'Intervalles longs, tempo soutenu, travail au seuil lactique'},
+  {z:5,n:'VO₂max',                   pct:'95–105%',lo:0.94,hi:1.05, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'Je ne peux plus parler',                    rpe:'9–10', use:'Intervalles courts à moyens, répétitions VMA, développement VO₂max'},
 ];
 
 /* ══ RENDER DASHBOARD ══ */
@@ -1741,6 +1869,7 @@ function renderDashboard(){
   renderCSPredictions();
   renderCsModel();
   renderGoalSection();
+  renderDashPlan();
   renderRecords();
   buildRaces();
   renderChart();
@@ -1843,9 +1972,32 @@ function renderProfile(){
     }
   }
 
+  const _ini=(S.pseudo||'?').slice(0,2).toUpperCase();
+  const b0=`
+    <div class="ph-block ph-full">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--orange);flex-shrink:0">${_ini}</div>
+        <div style="min-width:0">
+          <div class="ph-b-lbl">Athlète</div>
+          <div style="font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.4px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${S.pseudo||'—'}</div>
+          ${S.testDate?`<div style="font-size:12.5px;color:var(--muted2);margin-top:3px">Profil édité le ${S.testDate}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  const bActions=`
+    <div class="ph-block ph-full ph-actions" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;padding-top:14px">
+      <button class="btn-save-athlete" id="btn-save-ath" onclick="saveCurrentAthlete()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span>Enregistrer</span>
+      </button>
+      <button class="btn-save-athlete" id="btn-share-ath" onclick="exportAthleteView()">
+        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      <span>Partager à l'athlète</span>
+      </button>
+    </div>`;
   document.getElementById('db-profile').innerHTML=`
     <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
-      ${b1}${b2}${b3vma}${b3}
+      ${b0}${b1}${b2}${b3vma}${b3}${bActions}
     </div>
     ${warnHtml}`;
 }
@@ -1874,13 +2026,13 @@ function renderZones(){
   let rows='';
   zones.forEach(z=>{
     const vlo=ref*z.lo, vhi=ref*z.hi;
-    const vStr=z.z===5?`≥ ${vlo.toFixed(1)}`:z.lo===0?`< ${vhi.toFixed(1)}`:`${vlo.toFixed(1)}–${vhi.toFixed(1)}`;
-    const aStr=z.z===5?`≤ ${fAll(3600/vlo)} /km`:z.lo===0?`≥ ${fAll(3600/vhi)} /km`:`${fAll(3600/vlo)}–${fAll(3600/vhi)} /km`;
+    const vStr=z.open?`≥ ${vlo.toFixed(1)}`:`${vlo.toFixed(1)}–${vhi.toFixed(1)}`;
+    const aStr=z.open?`≤ ${fAll(3600/vlo)} /km`:`${fAll(3600/vlo)}–${fAll(3600/vhi)} /km`;
     const isZ4=z.z===4;
     const pctStr=z.pct;
     rows+=`<tr>
       <td><span class="zb ${z.cls}">Z${z.z}</span></td>
-      <td style="font-weight:700;color:var(--text)">${z.n}</td>
+      <td style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}</td>
       <td class="col-num" style="color:var(--muted2)">${pctStr}</td>
       <td class="col-num" style="font-weight:600;color:${z.col}">${vStr}</td>
       <td style="color:var(--text2)">${aStr}</td>
@@ -1892,6 +2044,9 @@ function renderZones(){
 
   const vcNote='';
 
+  const zNote=isReal
+    ? 'Zones <b>Vitesse Critique</b> — 5 domaines physiologiques (SV1 ≈ 82-85 % VC · SV2 = 100 % VC = seuil). Allures calculées sur la VC réelle, pas sur la VMA. Modèle distance-temps (Nixon et al. 2021).'
+    : 'Zones <b>VMA</b> (Talk test / RPE) — référentiel croisé FFA (secteurs aérobie, seuil) &amp; INSEP (VMA 95-105 %).';
   document.getElementById('db-zones').innerHTML=`
     ${vcNote}
     <div class="tbl-wrap"><table>
@@ -1902,7 +2057,7 @@ function renderZones(){
       </tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
-    <div class="formula">Allure = 3600 / (Vitesse × %)  ·  FC cible = FC repos + % × (FC max − FC repos)</div>`;
+    <div class="formula">Allure = 3600 / (Vitesse × %)  ·  FC cible = FC repos + % × (FC max − FC repos)</div><div style="font-size:11px;color:var(--muted2);margin-top:6px">${zNote}</div>`;
 }
 
 /* ── VC Slider ── */
@@ -1961,7 +2116,7 @@ function bldZbar(slo,shi){
   const zones=isReal?ZONES_VC:ZONES_VMA;
   const rng=shi-slo;let html='';
   zones.forEach(z=>{
-    const zs=Math.max(ref*z.lo*20,slo),ze=Math.min(ref*z.hi*20,shi);
+    const zs=Math.max(ref*z.lo*20,slo),ze=Math.min((z.z===5?shi:ref*z.hi*20),shi);
     if(ze<=slo||zs>=shi)return;
     const l=((zs-slo)/rng)*100,w=((ze-zs)/rng)*100;
     html+=`<div style="position:absolute;left:${l}%;width:${w}%;height:100%;background:${z.col};opacity:0.22"></div>`;
@@ -2069,11 +2224,54 @@ const REC_DISTS=[
   {id:'semi',nm:'Semi',   lbl:'21,1 km', d:21097.5, col:'#10B981', rgb:'16,185,129',  hasH:true,  ph:'45'},
   {id:'mara',nm:'Marathon',lbl:'42,2 km',d:42195,   col:'#8B5CF6', rgb:'139,92,246',  hasH:true,  ph:'30'},
 ];
+function histBestRec(id){
+  const rh=(S.raceHistory||[]).filter(r=>r&&r.dist===id&&r.sec>=30);
+  if(!rh.length)return null;
+  const best=rh.reduce((a,b)=>b.sec<a.sec?b:a);
+  return best;
+}
+function recSecOf(rec){return (+rec.hh||0)*3600+(+rec.mm||0)*60+(+rec.ss||0);}
+function syncRecordsFromHistory(){
+  if(!S.records)S.records={};
+  REC_DISTS.forEach(r=>{
+    const b=histBestRec(r.id);
+    if(!b)return;
+    const cur=S.records[r.id];
+    // dérive depuis l'historique si aucun record manuel, ou si l'historique est meilleur et non édité à la main
+    const fdate=t=>t?new Date(t).getFullYear()+'-'+String(new Date(t).getMonth()+1).padStart(2,'0')+'-'+String(new Date(t).getDate()).padStart(2,'0'):'';
+    if(!cur||recSecOf(cur)<30||(cur.fromHist&&b.sec<recSecOf(cur))){
+      const hasH=r.hasH, sec=Math.round(b.sec);
+      const parts=hasH?{hh:String(Math.floor(sec/3600)),mm:String(Math.floor((sec%3600)/60)),ss:String(sec%60)}:{hh:'',mm:String(Math.floor(sec/60)),ss:String(sec%60)};
+      parts.date=fdate(b.ts);
+      parts.fromHist=true;
+      S.records[r.id]=parts;
+    } else if(cur&&recSecOf(cur)>=30&&!cur.date){
+      // date manquante mais chrono correspondant à une course de l'historique → renseigner la date
+      const t=recSecOf(cur);
+      const match=(S.raceHistory||[]).filter(x=>x&&x.dist===r.id&&Math.abs(x.sec-t)<=1&&x.ts);
+      if(match.length){match.sort((a,c)=>b.ts-a.ts);S.records[r.id].date=fdate(match[0].ts);}
+    }
+  });
+}
+let _recAddOpen=false;
+function recAddToggle(){_recAddOpen=!_recAddOpen;renderRecords();}
+function recAddDist(id){
+  if(!S.records)S.records={};
+  const r=REC_DISTS.find(x=>x.id===id); if(!r)return;
+  S.records[id]={hh:'',mm:'',ss:'',date:'',manualAdd:true};
+  _recAddOpen=false; renderRecords();
+}
+function recRemove(id){
+  if(S.records&&S.records[id])delete S.records[id];
+  renderRecords();saveLS();renderChart();
+}
 function renderRecords(){
   const el=document.getElementById('db-records');if(!el)return;
   if(!S.records)S.records={};
+  syncRecordsFromHistory();
   const refLbl=S.csKmh?'% VC':'% VMA';
-  const cards=REC_DISTS.map(r=>{
+  const shown=REC_DISTS.filter(r=>{const rec=S.records[r.id]; return (rec&&(recSecOf(rec)>=30||rec.manualAdd));});
+  const cards=(shown.length?shown:[]).map(r=>{
     const rec=S.records[r.id]||{};
     const hh=rec.hh!=null?rec.hh:'';
     const mm=rec.mm!=null?rec.mm:'';
@@ -2093,17 +2291,28 @@ function renderRecords(){
         </div>`;
     return `<div class="rec-card" style="border-top:3px solid ${r.col}">
       <div class="rec-top">
-        <div><div class="rec-name" style="color:${r.col}">${r.nm}</div><div class="rec-dist">${r.lbl}</div></div>
-        <div class="rec-badge" id="rec-badge-${r.id}" style="background:rgba(${r.rgb},0.12);border:1px solid rgba(${r.rgb},0.25);color:${r.col};display:none"></div>
+        <div><div class="rec-name" style="color:${r.col}">${r.nm}</div><div class="rec-dist">${r.lbl}${rec.fromHist?' · <span style="color:'+r.col+'">auto</span>':''}</div></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="rec-badge" id="rec-badge-${r.id}" style="background:rgba(${r.rgb},0.12);border:1px solid rgba(${r.rgb},0.25);color:${r.col};display:none"></div>
+          <button type="button" onclick="recRemove('${r.id}')" title="Retirer" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;line-height:1;padding:0 2px">&times;</button>
+        </div>
       </div>
       <label style="margin-bottom:8px">Record (chrono)</label>
       ${timeRow}
-      <div class="rec-out" id="rec-out-${r.id}"><div class="rec-out-empty">Entrez un temps pour voir l'allure et le ${refLbl}</div></div>
+      <input type="date" id="rec-dt-${r.id}" value="${rec.date||''}" onchange="updRecord('${r.id}')" title="Date du record" class="goal-date" style="width:100%;margin-top:8px;padding:6px 9px;font-size:12px;color:${rec.date?'var(--text2)':'var(--muted2)'}">
+      <div class="rec-out" id="rec-out-${r.id}"><div class="rec-out-empty">Entrez un temps pour voir l'allure</div></div>
     </div>`;
   }).join('');
-  const formula=S.csKmh?'% VC = (Distance / temps) / VC × 100  ·  Allure = temps / distance':'% VMA = (Distance / temps) / VMA × 100  ·  Allure = temps / distance';
-  el.innerHTML=`<div class="rec-grid">${cards}</div><div class="formula">${formula}</div>`;
-  REC_DISTS.forEach(r=>updRecord(r.id,true));
+  const formula='Allure = temps / distance';
+  const missing=REC_DISTS.filter(r=>!shown.some(x=>x.id===r.id));
+  const addBtn=missing.length?('<div style="margin-top:14px">'
+    +(_recAddOpen
+      ?'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Ajouter :</span>'+missing.map(r=>'<button type="button" class="lib-chip" onclick="recAddDist(\''+r.id+'\')">'+r.nm+'</button>').join('')+'<button type="button" class="lib-chip" onclick="recAddToggle()">Annuler</button></div>'
+      :'<button type="button" class="btn-road-apply" onclick="recAddToggle()" style="width:auto;margin:0;padding:8px 16px">+ Ajouter une distance</button>')
+    +'</div>'):'';
+  const empty=shown.length?'':'<div class="rec-out-empty" style="padding:20px;text-align:center">Aucun record. Importe une fiche FFA (les records s\u2019extraient de l\u2019historique) ou ajoute une distance manuellement.</div>';
+  el.innerHTML=`<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
+  shown.forEach(r=>updRecord(r.id,true));
 }
 function updRecord(id,skipSave){
   const r=REC_DISTS.find(x=>x.id===id);if(!r)return;
@@ -2112,14 +2321,18 @@ function updRecord(id,skipSave){
   const sEl=document.getElementById('rec-ss-'+id);
   if(!mEl||!sEl)return;
   const hh=hEl?hEl.value:'';const mm=mEl.value;const ss=sEl.value;
+  const dtEl=document.getElementById('rec-dt-'+id);
+  const rdate=dtEl?dtEl.value:((S.records&&S.records[id])?S.records[id].date:'')||'';
   if(!S.records)S.records={};
-  S.records[id]={hh,mm,ss};
+  const wasHist=(S.records[id]||{}).fromHist;
+  const edited=!skipSave; // édition réelle par l'utilisateur (oninput)
+  S.records[id]={hh,mm,ss,date:rdate,fromHist:edited?false:wasHist};
   const T=(+hh||0)*3600+(+mm||0)*60+(+ss||0);
   const out=document.getElementById('rec-out-'+id);
   const badge=document.getElementById('rec-badge-'+id);
   const vcMode=!!S.csKmh; const ref=vcMode?S.csKmh:S.vma; const refLbl=vcMode?'% VC':'% VMA';
   if(!T||T<30){
-    if(out)out.innerHTML=`<div class="rec-out-empty">Entrez un temps pour voir l'allure et le ${refLbl}</div>`;
+    if(out)out.innerHTML=`<div class="rec-out-empty">Entrez un temps pour voir l'allure</div>`;
     if(badge)badge.style.display='none';
     if(!skipSave){saveLS();renderChart();}
     return;
@@ -2128,20 +2341,15 @@ function updRecord(id,skipSave){
   const kmh=spd*3.6;
   const pace=fAll(1000/spd);
   const pct=ref?Math.round(kmh/ref*100):null;
+  const stale=rdate&&((Date.now()-new Date(rdate+'T00:00:00').getTime())>365*864e5);
+  const pctCol=stale?'var(--muted2)':r.col;
   if(out)out.innerHTML=`
     <div>
       <div class="rec-metric-lbl">Allure</div>
       <div class="rec-pace" style="color:${r.col}">${pace}<span> /km</span></div>
       <div class="rec-kmh">${kmh.toFixed(2)} km/h · ${fHMS(T)}</div>
-    </div>
-    <div style="text-align:right">
-      <div class="rec-metric-lbl">${refLbl}</div>
-      <div class="rec-pct" style="color:${r.col}">${pct!=null?pct+'%':'—'}</div>
     </div>`;
-  if(badge){
-    if(pct!=null){badge.textContent=pct+' '+refLbl;badge.style.display='';}
-    else badge.style.display='none';
-  }
+  if(badge)badge.style.display='none';
   if(!skipSave){saveLS();renderChart();}
 }
 
@@ -2323,9 +2531,16 @@ function updPseudo(){
     resHtml=`<div class="tb-results">${items.join(sep)}${methodHtml}</div>`;
   }
 
-  tb.innerHTML=v
-    ?`<div class="tb-top"><span class="tb-avatar">${userIco}</span><span class="tb-pname">${v}</span>${dateHtml}</div>${resHtml}`
-    :'';
+  if(v){
+    const ini=v.slice(0,2).toUpperCase();
+    tb.innerHTML=`<button class="tb-ath" onclick="go('athletes')" title="Voir mes athlètes">
+      <span class="tb-ath-av">${ini}</span>
+      <span class="tb-ath-txt"><span class="tb-ath-name">${v}</span>${S.testDate?`<span class="tb-ath-date">${S.testDate}</span>`:''}</span>
+      <svg viewBox="0 0 24 24" class="tb-ath-chev"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>`;
+  } else {
+    tb.innerHTML=`<span style="font-size:13px;color:var(--muted2)">Aucun profil chargé</span>`;
+  }
 }
 
 /* ══ MOBILE HEADER CONTEXT ══ */
@@ -2419,6 +2634,7 @@ function saveCurrentAthlete(){
     raceHistory:S.raceHistory||[],
     goal:S.goal||null,
     csPts:S.csPts||null,
+    plan:S.plan||null,
   };
   // Historique de progression
   let hist=(existing>=0 && Array.isArray(athletes[existing].history))?athletes[existing].history.slice():[];
@@ -2463,7 +2679,9 @@ function loadAthlete(id){
     raceHistory:ath.raceHistory||[],
     goal:ath.goal||{id:'',t:null,date:''},
     csPts:ath.csPts||null,
+    plan:ath.plan||null,
   });
+  _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
   document.getElementById('pseudo-inp').value=ath.pseudo;
   setMode(ath.mode||'vma');
   if(ath.mode==='vma'){
@@ -2720,9 +2938,45 @@ function updGoal(){
   const ue=document.getElementById('goal-url');
   S.goal={id:id,t:t,date:de2?de2.value:'',name:ne?ne.value.trim():'',url:ue?ue.value.trim():''};
   renderPredCards();
+  goalReadout();
+  if(typeof renderDashPlan==='function')renderDashPlan();
   saveLS();
 }
 function goalLinkRefresh(){ renderGoalSection(); }
+function renderDashPlan(){
+  const sec=document.getElementById('db-plan-section'), box=document.getElementById('db-plan');
+  if(!sec||!box||typeof PLANIF==='undefined')return;
+  const g=S.goal||{};
+  const p=(g.id&&PLANIF.some(x=>x.id===g.id))?PLANIF.find(x=>x.id===g.id):null;
+  if(!p||!g.date){sec.style.display='none';return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  const race=new Date(g.date+'T00:00:00');
+  const days=Math.round((race-today)/864e5);
+  if(days<7){sec.style.display='none';return;}
+  let wkAvail=Math.round(days/7);
+  const w=Math.min(Math.max(wkAvail,p.wmin),p.wmax);
+  // sauvegarde état planif
+  const save={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,d1:_plDate1,d2:_plDate2,di:_plDi,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase};
+  const cfg=(S.plan&&S.plan.D===p.id)?S.plan:null;
+  _plPhaseOverride=cfg?(cfg.ph||null):null;
+  _plOrient=cfg?(cfg.orient||0):0;
+  _plBase=cfg?(cfg.base!==false):true;
+  const wEff=(cfg&&cfg.W!=null)?Math.min(Math.max(cfg.W,p.wmin),p.wmax):w;
+  _plD=p.id;_plCtx=cfg?cfg.ctx:'new';_plVol=cfg?cfg.vol:null;_plProf=cfg?cfg.prof:'rout';
+  _plDate1=null;
+  _plDate2=g.date;_plDi=null;_plW=wEff;
+  const weeks=plWeeks(p,wEff), ph=plPhases(p,wEff);
+  const html=plLoadHTML(p,weeks,{noTitle:true,cid:'db-vol-canvas'});
+  const _unit=plUnit();
+  window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
+  // restauration
+  _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;
+  box.innerHTML=html;
+  plDrawVol(p,weeks,'db-vol-canvas');
+  const bd=document.getElementById('db-plan-badge');
+  if(bd){bd.textContent=wEff+' sem'+(wkAvail>p.wmax?' (max)':(wkAvail<p.wmin?' (court)':''));}
+  sec.style.display='block';
+}
 
 /* ══ FICHE PDF ══ */
 function _pdfData(src){return {pseudo:src.pseudo||S.pseudo,vma:src.vma,csKmh:src.csKmh||null,dp:src.dp||null,fcMax:src.fcMax||null,fcRest:src.fcRest||null,records:src.records||{},testDate:src.testDate||S.testDate,goal:src.goal||null,csPts:src.csPts||null};}
@@ -3169,6 +3423,7 @@ function renderExtrapol(){
   const wrap=document.getElementById('extrapol-wrap');if(!wrap)return;
   wrap.innerHTML=
     '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Extrapolation \u2014 potentiel de course</div><div class="input-hero-sub">Estime le potentiel d\u2019un athl\u00e8te sur 5 km, 10 km, semi et marathon \u00e0 partir d\u2019une course r\u00e9cente ou de sa vitesse critique \u2014 m\u00e9thodes issues de la litt\u00e9rature scientifique, class\u00e9es par fiabilit\u00e9.</div></div>'
+    +toolAthleteBar()
     +libExtrapolHTML();
 }
 function renderLibrary(){
@@ -3176,6 +3431,7 @@ function renderLibrary(){
   const chips=[['all','Toutes']].concat(LIB_THEMES.map(t=>[t.id,t.lbl])).map(c=>'<button class="lib-chip'+(libTheme===c[0]?' active':'')+'" onclick="setLibTheme(\''+c[0]+'\')">'+c[1]+'</button>').join('');
   wrap.innerHTML=
     '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique et <b>ordonnées dans la prépa</b> : commence par l\u2019Étape 1 de chaque bloc, termine par la dernière grosse spé (J-10 à J-14) puis l\u2019affûtage. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
+    toolAthleteBar()+
     '<div class="lib-toolbar">'+
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
       '<div class="lib-chips">'+chips+'</div>'+
@@ -3209,11 +3465,16 @@ function perfRange(r,m){ return m.csKmh ? csRange(r,m.csKmh,m.dp) : vmaRange(r,m
    (1500/Mile/3000/5 km, on saisit le temps). 10 km/semi/marathon exclus (durabilité). */
 const CS_ITEMS=[
   {id:'t3',   kind:'test', lbl:'Test 3 min',    t:180},
+  {id:'t6',   kind:'test', lbl:'Test 6 min',    t:360},
+  {id:'t9',   kind:'test', lbl:'Test 9 min',    t:540},
   {id:'t12',  kind:'test', lbl:'Test 12 min',   t:720},
   {id:'1500', kind:'race', lbl:'1500 m',        d:1500},
   {id:'mile', kind:'race', lbl:'Mile (1609 m)', d:1609.34},
   {id:'3000', kind:'race', lbl:'3000 m',        d:3000},
   {id:'5000', kind:'race', lbl:'5 km',          d:5000},
+  {id:'10000',kind:'race', lbl:'10 km',         d:10000},
+  {id:'semi', kind:'race', lbl:'Semi (21,1 km)',d:21097.5},
+  {id:'mara', kind:'race', lbl:'Marathon',      d:42195},
 ];
 function csItem(id){return CS_ITEMS.find(x=>x.id===id);}
 function csPerfOptions(sel){return CS_ITEMS.map(o=>'<option value="'+o.id+'"'+(o.id===sel?' selected':'')+'>'+o.lbl+'</option>').join('');}
@@ -3251,16 +3512,17 @@ function csRacesValidate(r1,r2){
   if(!r1||!r2) return {ok:false,msg:'Renseignez deux performances.'};
   if(r1.id===r2.id) return {ok:false,msg:'Choisissez deux performances différentes.'};
   const s=[r1,r2].sort((a,b)=>a.t-b.t); const sc=s[0],lg=s[1];
-  if(lg.t>1200) return {ok:false,msg:'Un effort dépasse 20 min : hors du domaine du modèle (2–15 min).'};
   if(lg.t-sc.t<120) return {ok:false,msg:'Durées trop proches (< 2 min d’écart) : la Vitesse Critique serait très imprécise.'};
   if(sc.d/sc.t<=lg.d/lg.t) return {ok:false,msg:'Vitesses incohérentes (plus rapide sur l’effort le plus long).'};
   let warn='';
   const a=csTimeState(sc.t), b=csTimeState(lg.t);
-  if((a&&a.lbl!=='dans la fenêtre idéale')||(b&&b.lbl!=='dans la fenêtre idéale')) warn='Un effort est en limite de la fenêtre 2–15 min : fiabilité réduite.';
+  if(lg.t>1200) warn='Effort long > 15 min : hors de la fenêtre idéale (2–15 min) → estimation « terrain », fiabilité réduite.';
+  else if((a&&a.lbl!=='dans la fenêtre idéale')||(b&&b.lbl!=='dans la fenêtre idéale')) warn='Un effort est en limite de la fenêtre 2–15 min : fiabilité réduite.';
   else if(lg.t/sc.t<1.5) warn='Écart de durée un peu faible : idéalement le long ≥ 1,5× le court.';
   return {ok:true,warn:warn};
 }
 function updCsRaces(){
+  if(typeof csAutoEstimate==='function')csAutoEstimate();
   [1,2].forEach(i=>{
     const r=csReadPerf(i); const b=document.getElementById('csr-badge-'+i); if(!b)return;
     if(!r){b.innerHTML='';return;}
@@ -3284,6 +3546,71 @@ function updCsRaces(){
   box.innerHTML='<div class="info-box'+(plaus?' error':'')+'"><strong>VC</strong> : '+cs.csKmh.toFixed(2)+' km/h ('+fAll(3600/cs.csKmh)+' /km) &nbsp;·&nbsp; <strong>D′</strong> : '+Math.round(cs.dp)+' m &nbsp;·&nbsp; VMA est. : '+vmaEst.toFixed(1)+' km/h'+
     (warns?'<br>'+warns:'')+
     '<div class="formula">VC = (D_long − D_court) / (t_long − t_court)  ·  D′ = D_court − VC × t_court</div></div>';
+}
+/* ══ ASSISTANT VC : reco de protocole + estimation auto ══ */
+let _csObj='10k',_csObjTouched=false;
+const CS_OBJS=[['5k','5 km'],['10k','10 km'],['semi','Semi'],['mara','Marathon']];
+const CS_RECO={
+  '5k':{reco:[['3000','t3'],['5000','t3']], alt:[['t3','t9'],['t3','t12']], why:'Le 3000 m / 5 km reflète une intensité proche de VO₂max ; le test 3 min estime la réserve anaérobie D′. Deux efforts assez éloignés en durée = VC plus fiable.'},
+  '10k':{reco:[['5000','t3']], alt:[['10000','t3'],['t3','t12']], why:'Le 5 km est proche de la zone VO₂max ; le test 3 min estime la réserve D′. Alternative robuste : Test 3′ + Test 12′ (toujours dans la fenêtre idéale).'},
+  'semi':{reco:[['10000','t3']], alt:[['semi','t3'],['t3','t12']], why:'Le 10 km ancre l’endurance de haute intensité ; le test 3 min estime D′. Effort long > 15 min : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.'},
+  'mara':{reco:[['semi','t3']], alt:[['mara','t3'],['t3','t12']], why:'Le semi ancre l’allure longue ; le test 3 min estime D′. Effort long : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.'}
+};
+function csObjSet(id){_csObj=id;_csObjTouched=true;csRenderAssistant();}
+function csComboLabel(c){var a=csItem(c[0]),b=csItem(c[1]);return (a?a.lbl:c[0])+'  +  '+(b?b.lbl:c[1]);}
+function csApplyReco(a,b){cddPick('cdd-1',a);cddPick('cdd-2',b);csRenderAssistant();var box=document.getElementById('csr-preview');}
+function csWhyToggle(){var e=document.getElementById('cs-why');if(e)e.style.display=(e.style.display==='none'||!e.style.display)?'block':'none';}
+function csRenderAssistant(){
+  var box=document.getElementById('cs-assistant'); if(!box)return;
+  if(!_csObjTouched && S.goal && ['5k','10k','semi','mara'].indexOf(S.goal.id)>=0){ _csObj=S.goal.id; _csObjTouched=true; }
+  var r=CS_RECO[_csObj]||CS_RECO['10k'];
+  var cur1=(document.getElementById('csr-type-1')||{}).value, cur2=(document.getElementById('csr-type-2')||{}).value;
+  function chip(c,primary){var on=(c[0]===cur1&&c[1]===cur2);var bg=primary?(on?'#34D399':'rgba(52,211,153,0.10)'):(on?'var(--orange)':'var(--input-bg)');var bd=primary?'#34D399':(on?'var(--orange)':'var(--border2)');var col=on?'#fff':'var(--text)';return '<button type="button" onclick="csApplyReco(\''+c[0]+'\',\''+c[1]+'\')" style="padding:9px 14px;border-radius:10px;border:1.5px solid '+bd+';background:'+bg+';color:'+col+';font-family:var(--font);font-size:12.5px;font-weight:800;cursor:pointer">'+csComboLabel(c)+'</button>';}
+  var objChips=CS_OBJS.map(function(o){var on=o[0]===_csObj;return '<button type="button" onclick="csObjSet(\''+o[0]+'\')" style="padding:7px 15px;border-radius:9px;border:1px solid '+(on?'var(--orange)':'var(--border2)')+';background:'+(on?'var(--orange)':'var(--input-bg)')+';color:'+(on?'#fff':'var(--text2)')+';font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer">'+o[1]+'</button>';}).join('');
+  box.innerHTML=
+    '<div style="border:1px solid var(--border2);border-radius:12px;padding:16px 16px;background:rgba(255,255,255,0.02)">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Données recommandées pour ton objectif</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">'+objChips+'</div>'
+    +'<div style="font-size:11.5px;font-weight:800;color:#34D399;margin-bottom:6px">Recommandé</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+r.reco.map(function(c){return chip(c,true);}).join('')+'</div>'
+    +'<div style="font-size:11.5px;font-weight:800;color:var(--muted2);margin-bottom:6px">Alternatives</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px">'+r.alt.map(function(c){return chip(c,false);}).join('')+'</div>'
+    +'<div style="margin-top:12px"><span onclick="csWhyToggle()" style="cursor:pointer;font-size:12px;font-weight:700;color:var(--orange)">Pourquoi ce choix ? ▾</span>'
+    +'<div id="cs-why" style="display:none;font-size:12px;color:var(--muted2);line-height:1.6;margin-top:8px;padding:10px 12px;border-left:3px solid var(--orange);background:rgba(255,107,26,0.05);border-radius:0 8px 8px 0">'+r.why+'</div></div>'
+    +'</div>';
+}
+function csEstimate(present,targetId){
+  var it=csItem(targetId); if(!it||!present||!present.d||!present.t)return null;
+  if(it.kind==='test'){
+    var d;
+    var k3={360:0.95,540:0.915,720:0.885};
+    if(present.kind==='test' && Math.abs(present.t-180)<1 && k3[it.t]){ d=(present.d/180)*k3[it.t]*it.t; }
+    else { d=present.d*Math.pow(it.t/present.t,1/1.06); }
+    return {kind:'test',d:Math.round(d/5)*5};
+  } else {
+    var t=present.t*Math.pow(it.d/present.d,1.06);
+    return {kind:'race',t:Math.round(t)};
+  }
+}
+function csShowSug(i,e){
+  var el=document.getElementById('cs-sug-'+i); if(!el)return;
+  var disp=e.kind==='test'?(e.d+' m'):fHMS(e.t), val=e.kind==='test'?e.d:e.t;
+  el.innerHTML='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted2)"><span>Valeur estimée pour ton 2e effort : <b style="color:var(--orange)">'+disp+'</b></span>'
+    +'<button type="button" onclick="csUseEst('+i+','+val+',\''+e.kind+'\')" style="padding:3px 11px;border-radius:7px;border:1px solid var(--border2);background:var(--input-bg);color:var(--text2);font-family:var(--font);font-size:11.5px;font-weight:800;cursor:pointer">Utiliser</button>'
+    +'<span style="font-size:11px">(modifiable)</span></div>';
+}
+function csUseEst(i,val,kind){
+  if(kind==='test'){var el=document.getElementById('csr-val-'+i);if(el)el.value=val;}
+  else {var mm=Math.floor(val/60),ss=val%60,em=document.getElementById('csr-mm-'+i),es=document.getElementById('csr-ss-'+i);if(em)em.value=mm;if(es)es.value=ss;}
+  updCsRaces();
+}
+function csAutoEstimate(){
+  var s1=document.getElementById('cs-sug-1'), s2=document.getElementById('cs-sug-2');
+  if(s1)s1.innerHTML=''; if(s2)s2.innerHTML='';
+  var r1=csReadPerf(1), r2=csReadPerf(2);
+  var t1=(document.getElementById('csr-type-1')||{}).value, t2=(document.getElementById('csr-type-2')||{}).value;
+  if(r1&&!r2&&t2){var e=csEstimate(r1,t2);if(e)csShowSug(2,e);}
+  else if(r2&&!r1&&t1){var e=csEstimate(r2,t1);if(e)csShowSug(1,e);}
 }
 let csSub='terrain';
 function setCsSubMode(m){
@@ -3577,25 +3904,64 @@ function renderGoalSection(){
   const ur=(g.url||'').replace(/"/g,'&quot;');
   let safeUrl='';
   if(g.url){ safeUrl=/^https?:\/\//i.test(g.url)?g.url:'https://'+g.url; }
-  box.innerHTML='<div class="goal-bar">'+
+  if(window._goalEdit===undefined) window._goalEdit=!g.t;
+  const editing=window._goalEdit;
+  box.innerHTML='<div class="goal-bar" id="goal-edit-bar" style="'+(editing?'':'display:none')+'">'+
     '<span class="goal-lbl">Course visée</span>'+
     '<input type="hidden" id="goal-dist" value="'+g.id+'">'+
     '<div class="cdd" id="cdd-goal" style="width:210px;flex:none"></div>'+
-    '<input id="goal-name" type="text" class="goal-date" maxlength="80" placeholder="Nom de la course (ex : 10 km de Paris)" value="'+nm+'" oninput="updGoal()" style="flex:1;min-width:170px">'+
+    '<input id="goal-name" type="text" class="goal-date" maxlength="80" placeholder="Nom de la course (ex : 10 km de Paris)" value="'+nm+'" oninput="updGoal()" style="width:190px;flex:0 0 auto">'+
+    '<span class="goal-lbl" style="color:var(--muted2)">Objectif — temps</span>'+
     '<span class="goal-time">'+
-      '<input id="goal-h" type="number" min="0" max="9" placeholder="h" value="'+gh+'" oninput="updGoal()">:'+
-      '<input id="goal-m" type="number" min="0" max="59" placeholder="min" value="'+gm+'" oninput="updGoal()">:'+
-      '<input id="goal-s" type="number" min="0" max="59" placeholder="sec" value="'+gs+'" oninput="updGoal()">'+
+      '<input id="goal-h" type="number" min="0" max="9" placeholder="h" value="'+gh+'" oninput="updGoal()"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px 0 -2px">h</span>'+
+      '<input id="goal-m" type="number" min="0" max="59" placeholder="min" value="'+gm+'" oninput="updGoal()"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px 0 -2px">min</span>'+
+      '<input id="goal-s" type="number" min="0" max="59" placeholder="sec" value="'+gs+'" oninput="updGoal()"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin-left:-2px">s</span>'+
     '</span>'+
     '<input id="goal-date" type="date" class="goal-date" value="'+(g.date||'')+'" onchange="updGoal()">'+
+    (g.t?'<button type="button" onclick="goalDone()" style="margin-left:auto;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer">Valider</button>':'')+
     '</div>'+
-    '<div class="goal-bar" style="border-left-color:rgba(255,107,26,0.35);margin-top:-8px">'+
+    '<div class="goal-bar" id="goal-link-bar" style="border-left-color:rgba(255,107,26,0.35);margin-top:-8px;'+(editing?'':'display:none')+'">'+
       '<span class="goal-lbl" style="color:var(--muted2)">Lien</span>'+
       '<input id="goal-url" type="url" class="goal-date" maxlength="300" placeholder="https://... (site d\'inscription, parcours)" value="'+ur+'" oninput="updGoal()" onchange="goalLinkRefresh()" style="flex:1;min-width:200px">'+
       (safeUrl?'<a href="'+safeUrl.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:13px;font-weight:700;text-decoration:none;border:1px solid rgba(255,107,26,0.35);border-radius:8px;padding:8px 13px;white-space:nowrap">Ouvrir <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>':'')+
     '</div>'+
+    '<div id="goal-readout"></div>'+
     (!g.id?'<div class="goal-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Ajoute ta prochaine course pour suivre ton objectif</div>':'');
   cddBuild('goal-dist','cdd-goal',[{v:'',l:'— Aucune —'},{v:'5k',l:'5 km'},{v:'10k',l:'10 km'},{v:'semi',l:'Semi-marathon'},{v:'mara',l:'Marathon'}],function(){updGoal();});
+  goalReadout();
+}
+const GOAL_DIST={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
+const GOAL_LBL={'5k':'5 km','10k':'10 km','semi':'Semi-marathon','mara':'Marathon'};
+function goalEdit(){window._goalEdit=true;renderGoalSection();}
+function goalDone(){window._goalEdit=false;renderGoalSection();}
+function goalReadout(){
+  const box=document.getElementById('goal-readout'); if(!box)return;
+  const g=S.goal||{};
+  if(!g.t||window._goalEdit){box.innerHTML='';return;}
+  const D=GOAL_DIST[g.id];
+  const pace=D?fAll(g.t/D*1000)+'/km':null;
+  const kmh=D?(D/g.t*3.6).toFixed(1)+' km/h':null;
+  const nm=g.name?g.name:(GOAL_LBL[g.id]||'Objectif');
+  let days='';
+  if(g.date){
+    const dd=new Date(g.date+'T00:00:00'), now=new Date(); now.setHours(0,0,0,0);
+    const n=Math.round((dd-now)/86400000);
+    if(n>0){const wk=Math.floor(n/7);days='<div class="gr-count" style="display:flex;flex-direction:column;align-items:center;gap:4px"><div class="gr-chip">J-'+n+'</div>'+(wk>0?'<div class="gr-weeks" style="font-size:12px;font-weight:700;color:var(--muted2)">'+wk+' semaine'+(wk>1?'s':'')+'</div>':'')+'</div>';}
+    else if(n===0)days='<div class="gr-count"><div class="gr-chip" style="background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.35);color:#34D399">Jour J</div></div>';
+  }
+  box.innerHTML='<div class="goal-readout-card" style="justify-content:space-between">'
+    +'<div class="gr-left" style="display:flex;align-items:center;gap:16px;flex:1 1 0;min-width:180px">'
+    +'<div class="gr-flag"><svg viewBox="0 0 24 24"><path d="M4 4v16"/><path d="M4 5h13l-2 4 2 4H4"/></svg></div>'
+    +'<div class="gr-mid" style="min-width:0"><div class="gr-name">'+nm+'</div></div>'
+    +'</div>'
+    +'<div class="gr-main" style="text-align:center;flex:0 0 auto"><div class="gr-lbl">Chrono visé</div><div class="gr-time">'+fHMS(g.t)+'</div>'
+    +(pace?'<div class="gr-sub">'+pace+' · '+kmh+'</div>':'<div class="gr-sub">Choisis une distance pour l\u2019allure</div>')+'</div>'
+    +'<div class="gr-zone-r" style="display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:1 1 0;min-width:150px">'
+    +days
+    +'<button type="button" class="gr-edit" onclick="goalEdit()" title="Modifier"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
+    +'</div>'
+    +(g.url?(function(){var u=/^https?:\/\//i.test(g.url)?g.url:'https://'+g.url;var host=u.replace(/^https?:\/\//i,'').replace(/\/$/,'');return '<div class="gr-link"><a href="'+u.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'+host+'<svg viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>';})():'')
+    +'</div>';
 }
 
 
@@ -3622,6 +3988,9 @@ function exportAthleteView(){
   }
   const csmBox=clone.querySelector('#db-csmodel');
   if(csmBox){ Array.from(csmBox.children).forEach((ch,i)=>{ if(i>0) ch.remove(); }); }
+  const gEdit=clone.querySelector('#goal-edit-bar'); if(gEdit) gEdit.style.display='none';
+  const gLink=clone.querySelector('#goal-link-bar'); if(gLink) gLink.style.display='none';
+  const phAct=clone.querySelector('.ph-actions'); if(phAct) phAct.remove();
   // Retirer toutes les formules (fiche athlète épurée)
   clone.querySelectorAll('.formula,.csm-formula-bar,.csm-formula-exp,.csm-detail,.ph-b-calc,.sim-formula,.csm-toggle').forEach(el=>el.remove());
   // Retirer les invites coach (test TMI / données cardiaques) si non renseignés
@@ -3636,19 +4005,28 @@ function exportAthleteView(){
   // Images de secours : les visionneuses sans JavaScript (aperçu WhatsApp/iOS) affichent
   // un instantané des graphiques ; dans un vrai navigateur, le JS les remplace par les
   // graphiques interactifs.
+  const STATIC_CV={'pl-vol-canvas':1};
   clone.querySelectorAll('canvas').forEach(cv=>{
     const orig=cv.id?document.getElementById(cv.id):null;
+    let snapped=false;
     if(orig&&orig.width){
       try{
         const img=document.createElement('img');
         img.src=orig.toDataURL('image/png');
         img.className='cv-fallback';
-        img.style.cssText='width:100%;height:100%;object-fit:contain;display:block';
+        var _ph=(cv.parentNode&&cv.parentNode.style&&cv.parentNode.style.height)||'';
+        img.style.cssText=(/px$/.test(_ph))?'width:100%;height:'+_ph+';object-fit:contain;display:block':'width:100%;height:auto;display:block';
         cv.parentNode.insertBefore(img,cv);
+        snapped=true;
       }catch(e){}
     }
-    cv.setAttribute('data-live','1');
-    cv.style.display='none';
+    if(STATIC_CV[cv.id]){ // graphique figé : on garde l'image, on retire le canvas
+      if(snapped)cv.parentNode.removeChild(cv);
+      else cv.setAttribute('data-live','1'),cv.style.display='none';
+    } else {
+      cv.setAttribute('data-live','1');
+      cv.style.display='none';
+    }
   });
 
   // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
@@ -3688,11 +4066,14 @@ function exportAthleteView(){
     recSeconds.toString(), chartSeconds.toString(),
     renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
+    'var PL_PHC='+JSON.stringify(PL_PHC)+';',
+    'var _fVol='+JSON.stringify(window._dashVolData||null)+';',
+    'function _drawFVol(){if(!_fVol||typeof Chart===\'undefined\')return;var cv=document.getElementById(\'db-vol-canvas\');if(!cv)return;var wk=_fVol.weeks,col=_fVol.col,u=_fVol.unit;var labels=wk.map(function(x){return x.dt;});var data=wk.map(function(x){return x.km;});var _ymax=Math.max.apply(null,data.length?data:[1])*1.08;var _pha=function(hh,a){hh=hh.replace(\'#\',\'\');return \'rgba(\'+parseInt(hh.slice(0,2),16)+\',\'+parseInt(hh.slice(2,4),16)+\',\'+parseInt(hh.slice(4,6),16)+\',\'+a+\')\';};var ptc=wk.map(function(x){return x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph];});try{if(window.Chart&&Chart.getChart){var _ex=Chart.getChart(cv);if(_ex)_ex.destroy();}}catch(e){}new Chart(cv,{type:\'bar\',data:{labels:labels,datasets:[{label:\'Volume\',data:data,backgroundColor:ptc,borderColor:ptc,borderWidth:0,borderRadius:5,maxBarThickness:46,categoryPercentage:0.82,barPercentage:0.92}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return \'S\'+x.n+\' · \'+x.dt;},label:function(c){var x=wk[c.dataIndex];return x.km+\' \'+(u||\'\')+(x.rec?\' · décharge\':\'\')+(x.race?\' · course\':\'\')+(x.inter?\' · course prépa\':\'\');}}}},scales:{y:{title:{display:true,text:(u?\'Volume (\'+u+\'/sem)\':\'Volume\'),color:\'#94A3B8\',font:{size:11}},ticks:{color:\'#94A3B8\'},grid:{color:\'rgba(255,255,255,0.06)\'},suggestedMax:_ymax},x:{ticks:{color:\'#94A3B8\',maxRotation:0,autoSkip:true},grid:{color:\'rgba(255,255,255,0.04)\'}}},plugins:[{id:\'volLbl\',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign=\'center\';g.textBaseline=\'bottom\';m.data.forEach(function(pt,i){g.font=\'800 12px Manrope,sans-serif\';g.fillStyle=\'#E2E8F0\';g.fillText(ch.data.datasets[0].data[i]+(u?\' \'+u:\'\'),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font=\'800 9px Manrope,sans-serif\';g.fillStyle=\'#FBBF24\';g.fillText(\'PR\\u00c9PA\',pt.x,pt.y-26);}});g.restore();}}]});}',
     csmToggle.toString(), csmSim.toString(), simUnit.toString(),
     drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
     'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
-    'document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("img.cv-fallback").forEach(function(i){if(i.parentNode)i.parentNode.removeChild(i)});document.querySelectorAll("canvas[data-live]").forEach(function(c){c.style.display="block"});var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}});',
-    'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}},250);});'
+    'document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
+    'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},250);});'
   ].join('\n');
 
   // 4) CSS de l'app + surcouche autonome
@@ -3711,29 +4092,45 @@ function exportAthleteView(){
     +'.export-foot{text-align:center;padding:26px 20px 44px;color:var(--muted2);font-size:12px;line-height:1.8}'
     +'.export-foot b{color:var(--orange)}'
     +'#hist-add-form,.hist-del{display:none!important}'
-    +'.export-brand{display:flex;justify-content:center;padding:28px 16px 20px;background:radial-gradient(ellipse at 50% 0%,rgba(255,107,26,0.16),transparent 70%);border-bottom:1px solid var(--border)}'
-    +'.export-brand img{height:68px;width:auto;display:block;filter:drop-shadow(0 6px 24px rgba(255,107,26,0.5))}'
+    +'.export-brand{display:flex;justify-content:center;padding:24px 16px 18px;background:radial-gradient(ellipse at 50% 0%,rgba(255,107,26,0.16),transparent 70%);border-bottom:1px solid var(--border)}'
+    +'.export-brand img{height:96px;width:auto;display:block;filter:drop-shadow(0 6px 24px rgba(255,107,26,0.5))}'
+    +'.export-brand .ss{font-size:16.5px;letter-spacing:1.6px}'
     +'.rotate-hint{display:none}'
-    +'@media (max-width:820px) and (orientation:portrait){.rotate-hint{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(90deg,rgba(255,107,26,0.16),rgba(255,107,26,0.05));border:1px solid rgba(255,107,26,0.4);color:var(--orange);font-weight:800;font-size:13.5px;line-height:1.4;padding:13px 16px;border-radius:12px;margin:12px 14px 0;text-align:center}.export-brand img{height:48px}}'
+    +'@media (max-width:820px) and (orientation:portrait){.rotate-hint{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(90deg,rgba(255,107,26,0.16),rgba(255,107,26,0.05));border:1px solid rgba(255,107,26,0.4);color:var(--orange);font-weight:800;font-size:13.5px;line-height:1.4;padding:13px 16px;border-radius:12px;margin:12px 14px 0;text-align:center}.export-brand img{height:58px}.export-brand{padding:12px 10px;gap:12px!important}.export-brand .ss{font-size:12.5px;letter-spacing:1px}.export-av{width:38px;height:38px;font-size:14px}}'
     +'@media(max-width:860px){.export-badge{display:none}.export-head{padding:14px 16px;gap:10px}.export-head img{height:30px!important}.export-sep{margin:0 6px 0 0!important}.export-av{width:38px;height:38px;font-size:14px}}';
 
+  // Infos clés sur la course préparée (fin de fiche)
+  let raceKeyHTML='';
+  if(S.goal&&S.goal.id&&typeof RACE_KEY!=='undefined'&&RACE_KEY[S.goal.id]){
+    const g=S.goal, rk=RACE_KEY[g.id], vr=(typeof PL_VOLREF!=='undefined')?PL_VOLREF[g.id]:null;
+    const nm=g.name?g.name:rk.lbl;
+    let daysTxt='';
+    if(g.date){const dd=new Date(g.date+'T00:00:00'),now=new Date();now.setHours(0,0,0,0);const n=Math.round((dd-now)/86400000);if(n>0)daysTxt='J-'+n+(n>=7?' · '+Math.floor(n/7)+' sem':'');else if(n===0)daysTxt='Jour J';}
+    const paceTxt=(g.t&&rk.d)?fAll(g.t/rk.d*1000)+'/km':'';
+    const chip=(l,v)=>v?'<div style="flex:1;min-width:120px"><div style="font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">'+l+'</div><div style="font-size:15px;font-weight:800;color:var(--text);margin-top:2px">'+v+'</div></div>':'';
+    const line=(l,v)=>'<div style="margin-top:12px"><div style="font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--orange);margin-bottom:3px">'+l+'</div><div style="font-size:13px;color:var(--text2);line-height:1.6">'+v+'</div></div>';
+    raceKeyHTML='<div class="db-section" style="margin:8px 0 0"><div class="card" style="padding:22px;border-top:3px solid var(--orange)">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);margin-bottom:14px">À retenir pour ta course</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:16px">'+chip('Course',nm)+chip('Objectif',g.t?fHMS(g.t)+(paceTxt?' · '+paceTxt:''):'—')+chip('Échéance',daysTxt||(g.date||'—'))+'</div>'
+      +line('Allure de référence',(S.csKmh?rk.vc:rk.vma))
+      +line('Stratégie de course',rk.strat)
+      +(vr?(function(){var vt=(g.t&&typeof plVolForTime==='function')?plVolForTime(g.id,g.t):null;var txt=vt?('Volume conseillé pour viser <b>'+fHMS(g.t)+'</b> : <b style="color:var(--orange)">'+vt+' '+vr.unit+'</b>'):('Volume conseillé : minimum <b>'+vr.min+' '+vr.unit+'</b> · cible '+vr.lo+'–'+vr.hi+' · perf '+vr.perf);return '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:13.5px;color:var(--text2);line-height:1.6">'+txt+'</div>';})():'')
+      +'</div></div>';
+  }
   const doc='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
     +'<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     +'<title>RedLab — '+S.pseudo+'</title>'
-    +'<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">'
     +'<style>'+baseCSS+extraCSS+'</style></head><body>'
     +'<div class="export-wrap">'
-    +'<div class="export-brand"><a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" title="Reding Running"><img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running"></a></div>'
-    +'<div class="rotate-hint"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M2 12a10 10 0 0 1 3-7"/><polyline points="2 2 2 5 5 5"/></svg>Tourne ton téléphone en paysage pour un meilleur affichage</div>'
-    +'<div class="export-head">'
-    +'<div style="display:flex;align-items:center;gap:12px;min-width:0">'
-    +'<div class="export-av">'+initials+'</div>'
-    +'<div style="min-width:0"><div class="export-h-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+S.pseudo+'</div>'
-    +'<div class="export-h-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Profil transmis par ton coach · '+today+'</div></div>'
+    +'<div class="export-brand" style="position:relative;align-items:center;gap:22px">'
+    +'<a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" title="Reding Running" style="flex-shrink:0"><img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running"></a>'
+    +'<div class="side-slogan" style="margin:0;gap:4px"><div class="ss">Coach running</div><div class="ss">Tous niveaux</div><div class="ss">Courir encadré</div></div>'
+    +'<div class="export-badge" style="position:absolute;top:14px;right:16px">Lecture seule</div>'
     +'</div>'
-    +'<div class="export-badge">Lecture seule</div></div>'
+    +'<div class="rotate-hint"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M2 12a10 10 0 0 1 3-7"/><polyline points="2 2 2 5 5 5"/></svg>Tourne ton téléphone en paysage pour un meilleur affichage</div>'
     +clone.outerHTML
-    +'<div class="export-foot">Généré avec <b>RedLab</b> · <a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-weight:700;text-decoration:none">Reding Running</a><br>Profil transmis le '+today+' — calculateurs d\'allure et records interactifs.</div>'
+    +'<div class="export-foot">Généré avec <b>RedLab</b> · <a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-weight:700;text-decoration:none">Reding Running</a><br>Profil transmis le '+today+'.</div>'
     +'</div>'
     +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>'
     +'<script>'+embedJS+'<\/script>'
@@ -3834,7 +4231,14 @@ function ffaApply(){
   const best=window._ffaBest||{};
   if(!S.records)S.records={};
   let n=0;
-  FFA_DISTS.forEach(d=>{if(best[d.id]!=null){S.records[d.id]=ffaSecToParts(best[d.id],d.hasH);n++;}});
+  const _races=window._ffaRaces||[];
+  FFA_DISTS.forEach(d=>{if(best[d.id]!=null){
+    S.records[d.id]=ffaSecToParts(best[d.id],d.hasH);
+    S.records[d.id].fromHist=true;
+    const src=_races.find(r=>r.dist===d.id&&r.sec===best[d.id]);
+    if(src&&src.ts){const dd=new Date(src.ts);S.records[d.id].date=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');}
+    n++;
+  }});
   S.raceHistory=window._ffaRaces||[];
   if(typeof renderRecords==='function')renderRecords();
   if(typeof renderChart==='function')renderChart();
@@ -3953,6 +4357,1166 @@ function renderRaceHistory(){
   }
 }
 
+/* ══ BANDEAU PROFIL CHARGÉ (outils) ══ */
+function toolAthleteBar(){
+  if(!S.vma){
+    return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;padding:11px 16px;border:1px dashed var(--border2);border-radius:10px;background:rgba(255,255,255,0.02);font-size:12.5px;color:var(--muted2)">'
+      +'<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>'
+      +'Aucun profil chargé — <span style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:2px" onclick="go(\'athletes\')">charge un athlète</span> pour personnaliser cet outil (allures, discipline…).'
+      +'</div>';
+  }
+  const ini=(S.pseudo||'?').slice(0,2).toUpperCase();
+  const vc=S.csKmh?('VC '+S.csKmh.toFixed(1)+' km/h'):('VMA '+S.vma.toFixed(1)+' km/h');
+  return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding:11px 16px;border:1px solid rgba(255,107,26,0.25);border-radius:10px;background:rgba(255,107,26,0.05)">'
+    +'<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:900;color:var(--orange);flex-shrink:0">'+ini+'</div>'
+    +'<div style="font-size:13.5px;font-weight:800;color:var(--text)">'+(S.pseudo||'Athlète')+'</div>'
+    +'<div style="font-size:12.5px;font-weight:700;color:var(--orange)">'+vc+'</div>'
+    +(S.testDate?'<div style="font-size:11.5px;color:var(--muted2);margin-left:auto">Profil édité le '+S.testDate+'</div>':'')
+    +'</div>';
+}
+
+/* ══ PLANIFICATION ══ */
+const PL_PHC={base:'#94A3B8',dev:'#FB923C',spe:'#34D399',aff:'#A855F7'};
+const PL_PHL={base:'Base générale',dev:'Développement',spe:'Spécifique',aff:'Affûtage'};
+const PLANIF=[
+ {id:'5k',lbl:'5 km',col:'#3B82F6',wmin:6,wmax:12,wdef:8,ratios:{base:.30,dev:.40,spe:.30},taper:function(t){return 1;},
+  principes:['Le 5 km est une épreuve à ~93–97 % de VMA : la préparation tourne autour du développement de la VMA et de la capacité à la soutenir.','Volume modéré mais intensité élevée : c’est la distance où la part de travail dur (VO2max, seuil haut) est la plus grande.','La vitesse de base (foulée, économie) fait la différence : lignes droites, côtes courtes et travail en R toute l’année.'],
+  qualites:[['VMA / VO2max','Priorité'],['Vitesse & économie de course','Élevée'],['Seuil anaérobie','Élevée'],['Endurance fondamentale','Support']],
+  phases:{
+   base:{focus:'Construire la caisse aérobie et préparer le corps à l’intensité.',ex:'Footings EF, sortie longue courte (1h–1h15), lignes droites, côtes courtes, 1 fartlek léger/sem.'},
+   dev:{focus:'Développer la VMA — le moteur du 5 km.',ex:'2 qualités/sem : 30/30 puis 400/1000 m à VMA (Étapes 1→6 du bloc VO2max), 1 tempo seuil.'},
+   spe:{focus:'Convertir la VMA en allure course : soutenir 93–97 % de VMA.',ex:'Séances à allure 5K (Étapes 1→5 du bloc Spé 5K) : 6×500, 5×1000, dernière grosse spé 2×2000 à J-10.'},
+   aff:{focus:'Décharger en gardant l’intensité.',ex:'Volume −40/−50 %, rappel 4×400 m allure course à J-4/J-6.'}},
+  levels:{deb:{s:'3 séances/sem',vol:'25–35 km/sem',comp:'1 qualité · 1–2 footings EF · 1 sortie un peu plus longue'},
+          int:{s:'4–5 séances/sem',vol:'40–55 km/sem',comp:'2 qualités · 2 footings EF · 1 sortie longue 1h15'},
+          av:{s:'5–6 séances/sem',vol:'60–80 km/sem',comp:'2–3 qualités · EF quotidien · SL 1h30 · lignes/côtes hebdo'}}},
+ {id:'10k',lbl:'10 km',col:'#FF6B1A',wmin:6,wmax:12,wdef:10,ratios:{base:.35,dev:.35,spe:.30},taper:function(t){return 1;},
+  principes:['Le 10 km se court autour du seuil haut (88–92 % VMA) : le seuil anaérobie est la qualité reine.','Équilibre 50/50 entre développement (VMA + seuil) et travail spécifique à allure course.','La régularité d’allure est décisive : les records se courent au métronome — l’entraînement doit l’apprendre (tempos, fractions longues).'],
+  qualites:[['Seuil anaérobie','Priorité'],['VMA / VO2max','Élevée'],['Endurance fondamentale','Élevée'],['Économie de course','Support']],
+  phases:{
+   base:{focus:'Volume aérobie et rythme : la base du seuil.',ex:'Footings EF, SL 1h15–1h30, fartlek, tempo court (20 min) en fin de phase.'},
+   dev:{focus:'Monter le seuil et entretenir la VMA.',ex:'1 séance seuil (Étapes 1→6 du bloc Seuil) + 1 VMA (30/30, 400, 1000) par semaine.'},
+   spe:{focus:'S’installer à l’allure 10K : fractions de plus en plus longues.',ex:'Étapes 1→5 du bloc Spé 10K : tempo 8 km → 5×1000 → 3×3000 → 5×2000 → 2×4 km à J-10.'},
+   aff:{focus:'Décharge courte, jambes vives.',ex:'Volume −40/−50 %, 3×1000 m allure course à J-4/J-6.'}},
+  levels:{deb:{s:'3 séances/sem',vol:'30–40 km/sem',comp:'1 qualité (seuil ou VMA en alternance) · 1–2 EF · 1 SL 1h'},
+          int:{s:'4–5 séances/sem',vol:'45–60 km/sem',comp:'1 seuil + 1 VMA · 2 EF · 1 SL 1h15–1h30'},
+          av:{s:'5–6 séances/sem',vol:'65–90 km/sem',comp:'2 qualités + 1 tempo · EF quotidien · SL 1h30'}}},
+ {id:'semi',lbl:'Semi-marathon',col:'#10B981',wmin:8,wmax:14,wdef:12,ratios:{base:.35,dev:.30,spe:.35},taper:function(t){return t>=12?2:1;},
+  principes:['Le semi (84–88 % VMA, 92–96 % VC) est l’épreuve du seuil par excellence : on y court ~1h à 1h50 juste sous le seuil.','La sortie longue devient structurante : c’est elle qui prépare à tenir l’allure sur la durée.','Les blocs d’allure spécifique en fin de sortie longue (fatigue pré-installée) sont l’outil le plus spécifique de la prépa.'],
+  qualites:[['Seuil anaérobie','Priorité'],['Endurance fondamentale','Priorité'],['Allure spécifique semi','Élevée'],['VMA (entretien)','Support']],
+  phases:{
+   base:{focus:'Volume et sortie longue progressive (jusqu’à 1h30–1h45).',ex:'EF majoritaire, SL +10 min/sem, tempo 20 min, lignes droites.'},
+   dev:{focus:'Seuil en priorité, VMA en entretien.',ex:'1 seuil/sem (progression du bloc Seuil), 1 VMA légère, SL consolidée.'},
+   spe:{focus:'Allure semi en conditions réelles.',ex:'Étapes 1→5 du bloc Spé semi : 3×4 km → 2×5 km → SL + blocs AS21 → 2×6 km à J-10.'},
+   aff:{focus:'Décharge 1–2 sem selon la durée de prépa.',ex:'Volume −40/−50 %, 3×2 km AS21 à J-5/J-7.'}},
+  levels:{deb:{s:'3–4 séances/sem',vol:'35–45 km/sem',comp:'1 qualité · 2 EF · 1 SL jusqu’à 1h30'},
+          int:{s:'4–5 séances/sem',vol:'50–65 km/sem',comp:'1 seuil + 1 spé · 2 EF · 1 SL 1h30–1h45 avec blocs'},
+          av:{s:'5–6 séances/sem',vol:'70–95 km/sem',comp:'2 qualités · EF quotidien · SL 1h45 avec blocs AS21'}}},
+ {id:'mara',lbl:'Marathon',col:'#8B5CF6',wmin:12,wmax:20,wdef:16,ratios:{base:.30,dev:.30,spe:.40},taper:function(t){return 2;},
+  principes:['Le marathon (84–91 % de VC) est une épreuve d’économie et de durabilité : résister à la dérive après 30 km compte plus que la vitesse pure.','Le kilométrage hebdomadaire est le meilleur prédicteur de la performance (Vickers &amp; Vertosick 2016) : construire le volume AVANT de construire l’allure.','L’allure marathon se répète inlassablement en fin de prépa : blocs AM dans les sorties longues, répétition générale à J-14.','L’affûtage est non négociable : 2 semaines, volume −40/−60 %, intensité conservée (Bosquet 2007).'],
+  qualites:[['Endurance fondamentale / volume','Priorité'],['Allure marathon & durabilité','Priorité'],['Seuil anaérobie','Élevée'],['Nutrition / ravitaillement','Élevée'],['VMA (entretien)','Support']],
+  phases:{
+   base:{focus:'Monter le volume et la sortie longue (jusqu’à 2h) sans intensité excessive.',ex:'EF majoritaire (80 % du volume), SL progressive, tempo court, côtes légères.'},
+   dev:{focus:'Seuil + entretien VMA, volume au plus haut.',ex:'1 seuil/sem, 1 VMA légère, SL 2h–2h15, premiers segments AM courts.'},
+   spe:{focus:'Le cœur de la prépa : allure marathon en fatigue.',ex:'Étapes du bloc Spé marathon : tempo Hansons → 2×8 km AM → SL + 3×15 min AM → 30 km progressif (S-3) → répétition générale J-14.'},
+   aff:{focus:'2 semaines de décharge, glycogène plein, jambes fraîches.',ex:'Volume −40/−60 %, 2–3 rappels AM courts, dernière SL légère à J-7.'}},
+  levels:{deb:{s:'3–4 séances/sem',vol:'40–55 km/sem',comp:'1 qualité · 2 EF · 1 SL jusqu’à 2h30 (objectif : finir)'},
+          int:{s:'4–5 séances/sem',vol:'60–80 km/sem',comp:'1 seuil + 1 spé AM · 2 EF · 1 SL 2h–2h45 avec blocs AM'},
+          av:{s:'6–7 séances/sem',vol:'90–130 km/sem',comp:'2 qualités · EF quotidien (doubles) · SL 2h30 avec gros blocs AM'}}},
+ {id:'trail',lbl:'Trail',col:'#EAB308',wmin:10,wmax:20,wdef:16,ratios:{base:.40,dev:.25,spe:.35},taper:function(t){return t>=14?2:1;},
+  principes:['Le trail se prépare en heures et en dénivelé (D+), pas seulement en kilomètres : la charge se pilote sur durée + D+.','La spécificité du terrain est reine : côtes, descentes (excentrique), terrain technique — on performe sur ce qu’on a répété.','La force compte autant que le moteur aérobie : renforcement (jambes, gainage) et côtes toute l’année.','Les descentes s’entraînent : c’est le casse-muscle du trail — les intégrer progressivement protège et fait gagner du temps.','Sur les formats longs, la nutrition et la gestion (marche en côte, matériel) font partie de l’entraînement.'],
+  qualites:[['Endurance / caisse aérobie','Priorité'],['Force & côtes (D+)','Priorité'],['Descente & technique','Élevée'],['Seuil (allure soutenue)','Élevée'],['Nutrition & gestion','Élevée'],['VMA (entretien)','Support']],
+  phases:{
+   base:{focus:'Volume en heures, renforcement, premières côtes.',ex:'EF vallonné, renfo 2×/sem, côtes courtes, SL 1h30–2h en nature.'},
+   dev:{focus:'Force spécifique et seuil en côte.',ex:'Séances de côtes longues, seuil sur terrain vallonné, VMA courte en entretien, SL avec D+ croissant.'},
+   spe:{focus:'Simuler la course : D+, descentes, ravitos.',ex:'SL spécifiques sur profil proche de la course (D+/km cible), blocs à allure course, descentes appuyées, week-ends chocs sur les formats longs.'},
+   aff:{focus:'Décharge en gardant un peu de D+.',ex:'Volume −40/−50 %, une sortie courte avec côtes vives, repos actif.'}},
+  levels:{deb:{s:'3 séances/sem + renfo',vol:'4–6 h/sem · 500–1000 m D+',comp:'1 séance côtes · 1–2 EF · 1 SL nature 1h30–2h'},
+          int:{s:'4–5 séances/sem + renfo',vol:'6–9 h/sem · 1000–2500 m D+',comp:'1 côtes/seuil · 1 VMA légère · EF · SL 2h–3h avec D+'},
+          av:{s:'5–7 séances/sem + renfo',vol:'9–14 h/sem · 2500–5000 m D+',comp:'2 qualités (côtes, seuil vallonné) · EF · SL 3h+ / week-end choc'}}}
+];
+const PL_Q={
+ '5k':{
+  base:{deb:'1 fartlek léger/sem (ex : 8×30/30 souple) + lignes droites après 1 footing',
+        int:'1 fartlek ou côtes courtes/sem + lignes droites 2×/sem',
+        av:'1 fartlek + 1 séance de côtes courtes/sem, lignes droites quasi quotidiennes'},
+  dev:{deb:'1 VMA/sem : 30/30 classique (Étape 1) puis 10×400 (Étape 3)',
+       int:'2 qualités/sem : VMA (30/30 → 400 → 1000) + 1 tempo 20 min',
+       av:'2 VMA/sem (progression jusqu’à 6×1000 allure 5K) + 1 tempo seuil'},
+  spe:{deb:'1 spé/sem : 6×500 puis 4×800 à allure 5K, récup généreuse',
+       int:'1 spé/sem (Étapes 1→5 du bloc Spé 5K) + 1 rappel VMA courte',
+       av:'2 qualités : la spé du bloc (5×1000, 2×2000 à J-10) + rappel d’allure R'},
+  aff:{deb:'1 seul rappel : 3×400 allure course, récup complète',
+       int:'4×400 allure course à J-4/J-6',
+       av:'4×400 à J-5 + 3×200 vif la veille ou l’avant-veille'}},
+ '10k':{
+  base:{deb:'1 fartlek léger/sem + lignes droites',
+        int:'1 fartlek/sem + tempo 20 min en fin de phase',
+        av:'1 fartlek + 1 tempo 20–25 min/sem'},
+  dev:{deb:'1 qualité/sem en alternance : seuil (2×10 min) une semaine, VMA (30/30) la suivante',
+       int:'1 seuil (Étapes 1→4 du bloc Seuil) + 1 VMA par semaine',
+       av:'1 seuil long (cruise intervals, 4×2000) + 1 VMA + 1 tempo/sem'},
+  spe:{deb:'1 spé/sem : tempo 6 km → 4×1000 → 2×3 km à AS10',
+       int:'1 spé/sem (Étapes 1→5 du bloc Spé 10K) + 1 rappel seuil ou VMA courte',
+       av:'2 qualités : la spé du bloc (5×2000, 2×4 km à J-10) + seuil d’entretien'},
+  aff:{deb:'1 rappel : 2×1000 allure course',
+       int:'3×1000 allure course à J-4/J-6',
+       av:'3×1000 à J-5 + lignes droites tous les jours'}},
+ 'semi':{
+  base:{deb:'1 fartlek léger/sem, SL régulière sans qualité',
+        int:'1 tempo 20 min/sem + lignes droites',
+        av:'1 tempo + 1 séance de côtes/sem'},
+  dev:{deb:'1 qualité/sem : seuil progressif (2×10 → 3×10 min)',
+       int:'1 seuil (progression du bloc Seuil) + 1 VMA légère/sem',
+       av:'1 seuil long + 1 VMA + fin de SL au tempo'},
+  spe:{deb:'1 spé/sem : 2×3 km → 3×3 km AS21, puis blocs AS21 en fin de SL',
+       int:'1 spé/sem (Étapes 1→5 du bloc Spé semi) + 1 seuil',
+       av:'2 qualités : la spé du bloc (2×5 km, 2×6 km à J-10) + SL avec gros blocs AS21'},
+  aff:{deb:'1 rappel : 2×2 km AS21',
+       int:'3×2 km AS21 à J-5/J-7',
+       av:'3×2 km à J-6 + rappel court (2×1 km AS21) à J-2/J-3'}},
+ 'mara':{
+  base:{deb:'1 qualité douce/sem : fartlek ou tempo 15–20 min',
+        int:'1 tempo 20 min/sem + côtes légères',
+        av:'1 tempo + 1 côtes/sem, SL vallonnée'},
+  dev:{deb:'1 qualité/sem : seuil progressif (2×10 → 3×10 min)',
+       int:'1 seuil + 1 VMA légère par semaine',
+       av:'1 seuil long + 1 VMA + premiers segments AM courts en SL'},
+  spe:{deb:'1 spé/sem : 2×6 km AM, puis SL avec 2×15 min AM',
+       int:'1 spé/sem (tempo Hansons → 2×8 km AM → SL + 3×15 min AM) + 1 seuil',
+       av:'2 qualités : gros blocs AM (Canova, 30 km progressif) + seuil d’entretien'},
+  aff:{deb:'2 rappels AM courts (2×10 min)',
+       int:'3×3 km AM en début d’affûtage, puis rappels courts',
+       av:'répétition générale à J-14, puis 2–3 rappels AM courts'}},
+ 'trail':{
+  base:{deb:'1 séance de côtes courtes/sem + renfo 1–2×',
+        int:'1 côtes + 1 fartlek vallonné/sem + renfo 2×',
+        av:'1 côtes + 1 seuil vallonné/sem + renfo 2–3×'},
+  dev:{deb:'1 qualité/sem : côtes longues ou seuil vallonné, en alternance',
+       int:'1 côtes longues + 1 seuil par semaine',
+       av:'1 côtes longues + 1 seuil + 1 VMA courte d’entretien'},
+  spe:{deb:'1 SL spécifique (D+ et descentes du profil de course) + 1 rappel côtes/sem',
+       int:'1 SL spécifique + 1 bloc allure course en terrain vallonné',
+       av:'week-end choc, blocs allure course, descentes appuyées répétées'},
+  aff:{deb:'1 sortie courte avec 4–5 côtes vives',
+       int:'sortie courte côtes vives + lignes droites',
+       av:'côtes vives + rappel court à allure course'}}
+};
+
+/* ══ Profils, cibles radar, erreurs & guide ══ */
+const PL_PROFILES=[
+ {id:'deb',ico:'🟢',lbl:'Débutant',volMult:0.70,sl:0.85,qlvl:'deb',radar:{vo2:2,vit:2,seuil:2,ef:3,end:3,force:2},desc:'Découverte : priorité endurance, régularité et prévention.'},
+ {id:'rout',ico:'🔵',lbl:'Routier',volMult:1.15,sl:1.15,qlvl:'int',radar:{vo2:3,vit:2,seuil:4,ef:4,end:4,force:2},desc:'Gros volume, seuil et endurance ; VMA en entretien.'},
+ {id:'pist',ico:'🟠',lbl:'Pistard',volMult:0.90,sl:0.80,qlvl:'av',radar:{vo2:4,vit:4,seuil:3,ef:3,end:2,force:3},desc:'VMA et vitesse dominantes, volume modéré, rappels fréquents.'},
+ {id:'trail',ico:'🟣',lbl:'Traileur',volMult:1.10,sl:1.35,qlvl:'int',radar:{vo2:3,vit:2,seuil:3,ef:4,end:5,force:4},desc:'Endurance longue, force et dénivelé au cœur du plan.'},
+ {id:'sprint',ico:'🔴',lbl:'Ancien sprinteur',volMult:0.85,sl:1.10,qlvl:'av',radar:{vo2:3,vit:5,seuil:2,ef:2,end:2,force:4},desc:'Grosse vitesse ; endurance et seuil à construire.'}
+];
+const PL_TARGET={
+ '5k':{vo2:5,vit:4,seuil:3,ef:3,end:2,force:2},
+ '10k':{vo2:4,vit:3,seuil:5,ef:4,end:3,force:2},
+ 'semi':{vo2:3,vit:2,seuil:5,ef:5,end:4,force:2},
+ 'mara':{vo2:2,vit:1,seuil:4,ef:5,end:5,force:3},
+ 'trail':{vo2:3,vit:2,seuil:4,ef:5,end:5,force:5}
+};
+const PL_VOLREF={
+ '5k':{unit:'km/sem',min:25,lo:30,hi:50,perf:'60–80',note:'Le 5 km demande peu de volume mais beaucoup de qualité : la vitesse de base compte plus que le kilométrage.'},
+ '10k':{unit:'km/sem',min:30,lo:45,hi:65,perf:'70–90',note:'Équilibre volume/intensité : le seuil se construit sur une base aérobie régulière.'},
+ 'semi':{unit:'km/sem',min:40,lo:55,hi:75,perf:'80–100',note:'La sortie longue devient structurante. Repère « feu vert » : tenir 1h30 en continu avant la prépa.'},
+ 'mara':{unit:'km/sem',min:40,lo:60,hi:80,perf:'90–130',note:'~40 km/sem minimum pour finir sereinement, avec une sortie longue montant à 30–32 km. La régularité et la SL priment sur le pic hebdo (Vickers & Vertosick 2016).'},
+ 'trail':{unit:'h/sem',min:4,lo:6,hi:9,perf:'9–14',note:'Le volume se compte en heures et en dénivelé : la durée des sorties et le D+ priment sur les kilomètres.'}
+};
+const PL_VOLBYTIME={
+ '5k':[[960,'60–80'],[1080,'45–65'],[1200,'35–50'],[1320,'28–40'],[1e9,'25–35']],
+ '10k':[[2100,'70–90'],[2400,'55–75'],[2700,'40–55'],[3000,'30–45'],[1e9,'25–35']],
+ 'semi':[[4800,'80–110'],[5400,'65–85'],[6300,'50–70'],[7200,'40–55'],[1e9,'35–45']],
+ 'mara':[[10800,'90–120'],[12600,'70–90'],[14400,'55–75'],[16200,'45–60'],[1e9,'40–50']]
+};
+function plVolForTime(id,sec){
+  const T=PL_VOLBYTIME[id]; if(!T||!sec)return null;
+  for(const r of T){ if(sec<=r[0]) return r[1]; }
+  return T[T.length-1][1];
+}
+const RACE_KEY={
+ '5k':{d:5000,lbl:'5 km',vma:'90–95 % VMA',vc:'≈ 105 % VC (au-dessus, via le D′)',strat:'Départ et fin les plus rapides, milieu régulier — ne pas céder aux à-coups du peloton.'},
+ '10k':{d:10000,lbl:'10 km',vma:'85–90 % VMA',vc:'≈ 96–100 % VC',strat:'Allure au métronome : départ maîtrisé, long milieu régulier, accélération sur le dernier km.'},
+ 'semi':{d:21097.5,lbl:'Semi-marathon',vma:'80–85 % VMA',vc:'92–96 % VC',strat:'Allure constante du 5e au 15e km. Courir en groupe protège de la baisse d’allure.'},
+ 'mara':{d:42195,lbl:'Marathon',vma:'75–80 % VMA',vc:'84–91 % VC (84,8 % en moyenne)',strat:'Partir à ≤ 88 % de sa VC (ou ~80 % VMA) protège de l’effondrement après 30 km. Ravitaillement toutes les 30–40 min.'},
+ 'trail':{d:0,lbl:'Trail',vma:'variable selon le D+',vc:'variable selon le D+',strat:'Marcher les côtes raides, gérer les descentes, tester nutrition et matériel à l’entraînement.'}
+};
+const PL_RAD_LBL=['VO₂max','Vitesse','Seuil','EF','Endurance','Force'];
+const PL_RAD_KEYS=['vo2','vit','seuil','ef','end','force'];
+const PL_ERR={
+ base:'Courir trop vite en EF (rester en aisance) · augmenter le volume de plus de 10 %/sem · négliger le renforcement.',
+ dev:'Enchaîner deux qualités sans récup · courir les intervalles trop vite (tenir l’allure cible) · sauter les footings de récup.',
+ spe:'Dépasser l’allure course « pour voir » · trop de volume à haute intensité · négliger la récup entre les grosses séances.',
+ aff:'Baisser l’intensité (garder les allures) · caser une grosse séance de dernière minute · changer ses habitudes (chaussures, alimentation) la semaine de course.'
+};
+const PL_PROG={base:'Volume ↗ progressif, intensité faible',dev:'Intensité ↗, volume stable',spe:'Spécificité ↗, volume léger ↘',aff:'Volume ↘↘, intensité maintenue'};
+const PL_SKEL={
+ deb:{def:'Mar : qualité · Jeu : EF 45–60′ · Dim : sortie longue',aff:'Garder les 3 jours, tout raccourcir (volume −40/−50 %)'},
+ int:{def:'Mar : qualité 1 · Mer : EF · Ven : qualité 2 · Dim : SL',aff:'Mar : rappel d’allure · Jeu : EF courte · Dim : SL écourtée'},
+ av:{def:'Lun : EF · Mar : qualité 1 · Mer : EF · Jeu : qualité 2 · Sam : EF+lignes · Dim : SL',aff:'Conserver la fréquence, diviser les volumes par 2 · rappels courts'}
+};
+
+let _plD='10k',_plProf='rout',_plW=null,_plCtx='new',_plPicked=false;
+let _plDate1=null,_plDate2=null,_plDi=null,_plDatesSeeded=false,_plPhaseOverride=null,_plOrient=0,_plBase=true;
+let _plTime='',_plVol=null,_plSess=null,_plQual=null,_plInj=false,_plPrep=false;
+let _plOpen={},plRadarChart=null;
+
+function plProf(){return PL_PROFILES.find(x=>x.id===_plProf)||PL_PROFILES[1];}
+function plQlvl(){return plProf().qlvl;}
+
+function plPhases(p,w){
+  if(_plPhaseOverride){var _o=_plPhaseOverride,_sum=_o.base+_o.dev+_o.spe+_o.aff;if(w===_sum)return [['base',_o.base],['dev',_o.dev],['spe',_o.spe],['aff',_o.aff]];}
+  const aff=p.taper(w);
+  let rest=w-aff;
+  if(_plCtx==='race'){
+    const base=Math.min(2,Math.max(1,Math.round(w*0.10)));
+    rest-=base;
+    let dev=Math.max(1,Math.round(rest*p.ratios.dev/(p.ratios.dev+p.ratios.spe)));
+    let spe=rest-dev; if(spe<1){spe=1;if(dev>1)dev--;}
+    return _plOrientPhases([['base',base],['dev',dev],['spe',spe],['aff',aff]]);
+  }
+  const rb=p.ratios.base*(_plCtx==='fit'?0.5:1);
+  const tot=rb+p.ratios.dev+p.ratios.spe;
+  let base=_plBase?Math.max(1,Math.round(rest*rb/tot)):0;
+  let rem=rest-base;
+  let dev=Math.max(1,Math.round(rem*p.ratios.dev/(p.ratios.dev+p.ratios.spe)));
+  let spe=rem-dev;
+  if(spe<1){spe=1;if(dev>1)dev--;}
+  return _plOrientPhases([['base',base],['dev',dev],['spe',spe],['aff',aff]]);
+}
+function _plOrientPhases(arr){
+  var k=_plOrient||0; if(!k)return arr;
+  var o={}; arr.forEach(function(s){o[s[0]]=s[1];});
+  if(k>0){for(var i=0;i<k;i++){if(o.dev>1){o.dev--;o.spe++;}else break;}}
+  else{for(var j=0;j<-k;j++){if(o.spe>1){o.spe--;o.dev++;}else break;}}
+  return [['base',o.base],['dev',o.dev],['spe',o.spe],['aff',o.aff]];
+}
+function plPhaseJustif(p){
+  var ph=plPhases(p,_plW),o={}; ph.forEach(function(s){o[s[0]]=s[1];});
+  var sp={'10k':'sp\u00e9cifique courte (allure soutenue)','semi':'sp\u00e9cifique interm\u00e9diaire','mara':'sp\u00e9cifique longue \u2014 l\u2019endurance \u00e0 allure marathon est le facteur cl\u00e9','trail':'sp\u00e9cifique orient\u00e9e terrain/d\u00e9nivel\u00e9'}[_plD]||'sp\u00e9cifique adapt\u00e9e';
+  var lead=_plOrient>0?'Orientation <b style="color:'+PL_PHC.spe+'">sp\u00e9cifique</b> \u2014 ':(_plOrient<0?'Orientation <b style="color:'+PL_PHC.base+'">endurance</b> \u2014 ':'');
+  return lead+(o.base===0?'pas de bloc de base':'<b>'+o.base+'</b> sem de base '+(_plCtx==='fit'?'(r\u00e9duite, d\u00e9j\u00e0 entra\u00een\u00e9)':'(g\u00e9n\u00e9rale, reprise)'))+' \u00b7 <b>'+o.dev+'</b> sem de d\u00e9veloppement \u00b7 <b>'+o.spe+'</b> sem '+sp+' \u00b7 <b>'+o.aff+'</b> sem d\u2019aff\u00fbtage (cal\u00e9 sur la distance, Bosquet).';
+}
+function plPhaseBoxHTML(p){
+  return '<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">R\u00e9partition des phases</div>'
+    +'<div id="pl-justif" style="font-size:12.5px;color:var(--text2);line-height:1.65;margin-bottom:12px">'+plPhaseJustif(p)+'</div>'
+    +'<label style="display:inline-flex;align-items:center;gap:9px;margin-bottom:14px;cursor:pointer;padding:8px 12px;border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,0.02)">'
+    +'<input type="checkbox" id="pl-base-cb" '+(_plBase?'checked':'')+' onchange="setPlBase(this.checked)" style="width:17px;height:17px;cursor:pointer;accent-color:'+PL_PHC.base+'">'
+    +'<span style="font-size:12.5px;font-weight:700;color:var(--text2)">Inclure une phase de <b style="color:'+PL_PHC.base+'">Base</b> <span style="color:var(--muted2);font-weight:600">(retour / reprise)</span></span></label>'
+    +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+    +'<span style="font-size:11.5px;font-weight:800;color:'+PL_PHC.dev+'">D\u00e9veloppement</span>'
+    +'<input type="range" id="pl-orient-sl" min="-5" max="5" step="1" value="'+(_plOrient||0)+'" oninput="setPlOrient(this.value)" class="sl" style="flex:1;min-width:170px;max-width:320px">'
+    +'<span style="font-size:11.5px;font-weight:800;color:'+PL_PHC.spe+'">Sp\u00e9cifique</span>'
+    +'<button type="button" id="pl-orient-auto" onclick="setPlOrient(0)" style="background:none;border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:11px;font-weight:800;padding:4px 10px;cursor:pointer;display:'+(_plOrient?'inline-block':'none')+'">\u21ba Auto</button>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--muted2);margin-top:8px">Le curseur d\u00e9place les semaines entre <b>D\u00e9veloppement</b> et <b>Sp\u00e9cifique</b> (dur\u00e9e totale inchang\u00e9e).</div>';
+}
+function setPlBase(v){
+  _plBase=!!v;_plPicked=true;
+  renderPlanif();
+}
+function setPlOrient(v){
+  _plOrient=+v;_plPicked=true;
+  var p=PLANIF.find(function(x){return x.id===_plD;});if(!p)return;
+  plDrawVol(p,plWeeks(p,_plW),'pl-vol-canvas');
+  var j=document.getElementById('pl-justif');if(j)j.innerHTML=plPhaseJustif(p);
+  var sl=document.getElementById('pl-orient-sl');if(sl)sl.value=_plOrient;
+  var ab=document.getElementById('pl-orient-auto');if(ab)ab.style.display=_plOrient?'inline-block':'none';
+  if(typeof plSyncCfg==='function')plSyncCfg();
+}
+function plPhLabel(k){return (k==='base'&&_plCtx==='race')?'Récup & relance':PL_PHL[k];}
+
+function plWeeks(p,w){
+  const ph=plPhases(p,w); const arr=[];
+  ph.forEach(seg=>{for(let i=0;i<seg[1];i++)arr.push({ph:seg[0],pi:i,pl:seg[1]});});
+  const prof=plProf();
+  const _nb=arr.filter(w=>w.ph!=='aff').length;
+  // indexer les semaines de charge (hors affûtage)
+  let _bi=0; arr.forEach(function(wk){ if(wk.ph!=='aff'){ wk._bi=_bi; _bi++; } });
+  // --- Placement des décharges : option 2 (hybride) ---
+  // décharge calée en FIN de bloc (transition, si bloc >= 4 sem), + sécurité : jamais > 4 semaines de charge d'affilée.
+  // jamais sur le pic (dernière semaine de charge, qui enchaîne sur l'affûtage).
+  let since=0;
+  arr.forEach(function(wk,i){
+    if(wk.ph==='aff'){return;}
+    if(wk.ph==='base'){ wk.rec=false; return; }   // base = charge légère : pas de décharge, ne compte pas dans le run
+    const bi=wk._bi, isPeak=(bi===_nb-1), isEnd=(wk.pi===wk.pl-1), pLen=wk.pl;
+    since++;
+    let rec=false;
+    if(!isPeak){
+      if(isEnd && pLen>=4 && since>=3){ rec=true; }        // décharge de transition en fin de bloc
+      else if(since>=4){                                    // sécurité : jamais > 4 sem de charge d'affilée
+        rec=true;
+        var nx=arr[i+1];                                    // si la semaine suivante est une fin de bloc, on laisse la décharge s'y caler
+        if(nx && nx.ph!=='aff' && nx.ph!=='base' && nx.pi===nx.pl-1 && nx.pl>=4 && nx._bi!==_nb-1){ rec=false; }
+        else if(wk.pi===0 && i>0 && arr[i-1] && arr[i-1].ph!=='aff' && arr[i-1].ph!=='base' && !arr[i-1].rec && arr[i-1]._bi!==_nb-1){
+          arr[i-1].rec=true; rec=false; since=1;            // pas de décharge en début de bloc → on la cale sur la fin du bloc précédent
+        }
+      }
+    }
+    wk.rec=rec; if(rec) since=0;
+  });
+  arr.forEach(function(wk,i){
+    let v;
+    if(wk.ph==='aff'){ v=(wk.pl===1)?0.50:(0.59-0.19*wk.pi/(wk.pl-1)); } // affûtage -41% (S-2) à -60% (S-1), Bosquet 2007
+    else{ const prog=_nb>1?(0.72+0.28*(wk._bi/(_nb-1))):0.9; v=wk.rec?prog*0.7:prog; } // -30% la semaine allégée
+    wk.n=i+1; wk.vol=v;
+  });
+  // km hebdo
+  const baseKm=_plVol||plDefaultVol(p);
+  const peakKm=Math.round(baseKm*1.2);
+  arr.forEach(wk=>{wk.km=Math.max(1,Math.round(wk.vol*peakKm));});
+  let _d1=null;
+  if(_plDate2)_d1=new Date(new Date(_plDate2+'T00:00:00').getTime()-(arr.length*7-1)*864e5);
+  else if(_plDate1)_d1=new Date(_plDate1+'T00:00:00');
+  if(_d1){
+    const d1=_d1;
+    const fd=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+    arr.forEach((wk,i)=>{const a=new Date(d1.getTime()+i*7*864e5),b=new Date(d1.getTime()+(i*7+6)*864e5);wk.dates=fd(a)+'–'+fd(b);wk.d0=a;});
+    if(_plDi){const di=new Date(_plDi+'T00:00:00');const idx=Math.floor((di-d1)/(7*864e5));if(idx>=0&&idx<arr.length)arr[idx].inter=true;}
+  }
+  arr[arr.length-1].race=true;
+  return arr;
+}
+function plDefaultVol(p){
+  const base={'5k':45,'10k':50,'semi':55,'mara':65,'trail':45}[p.id]||50;
+  return Math.round(base*plProf().volMult);
+}
+function plUnit(){return _plD==='trail'?'':'km';}
+
+/* Allures perso */
+function plPaces(p){
+  if(!S.vma)return null;
+  const v=S.vma,pc=x=>fAll(3600/(v*x));
+  const out={ef:pc(0.65)+'–'+pc(0.75)+'/km',seuil:pc(0.85)+'–'+pc(0.90)+'/km',vma:pc(1)+'/km'};
+  const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===p.id):null;
+  if(pr&&typeof perfRange==='function'){const rg=perfRange(pr,{vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0});out.as=fAll(rg.tMed/pr.d*1000)+'/km';}
+  return out;
+}
+function plCardPaces(p,phk){
+  const pa=plPaces(p); if(!pa)return '';
+  const map={base:[['EF',pa.ef]],dev:[['Seuil',pa.seuil],['VMA',pa.vma]],spe:pa.as?[['Allure course',pa.as],['Seuil',pa.seuil]]:[['Seuil',pa.seuil]],aff:pa.as?[['Allure course',pa.as]]:[['VMA',pa.vma]]};
+  const items=map[phk]||[]; if(!items.length)return '';
+  return '<div style="margin-top:8px;font-size:12px;color:var(--muted2)">Allures : '+items.map(x=>x[0]+' <b style="color:var(--text2)">'+x[1]+'</b>').join(' · ')+'</div>';
+}
+
+/* Reco durée + logique de décision */
+function plRecoWeeks(p){
+  let w=p.wdef;
+  if(_plCtx==='new')w+=2;
+  if(_plPrep)w+=2;
+  if(_plInj)w+=1;
+  if(_plCtx==='fit'&&!_plPrep&&!_plInj)w=p.wdef;
+  return Math.min(Math.max(w,p.wmin),p.wmax);
+}
+function plReasons(p,weeks){
+  const R=[];
+  const prof=plProf();
+  if(_plVol!=null)R.push({ok:_plVol>=40,t:'Volume actuel '+_plVol+' '+plUnit()+(_plVol>=45?' — base solide':' — base à consolider')});
+  R.push({ok:true,t:'Profil '+prof.lbl.toLowerCase()+' — '+prof.desc.toLowerCase().replace(/\.$/,'')});
+  R.push({ok:_plCtx!=='new',t:_plCtx==='fit'?'Athlète déjà entraîné → base réduite':(_plCtx==='race'?'Enchaînement post-course → phase de relance':'Reprise → base générale complète')});
+  if(_plTime)R.push({ok:true,t:'Objectif '+_plTime+' sur '+p.lbl+' → allure spécifique travaillée en fin de prépa'});
+  if(_plPrep)R.push({ok:true,t:'Course préparatoire prévue → +2 sem pour la caler et absorber'});
+  if(_plInj)R.push({ok:false,t:'Reprise après blessure → montée en charge prudente (+1 sem, décharges respectées)'});
+  const ph=plPhases(p,weeks);
+  const dev=ph.find(x=>x[0]==='dev')[1],spe=ph.find(x=>x[0]==='spe')[1];
+  R.push({concl:true,t:'⇒ '+weeks+' semaines : '+ph.map(x=>x[1]+' '+({base:'base',dev:'dév.',spe:'spé.',aff:'affût.'})[x[0]]).join(' + ')});
+  return R;
+}
+
+/* Cohérence */
+function plCoherence(p,weeks,wk){
+  const items=[]; let score=0,max=0;
+  const add=(ok,warn,t)=>{items.push({s:ok?'ok':(warn?'warn':'no'),t:t});max+=1;score+=ok?1:(warn?0.5:0);};
+  const avail=(_plDate1&&_plDate2)?Math.floor((new Date(_plDate2)-new Date(_plDate1))/(7*864e5)):null;
+  add(weeks>=p.wmin&&weeks<=p.wmax,false,weeks>=p.wmin&&weeks<=p.wmax?'Durée dans la plage optimale ('+p.wmin+'–'+p.wmax+' sem)':'Durée hors plage conseillée');
+  add(_plVol!=null,_plVol==null, _plVol!=null?'Volume renseigné ('+_plVol+' '+plUnit()+')':'Volume actuel non renseigné');
+  // progression : sauts ≤ 12% hors décharge/affûtage
+  let progOk=true;
+  for(let i=1;i<wk.length;i++){if(wk[i].ph!=='aff'&&!wk[i].rec&&!wk[i-1].rec&&wk[i-1].km>0){if((wk[i].km-wk[i-1].km)/wk[i-1].km>0.13)progOk=false;}}
+  add(progOk,!progOk,progOk?'Progression de charge cohérente (≤ 12 %/sem)':'Progression un peu raide sur certaines semaines');
+  add(_plPrep,!_plPrep,_plPrep?'Course préparatoire prévue':'Aucune course préparatoire (recommandée à 60–70 %)');
+  const nSL=weeks; add(plProf().sl>=0.9||_plD==='5k',plProf().sl<0.9,'Sortie longue adaptée au profil');
+  if(avail!=null)add(Math.abs(avail-weeks)<=1,Math.abs(avail-weeks)<=3,avail===weeks?'Plan calé sur le temps disponible':'Écart entre durée idéale et temps disponible ('+avail+' sem)');
+  return {pct:Math.round(score/max*100),items:items};
+}
+
+function plBarHTML(p,ph){return ph.map(x=>'<div title="'+plPhLabel(x[0])+' · '+x[1]+' sem" style="flex:'+x[1]+';background:'+PL_PHC[x[0]]+';display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;color:#0f172a;white-space:nowrap;overflow:hidden;padding:0 4px"><span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.3px;overflow:hidden;text-overflow:ellipsis;max-width:100%">'+plPhLabel(x[0])+'</span><span style="font-size:10px;font-weight:700;opacity:.8">'+x[1]+' sem</span></div>').join('');}
+
+/* Courbe de charge (SVG) + liste km */
+function plLoadHTML(p,wk,opts){
+  opts=opts||{};
+  const cid=opts.cid||'pl-vol-canvas';
+  const title=opts.noTitle?'':'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Périodisation de la charge</div>';
+  const legend=[['base','Base'],['dev','Développement'],['spe','Spécifique'],['aff','Affûtage']].map(l=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2)"><i style="width:10px;height:10px;border-radius:50%;background:'+PL_PHC[l[0]]+'"></i>'+l[1]+'</span>').join('');
+  return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
+    +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
+    +'<div style="position:relative;height:400px"><canvas id="'+cid+'"></canvas></div>'
+    +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 4 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
+}
+let _plVolCharts={};
+function plDrawVol(p,wk,cid){
+  const cv=document.getElementById(cid); if(!cv||typeof Chart==='undefined')return;
+  if(_plVolCharts[cid]){_plVolCharts[cid].destroy();}
+  const u=plUnit();
+  const labels=wk.map(x=>x.race&&x.d0?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n)));
+  const data=wk.map(x=>x.km);
+  const _pha=function(h,a){h=h.replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';};
+  const barCol=wk.map(x=>x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph]);
+  const _ymax=Math.max.apply(null,data.length?data:[1])*1.08;
+  _plVolCharts[cid]=new Chart(cv,{type:'bar',data:{labels:labels,datasets:[{
+    label:'Volume',data:data,
+    backgroundColor:barCol,borderColor:barCol,borderWidth:0,
+    borderRadius:5,maxBarThickness:46,categoryPercentage:0.82,barPercentage:0.92
+  }]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return 'S'+x.n+(x.d0?' · '+labels[it[0].dataIndex]:'');},label:function(c){var x=wk[c.dataIndex];return c.parsed.y+' '+(u||'')+(x.rec?' · décharge':'')+(x.race?' · course':'')+(x.inter?' · ★ course prépa':'')+' · '+plPhLabel(x.ph);}}}},
+    scales:{
+      y:{title:{display:true,text:(u?'Volume ('+u+'/sem)':'Volume/sem'),color:'#94A3B8',font:{size:11}},ticks:{color:'#94A3B8',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'},beginAtZero:false,suggestedMax:_ymax},
+      x:{ticks:{color:'#94A3B8',font:{size:11},maxRotation:0,autoSkip:true},grid:{color:'rgba(255,255,255,0.04)'}}
+    }},plugins:[{id:'volLbl',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign='center';g.textBaseline='bottom';m.data.forEach(function(pt,i){g.font='800 12px Manrope,sans-serif';g.fillStyle='#E2E8F0';g.fillText(ch.data.datasets[0].data[i]+(u?' '+u:''),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font='800 9px Manrope,sans-serif';g.fillStyle='#FBBF24';g.fillText('PR\u00c9PA',pt.x,pt.y-26);}});g.restore();}}]});
+}
+
+/* Calendrier avec flux */
+function plCalHTML(p,weeks){
+  const cells=weeks.map((wk,i)=>{
+    const badges=(wk.rec?'<span style="background:rgba(255,255,255,0.1);border-radius:8px;padding:1px 7px;font-size:10px;font-weight:900">↓ allégée</span>':'')
+      +(wk.inter?'<span style="background:rgba(251,191,36,0.18);border:1px solid rgba(251,191,36,0.4);color:#FBBF24;border-radius:8px;padding:1px 7px;font-size:10px;font-weight:800">★ course prépa</span>':'')
+      +(wk.race?'<span style="background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:#34D399;border-radius:8px;padding:1px 7px;font-size:10px;font-weight:800">course</span>':'');
+    const dlabel=wk.d0?wk.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+wk.n);
+    return '<div style="border:1px solid var(--border);border-left:3px solid '+PL_PHC[wk.ph]+';border-radius:9px;padding:9px 11px;background:'+(wk.rec?'rgba(255,255,255,0.015)':'var(--card)')+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:13.5px;color:var(--text)">'+dlabel+'</b><span style="font-size:10.5px;color:var(--muted2)">S'+wk.n+'</span></div>'
+      +'<div style="font-size:11px;font-weight:700;color:'+PL_PHC[wk.ph]+';margin-top:2px">'+plPhLabel(wk.ph)+' · '+wk.km+(plUnit()?' '+plUnit():'')+'</div>'
+      +(badges?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">'+badges+'</div>':'')
+      +'</div>';
+  }).join('<div style="display:flex;align-items:center;justify-content:center;color:var(--muted2)">↓</div>');
+  return '<div style="display:flex;flex-direction:column;gap:6px;max-width:520px">'+cells+'</div>';
+}
+
+/* Cartes de phases dépliables */
+function plCardsHTML(p,ph){
+  return ph.map((x,idx)=>{
+    let d=p.phases[x[0]];
+    let q=(PL_Q[p.id]&&PL_Q[p.id][x[0]])?PL_Q[p.id][x[0]][plQlvl()]:null;
+    if(x[0]==='base'&&_plCtx==='race'){d={focus:'Récupérer de la course puis relancer.',ex:'7–10 jours très faciles puis réintroduction progressive : lignes droites, fartlek léger, premier tempo court.'};q='Aucune qualité la 1re semaine, puis réintroduction progressive.';}
+    const skel=PL_SKEL[plQlvl()][x[0]==='aff'?'aff':'def'];
+    const open=!!_plOpen[x[0]];
+    const pcs=plCardPaces(p,x[0]);
+    const sect=(t,c)=>'<div style="margin-top:10px"><div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px">'+t+'</div><div style="font-size:12.5px;color:var(--text2);line-height:1.6">'+c+'</div></div>';
+    const body=open?(''
+      +sect('Objectif',d.focus)
+      +(q?sect('Qualités à faire',q):'')
+      +sect('Séances proposées',d.ex)
+      +(pcs?sect('Allures cibles',pcs.replace('<div style="margin-top:8px;font-size:12px;color:var(--muted2)">Allures : ','').replace('</div>','')):'')
+      +sect('Volume conseillé',(function(){const seg=[];let n=1;for(const s of ph){if(s[0]===x[0])break;n+=s[1];}return 'phase '+x[1]+' sem · '+PL_PROG[x[0]];})())
+      +sect('Fréquence',plProf().qlvl==='deb'?'3 séances/sem (+ renfo)':(plProf().qlvl==='av'?'5–7 séances/sem':'4–5 séances/sem'))
+      +sect('Progression',PL_PROG[x[0]])
+      +sect('Erreurs à éviter','<span style="color:#FCA5A5">'+PL_ERR[x[0]]+'</span>')
+    ):('<div style="font-size:12.5px;color:var(--muted);line-height:1.6">'+d.focus+'</div>');
+    return '<div class="card" style="padding:16px 18px;border-top:3px solid '+PL_PHC[x[0]]+'">'
+      +'<button type="button" onclick="plToggle(\''+x[0]+'\')" style="width:100%;background:none;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:0;font-family:var(--font)">'
+      +'<b style="font-size:15px;color:'+PL_PHC[x[0]]+'">'+(open?'▼ ':'▶ ')+plPhLabel(x[0])+'</b>'
+      +'<span style="font-size:12.5px;font-weight:800;color:var(--muted2)">'+x[1]+' sem</span></button>'
+      +body+'</div>';
+  }).join('');
+}
+function plToggle(k){_plOpen[k]=!_plOpen[k];renderPlanif();}
+
+/* Radar */
+function plDrawRadar(p){
+  const cv=document.getElementById('pl-radar'); if(!cv||typeof Chart==='undefined')return;
+  if(plRadarChart){plRadarChart.destroy();plRadarChart=null;}
+  const prof=plProf(),tgt=PL_TARGET[p.id];
+  const hex=p.col.replace('#',''),rr=parseInt(hex.slice(0,2),16),gg=parseInt(hex.slice(2,4),16),bb=parseInt(hex.slice(4,6),16);
+  plRadarChart=new Chart(cv,{type:'radar',data:{labels:PL_RAD_LBL,datasets:[
+    {label:'Qualités à développer — '+p.lbl,data:PL_RAD_KEYS.map(k=>tgt[k]),borderColor:p.col,backgroundColor:'rgba('+rr+','+gg+','+bb+',0.18)',pointBackgroundColor:p.col,borderWidth:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#CBD5E1',boxWidth:12,font:{size:11}}}},
+    scales:{r:{min:0,max:5,ticks:{display:false,stepSize:1},grid:{color:'rgba(255,255,255,0.08)'},angleLines:{color:'rgba(255,255,255,0.08)'},pointLabels:{color:'#CBD5E1',font:{size:12,weight:'700'}}}}}});
+}
+
+const PL_SPE=[
+ {id:'10k',ep:'10 km',int:'85-90 % (rapide) → 80-85 % (lent)',vol:'4 à 6 km',frac:'1000 m à 3000 m',rec:'1′ à 3′'},
+ {id:'semi',ep:'Semi',int:'80-85 % → 75-80 %',vol:'6 à 10 km',frac:'2000 m à 5000 m',rec:'1′ à 3′'},
+ {id:'mara',ep:'Marathon',int:'75-80 % → 70-75 %',vol:'8 à 15 km',frac:'3000 m à 10 000 m',rec:'1′30 à 5′'}
+];
+const PL_RECOV=[
+ ['Dette d’oxygène','2 à 5 min','Phase rapide (souffle)'],
+ ['Créatine phosphate (CP)','3 à 5 min','Réserves d’explosivité'],
+ ['Lactate musculaire','~1 heure','Accéléré par récup active'],
+ ['Lactate sanguin','1 à 2 heures','Retour normal en 30-60 min si récup active'],
+ ['Glycogène hépatique','6 à 12 heures','Réduit par un apport glucidique'],
+ ['Glycogène musculaire','24 à 48 heures','Plusieurs jours sans apport glucidique élevé']
+];
+const PL_POSTRACE=[['10 km','3 jours'],['Semi-marathon','5 jours'],['Marathon / 100 km','2 semaines'],['24 h et plus','3 semaines']];
+const PL_RECOV_SESS=[
+ ['Footing / EF','Aucun','Enchaînable, même quotidien'],
+ ['Sortie longue','24–48 h','Reconstitution du glycogène musculaire'],
+ ['Seuil (SV1/SV2)','24–48 h','Charge métabolique modérée'],
+ ['VMA / VO2max','~48 h','Avant une nouvelle séance dure'],
+ ['Vitesse / sprint','48–72 h','Stress neuromusculaire (le plus long à dissiper)'],
+ ['Compétition','voir tableau reprise','Selon la distance']
+];
+function plRecovHTML(){
+  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  const rows=PL_RECOV.map(r=>'<tr><td style="'+td+';font-weight:700;color:var(--text)">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td><td style="'+td+';color:var(--muted)">'+r[2]+'</td></tr>').join('');
+  const prows=PL_POSTRACE.map(r=>{const on=(r[0].indexOf('10 km')===0&&_plD==='10k')||(r[0].indexOf('Semi')===0&&_plD==='semi')||(r[0].indexOf('Marathon')===0&&_plD==='mara');return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'"><td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Délais de récupération — référentiel FFA</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">'
+    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Restauration métabolique (après effort max)</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Système</th><th style="'+th+'">Durée</th><th style="'+th+'">Remarque</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'
+    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Reprise post-compétition</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Épreuve</th><th style="'+th+'">Repos conseillé</th></tr></thead><tbody>'+prows+'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Règle <b>60/30/10</b> : 60 % de la récupération se fait dans le 1<sup>er</sup> tiers du temps, 30 % dans le 2<sup>e</sup> → <b>90 % acquis aux 2/3</b>. Étirements réintroduits en S2 après un marathon. Source : Livret CQP FFA.</div></div>'
+    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Récup après chaque type de séance</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Type de séance</th><th style="'+th+'">Avant la prochaine séance dure</th><th style="'+th+'">Remarque</th></tr></thead><tbody>'+PL_RECOV_SESS.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text)">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td><td style="'+td+';color:var(--muted)">'+r[2]+'</td></tr>';}).join('')+'</tbody></table></div>'
+    +'<div style="font-size:11px;color:var(--muted2);margin-top:8px">Repères dérivés des délais métaboliques FFA (glycogène musculaire 24-48 h) et de la hiérarchie des stress (le neuromusculaire est le plus long).</div></div>'
+    +'</div></div>';
+}
+const PL_DOMTIME=[
+ ['Endurance fondamentale','50-65 %','Course continue (footing, récup)','45′ à 1h10','—'],
+ ['Endurance active / tempo (SV1)','70-85 %','Fartlek moyen 3′-5′, long 5′-12′','30′ à 1h','Continue / courte'],
+ ['Seuil (SV2)','80-90 %','3×10′, 2×15′, 5×6′, X×400 m','30′ à 40′','30″ à 2′'],
+ ['VMA extensive','95-100 %','Fractions 600-1200 m','15′ à 25′','1/3 à 2/3 de l’effort'],
+ ['VMA intensive','100-105 %','Fractions 100-500 m (< 3′), 36″/36″','12′ à 20′','≤ temps d’effort'],
+ ['VMA mixte (marathon)','95-100 %','200-500 m, 1 à 3 séries','≤ 40′','< 1′ / 2-3′ séries'],
+ ['Vitesse / neuromusculaire','Sprint','30-50 m (< 10″)','Quelques rép.','Complète (5-6′)']
+];
+const PL_COMBINE=[
+ ['La muscu améliore la course','Force max / explosive → meilleure économie de course & puissance (fibres 2A, RFD). N’altère pas la VO2max.','pos'],
+ ['≥ 3 h entre aérobie dure et muscu','Idéal 6-24 h. L’aérobie active l’AMPK, qui inhibe mTOR (synthèse protéique) → gains de force bridés si trop rapproché.','sep'],
+ ['Éviter l’aérobie à jeun le matin si muscu ensuite','Le jeûne sur-active l’AMPK et prolonge l’état catabolique → freine l’hypertrophie.','warn'],
+ ['Recharger glucides + protéines/leucine après séance','Sort le muscle de l’état catabolique et relance la synthèse protéique (mTOR).','pos'],
+ ['≤ 2 séances aérobies/sem = pas d’interférence','À partir de 3 séances/sem, la force max peut baisser. Privilégier qualité HI + faible volume.','sep'],
+ ['Vélo > course comme complément aérobie en cycle de force','La course (contractions excentriques) crée des dommages musculaires qui interfèrent ; le vélo (concentrique) non.','warn'],
+ ['Bas du corps (course) n’affecte pas la muscu du haut','L’interférence est surtout locale : mêmes groupes musculaires sollicités.','pos'],
+ ['Aérobie HI + muscu → meilleure perte de masse grasse','Synergie confirmée en méta-analyse (Wilson 2012).','pos']
+];
+function plCombineHTML(){
+  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  const dot={pos:'#34D399',warn:'#FB923C',sep:'#94A3B8'};
+  const rows=PL_COMBINE.map(function(r){return '<tr>'
+    +'<td style="'+td+';font-weight:800;color:var(--text)"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+dot[r[2]]+';margin-right:8px;vertical-align:middle"></span>'+r[0]+'</td>'
+    +'<td style="'+td+';color:var(--muted)">'+r[1]+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Muscu + course — combiner sans interférence (INSEP)</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">La force n’altère pas l’aérobie (elle améliore l’économie de course) ; l’inverse peut brider les gains de force. Comment enchaîner les deux.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
+    +'<thead><tr><th style="'+th+'">Règle</th><th style="'+th+'">Pourquoi</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Cohérent avec les délais FFA ci-dessus (stress neuromusculaire 48-72 h). Le continu à faible intensité reste indispensable chez l’endurant élite (Seiler 2006). Source : INSEP « Sports à haute intensité » (dir. C. Hanon).</div>'
+    +'</div>';
+}
+function plDomainTimeHTML(){
+  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  const rows=PL_DOMTIME.map(function(r){return '<tr>'
+    +'<td style="'+td+';font-weight:800;color:var(--text)">'+r[0]+'</td>'
+    +'<td style="'+td+';white-space:nowrap">'+r[1]+'</td>'
+    +'<td style="'+td+'">'+r[2]+'</td>'
+    +'<td style="'+td+';font-weight:800;white-space:nowrap;color:var(--orange)">'+r[3]+'</td>'
+    +'<td style="'+td+';white-space:nowrap">'+r[4]+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Temps de travail par domaine — référentiel FFA</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Durée de travail effectif dans la zone (échauffement/récup exclus), par séance.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px">'
+    +'<thead><tr><th style="'+th+'">Domaine</th><th style="'+th+'">Intensité (% VMA)</th><th style="'+th+'">Format d’effort</th><th style="'+th+'">Temps de travail effectif</th><th style="'+th+'">Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Secteurs d’intensité (aérobie bas/intermédiaire/haut), modalités VMA intensive/extensive/mixte et formats de seuil. Source : Livret CQP FFA (S2-S3).</div>'
+    +'</div>';
+}
+function plSpeSessHTML(){
+  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  const rows=PL_SPE.map(r=>{const on=r.id===_plD;const bg=on?'background:rgba(255,107,26,0.08)':'';return '<tr style="'+bg+'">'
+    +'<td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r.ep+'</td>'
+    +'<td style="'+td+'">'+r.int+'</td>'
+    +'<td style="'+td+';font-weight:800">'+r.vol+'</td>'
+    +'<td style="'+td+'">'+r.frac+'</td>'
+    +'<td style="'+td+';white-space:nowrap">'+r.rec+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Séance spécifique — référentiel FFA</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Volume à l\u2019allure de course dans la séance pivot (échauffement/récup exclus).</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
+    +'<thead><tr><th style="'+th+'">Épreuve</th><th style="'+th+'">Intensité (% VMA)</th><th style="'+th+'">Volume global</th><th style="'+th+'">Fractions types</th><th style="'+th+'">Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Progression (« jeu subtil ») : allonger les fractions · augmenter le volume · réduire les récups. Ex. semi 1h30 : 3×2000 (r1′30) → 5000+3000+2000 (récup dégressive). Source : Livret CQP FFA.</div>'
+    +'</div>';
+}
+function plPhaseEditHTML(p){
+  var cur=plPhases(p,_plW);
+  var counts={base:0,dev:0,spe:0,aff:0}; cur.forEach(function(sg){counts[sg[0]]=sg[1];});
+  var order=['base','dev','spe','aff'];
+  var total=order.reduce(function(a,k){return a+counts[k];},0)||1;
+  var tb='background:var(--input-bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);width:32px;height:32px;font-size:19px;font-weight:800;cursor:pointer;line-height:1';
+  var segs=order.map(function(k){var n=counts[k],w=(n/total*100),c=PL_PHC[k];
+    return '<div id="pl-seg-'+k+'" style="width:'+w+'%;flex-shrink:0;background:'+c+';display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">'
+      +'<span style="font-size:9px;font-weight:800;letter-spacing:.2px;color:rgba(11,18,32,0.72);text-transform:uppercase;white-space:nowrap;padding:0 3px">'+plPhLabel(k)+'</span>'
+      +'<b id="pl-seg-n-'+k+'" style="font-size:19px;font-weight:900;color:#0B1220;line-height:1.05">'+n+'</b></div>';}).join('');
+  var handles=''; var cc=0;
+  for(var i=0;i<3;i++){cc+=counts[order[i]];var x=(cc/total*100);
+    handles+='<div id="pl-h-'+i+'" onpointerdown="plTLDown(event,'+i+')" title="Glisser pour r\u00e9partir" style="position:absolute;top:-5px;bottom:-5px;left:'+x+'%;width:20px;transform:translateX(-50%);cursor:ew-resize;touch-action:none;z-index:5;display:flex;align-items:center;justify-content:center">'
+      +'<div style="width:5px;height:72%;background:#E2E8F0;border:1px solid #0B1220;border-radius:4px;box-shadow:0 1px 5px rgba(0,0,0,0.45)"></div></div>';}
+  return '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">R\u00e9partition des phases</span>'
+    +(_plPhaseOverride?'<button type="button" onclick="plPhaseAuto()" style="background:none;border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:11px;font-weight:800;padding:4px 10px;cursor:pointer">\u21ba Auto</button>':'')
+    +'</div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);margin-bottom:10px">Glisse les <b>s\u00e9parations</b> pour donner plus ou moins de semaines \u00e0 chaque phase.</div>'
+    +'<div id="pl-tl" style="position:relative;height:66px">'
+    +'<div style="display:flex;height:100%;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--border)">'+segs+'</div>'+handles+'</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-top:12px"><span style="font-size:12.5px;color:var(--muted2)">Dur\u00e9e totale</span>'
+    +'<button type="button" onclick="plTotalAdj(-1)" style="'+tb+'">\u2212</button>'
+    +'<b id="pl-tl-total" style="font-size:15px;color:var(--text);min-width:64px;text-align:center">'+_plW+' sem</b>'
+    +'<button type="button" onclick="plTotalAdj(1)" style="'+tb+'">+</button>'
+    +'<span style="font-size:11px;color:var(--muted2);margin-left:4px">ajoute / retire une semaine</span></div></div>';
+}
+var _plTL={dragging:false,i:-1,startX:0,orig:null,px:1,lastDw:0};
+function plTLDown(ev,i){
+  ev.preventDefault();
+  var p=PLANIF.find(function(x){return x.id===_plD;});if(!p)return;
+  if(!_plPhaseOverride){var ph=plPhases(p,_plW);_plPhaseOverride={base:0,dev:0,spe:0,aff:0};ph.forEach(function(s){_plPhaseOverride[s[0]]=s[1];});}
+  var el=document.getElementById('pl-tl');if(!el)return;
+  var o=_plPhaseOverride,total=o.base+o.dev+o.spe+o.aff||1;
+  _plTL={dragging:true,i:i,startX:ev.clientX,orig:{base:o.base,dev:o.dev,spe:o.spe,aff:o.aff},px:el.getBoundingClientRect().width/total,lastDw:0};
+  _plPicked=true;
+  document.addEventListener('pointermove',plTLMove);
+  document.addEventListener('pointerup',plTLUp);
+  document.addEventListener('pointercancel',plTLUp);
+}
+function plTLMove(ev){
+  if(!_plTL.dragging)return;
+  var order=['base','dev','spe','aff'],kL=order[_plTL.i],kR=order[_plTL.i+1];
+  var dw=Math.round((ev.clientX-_plTL.startX)/_plTL.px);
+  if(dw>_plTL.orig[kR])dw=_plTL.orig[kR];
+  if(dw<-_plTL.orig[kL])dw=-_plTL.orig[kL];
+  if(dw===_plTL.lastDw)return; _plTL.lastDw=dw;
+  var o=_plPhaseOverride;
+  o[kL]=_plTL.orig[kL]+dw; o[kR]=_plTL.orig[kR]-dw;
+  _plW=o.base+o.dev+o.spe+o.aff;
+  plTLPaint();
+}
+function plTLUp(){
+  if(!_plTL.dragging)return;
+  _plTL.dragging=false;
+  document.removeEventListener('pointermove',plTLMove);
+  document.removeEventListener('pointerup',plTLUp);
+  document.removeEventListener('pointercancel',plTLUp);
+  renderPlanif();
+}
+function plTLPaint(){
+  var p=PLANIF.find(function(x){return x.id===_plD;});if(!p)return;
+  var o=_plPhaseOverride,order=['base','dev','spe','aff'],total=o.base+o.dev+o.spe+o.aff||1;
+  order.forEach(function(k){var sg=document.getElementById('pl-seg-'+k);if(sg)sg.style.width=(o[k]/total*100)+'%';var nn=document.getElementById('pl-seg-n-'+k);if(nn)nn.textContent=o[k];});
+  var c=0;for(var i=0;i<3;i++){c+=o[order[i]];var h=document.getElementById('pl-h-'+i);if(h)h.style.left=(c/total*100)+'%';}
+  var wl=document.getElementById('pl-weeks');if(wl)wl.textContent=_plW+' semaines';
+  var ft=document.getElementById('pl-tl-total');if(ft)ft.textContent=_plW+' sem';
+  plDrawVol(p,plWeeks(p,_plW),'pl-vol-canvas');
+}
+function plTotalAdj(delta){
+  var p=PLANIF.find(function(x){return x.id===_plD;});if(!p)return;
+  if(!_plPhaseOverride){var ph=plPhases(p,_plW);_plPhaseOverride={base:0,dev:0,spe:0,aff:0};ph.forEach(function(s){_plPhaseOverride[s[0]]=s[1];});}
+  var o=_plPhaseOverride;
+  if(delta>0){o.dev+=1;}
+  else{var order=['spe','dev','base','aff'],tgt=null,mx=0;order.forEach(function(k){if(o[k]>mx){mx=o[k];tgt=k;}});if(!tgt||(o.base+o.dev+o.spe+o.aff)<=1)return;o[tgt]-=1;}
+  _plW=o.base+o.dev+o.spe+o.aff;_plPicked=true;renderPlanif();
+}
+function plPhaseAdj(key,delta){
+  var p=PLANIF.find(function(x){return x.id===_plD;});if(!p)return;
+  if(!_plPhaseOverride){var ph=plPhases(p,_plW);_plPhaseOverride={base:0,dev:0,spe:0,aff:0};ph.forEach(function(sg){_plPhaseOverride[sg[0]]=sg[1];});}
+  var o=_plPhaseOverride,nv=o[key]+delta;
+  if(nv<0)return;
+  var others=(key==='base'?0:o.base)+(key==='dev'?0:o.dev)+(key==='spe'?0:o.spe)+(key==='aff'?0:o.aff);
+  if(nv+others<1)return;
+  o[key]=nv;_plW=o.base+o.dev+o.spe+o.aff;_plPicked=true;renderPlanif();
+}
+function plPhaseAuto(){_plPhaseOverride=null;renderPlanif();}
+function plSliderFill(p){const sl=document.getElementById('pl-slider');if(!sl)return;const pc=(_plW-p.wmin)/Math.max(1,(p.wmax-p.wmin))*100;sl.style.background='linear-gradient(to right,'+p.col+' 0%,'+p.col+' '+pc+'%,rgba(255,255,255,0.08) '+pc+'%,rgba(255,255,255,0.08) 100%)';}
+function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plPicked=true;renderPlanif();}
+function setPlProf(id){_plProf=id;_plPicked=true;renderPlanif();}
+function setPlW(v){_plPhaseOverride=null;_plW=+v;_plPicked=true;plUpd();}
+function setPlCtx(c){_plCtx=c;_plPicked=true;renderPlanif();}
+function plQ(field,val){
+  _plPicked=true;
+  if(field==='hist'){_plCtx=(val==='fit')?'fit':'new';_plPhaseOverride=null;renderPlanif();return;}
+  if(field==='inj'){_plInj=val;renderPlanif();return;}
+  if(field==='prep'){_plPrep=val;renderPlanif();return;}
+  // champs saisis au clavier : pas de reconstruction (garde le focus)
+  if(field==='time')_plTime=val;
+  else if(field==='vol')_plVol=val?+val:null;
+  else if(field==='sess')_plSess=val?+val:null;
+  else if(field==='qual')_plQual=val?+val:null;
+  const p=PLANIF.find(x=>x.id===_plD);
+  const rb=document.getElementById('pl-reco');if(rb&&p)rb.innerHTML=plRecoBox(p);
+  plTimeVerdict();plVolVerdict();
+  plUpd();
+}
+function plVolVerdict(){
+  const box=document.getElementById('pl-vol-verdict'); if(!box)return;
+  const r=PL_VOLREF[_plD]; if(!r){box.innerHTML='';return;}
+  if(_plVol==null){box.innerHTML='<span style="color:var(--muted2)">Minimum conseillé : <b>'+r.min+' '+r.unit+'</b> · cible '+r.lo+'–'+r.hi+' · perf '+r.perf+'</span>';return;}
+  let col,txt;
+  if(_plVol<r.min){col='#F87171';txt='Insuffisant pour la distance (min ~'+r.min+' '+r.unit+')';}
+  else if(_plVol<r.lo){col='#FBBF24';txt='Juste — base à consolider';}
+  else if(_plVol<=r.hi){col='#34D399';txt='Cohérent avec la distance';}
+  else {col='#34D399';txt='Volume élevé — bien géré = performance';}
+  box.innerHTML='<span style="font-weight:800;color:'+col+'">'+txt+'</span> <span style="color:var(--muted2)">· cible '+r.lo+'–'+r.hi+' '+r.unit+'</span>';
+}
+function plTP(part){
+  const t=plParseTime(_plTime); if(!t)return '';
+  const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),s=t%60;
+  if(part==='h')return h||'';
+  if(part==='m')return m;
+  return s;
+}
+function plTimeSet(){
+  const gv=id=>{const e=document.getElementById(id);return e?(+e.value||0):0;};
+  const t=gv('pl-t-h')*3600+gv('pl-t-m')*60+gv('pl-t-s');
+  _plTime=t>0?(gv('pl-t-h')?gv('pl-t-h')+':'+String(gv('pl-t-m')).padStart(2,'0')+':'+String(gv('pl-t-s')).padStart(2,'0'):gv('pl-t-m')+':'+String(gv('pl-t-s')).padStart(2,'0')):'';
+  const p=PLANIF.find(x=>x.id===_plD);
+  const rb=document.getElementById('pl-reco');if(rb&&p)rb.innerHTML=plRecoBox(p);
+  plTimeVerdict();
+  plUpd();
+}
+function plParseTime(str){
+  if(!str)return null;
+  const hasH=/h/i.test(str);
+  const parts=str.trim().split(/[:'\u2019.hHmMsS\s]+/).filter(x=>x!=='').map(Number);
+  if(!parts.length||parts.some(isNaN))return null;
+  if(parts.length===3)return parts[0]*3600+parts[1]*60+parts[2];
+  if(parts.length===2)return hasH?parts[0]*3600+parts[1]*60:parts[0]*60+parts[1];
+  return null;
+}
+function plTimeVerdict(){
+  const box=document.getElementById('pl-time-verdict'); if(!box)return;
+  const p=PLANIF.find(x=>x.id===_plD);
+  const t=plParseTime(_plTime);
+  const wrap=(html,bd)=>'<div style="padding:8px 11px;border-radius:8px;background:rgba(255,255,255,0.03);border-left:3px solid '+(bd||'var(--border2)')+'">'+html+'</div>';
+  if(!_plTime||!_plTime.trim()){box.innerHTML='';return;}
+  if(!t){box.innerHTML=wrap('<span style="color:var(--muted2)">Format non reconnu — ex : <b>17'+String.fromCharCode(39)+'30</b> ou <b>1:30:00</b></span>');return;}
+  const vbt=plVolForTime(_plD,t), vu=(typeof PL_VOLREF!=='undefined'&&PL_VOLREF[_plD])?PL_VOLREF[_plD].unit:'km/sem';
+  const volLine=vbt?'<div style="margin-top:5px;color:var(--text2)">Volume conseillé pour viser <b>'+fHMS(t)+'</b> : <b style="color:'+p.col+'">'+vbt+' '+vu+'</b></div>':'';
+  if(!S.vma){box.innerHTML=wrap('<span style="color:var(--muted2)">Charge un profil athlète pour évaluer ce chrono.</span>'+volLine);return;}
+  const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===p.id):null;
+  if(!pr||typeof perfRange!=='function'){box.innerHTML='';return;}
+  const rg=perfRange(pr,{vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0});
+  const tFast=rg.tFast,tMed=rg.tMed,tSlow=rg.tSlow;
+  let col,verdict,detail;
+  const gapMed=(t-tMed)/tMed*100;
+  if(t>=tSlow){col='#34D399';verdict='Confortable';detail='sous ton niveau actuel — vise plus ambitieux';}
+  else if(t>=tMed){col='#34D399';verdict='Atteignable';detail='dans ta fourchette réaliste';}
+  else if(t>=tFast){col='#FBBF24';verdict='Ambitieux';detail='il faut être au top de ta forme';}
+  else {col='#F87171';verdict='Hors de portée aujourd’hui';detail='au-delà de ton potentiel actuel de '+Math.round(-gapMed)+' %';}
+  box.innerHTML=wrap('<span style="font-weight:800;color:'+col+'">'+verdict+'</span> <span style="color:var(--muted2)">· '+detail+'</span>'
+    +'<div style="color:var(--muted2);margin-top:2px">Prédiction '+p.lbl+' : <b style="color:var(--text2)">'+fHMS(tMed)+'</b> (fourchette '+fHMS(tFast)+'–'+fHMS(tSlow)+')</div>'+volLine,col);
+}
+function plRecoBox(p){
+  const reco=plRecoWeeks(p), recoPh=plPhases(p,reco);
+  return '<div style="padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,'+p.col+'22,transparent);border:1px solid '+p.col+'55;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">Préparation idéale</div>'
+    +'<div style="font-size:22px;font-weight:900;color:'+p.col+'">'+reco+' semaines</div>'
+    +'<div style="font-size:12.5px;color:var(--text2);margin-top:2px">'+recoPh.map(x=>x[1]+' '+({base:plPhLabel('base').toLowerCase(),dev:'développement',spe:'spécifique',aff:'affûtage'})[x[0]]).join(' · ')+'</div></div>'
+    +'<div style="font-size:11px;color:var(--muted2);max-width:200px;line-height:1.5">Repère indicatif \u2014 ajuste ensuite la prépa manuellement.</div>'
+    +'</div>';
+}
+function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plW=plRecoWeeks(p);_plPicked=true;renderPlanif();}
+function plUpd(){
+  const p=PLANIF.find(x=>x.id===_plD);if(!p)return;
+  _plW=Math.min(Math.max(_plW,p.wmin),p.wmax);
+  const ph=plPhases(p,_plW),weeks=plWeeks(p,_plW);
+  const set=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html;};
+  const wl=document.getElementById('pl-weeks');if(wl)wl.textContent=_plW+' semaines';
+  set('pl-load',plLoadHTML(p,weeks,{cid:'pl-vol-canvas'}));plDrawVol(p,weeks,'pl-vol-canvas');
+  set('pl-coh',plCohHTML(p,_plW,weeks));
+  var _sl=document.getElementById('pl-slider');if(_sl)_sl.value=_plW;
+  var _pe=document.getElementById('pl-phase-edit');if(_pe)_pe.innerHTML=plPhaseEditHTML(p);
+  plSliderFill(p);
+  const tk=document.getElementById('pl-ticks');
+  if(tk){Array.from(tk.querySelectorAll('button')).forEach(b=>{const on=+b.getAttribute('data-w')===_plW;b.style.color=on?p.col:'var(--muted2)';b.style.fontWeight=on?'900':'700';b.style.fontSize=on?'14px':'12px';});}
+  plSyncCfg();
+}
+function plSyncCfg(){
+  if(!_plPicked)return;
+  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase};
+  if(typeof saveLS==='function')saveLS();
+  if(typeof renderDashPlan==='function')renderDashPlan();
+}
+function plToDash(){
+  var p=PLANIF.find(function(x){return x.id===_plD;}); if(!p)return;
+  var msg=document.getElementById('pl-dash-msg');
+  function warn(t){if(msg){msg.style.color='#F87171';msg.textContent=t;}}
+  if(!S.vma){warn('Renseigne d\u2019abord un profil (VMA) dans Saisie.');return;}
+  var date=_plDate2||(S.goal&&S.goal.date)||'';
+  if(!date){warn('Renseigne la date de course (champ \u00ab course \u00bb) avant d\u2019ajouter au dashboard.');return;}
+  var today=new Date();today.setHours(0,0,0,0);
+  var days=Math.round((new Date(date+'T00:00:00')-today)/864e5);
+  if(days<7){warn('La course doit \u00eatre \u00e0 au moins 7 jours pour afficher un plan.');return;}
+  _plPicked=true;
+  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase};
+  var g=S.goal||{};
+  S.goal={id:_plD,t:g.t||null,date:date,name:g.name||'',url:g.url||''};
+  if(typeof saveLS==='function')saveLS();
+  if(typeof renderGoalSection==='function')renderGoalSection();
+  if(typeof renderPredCards==='function')renderPredCards();
+  if(typeof goalReadout==='function')goalReadout();
+  if(typeof renderDashPlan==='function')renderDashPlan();
+  go('dashboard');
+}
+function plReasonHTML(p,weeks){
+  const R=plReasons(p,weeks);
+  return R.map(r=>r.concl
+    ?'<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--border);font-size:13.5px;font-weight:800;color:'+p.col+'">'+r.t+'</div>'
+    :'<div style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.55;margin-bottom:5px"><span style="color:'+(r.ok?'#34D399':'#FBBF24')+';font-weight:900;flex-shrink:0">'+(r.ok?'✓':'⚠')+'</span><span>'+r.t+'</span></div>').join('');
+}
+function plCohHTML(p,weeks,wk){
+  const c=plCoherence(p,weeks,wk);
+  const col=c.pct>=85?'#34D399':(c.pct>=65?'#FBBF24':'#F87171');
+  const bars=Math.round(c.pct/10);
+  return '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">'
+    +'<div style="font-size:13px;font-weight:800;color:var(--text)">Cohérence du plan</div>'
+    +'<div style="flex:1;min-width:140px;height:10px;border-radius:6px;background:var(--input-bg);overflow:hidden"><div style="width:'+c.pct+'%;height:100%;background:'+col+'"></div></div>'
+    +'<div style="font-size:18px;font-weight:900;color:'+col+'">'+c.pct+' %</div></div>'
+    +'<div style="display:flex;flex-direction:column;gap:4px">'+c.items.map(it=>'<div style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.5"><span style="flex-shrink:0;font-weight:900;color:'+(it.s==='ok'?'#34D399':(it.s==='warn'?'#FBBF24':'#F87171'))+'">'+(it.s==='ok'?'✓':'⚠')+'</span><span>'+it.t+'</span></div>').join('')+'</div>';
+}
+function plDates(){
+  const e1=document.getElementById('pl-d1'),e2=document.getElementById('pl-d2'),e3=document.getElementById('pl-di');
+  if(!e1||!e2)return;
+  _plDate1=e1.value||null;_plDate2=e2.value||null;_plDi=(e3&&e3.value)||null;
+  const out=document.getElementById('pl-avail');
+  if(!_plDate1||!_plDate2){if(out)out.textContent='';plUpd();return;}
+  const d1=new Date(_plDate1+'T00:00:00'),d2=new Date(_plDate2+'T00:00:00');
+  const days=Math.round((d2-d1)/864e5);
+  if(days<=0){if(out){out.textContent='La course doit être après le début !';out.style.color='#F87171';}return;}
+  const wkn=Math.round(days/7),p=PLANIF.find(x=>x.id===_plD);if(!p)return;
+  let msg='→ '+wkn+' sem disponible'+(wkn>1?'s':''),col='var(--text2)',applied=wkn;
+  if(wkn<p.wmin){applied=p.wmin;msg+=' — trop court, calé à '+p.wmin+' sem';col='#F87171';}
+  else if(wkn>p.wmax){applied=p.wmax;msg+=' — calé au max ('+p.wmax+' sem)';col='#FBBF24';}
+  else{msg+=' — plan calé sur '+wkn+' sem';col='#34D399';}
+  _plPhaseOverride=null;_plW=applied;const sl=document.getElementById('pl-slider');if(sl)sl.value=applied;
+  plUpd();if(out){out.innerHTML=msg;out.style.color=col;}
+}
+const PL_DJOURS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+function plMkDay(spec){const p=spec.split('|');const s=p[0];const rest=/^Repos/i.test(s);return {s:s,c:p[1]||(rest?'#475569':'#60A5FA'),rest:rest};}
+function plWeekDays(phase,level,id){
+  id=id||_plD;
+  const EF='EF (footing)';
+  const ASL={'5k':'Allure 5K','10k':'Allure 10K','semi':'Allure semi','mara':'Allure marathon','trail':'Allure terrain'}[id]||'Allure course';
+  const SLb={'5k':['SL 1h','SL 1h','SL 1h + lignes','SL courte'],'10k':['SL 1h15','SL 1h15','SL 1h15 + bloc','SL courte'],'semi':['SL 1h30','SL 1h30','SL + bloc AS21','SL écourtée'],'mara':['SL 1h45','SL 2h','SL 2h + bloc AM','SL écourtée'],'trail':['SL nature','SL 2h + D+','SL profil course','SL écourtée']}[id]||['SL','SL','SL + bloc','SL écourtée'];
+  // Logique Canova : développement = monter le moteur (VMA) + seuil DOUX (SV1/tempo) ;
+  // spécifique = convertir vers l'allure de course (SV2 / allure spé). Ordre des qualités = 1 = prioritaire.
+  const Qmap={
+    base:{'trail':[['Côtes courtes','#FB923C'],['EF vallonné','#60A5FA']]},
+    dev:{'5k':[['VMA (30/30, 400 m)','#F87171'],['Tempo SV1 (2×15′)','#FBBF24']],'10k':[['VMA (400/1000 m)','#F87171'],['Tempo SV1 (20–30′)','#FBBF24']],'semi':[['Tempo SV1 (25–35′)','#FBBF24'],['VMA (entretien)','#F87171']],'mara':[['Tempo SV1 (30–40′)','#FBBF24'],['VMA (entretien)','#F87171']],'trail':[['Côtes longues','#FB923C'],['Tempo vallonné SV1','#FBBF24']]},
+    spe:{'5k':[['Allure 5K (SV2+)','#34D399'],['VMA rappel','#F87171']],'10k':[['Allure 10K (SV2)','#34D399'],['Tempo SV1 (soutien)','#FBBF24']],'semi':[['Allure semi (AS21)','#34D399'],['Seuil SV2 (soutien)','#FB923C']],'mara':[['Allure marathon (AM)','#34D399'],['Seuil SV2 (soutien)','#FB923C']],'trail':[['Allure terrain','#34D399'],['Côtes / descentes','#FB923C']]},
+    aff:[['Rappel '+ASL,'#A855F7']]
+  };
+  const Qbase=[['Fartlek / côtes','#FB923C'],['Tempo SV1 (20′)','#FB923C']];
+  let Q;
+  if(phase==='base')Q=Qmap.base[id]||Qbase;
+  else if(phase==='aff')Q=Qmap.aff;
+  else Q=Qmap[phase][id]||Qmap[phase]['10k'];
+  const pi={base:0,dev:1,spe:2,aff:3}[phase];
+  const q1=Q[0][0]+'|'+Q[0][1], q2=(Q[1]?Q[1][0]+'|'+Q[1][1]:q1), SLd=SLb[pi]+'|#8B5CF6';
+  let arr;
+  if(phase==='aff'){
+    if(level==='deb')arr=['Repos','Rappel allure|#A855F7','Repos','EF court|#60A5FA','Repos','Repos','Course / SL courte|#34D399'];
+    else if(level==='int')arr=['EF court|#60A5FA','Rappel allure|#A855F7','Repos','EF court|#60A5FA','Repos','Repos léger','Course / SL courte|#34D399'];
+    else arr=['EF|#60A5FA','Rappel allure|#A855F7','EF court|#60A5FA','Repos','EF + lignes|#60A5FA','Repos','Course / SL courte|#34D399'];
+  } else if(level==='deb')arr=['Repos',q1,'Repos',EF+'|#60A5FA','Repos','Repos',SLd]; // 1 seule qualité (q1 = prioritaire)
+  else if(level==='int')arr=[EF+'|#60A5FA',q1,EF+'|#60A5FA','Repos',q2,'Repos',SLd];
+  else arr=[EF+'|#60A5FA',q1,EF+'|#60A5FA',q2,EF+'|#60A5FA','EF + lignes|#60A5FA',SLd];
+  return arr.map((sp,i)=>{const o=plMkDay(sp);o.j=PL_DJOURS[i];return o;});
+}
+function plWeeksTypeHTML(p,ph){
+  return ph.map(x=>{
+    const phc=PL_PHC[x[0]];
+    const days=plWeekDays(x[0],plQlvl(),p.id);
+    const cards=days.map(dz=>'<div style="border:1px solid '+phc+'33;border-top:3px solid '+dz.c+';border-radius:9px;padding:9px 7px;text-align:center;min-height:74px;display:flex;flex-direction:column;gap:5px;background:'+phc+(dz.rest?'0d':'1f')+'">'
+      +'<div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2)">'+dz.j+'</div>'
+      +'<div style="font-size:11.5px;font-weight:700;color:'+(dz.rest?'var(--muted2)':'var(--text)')+';line-height:1.25">'+dz.s+'</div></div>').join('');
+    return '<div style="margin-bottom:16px;padding:12px 14px;border-radius:12px;background:'+phc+'0a;border:1px solid '+phc+'26"><div style="font-size:12.5px;font-weight:800;color:'+phc+';margin-bottom:9px">'+plPhLabel(x[0])+' <span style="color:var(--muted2);font-weight:600">· '+x[1]+' sem · semaine type</span></div>'
+      +'<div style="overflow-x:auto"><div style="display:grid;grid-template-columns:repeat(7,minmax(94px,1fr));gap:6px">'+cards+'</div></div></div>';
+  }).join('')
+  +'<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:2px"><b style="color:var(--text2)">Logique du général au spécifique (Canova) :</b> le <b>développement</b> monte le moteur (VMA) avec un seuil doux <b>SV1</b> (tempo long, ~allure semi/marathon) ; le <b>spécifique</b> convertit vers l\u2019allure de course — qui approche le <b>SV2</b> (seuil anaérobie, ~allure 10 km) sur les distances courtes. On évite ainsi d\u2019empiler deux blocs de seuil.</div>';
+}
+function _plUnusedLegend(){
+}
+function plPeriodHTML(){
+  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  var PER=[
+   ['10 km','4 sem (2 sem post-cross)','~5-7 j','1h05-1h15, hebdo'],
+   ['Semi','4 sem','~7-10 j','1h05-1h15, hebdo'],
+   ['Marathon','6 sem','2 sem','1h30-2h /15j · jalon J-28 (jusqu’à 2h30)'],
+   ['Ultra','8 à 10 sem','2 sem','2-4h /15j']
+  ];
+  var rows=PER.map(function(r){var on=(r[0].indexOf('10 km')===0&&_plD==='10k')||(r[0]==='Semi'&&_plD==='semi')||(r[0]==='Marathon'&&_plD==='mara');return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'">'
+    +'<td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r[0]+'</td>'
+    +'<td style="'+td+';font-weight:800">'+r[1]+'</td>'
+    +'<td style="'+td+'">'+r[2]+'</td>'
+    +'<td style="'+td+'">'+r[3]+'</td></tr>';}).join('');
+  var pr=[
+   'Du général au spécifique (Canova) : Base → Développement (seuil) → Spécifique (allure course) → Affûtage.',
+   'Progression du volume ≈ 10 %/sem, avec 1 semaine allégée sur 4 (deload 3:1, -30 à -40 %).',
+   'Charge : ACWR (aiguë/chronique) en zone sûre 0,8-1,2 ; danger &gt; 1,5.',
+   'Affûtage : à S-2 volume -25 à -50 % ; S-1 ne dépasse jamais la semaine la plus lourde.',
+   'Marathon (J-10 à J-1) : J-10 dernière spé courte 6-8 km · J-7 sortie 1h30 + 15′ à allure spé · J-5/J-3/J-1 footings 30-45′.',
+   'Compétition prépa : semi placé à J-21 du marathon (1re partie à allure marathon).',
+   'Réévaluer VMA et zones toutes les 4 semaines.'
+  ];
+  var lis=pr.map(function(x){return '<li style="margin-bottom:6px">'+x+'</li>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Périodisation &amp; planification — repères FFA</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Durées de bloc spécifique, affûtage et sortie longue par distance (hors relâchement).</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
+    +'<thead><tr><th style="'+th+'">Distance</th><th style="'+th+'">Bloc spécifique</th><th style="'+th+'">Affûtage</th><th style="'+th+'">Sortie longue</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:12px"><ul style="margin:0;padding-left:18px">'+lis+'</ul></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Source : Livret CQP FFA (S2-S3).</div>'
+    +'</div>';
+}
+function plVO2HTML(){
+  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  var V=[
+   ['IM long','≥ 2-3 min','95-100 % VMA','≤ effort (passive) ou ≥ effort (active)','15′','4 à 10 min','INSEP'],
+   ['IM court 30/30','30 s','100-105 % VMA','30 s trot actif ~50-65 % VMA','~20′','6 à 8 min','Billat / INSEP'],
+   ['IM court 15/15','15 s','105-110 % VMA','15 s trot ~50 % VMA','blocs 3-9′','6 à 7 min','Billat'],
+   ['Continu','20-40′','85-91 % VMA','—','—','~1/3 du temps d’effort','Billat / INSEP']
+  ];
+  var rows=V.map(function(r){return '<tr>'
+    +'<td style="'+td+';font-weight:800;color:var(--text)">'+r[0]+'</td>'
+    +'<td style="'+td+';white-space:nowrap">'+r[1]+'</td>'
+    +'<td style="'+td+';font-weight:800;white-space:nowrap;color:var(--orange)">'+r[2]+'</td>'
+    +'<td style="'+td+'">'+r[3]+'</td>'
+    +'<td style="'+td+';white-space:nowrap">'+r[4]+'</td>'
+    +'<td style="'+td+';white-space:nowrap">'+r[5]+'</td>'
+    +'<td style="'+td+';color:var(--muted);white-space:nowrap">'+r[6]+'</td></tr>';}).join('');
+  var pr=[
+   'Objectif : maximiser le <b>temps passé à VO2max</b> dans la séance (critère d’efficacité).',
+   'Étude fondatrice (Billat, K4) : en 30/30 à VMA les coureurs passent ~8 min à VO2max (jusqu’à 18 min pour certains) ; le continu à 91 % VMA n’atteint VO2max qu’~1/3 du temps.',
+   '<b>Débat long vs court</b> : des travaux récents (2024) montrent que l’IM long (~3 min) accumule autant, voire plus de temps &gt; 90 % VO2max que le 30 s malgré une intensité moindre. Pour le développement pur de VO2max chez le coureur, l’IM long est au moins aussi efficace.',
+   'Le 30/30 à <b>110 % VMA</b> est le calibrage « sports collectifs » (VIFT/Buchheit) ; pour un coureur, 100-105 % VMA (Billat) est la référence.',
+   'Resynthèse de PCr : la composante rapide (60 premières s) est clé ; 3-5 min pour une restauration complète.',
+   'Le continu &gt; 85-90 % VMA améliore aussi VO2max, mais moins efficacement que l’intermittent sur PCr et la capacité tampon.',
+   'La vitesse/sprint est le 1<sup>er</sup> facteur de risque de blessure (ischios) → progressivité + échauffement soigné.'
+  ];
+  var lis=pr.map(function(x){return '<li style="margin-bottom:6px">'+x+'</li>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">VMA / VO2max — travail intermittent</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Formats d’intermittent pour développer VO2max et la capacité à répéter les efforts.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:720px">'
+    +'<thead><tr><th style="'+th+'">Format</th><th style="'+th+'">Effort</th><th style="'+th+'">Intensité</th><th style="'+th+'">Récup</th><th style="'+th+'">Durée séance</th><th style="'+th+'">Temps à VO2max</th><th style="'+th+'">Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:12px"><ul style="margin:0;padding-left:18px">'+lis+'</ul></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Sources : INSEP « Sports à haute intensité » (C. Hanon, chap. V — Buchheit &amp; Laursen) ; Billat et al. (30/30, temps à VO2max) ; travaux 2024 sur le temps &gt; 90 % VO2max.</div>'
+    +'</div>';
+}
+function plNutritionHTML(){
+  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
+  var N=[
+   ['Juste après la séance','Glucides à index élevé (~1-1,2 g/kg/h) + 20-25 g de protéines (leucine)','Ouvre la fenêtre de resynthèse du glycogène et relance la synthèse protéique'],
+   ['Entre 2 séances / jour','Repas équilibré, recharger le glycogène','Sort le muscle de l’état catabolique (AMPK/SIRT1) et prépare la séance suivante'],
+   ['À jeun','Éviter avant une séance qualité/force ; OK pour un footing EF court','Le jeûne sur-active l’AMPK et freine les adaptations de force'],
+   ['En course (semi/marathon)','30-60 g de glucides/h (jusqu’à ~90 g/h sur longue distance)','Maintient la glycémie et retarde la déplétion du glycogène'],
+   ['Sortie longue','Tester gels, boissons et timing en conditions réelles','La SL est le laboratoire pour valider la stratégie nutritionnelle du jour J'],
+   ['Hydratation','Boire régulièrement ; électrolytes par forte chaleur','Déshydratation, hyperthermie et hypoglycémie = 1res sources de fatigue']
+  ];
+  var rows=N.map(function(r){return '<tr>'
+    +'<td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td>'
+    +'<td style="'+td+';font-weight:700">'+r[1]+'</td>'
+    +'<td style="'+td+';color:var(--muted)">'+r[2]+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Nutrition — course d’endurance</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Recharge du glycogène, apport en course et hydratation.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px">'
+    +'<thead><tr><th style="'+th+'">Moment</th><th style="'+th+'">Recommandation</th><th style="'+th+'">Pourquoi</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Glycogène : restauration musculaire 24-48 h, hépatique 6-12 h (FFA). Les dosages sont des repères du consensus nutrition endurance. Sources : FFA, INSEP + consensus endurance.</div>'
+    +'</div>';
+}
+var PL_STUDIES_UPD='23/07/2026';
+var PL_STUDIES=[
+ {cat:'Périodisation & charge',title:'Effects of tapering on performance: a meta-analysis',au:'Bosquet et al.',yr:2007,url:'https://pubmed.ncbi.nlm.nih.gov/17762369/',sum:'Affûtage optimal : réduire le volume de 41-60 % sur ~2 semaines en gardant l’intensité et la fréquence → gain de performance moyen ~2 %.'},
+ {cat:'Périodisation & charge',title:'Training intensity distribution among well-trained and elite endurance athletes',au:'Stöggl & Sperlich',yr:2015,url:'https://pubmed.ncbi.nlm.nih.gov/26578968/',sum:'Chez l’endurant entraîné, une répartition ~80 % faible intensité / 20 % haute intensité (polarisée ou pyramidale) domine ; le tout-au-seuil est sous-optimal.'},
+ {cat:'Périodisation & charge',title:'Comparison of polarized vs other endurance training intensity distributions: meta-analysis',au:'Sports Medicine',yr:2024,url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC11329428/',sum:'L’entraînement polarisé améliore un peu plus le VO2peak que les autres modèles, surtout sur des cycles < 12 semaines et chez les athlètes entraînés.'},
+ {cat:'Intervalles & VO₂max',title:'Effectiveness of HIIT vs continuous training for VO2max improvements: meta-analysis',au:'Milanović et al.',yr:2015,url:'https://pubmed.ncbi.nlm.nih.gov/26243014/',sum:'Le HIIT augmente le VO2max davantage que le continu modéré (~+4,9 vs +1,9 ml/kg/min), pour un temps d’entraînement moindre.'},
+ {cat:'Intervalles & VO₂max',title:'Faster intervals, faster recoveries: short vs long VO2max intervals',au:'Scand J Med Sci Sports',yr:2024,url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC11743937/',sum:'À charge égale, les intervalles longs (~3 min) accumulent plus de temps > 90 % VO2max que les 30 s, malgré une intensité plus basse.'},
+ {cat:'Vitesse critique & seuils',title:'Critical power: implications for determination of VO2max and exercise tolerance',au:'Jones & Vanhatalo',yr:2010,url:'https://pubmed.ncbi.nlm.nih.gov/20195180/',sum:'La Puissance/Vitesse Critique = frontière entre domaines « lourd » et « sévère » ; repère de performance plus pertinent que le seuil lactique ou le VO2max seuls.'},
+ {cat:'Vitesse critique & seuils',title:'A critical review of critical power',au:'Eur J Appl Physiol',yr:2022,url:'https://link.springer.com/article/10.1007/s00421-022-04922-6',sum:'Revue : la CP dépend de l’apport/diffusion d’O₂ et de la capacité oxydative ; le W′ (≈ D′) est la réserve finie utilisable au-dessus de la CP.'},
+ {cat:'Force & économie de course',title:'Strength training and running economy: systematic review & meta-analysis',au:'Sports Medicine',yr:2024,url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC11052887/',sum:'La musculation (charges lourdes, pliométrie, combinée) améliore l’économie de course ; effet modéré, dépendant de la méthode et de l’allure testée.'},
+ {cat:'Force & économie de course',title:'Strength training methods and middle-/long-distance performance: meta-analysis',au:'Sports Medicine',yr:2024,url:'https://link.springer.com/article/10.1007/s40279-024-02018-z',sum:'Ajouter du renforcement améliore la performance (chrono, économie, vitesse terminale) chez le coureur de demi-fond et de fond.'},
+ {cat:'Nutrition',title:'A step towards personalized sports nutrition: carbohydrate intake during exercise',au:'Jeukendrup',yr:2014,url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC4008807/',sum:'Apport glucidique selon la durée : 30-60 g/h ; jusqu’à ~90 g/h (glucose + fructose) sur > 2,5 h ; à entraîner (tolérance digestive).'},
+ {cat:'Nutrition',title:'Carbohydrates for training and competition',au:'Burke et al.',yr:2011,url:'https://www.tandfonline.com/doi/full/10.1080/02640414.2011.585473',sum:'Apports glucidiques périodisés selon la charge (« fuel for the work required ») : recharge et apport per-course adaptés à l’épreuve.'},
+ {cat:'Blessures & prévention',title:'Risk factors for running-related injuries: an umbrella systematic review',au:'J Sport Health Sci',yr:2024,url:'https://pubmed.ncbi.nlm.nih.gov/38697289/',sum:'Facteurs de risque majeurs : antécédent de blessure, erreurs de charge/entraînement, IMC ; le genou est la zone la plus touchée.'},
+ {cat:'Blessures & prévention',title:'Biomechanical risk factors associated with running-related injuries: systematic review',au:'Sports Medicine',yr:2019,url:'https://pubmed.ncbi.nlm.nih.gov/31028658/',sum:'Certains facteurs biomécaniques (type d’attaque, charge d’impact) sont liés aux blessures de surmenage, mais de façon spécifique à chaque blessure.'},
+ {cat:'Aides ergogéniques',title:'Effects of caffeine intake on endurance running performance and time to exhaustion: meta-analysis',au:'Nutrients',yr:2022,url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC9824573/',sum:'La caféine (~3-6 mg/kg, ~1 h avant l’effort) améliore la performance de course et le temps jusqu’à épuisement (~2-7 %), chez le coureur récréatif comme entraîné.'},
+ {cat:'Récupération',title:'The impact of sleep interventions on athletic performance: a systematic review',au:'Sports Med - Open',yr:2023,url:'https://pubmed.ncbi.nlm.nih.gov/37462808/',sum:'Allonger le sommeil et faire des siestes sont les interventions les plus efficaces sur la performance ; la privation dégrade coordination, récupération et augmente le risque de blessure.'},
+ {cat:'Chaleur & altitude',title:'Short-term heat acclimation training improves physical performance: systematic review',au:'J Sci Med Sport',yr:2015,url:'https://pubmed.ncbi.nlm.nih.gov/24817609/',sum:'L’acclimatation à la chaleur, même courte (≤ 7 expositions), améliore les déterminants de l’endurance et la performance sur 5 km à la chaleur.'}
+];
+function plStudiesHTML(){
+  var cats=[]; PL_STUDIES.forEach(function(st){if(cats.indexOf(st.cat)<0)cats.push(st.cat);});
+  var body=cats.map(function(cat){
+    var items=PL_STUDIES.filter(function(x){return x.cat===cat;}).map(function(sx){
+      return '<div style="padding:11px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap">'
+        +'<a href="'+sx.url+'" target="_blank" rel="noopener" style="font-size:13.5px;font-weight:800;color:var(--text);text-decoration:none;line-height:1.45">'+sx.title+' <span style="color:var(--orange)">↗</span></a>'
+        +'<span style="font-size:11.5px;color:var(--muted2);white-space:nowrap">'+sx.au+' · '+sx.yr+'</span></div>'
+        +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:5px">'+sx.sum+'</div></div>';
+    }).join('');
+    return '<div style="margin-bottom:16px"><div style="font-size:11.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--orange);margin-bottom:4px">'+cat+'</div>'+items+'</div>';
+  }).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Études cliniques</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:14px">Sélection d’études scientifiques utiles pour la course à pied, classées par thème. Chaque titre renvoie à l’étude ; le résumé donne les points essentiels.</div>'
+    +body
+    +'<div style="font-size:11px;color:var(--muted2);margin-top:6px">Veille automatique — dernière mise à jour : '+PL_STUDIES_UPD+'.</div>'
+    +'</div>';
+}
+function plFracHTML(){
+  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
+  var FR=[
+   ['Nombre de répétitions','À calculer pour tenir <b>≥ 10 min à > 90 % VO₂max</b> (latence incluse)','À calculer pour tenir <b>≥ 10 min à > 90 % VO₂max</b> (latence incluse)'],
+   ['Durée des répétitions','<b>&gt; 2 min</b> · idéal 4-6 min','<b>&lt; 2 min</b>'],
+   ['Intensité','&gt; 90 % VO₂max · &gt; 90 % VMA/PMA · 90-95 % FC max','&gt; 90 % VO₂max · <b>100-120 % VMA/PMA</b>'],
+   ['Mode de contrôle','Essentiellement <b>FC</b> (+ puissance/vitesse)','<b>Puissance ou vitesse</b>'],
+   ['Récup entre répétitions','&lt; temps d’effort (50-100 %) · 2-3 min passives ou 3-4 min à 40 % VMA/PMA','&lt; temps d’effort (50-100 %) · <b>50-70 % VMA/PMA</b>'],
+   ['Nombre de séries','Condenser sur le moins de séries possible','Condenser sur le moins de séries possible']
+  ];
+  var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Fractionné VMA — long vs court (en résumé)</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Objectif commun : passer le plus de temps possible &gt; 90 % de VO₂max.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+function plRenfoHTML(){
+  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  var td='padding:9px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
+  var ph='padding:9px 10px;font-size:12px;font-weight:800;color:var(--text);border-bottom:1px solid var(--border);vertical-align:top;white-space:nowrap';
+  function full(txt){return '<td colspan="4" style="'+td+';font-style:italic;color:var(--muted2)">'+txt+'</td>';}
+  var rows=''
+   +'<tr><td style="'+ph+'">Reprise / Général</td>'+full('Conditionnement — travail au poids de corps &amp; pliométrie légère (toutes distances)')+'</tr>'
+   +'<tr><td style="'+ph+'">Foncier</td>'
+     +'<td style="'+td+'">Hypertrophie (+ puissance-explosivité en demi-fond)</td>'
+     +'<td style="'+td+'">Hypertrophie (semi) → puissance-explosivité (marathon)</td>'
+     +'<td style="'+td+'">Puissance-explosivité</td>'
+     +'<td style="'+td+'">Puissance-explosivité</td></tr>'
+   +'<tr><td style="'+ph+'">Spécifique</td>'
+     +'<td style="'+td+'">Puissance-explosivité</td>'
+     +'<td style="'+td+'">Endurance de force + puissance-explosivité</td>'
+     +'<td style="'+td+'">Endurance de force + puissance-explosivité <b>(excentrique ++)</b></td>'
+     +'<td style="'+td+'">Endurance de force + puissance-explosivité <b>(excentrique ++)</b></td></tr>'
+   +'<tr><td style="'+ph+'">Période de compétition</td>'
+     +'<td style="'+td+'">Puissance-explosivité, poids de corps &amp; pliométrie légère</td>'
+     +'<td style="'+td+'">Travail au poids de corps &amp; pliométrie légère</td>'
+     +'<td style="'+td+'">Travail au poids de corps &amp; pliométrie légère</td>'
+     +'<td style="'+td+'">Travail au poids de corps &amp; pliométrie légère</td></tr>'
+   +'<tr><td style="'+ph+'">Affûtage (2 sem. pré-compét.)</td>'
+     +'<td style="'+td+'">S-2 : puissance-explosivité + poids de corps/pliométrie légère · <b>semaine de course → OFF</b></td>'
+     +'<td style="'+td+'">S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b></td>'
+     +'<td style="'+td+'">S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b></td>'
+     +'<td style="'+td+'">S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b></td></tr>'
+   +'<tr><td style="'+ph+'">Récup / assimilation (intra &amp; inter-cycles)</td>'+full('Conditionnement — travail au poids de corps &amp; pliométrie légère')+'</tr>'
+   +'<tr><td style="'+ph+'">Récup / génération (post-compétition)</td>'+full('OFF')+'</tr>';
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Renforcement / musculation — périodisation par distance</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Type de travail de force selon la phase et la distance objectif. Plus la distance est longue, plus l’endurance de force et l’excentrique dominent.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr><th style="'+th+'">Phase</th><th style="'+th+'">Demi-fond · 10 km</th><th style="'+th+'">Semi · Marathon</th><th style="'+th+'">Trail</th><th style="'+th+'">Ultra (route &amp; trail)</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+function renderKnowledge(){
+  var w=document.getElementById('knowledge-wrap');if(!w)return;
+  w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
+    +plPeriodHTML()
+    +plSpeSessHTML()
+    +plDomainTimeHTML()
+    +plVO2HTML()
+    +plFracHTML()
+    +plRecovHTML()
+    +plRenfoHTML()
+    +plStudiesHTML();
+}
+function renderPlanif(){
+  const wrap=document.getElementById('planif-wrap');if(!wrap)return;
+  if(!_plPicked&&S.plan&&S.plan.D&&PLANIF.some(x=>x.id===S.plan.D)){_plD=S.plan.D;_plW=S.plan.W;_plCtx=S.plan.ctx;_plVol=S.plan.vol;_plProf=S.plan.prof;if(S.plan.ph)_plPhaseOverride=S.plan.ph;if('orient' in S.plan)_plOrient=S.plan.orient||0;if('base' in S.plan)_plBase=S.plan.base!==false;if('d2' in S.plan){_plDate1=S.plan.d1||null;_plDate2=S.plan.d2||null;_plDi=S.plan.di||null;}_plPicked=true;}
+  else if(!_plPicked&&S.goal&&S.goal.id&&PLANIF.some(x=>x.id===S.goal.id))_plD=S.goal.id;
+  const p=PLANIF.find(x=>x.id===_plD)||PLANIF[1];
+  if(_plPhaseOverride){_plW=Math.max(1,_plPhaseOverride.base+_plPhaseOverride.dev+_plPhaseOverride.spe+_plPhaseOverride.aff);}
+  else{if(_plW==null)_plW=plRecoWeeks(p);_plW=Math.min(Math.max(_plW,p.wmin),p.wmax);}
+  const weeks=plWeeks(p,_plW),ph=plPhases(p,_plW);
+  const chips=PLANIF.map(x=>'<button class="lib-chip'+(x.id===_plD?' active':'')+'" onclick="setPlD(\''+x.id+'\')" style="'+(x.id===_plD?'background:'+x.col+';border-color:'+x.col+';color:#fff':'')+'">'+x.lbl+'</button>').join('');
+  const profs=PL_PROFILES.map(pr=>'<button class="lib-chip'+(pr.id===_plProf?' active':'')+'" onclick="setPlProf(\''+pr.id+'\')" title="'+pr.desc.replace(/"/g,'')+'">'+pr.ico+' '+pr.lbl+'</button>').join('');
+  const princ=p.principes.map(x=>'<li style="font-size:13.5px;color:var(--text2);line-height:1.7;margin-bottom:8px">'+x+'</li>').join('');
+  const reco=plRecoWeeks(p);
+  const recoPh=plPhases(p,reco);
+  wrap.innerHTML=
+    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Planification</div><div class="input-hero-sub">Assistant de préparation : réponds au questionnaire, l’outil propose une durée, une répartition, une charge et un calendrier. Ajuste ce que tu veux.</div></div>'
+    +toolAthleteBar()
+    +'<div class="lib-chips" style="margin-bottom:6px"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-right:6px;align-self:center">Objectif</span>'+chips+'</div>'
+    // ── Questionnaire ──
+    +'<div class="card" style="padding:22px;margin:14px 0">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Questionnaire</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
+    +plQField('Temps visé','<span class="goal-time">'
+      +'<input id="pl-t-h" type="number" min="0" max="9" placeholder="h" value="'+plTP('h')+'" oninput="plTimeSet()" style="width:46px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">h</span>'
+      +'<input id="pl-t-m" type="number" min="0" max="59" placeholder="min" value="'+plTP('m')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">min</span>'
+      +'<input id="pl-t-s" type="number" min="0" max="59" placeholder="sec" value="'+plTP('s')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin-left:2px">s</span>'
+      +'</span><div id="pl-time-verdict" style="margin-top:8px;font-size:12px;line-height:1.5"></div>')
+    +plQField('Historique','<div class="lib-chips">'+[['fit','Déjà entraîné'],['new','Reprise']].map(o=>'<button class="lib-chip'+((_plCtx==='fit'?'fit':'new')===o[0]?' active':'')+'" onclick="plQ(\'hist\',\''+o[0]+'\')">'+o[1]+'</button>').join('')+'</div>')
+    +plQField('Volume actuel ('+(_plD==='trail'?'h':'km')+'/sem)','<input type="number" value="'+(_plVol||'')+'" placeholder="'+plDefaultVol(p)+'" oninput="plQ(\'vol\',this.value)" class="goal-date" style="width:90px"><div id="pl-vol-verdict" style="margin-top:6px;font-size:11.5px;line-height:1.5"></div>')
+    +plQField('Séances/sem','<input type="number" value="'+(_plSess||'')+'" placeholder="4" min="2" max="14" oninput="plQ(\'sess\',this.value)" class="goal-date" style="width:70px">')
+    +plQField('Dont qualité','<input type="number" value="'+(_plQual||'')+'" placeholder="2" min="0" max="6" oninput="plQ(\'qual\',this.value)" class="goal-date" style="width:70px">')
+    +plQField('Blessure récente ?','<div class="lib-chips">'+[['1','Oui'],['0','Non']].map(o=>'<button class="lib-chip'+((_plInj?'1':'0')===o[0]?' active':'')+'" onclick="plQ(\'inj\','+(o[0]==='1'?'true':'false')+')">'+o[1]+'</button>').join('')+'</div>')
+    +plQField('Course préparatoire ?','<div class="lib-chips">'+[['1','Oui'],['0','Non']].map(o=>'<button class="lib-chip'+((_plPrep?'1':'0')===o[0]?' active':'')+'" onclick="plQ(\'prep\','+(o[0]==='1'?'true':'false')+')">'+o[1]+'</button>').join('')+'</div>')
+    +'</div>'
+    +'<div id="pl-reco" style="margin-top:16px">'+plRecoBox(p)+'</div></div>'
+    // ── Planificateur (durée) ──
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Ajuster la prépa</div>'
+    +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:11px 14px;border:1px dashed var(--border2);border-radius:10px">'
+    +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Début :</span><input type="date" id="pl-d1" class="goal-date" value="'+(_plDate1||'')+'" onchange="plDates()">'
+    +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course :</span><input type="date" id="pl-d2" class="goal-date" value="'+(_plDate2||'')+'" onchange="plDates()">'
+    +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course prépa :</span><input type="date" id="pl-di" class="goal-date" value="'+(_plDi||'')+'" onchange="plDates()">'
+    +'<span id="pl-avail" style="font-size:12.5px;font-weight:700"></span></div>'
+    +'<div id="pl-phase-box" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'+plPhaseBoxHTML(p)+'</div>'
+    +'</div>'
+    +'<div id="pl-load">'+plLoadHTML(p,weeks,{cid:'pl-vol-canvas'})+'</div>'
+    +'<div style="display:flex;justify-content:center;margin-top:16px"><button onclick="plToDash()" style="display:inline-flex;align-items:center;gap:9px;background:'+p.col+';border:none;border-radius:11px;color:#fff;font-family:var(--font);font-size:14px;font-weight:800;padding:13px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.28)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Ajouter ce plan au dashboard</button></div>'
+    +'<div id="pl-dash-msg" style="text-align:center;font-size:12.5px;font-weight:700;margin-top:8px;min-height:16px"></div>'
+    +'</div>'
+    // ── Cohérence ──
+    +'<div class="card" style="padding:22px;margin-bottom:14px"><div id="pl-coh">'+plCohHTML(p,_plW,weeks)+'</div></div>'
+    // ── Principes + radar ──
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px">'
+    +'<div class="card" style="padding:20px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:'+p.col+';margin-bottom:12px">Principes clés — '+p.lbl+'</div><ul style="margin:0;padding-left:18px">'+princ+'</ul>'
+    +'<div style="margin-top:14px;padding:11px 13px;border-radius:9px;background:rgba(255,255,255,0.03);border-left:3px solid '+p.col+'"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px">Repères de volume</div><div style="font-size:12.5px;color:var(--text2);line-height:1.6"><b>Minimum '+PL_VOLREF[p.id].min+' '+PL_VOLREF[p.id].unit+'</b> · cible <b>'+PL_VOLREF[p.id].lo+'–'+PL_VOLREF[p.id].hi+'</b> · perf <b>'+PL_VOLREF[p.id].perf+'</b></div><div style="font-size:12px;color:var(--muted);line-height:1.55;margin-top:5px">'+PL_VOLREF[p.id].note+'</div></div></div>'
+    +'<div class="card" style="padding:20px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:'+p.col+';margin-bottom:6px">Qualités à développer</div><div style="position:relative;height:280px"><canvas id="pl-radar"></canvas></div></div>'
+    +'</div>'
+    // ── Phases dépliables ──
+    +'<div class="csm-limites" style="margin-top:16px"><b>Repères, pas dogmes</b> — trames standards (périodisation, 80/20, affûtage Bosquet 2007) à adapter à l’athlète.</div>';
+  plUpd();
+  plDrawRadar(p);
+  plTimeVerdict();plVolVerdict();
+  if(_plDate1&&_plDate2){var _av=document.getElementById('pl-avail');if(_av){var _sp=Math.round((new Date(_plDate2+'T00:00:00')-new Date(_plDate1+'T00:00:00'))/(7*864e5));_av.textContent='→ '+_sp+' sem entre début et course';_av.style.color='var(--muted2)';}}
+}
+function plQField(l,c){return '<div><div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">'+l+'</div>'+c+'</div>';}
+
+/* ══ DEMI-COOPER ══ */
+let _dcVma=null;
+function calcDemiCooper(){
+  const d=+document.getElementById('dc-dist').value||0;
+  const k=parseFloat(document.getElementById('dc-prof').value)||1;
+  const out=document.getElementById('dc-out');
+  const btn=document.getElementById('dc-apply');
+  if(d<600||d>3500){_dcVma=null;if(out)out.textContent='';if(btn)btn.style.display='none';return;}
+  const raw=d/100; // vitesse moyenne 6 min en km/h
+  _dcVma=Math.round(raw*k*10)/10;
+  if(out)out.innerHTML='→ VMA ≈ <b>'+_dcVma.toFixed(1)+' km/h</b>'+(k!==1?' <span style="font-size:12px;color:var(--muted2);font-weight:600">(brut '+raw.toFixed(1)+')</span>':'');
+  if(btn)btn.style.display='';
+}
+function applyDemiCooper(){
+  if(_dcVma==null)return;
+  const inp=document.getElementById('vma-inp');
+  if(inp){inp.value=_dcVma.toFixed(1);updTMICard();}
+}
+
 /* ══ INIT ══ */
 document.addEventListener('DOMContentLoaded',()=>{
   buildTestsForm();
@@ -3960,8 +5524,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   cddBuild('csr-type-1','cdd-1',CS_OPTS,()=>renderPerfInput(1));
   cddBuild('csr-type-2','cdd-2',CS_OPTS,()=>renderPerfInput(2));
   renderPerfInput(1);renderPerfInput(2);
+  if(typeof csRenderAssistant==='function')csRenderAssistant();
   loadLS();
   updMhCtx(S.vma?'dashboard':'input');
+  const ac0=document.getElementById('sbn-ath-count');
+  if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
 });
 
 
