@@ -312,6 +312,51 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 
 /* ── RECORDS ── */
 .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .lib-create-btn{margin-left:auto;padding:9px 15px;border:1px solid rgba(255,107,26,0.4);background:rgba(255,107,26,0.1);color:var(--orange);font-family:var(--font);font-weight:800;font-size:13px;border-radius:9px;cursor:pointer;white-space:nowrap}
+  .lib-create-btn:hover{background:rgba(255,107,26,0.18)}
+  .lib-create-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:2px 0 22px}
+  .lc-head{font-size:16px;font-weight:900;color:var(--text);margin-bottom:14px}
+  .lc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .lc-field{margin-bottom:12px;display:flex;flex-direction:column}
+  .lc-field label{font-size:12px;font-weight:800;color:var(--muted2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+  .lc-hint{font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px}
+  .lc-field input,.lc-field select,.lc-field textarea{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:14px;font-weight:600;padding:10px 12px;outline:none;width:100%}
+  .lc-field textarea{resize:vertical;line-height:1.5}
+  .lc-field input:focus,.lc-field select:focus,.lc-field textarea:focus{border-color:var(--orange)}
+  .lc-legend{font-size:12px;color:var(--muted);line-height:1.7;background:rgba(255,255,255,.03);border-radius:9px;padding:9px 12px;margin:2px 0 12px}
+  .lc-legend b{color:var(--text2)}
+  .lc-warn{font-size:12.5px;color:#FB923C;margin-bottom:8px;font-weight:700}
+  .lc-preview{margin-top:6px}
+  .lc-preview-lbl{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+  .lc-empty{font-size:13px;color:var(--muted);padding:8px 0}
+  .lc-actions{display:flex;gap:10px;margin-top:16px}
+  .lc-save{padding:11px 22px;border:none;background:var(--orange);color:#fff;font-family:var(--font);font-weight:800;font-size:14px;border-radius:9px;cursor:pointer}
+  .lc-save:hover{filter:brightness(1.08)}
+  .lc-cancel{padding:11px 18px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:var(--font);font-weight:700;font-size:14px;border-radius:9px;cursor:pointer}
+  .lib-perso{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:900;letter-spacing:.5px;padding:2px 6px;border-radius:5px;background:rgba(255,107,26,0.18);color:var(--orange);vertical-align:middle}
+  .lib-del{position:absolute;top:10px;right:10px;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,.06);color:var(--muted2);font-size:13px;font-weight:900;cursor:pointer;line-height:1;z-index:2}
+  .lib-del:hover{background:rgba(248,113,113,.2);color:#F87171}
+  .lib-seg{display:inline}
+  .lib-seg-plus{margin:0 7px;color:var(--muted2);font-weight:900}
+  @media(max-width:600px){.lc-grid{grid-template-columns:1fr}}
+
+  .pl-live-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
+  .pl-live-hd{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900;color:var(--text)}
+  .pl-live-dot{width:9px;height:9px;border-radius:50%;background:#34D399;box-shadow:0 0 0 3px rgba(52,211,153,.18);animation:plpulse 2s infinite}
+  @keyframes plpulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .pl-live-badge{font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#34D399;background:rgba(52,211,153,.14);padding:2px 7px;border-radius:5px}
+  .pl-live-refresh{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:900}
+  .pl-live-refresh:hover{color:var(--orange);border-color:var(--orange)}
+  .pl-live-sub{font-size:12.5px;color:var(--muted);line-height:1.6;margin:6px 0 14px}
+  .pl-live-item{display:block;padding:11px 13px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;text-decoration:none;transition:all .15s}
+  .pl-live-item:hover{border-color:var(--orange);background:rgba(255,107,26,.05)}
+  .pl-live-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.4}
+  .pl-live-meta{font-size:12px;color:var(--muted2);margin-top:4px}
+  .pl-live-loading{font-size:13px;color:var(--muted);padding:10px 0}
+  .pl-live-err{font-size:13px;color:#FB923C;padding:10px 0;line-height:1.6}
+  .pl-live-err a,.pl-live-more{color:var(--orange);font-weight:700;text-decoration:none}
+  .pl-live-more{display:inline-block;margin-top:10px;font-size:13px}
+
 @media(max-width:860px){.rec-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 @media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
@@ -530,7 +575,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .sidebar{display:none}
   .main{overflow:visible;display:block}
   .topbar{display:none!important}
-  .scroll{overflow:visible;padding:0}
+  .scroll{overflow:visible;padding:0 0 86px}
 
   .mobile-header{
     display:block;background:var(--bg2);
@@ -540,17 +585,28 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .mh-inner{display:flex;align-items:center;justify-content:space-between}
   .mh-logo{font-size:20px;font-weight:900;color:var(--text)}
   .mh-logo span{color:var(--orange)}
+  .mh-slogan{display:flex;flex-direction:column;gap:1px;margin-top:6px}
+  .mh-slogan-ctx{align-items:flex-end;margin-top:0}
+  .mh-slogan span{font-size:10.5px;font-weight:800;line-height:1.35;letter-spacing:0.4px}
+  .mhs-o{color:var(--orange)!important}
+  .mhs-w{color:rgba(241,245,249,0.8)!important}
+  .mhs-s{color:rgba(241,245,249,0.4)!important}
   .mh-menu{
-    display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;
-    border-top:1px solid var(--border);padding-top:10px;
+    display:flex;gap:3px;position:fixed;left:0;right:0;bottom:0;z-index:300;margin:0;
+    padding:6px 5px calc(6px + env(safe-area-inset-bottom,0px));
+    background:rgba(15,20,33,0.97);backdrop-filter:blur(12px);
+    border-top:1px solid var(--border2);
+    flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    box-shadow:0 -8px 26px rgba(0,0,0,0.5);
   }
+  .mh-menu::-webkit-scrollbar{display:none}
   .mh-btn{
-    flex:1;padding:9px 10px;border:1px solid var(--border);
-    background:transparent;color:var(--muted);font-family:var(--font);
-    font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;text-align:center;
-    transition:all .18s;
+    flex:1 0 auto;min-width:58px;padding:8px 8px;border:none;
+    background:transparent;color:var(--muted2);font-family:var(--font);
+    font-size:11.5px;font-weight:800;border-radius:11px;cursor:pointer;text-align:center;
+    white-space:nowrap;transition:all .15s;
   }
-  .mh-btn.active{background:rgba(255,107,26,0.12);color:var(--orange);border-color:rgba(255,107,26,0.3)}
+  .mh-btn.active{background:rgba(255,107,26,0.16);color:var(--orange)}
 
   .mh-ctx{flex:1;min-width:0;text-align:right;padding-left:10px}
   .mh-ctx:empty{display:none}
@@ -945,11 +1001,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   <div class="mh-menu">
     <button class="mh-btn active" id="mbn-input" onclick="go('input')">Saisie</button>
     <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')">Dashboard</button>
+    <button class="mh-btn" id="mbn-library" onclick="go('library')">Bibliothèque</button>
+    <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')">Extrapolation</button>
+    <button class="mh-btn" id="mbn-planif" onclick="go('planif')">Planification</button>
+    <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')">Connaissances</button>
     <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')">Athlètes</button>
-    <button class="mh-btn" id="mbn-library" onclick="go('library')">Séances</button>
-    <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')">Potentiel</button>
-    <button class="mh-btn" id="mbn-planif" onclick="go('planif')">Plan</button>
-    <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')">Savoirs</button>
   </div>
 </header>
 
@@ -2544,7 +2600,7 @@ function updPseudo(){
 }
 
 /* ══ MOBILE HEADER CONTEXT ══ */
-const SAISIE_CTX=`<div class="mh-ctx-title">Définir le profil d'endurance</div>`;
+const SAISIE_CTX=`<div class="mh-slogan mh-slogan-ctx"><span class="mhs-o">Coach running</span><span class="mhs-w">Tous niveaux</span><span class="mhs-s">Courir encadré</span></div>`;
 
 function updMhCtx(id){
   const el=document.getElementById('mh-ctx');
@@ -2974,7 +3030,7 @@ function renderDashPlan(){
   box.innerHTML=html;
   plDrawVol(p,weeks,'db-vol-canvas');
   const bd=document.getElementById('db-plan-badge');
-  if(bd){bd.textContent=wEff+' sem'+(wkAvail>p.wmax?' (max)':(wkAvail<p.wmin?' (court)':''));}
+  if(bd){bd.textContent=wEff+' sem';}
   sec.style.display='block';
 }
 
@@ -3299,16 +3355,19 @@ function libBlock(b,vma,lbl){
   const recTxt=rec.length?' <span class="lib-rec">('+rec.join(' · ')+')</span>':'';
   return '<div class="lib-step"><span class="lib-step-k">'+lbl+'</span><span class="lib-step-v"><b>'+core+'</b>'+(calc?' <span class="lib-calc">→ '+calc+'</span>':'')+recTxt+'</span></div>';
 }
-function libCard(s,vma){
-  const t=LIB_THEMES.find(x=>x.id===s.theme);
+function libCard(s,vma,opts){
+  opts=opts||{};
+  const t=LIB_THEMES.find(x=>x.id===s.theme)||LIB_THEMES[1];
   const ph=LIB_PHASES.find(p=>p.id===libPhaseOf(s))||LIB_PHASES[1];
   const od=libOrderOf(s);
   const phTxt=od?('Étape '+od.n+' · '+od.when):ph.short;
-  const blocks=s.blocks.map((b,i)=>libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
+  const delBtn=opts.del?'<button class="lib-del" title="Supprimer" onclick="libDeleteSession(\''+s.id+'\')">✕</button>':'';
+  const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
+  const blocks=s.blocks.map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
   const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
-  return '<div class="lib-card" style="border-top:3px solid '+t.col+'">'+
-    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div><div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
+  return '<div class="lib-card" style="border-top:3px solid '+t.col+';position:relative">'+delBtn+
+    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
@@ -3330,12 +3389,116 @@ function renderLibCards(){
       if(oa)return -1; if(ob)return 1;
       return ORD[libPhaseOf(a)]-ORD[libPhaseOf(b)];
     });
-    if(!ss.length)return;
+    const cs=CUSTOM_SESSIONS.filter(s=>s.theme===t.id);
+    if(!ss.length&&!cs.length)return;
     html+='<div class="lib-theme-hd" style="--thc:'+t.col+'">'+t.lbl+'</div>';
-    html+='<div class="lib-grid">'+ss.map(s=>libCard(s,vma)).join('')+'</div>';
+    html+='<div class="lib-grid">'+cs.map(s=>libCard(s,vma,{del:true})).join('')+ss.map(s=>libCard(s,vma)).join('')+'</div>';
   });
   box.innerHTML=html||'<div class="empty">Aucune séance.</div>';
 }
+/* ══ SÉANCES PERSO — parseur de notation libre ══ */
+const CUSTOM_KEY='redlab_custom_sessions_v1';
+function loadCustomSessions(){try{return JSON.parse(localStorage.getItem(CUSTOM_KEY)||'[]');}catch(e){return[];}}
+function saveCustomSessions(){try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(CUSTOM_SESSIONS));}catch(e){}}
+let CUSTOM_SESSIONS=loadCustomSessions();
+function fDist(d){return d>=1000?(String(d/1000).replace('.',',')+' km'):(d+' m');}
+function resolvePace(tok){
+  tok=(tok||'').toLowerCase().replace(/[^a-z0-9+]/g,'');
+  let m;
+  if(m=tok.match(/^(\d{2,3})%?$/)) return {pct:+m[1],lbl:m[1]+'%'};
+  if(m=tok.match(/^as(\d+)$/)){ const T={3:100,5:95,8:92,10:90,15:87,21:86,30:82,42:80}; const n=+m[1]; const pct=(T[n]!=null)?T[n]:Math.round(Math.max(75,Math.min(103,100-(n-3)*0.85))); return {pct:pct,lbl:'AS'+n}; }
+  if(/^(ef|fond|foot)/.test(tok)) return {pct:65,lbl:'EF'};
+  if(/^(asmar|asm|am)$/.test(tok)) return {pct:80,lbl:'AM'};
+  if(/^(assemi|ashm|asemi)/.test(tok)) return {pct:86,lbl:'AS21'};
+  if(/^(seuil|tempo)$/.test(tok)) return {pct:87,lbl:'Seuil'};
+  if(/^vma\+/.test(tok)) return {pct:105,lbl:'VMA+'};
+  if(/^vma$/.test(tok)) return {pct:100,lbl:'VMA'};
+  return null;
+}
+var PACE_TOK='as\\d+|assemi|ashm|asemi|asmar|asm|am|ef\\w*|fond\\w*|foot\\w*|seuil|tempo|vma\\+?|@\\d{2,3}|\\d{2,3}%';
+function parseSegs(txt,warnings){
+  const segs=[]; const re=new RegExp('(\\d+)\\s*(km|m)?\\s*('+PACE_TOK+')','gi'); let m;
+  while(m=re.exec(txt)){
+    let d=+m[1]; if((m[2]||'').toLowerCase()==='km')d*=1000;
+    const pace=resolvePace(m[3]);
+    if(!pace){ if(warnings)warnings.push('allure ignorée : « '+m[3].trim()+' »'); continue; }
+    segs.push({d:d,pct:pace.pct,lbl:pace.lbl});
+  }
+  return segs;
+}
+function parseWorkout(raw){
+  const warnings=[]; let s=' '+(raw||'').trim()+' ';
+  let rec=null,rm;
+  if(rm=s.match(/\b(?:r[ée]cup\.?|r)\s*=?\s*(\d+)\s*['′](\d{1,2})?["″]?/i)){ rec=rm[1]+"'"+(rm[2]||''); s=s.replace(rm[0],' '); }
+  else if(rm=s.match(/\b(?:r[ée]cup\.?|r)\s*=?\s*(\d+)\s*["″]/i)){ rec=rm[1]+'"'; s=s.replace(rm[0],' '); }
+  let header=null,hRep=null,hDist=null; const hm=s.match(/(\d+)\s*[x×*]\s*(\d+)\s*(km|m)?/i);
+  if(hm){ hRep=+hm[1]; hDist=+hm[2]*(((hm[3]||'').toLowerCase()==='km')?1000:1); header=hm[0]; }
+  const hasSeries=/s[ée]rie/i.test(s); const blocks=[];
+  if(hasSeries){
+    const chunks=s.slice(s.search(/s[ée]rie/i)).split(/s[ée]rie\s*n?[°º]?\s*(\d+)?/i);
+    for(let i=1;i<chunks.length;i+=2){ const num=chunks[i]||String((i+1)/2); const segs=parseSegs(chunks[i+1]||'',warnings); if(segs.length) blocks.push({label:'Série '+num,r:1,rec:rec,segs:segs}); }
+  } else {
+    const segs=parseSegs(s,warnings);
+    if(segs.length){ if(header) blocks.push({label:hRep+' × '+fDist(hDist),r:hRep,rec:rec,segs:segs}); else blocks.push({label:'Corps',r:1,rec:rec,segs:segs}); }
+  }
+  return {blocks:blocks,warnings:warnings,header:header,hRep:hRep,hDist:hDist,hasSeries:hasSeries};
+}
+function libBlockSegs(b,vma){
+  const multi=b.segs.length>1;
+  const parts=b.segs.map(function(sg){ let calc=''; if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';} return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>'; });
+  const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
+  const rec=b.rec?' <span class="lib-rec">(récup '+b.rec+')</span>':'';
+  const key=multi?b.label:((b.r>1)?'Répétitions':b.label);
+  return '<div class="lib-step"><span class="lib-step-k">'+key+'</span><span class="lib-step-v">'+body+rec+'</span></div>';
+}
+function toggleLibCreate(){
+  const box=document.getElementById('lib-create'); if(!box)return;
+  if(box.style.display==='none'||!box.style.display){ box.innerHTML=libCreateFormHTML(); box.style.display='block'; libPreview(); }
+  else { box.style.display='none'; box.innerHTML=''; }
+}
+function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
+function libCreateFormHTML(){
+  const themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'">'+t.lbl+'</option>';}).join('');
+  return '<div class="lc-head">Nouvelle séance</div>'
+    +'<div class="lc-grid">'
+      +'<div class="lc-field"><label>Titre</label><input id="lc-title" placeholder="10 × 1000 m pyramidal" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
+    +'</div>'
+    +'<div class="lc-field"><label>Contenu <span class="lc-hint">notation libre</span></label><textarea id="lc-raw" rows="3" placeholder="10x1000 : série 1 800as10 200as5 · série 2 700as10 300as5 · série 3 600as10 400as5 · R3&#39;" oninput="libPreview()"></textarea></div>'
+    +'<div class="lc-grid">'
+      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" placeholder="20 min + gammes" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" placeholder="10 min footing" oninput="libPreview()"></div>'
+    +'</div>'
+    +'<div class="lc-field"><label>Description <span class="lc-hint">option</span></label><input id="lc-desc" placeholder="Objectif de la séance…" oninput="libPreview()"></div>'
+    +'<div class="lc-legend">Allures reconnues : <b>AS3 AS5 AS10 AS21</b> (allures 3/5/10/21 km) · <b>AM</b> (marathon) · <b>EF</b> · <b>Seuil</b> · <b>VMA</b> · <b>VMA+</b> · ou un <b>%</b> direct. Distances en m (ou km). Récup : <b>R3&#39;</b> ou <b>R90"</b>. Plusieurs variantes ? Sépare-les par <b>série 1 / série 2…</b></div>'
+    +'<div id="lc-preview" class="lc-preview"></div>'
+    +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">Enregistrer la séance</button><button class="lc-cancel" onclick="toggleLibCreate()">Annuler</button></div>';
+}
+function libBuildFromForm(){
+  const raw=lcVal('lc-raw').trim(); const p=parseWorkout(raw);
+  const tag=p.header?(p.hRep+' × '+fDist(p.hDist)):(p.hasSeries?(p.blocks.length+' séries'):'Séance perso');
+  const s={id:'c'+Date.now(),custom:true,theme:lcVal('lc-theme')||'vo2',title:(lcVal('lc-title').trim()||'Séance perso'),tag:tag,desc:lcVal('lc-desc').trim(),warm:lcVal('lc-warm').trim()||'—',cool:lcVal('lc-cool').trim()||'—',raw:raw,blocks:p.blocks};
+  return {s:s,warnings:p.warnings,ok:p.blocks.length>0};
+}
+function libPreview(){
+  const box=document.getElementById('lc-preview'); if(!box)return;
+  const b=libBuildFromForm(); const vma=libVmaVal(); let html='';
+  if(b.warnings.length) html+='<div class="lc-warn">⚠ '+b.warnings.join(' · ')+'</div>';
+  html+=b.ok?('<div class="lc-preview-lbl">Aperçu</div><div class="lib-grid">'+libCard(b.s,vma)+'</div>'):'<div class="lc-empty">Saisis le contenu de la séance pour voir l’aperçu.</div>';
+  box.innerHTML=html;
+}
+function libSaveSession(){
+  const b=libBuildFromForm();
+  if(!b.ok){ alert('Impossible de lire la séance. Vérifie la notation, ex : 10x1000 800as10 200as5 R3\''); return; }
+  CUSTOM_SESSIONS.push(b.s); saveCustomSessions();
+  const box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
+  libTheme=b.s.theme; renderLibrary();
+}
+function libDeleteSession(id){
+  if(!confirm('Supprimer cette séance ?'))return;
+  CUSTOM_SESSIONS=CUSTOM_SESSIONS.filter(function(s){return s.id!==id;}); saveCustomSessions(); renderLibCards();
+}
+
 function libExtrapolHTML(){
   const IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 9px;outline:none';
   const tIn=(id,k)=>{
@@ -3435,7 +3598,9 @@ function renderLibrary(){
     '<div class="lib-toolbar">'+
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
       '<div class="lib-chips">'+chips+'</div>'+
+      '<button class="lib-create-btn" onclick="toggleLibCreate()">+ Créer une séance</button>'+
     '</div>'+
+    '<div id="lib-create" class="lib-create-box" style="display:none"></div>'+
     '<div id="lib-cards"></div>';
   renderLibCards();
 }
@@ -4046,6 +4211,16 @@ function exportAthleteView(){
   });
   clone.classList.add('active');
 
+  // Fiche épurée : retirer les notes sous le graphe de périodisation et sous les zones + resserrer la card
+  Array.from(clone.querySelectorAll('div')).forEach(function(d){
+    var t=(d.textContent||'');
+    if((t.indexOf('calée en fin de bloc')>-1||t.indexOf('référentiel croisé')>-1)&&!d.querySelector('canvas,table,img,input')) d.remove();
+  });
+  var _pcard=clone.querySelector('#db-plan');
+  if(_pcard){ if(_pcard.parentNode&&_pcard.parentNode.classList&&_pcard.parentNode.classList.contains('card')) _pcard.parentNode.style.padding='12px 16px';
+    var _leg=_pcard.querySelector('div>div'); if(_leg&&_leg.style)_leg.style.marginBottom='2px';
+    var _inner=_pcard.firstElementChild; if(_inner&&_inner.style)_inner.style.marginTop='0'; }
+
   // 3) JS embarqué : réutilise les fonctions EXACTES de l'app (zéro divergence)
   const embedJS=[
     'var S='+JSON.stringify({vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0,pseudo:S.pseudo,records:S.records||{},raceHistory:S.raceHistory||[],csPts:S.csPts||null,testDate:S.testDate||null})+';',
@@ -4068,7 +4243,7 @@ function exportAthleteView(){
     renderRaceHistory.toString(),
     'var PL_PHC='+JSON.stringify(PL_PHC)+';',
     'var _fVol='+JSON.stringify(window._dashVolData||null)+';',
-    'function _drawFVol(){if(!_fVol||typeof Chart===\'undefined\')return;var cv=document.getElementById(\'db-vol-canvas\');if(!cv)return;var wk=_fVol.weeks,col=_fVol.col,u=_fVol.unit;var labels=wk.map(function(x){return x.dt;});var data=wk.map(function(x){return x.km;});var _ymax=Math.max.apply(null,data.length?data:[1])*1.08;var _pha=function(hh,a){hh=hh.replace(\'#\',\'\');return \'rgba(\'+parseInt(hh.slice(0,2),16)+\',\'+parseInt(hh.slice(2,4),16)+\',\'+parseInt(hh.slice(4,6),16)+\',\'+a+\')\';};var ptc=wk.map(function(x){return x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph];});try{if(window.Chart&&Chart.getChart){var _ex=Chart.getChart(cv);if(_ex)_ex.destroy();}}catch(e){}new Chart(cv,{type:\'bar\',data:{labels:labels,datasets:[{label:\'Volume\',data:data,backgroundColor:ptc,borderColor:ptc,borderWidth:0,borderRadius:5,maxBarThickness:46,categoryPercentage:0.82,barPercentage:0.92}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return \'S\'+x.n+\' · \'+x.dt;},label:function(c){var x=wk[c.dataIndex];return x.km+\' \'+(u||\'\')+(x.rec?\' · décharge\':\'\')+(x.race?\' · course\':\'\')+(x.inter?\' · course prépa\':\'\');}}}},scales:{y:{title:{display:true,text:(u?\'Volume (\'+u+\'/sem)\':\'Volume\'),color:\'#94A3B8\',font:{size:11}},ticks:{color:\'#94A3B8\'},grid:{color:\'rgba(255,255,255,0.06)\'},suggestedMax:_ymax},x:{ticks:{color:\'#94A3B8\',maxRotation:0,autoSkip:true},grid:{color:\'rgba(255,255,255,0.04)\'}}},plugins:[{id:\'volLbl\',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign=\'center\';g.textBaseline=\'bottom\';m.data.forEach(function(pt,i){g.font=\'800 12px Manrope,sans-serif\';g.fillStyle=\'#E2E8F0\';g.fillText(ch.data.datasets[0].data[i]+(u?\' \'+u:\'\'),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font=\'800 9px Manrope,sans-serif\';g.fillStyle=\'#FBBF24\';g.fillText(\'PR\\u00c9PA\',pt.x,pt.y-26);}});g.restore();}}]});}',
+    'function _drawFVol(){if(!_fVol||typeof Chart===\'undefined\')return;var cv=document.getElementById(\'db-vol-canvas\');if(!cv)return;var wk=_fVol.weeks,col=_fVol.col,u=_fVol.unit;var labels=wk.map(function(x){return x.dt;});var data=wk.map(function(x){return x.km;});var _ymax=Math.max.apply(null,data.length?data:[1])*1.08;var _pha=function(hh,a){hh=hh.replace(\'#\',\'\');return \'rgba(\'+parseInt(hh.slice(0,2),16)+\',\'+parseInt(hh.slice(2,4),16)+\',\'+parseInt(hh.slice(4,6),16)+\',\'+a+\')\';};var ptc=wk.map(function(x){return x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph];});try{if(window.Chart&&Chart.getChart){var _ex=Chart.getChart(cv);if(_ex)_ex.destroy();}}catch(e){}new Chart(cv,{type:\'bar\',data:{labels:labels,datasets:[{label:\'Volume\',data:data,backgroundColor:ptc,borderColor:ptc,borderWidth:0,borderRadius:5,maxBarThickness:90,categoryPercentage:0.9,barPercentage:0.96}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return \'S\'+x.n+\' · \'+x.dt;},label:function(c){var x=wk[c.dataIndex];return x.km+\' \'+(u||\'\')+(x.rec?\' · décharge\':\'\')+(x.race?\' · course\':\'\')+(x.inter?\' · course prépa\':\'\');}}}},scales:{y:{title:{display:true,text:(u?\'Volume (\'+u+\'/sem)\':\'Volume\'),color:\'#94A3B8\',font:{size:11}},ticks:{color:\'#94A3B8\'},grid:{color:\'rgba(255,255,255,0.06)\'},suggestedMax:_ymax},x:{ticks:{color:\'#94A3B8\',maxRotation:0,autoSkip:true},grid:{color:\'rgba(255,255,255,0.04)\'}}},plugins:[{id:\'volLbl\',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign=\'center\';g.textBaseline=\'bottom\';m.data.forEach(function(pt,i){g.font=\'800 12px Manrope,sans-serif\';g.fillStyle=\'#E2E8F0\';g.fillText(ch.data.datasets[0].data[i]+(u?\' \'+u:\'\'),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font=\'800 9px Manrope,sans-serif\';g.fillStyle=\'#FBBF24\';g.fillText(\'PR\\u00c9PA\',pt.x,pt.y-26);}});g.restore();}}]});}',
     csmToggle.toString(), csmSim.toString(), simUnit.toString(),
     drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
     'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
@@ -4638,26 +4813,27 @@ function plWeeks(p,w){
   // --- Placement des décharges : option 2 (hybride) ---
   // décharge calée en FIN de bloc (transition, si bloc >= 4 sem), + sécurité : jamais > 4 semaines de charge d'affilée.
   // jamais sur le pic (dernière semaine de charge, qui enchaîne sur l'affûtage).
-  let since=0;
-  arr.forEach(function(wk,i){
+  // Décharges : jamais plus de 3 semaines de charge d'affilée (Base incluse) ; décharge calée en fin de bloc.
+  let run=0;
+  arr.forEach(function(wk){
     if(wk.ph==='aff'){return;}
-    if(wk.ph==='base'){ wk.rec=false; return; }   // base = charge légère : pas de décharge, ne compte pas dans le run
-    const bi=wk._bi, isPeak=(bi===_nb-1), isEnd=(wk.pi===wk.pl-1), pLen=wk.pl;
-    since++;
-    let rec=false;
+    var isPeak=(wk._bi===_nb-1), isEnd=(wk.pi===wk.pl-1), pLen=wk.pl;
+    var rec=false;
     if(!isPeak){
-      if(isEnd && pLen>=4 && since>=3){ rec=true; }        // décharge de transition en fin de bloc
-      else if(since>=4){                                    // sécurité : jamais > 4 sem de charge d'affilée
-        rec=true;
-        var nx=arr[i+1];                                    // si la semaine suivante est une fin de bloc, on laisse la décharge s'y caler
-        if(nx && nx.ph!=='aff' && nx.ph!=='base' && nx.pi===nx.pl-1 && nx.pl>=4 && nx._bi!==_nb-1){ rec=false; }
-        else if(wk.pi===0 && i>0 && arr[i-1] && arr[i-1].ph!=='aff' && arr[i-1].ph!=='base' && !arr[i-1].rec && arr[i-1]._bi!==_nb-1){
-          arr[i-1].rec=true; rec=false; since=1;            // pas de décharge en début de bloc → on la cale sur la fin du bloc précédent
-        }
-      }
+      if(isEnd && pLen>=4 && run>=2){ rec=true; }   // décharge de transition en fin de bloc
+      else if(run>=3){ rec=true; }                   // jamais 4 semaines de charge d'affilée
     }
-    wk.rec=rec; if(rec) since=0;
+    wk.rec=rec; run = rec?0:run+1;
   });
+  // Le pic ne peut pas être une décharge : s'il termine une série de 4 charges d'affilée,
+  // on décharge 2 semaines avant lui (montée → décharge → montée → pic).
+  (function(){
+    var pk=-1; for(var i=0;i<arr.length;i++){var w=arr[i];if(w.ph!=='aff'&&w._bi===_nb-1){pk=i;break;}}
+    if(pk<0)return;
+    var cnt=0,k=pk;
+    while(k>=0 && arr[k].ph!=='aff' && !arr[k].rec){cnt++;k--;}
+    if(cnt>=4){var t=pk-1;if(t>=0 && arr[t].ph!=='aff') arr[t].rec=true;}
+  })();
   arr.forEach(function(wk,i){
     let v;
     if(wk.ph==='aff'){ v=(wk.pl===1)?0.50:(0.59-0.19*wk.pi/(wk.pl-1)); } // affûtage -41% (S-2) à -60% (S-1), Bosquet 2007
@@ -4753,8 +4929,8 @@ function plLoadHTML(p,wk,opts){
   const legend=[['base','Base'],['dev','Développement'],['spe','Spécifique'],['aff','Affûtage']].map(l=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2)"><i style="width:10px;height:10px;border-radius:50%;background:'+PL_PHC[l[0]]+'"></i>'+l[1]+'</span>').join('');
   return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
     +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
-    +'<div style="position:relative;height:400px"><canvas id="'+cid+'"></canvas></div>'
-    +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 4 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
+    +'<div style="position:relative;height:460px"><canvas id="'+cid+'"></canvas></div>'
+    +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 3 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
 }
 let _plVolCharts={};
 function plDrawVol(p,wk,cid){
@@ -4769,7 +4945,7 @@ function plDrawVol(p,wk,cid){
   _plVolCharts[cid]=new Chart(cv,{type:'bar',data:{labels:labels,datasets:[{
     label:'Volume',data:data,
     backgroundColor:barCol,borderColor:barCol,borderWidth:0,
-    borderRadius:5,maxBarThickness:46,categoryPercentage:0.82,barPercentage:0.92
+    borderRadius:5,maxBarThickness:90,categoryPercentage:0.9,barPercentage:0.96
   }]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return 'S'+x.n+(x.d0?' · '+labels[it[0].dataIndex]:'');},label:function(c){var x=wk[c.dataIndex];return c.parsed.y+' '+(u||'')+(x.rec?' · décharge':'')+(x.race?' · course':'')+(x.inter?' · ★ course prépa':'')+' · '+plPhLabel(x.ph);}}}},
     scales:{
@@ -5275,38 +5451,32 @@ function plPeriodHTML(){
 }
 function plVO2HTML(){
   var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
-  var V=[
-   ['IM long','≥ 2-3 min','95-100 % VMA','≤ effort (passive) ou ≥ effort (active)','15′','4 à 10 min','INSEP'],
-   ['IM court 30/30','30 s','100-105 % VMA','30 s trot actif ~50-65 % VMA','~20′','6 à 8 min','Billat / INSEP'],
-   ['IM court 15/15','15 s','105-110 % VMA','15 s trot ~50 % VMA','blocs 3-9′','6 à 7 min','Billat'],
-   ['Continu','20-40′','85-91 % VMA','—','—','~1/3 du temps d’effort','Billat / INSEP']
+  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
+  var FR=[
+   ['Objectif','Max. de temps &gt; 90 % VO₂max','Max. de temps &gt; 90 % VO₂max'],
+   ['Durée des répétitions','<b>&gt; 2 min</b> · idéal 4-6 min','<b>&lt; 2 min</b>'],
+   ['Intensité','95-100 % VMA · &gt; 90 % VO₂max · 90-95 % FCmax','<b>100-120 % VMA</b>'],
+   ['Formats types','3-5 × 3′ · 1000-1200 m','30/30 · 15/15 · 200-400 m'],
+   ['Récup entre répétitions','&lt; temps d’effort · passive ou ~40 % VMA','&lt; temps d’effort · <b>50-70 % VMA</b>'],
+   ['Mode de contrôle','Essentiellement <b>FC</b> (+ vitesse)','<b>Puissance / vitesse</b>'],
+   ['Temps passé à VO₂max','4 à 10 min','6 à 8 min'],
+   ['Nombre de rép. / séries','À calculer pour tenir <b>≥ 10 min &gt; 90 % VO₂max</b> (latence incluse) · condenser les séries','idem']
   ];
-  var rows=V.map(function(r){return '<tr>'
-    +'<td style="'+td+';font-weight:800;color:var(--text)">'+r[0]+'</td>'
-    +'<td style="'+td+';white-space:nowrap">'+r[1]+'</td>'
-    +'<td style="'+td+';font-weight:800;white-space:nowrap;color:var(--orange)">'+r[2]+'</td>'
-    +'<td style="'+td+'">'+r[3]+'</td>'
-    +'<td style="'+td+';white-space:nowrap">'+r[4]+'</td>'
-    +'<td style="'+td+';white-space:nowrap">'+r[5]+'</td>'
-    +'<td style="'+td+';color:var(--muted);white-space:nowrap">'+r[6]+'</td></tr>';}).join('');
+  var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
   var pr=[
-   'Objectif : maximiser le <b>temps passé à VO2max</b> dans la séance (critère d’efficacité).',
-   'Étude fondatrice (Billat, K4) : en 30/30 à VMA les coureurs passent ~8 min à VO2max (jusqu’à 18 min pour certains) ; le continu à 91 % VMA n’atteint VO2max qu’~1/3 du temps.',
-   '<b>Débat long vs court</b> : des travaux récents (2024) montrent que l’IM long (~3 min) accumule autant, voire plus de temps &gt; 90 % VO2max que le 30 s malgré une intensité moindre. Pour le développement pur de VO2max chez le coureur, l’IM long est au moins aussi efficace.',
-   'Le 30/30 à <b>110 % VMA</b> est le calibrage « sports collectifs » (VIFT/Buchheit) ; pour un coureur, 100-105 % VMA (Billat) est la référence.',
-   'Resynthèse de PCr : la composante rapide (60 premières s) est clé ; 3-5 min pour une restauration complète.',
-   'Le continu &gt; 85-90 % VMA améliore aussi VO2max, mais moins efficacement que l’intermittent sur PCr et la capacité tampon.',
-   'La vitesse/sprint est le 1<sup>er</sup> facteur de risque de blessure (ischios) → progressivité + échauffement soigné.'
+   'Objectif commun : <b>maximiser le temps passé à VO₂max</b> (critère d’efficacité de la séance).',
+   'Étude fondatrice (Billat, K4) : en 30/30 à VMA, les coureurs passent ~8 min à VO₂max ; le continu à 91 % VMA n’y reste qu’~1/3 du temps.',
+   '<b>Long vs court</b> : des travaux 2024 montrent que le long (~3 min) accumule autant, voire plus de temps &gt; 90 % VO₂max que le 30 s — au moins aussi efficace pour développer VO₂max.',
+   'Resynthèse de PCr : composante rapide (60 premières s) clé ; 3-5 min pour une restauration complète.',
+   'Le 30/30 à 110 % VMA = calibrage « sports collectifs » (VIFT/Buchheit) ; pour un coureur, 100-105 % VMA (Billat) est la référence.'
   ];
   var lis=pr.map(function(x){return '<li style="margin-bottom:6px">'+x+'</li>';}).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">VMA / VO2max — travail intermittent</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Formats d’intermittent pour développer VO2max et la capacité à répéter les efforts.</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:720px">'
-    +'<thead><tr><th style="'+th+'">Format</th><th style="'+th+'">Effort</th><th style="'+th+'">Intensité</th><th style="'+th+'">Récup</th><th style="'+th+'">Durée séance</th><th style="'+th+'">Temps à VO2max</th><th style="'+th+'">Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">VMA / VO₂max — fractionné long vs court</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Tout le travail intermittent VMA en un tableau : paramètres du fractionné long et court.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:12px"><ul style="margin:0;padding-left:18px">'+lis+'</ul></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Sources : INSEP « Sports à haute intensité » (C. Hanon, chap. V — Buchheit &amp; Laursen) ; Billat et al. (30/30, temps à VO2max) ; travaux 2024 sur le temps &gt; 90 % VO2max.</div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Sources : INSEP « Sports à haute intensité » (C. Hanon) ; Billat et al. (30/30, temps à VO₂max) ; travaux 2024.</div>'
     +'</div>';
 }
 function plNutritionHTML(){
@@ -5421,17 +5591,57 @@ function plRenfoHTML(){
     +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Type de travail de force selon la phase et la distance objectif. Plus la distance est longue, plus l’endurance de force et l’excentrique dominent.</div>'
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr><th style="'+th+'">Phase</th><th style="'+th+'">Demi-fond · 10 km</th><th style="'+th+'">Semi · Marathon</th><th style="'+th+'">Trail</th><th style="'+th+'">Ultra (route &amp; trail)</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
+
+/* ══ VEILLE PUBMED LIVE — API NCBI E-utilities (cross-origin autorisé) ══ */
+const PUBMED_TERM='(running[tiab] OR runners[tiab] OR marathon[tiab] OR "half marathon"[tiab] OR "10 km"[tiab] OR "5 km"[tiab] OR "endurance training"[tiab]) AND (VO2max[tiab] OR "critical speed"[tiab] OR "critical power"[tiab] OR "lactate threshold"[tiab] OR "running economy"[tiab] OR periodization[tiab] OR "interval training"[tiab] OR "training load"[tiab] OR tapering[tiab] OR "durability"[tiab])';
+function plEsc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+function pubmedSearchURL(){return 'https://pubmed.ncbi.nlm.nih.gov/?sort=date&term='+encodeURIComponent(PUBMED_TERM);}
+function pubmedLiveHTML(){
+  return '<div class="db-section" style="margin-top:30px">'
+    +'<div class="pl-live-card">'
+    +'<div class="pl-live-hd"><span class="pl-live-dot"></span>Veille PubMed — dernières études<span class="pl-live-badge">live</span>'
+    +'<button class="pl-live-refresh" onclick="fetchPubmedLive()" title="Actualiser">↻</button></div>'
+    +'<div class="pl-live-sub">Actualisé à chaque ouverture de l’onglet · 5 km / 10 km / semi / marathon croisés avec VO₂max, seuil, vitesse critique, périodisation, économie de course, affûtage.</div>'
+    +'<div id="pl-live-list"><div class="pl-live-loading">Chargement des dernières études…</div></div>'
+    +'<a class="pl-live-more" href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Voir toute la veille sur PubMed →</a>'
+    +'</div></div>';
+}
+async function fetchPubmedLive(){
+  const box=document.getElementById('pl-live-list'); if(!box)return;
+  box.innerHTML='<div class="pl-live-loading">Chargement des dernières études…</div>';
+  const base='https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
+  try{
+    const es=await fetch(base+'esearch.fcgi?db=pubmed&retmode=json&sort=date&retmax=12&term='+encodeURIComponent(PUBMED_TERM)).then(function(r){return r.json();});
+    const ids=(es&&es.esearchresult&&es.esearchresult.idlist)||[];
+    if(!ids.length){box.innerHTML='<div class="pl-live-err">Aucune étude trouvée pour l’instant.</div>';return;}
+    const sm=await fetch(base+'esummary.fcgi?db=pubmed&retmode=json&id='+ids.join(',')).then(function(r){return r.json();});
+    const R=sm&&sm.result; if(!R||!R.uids){throw new Error('bad summary');}
+    const rows=R.uids.map(function(id){
+      const a=R[id]||{}; const au=(a.authors||[]).map(function(x){return x.name;});
+      const authors=au.slice(0,3).join(', ')+(au.length>3?' et al.':'');
+      const meta=[authors,a.fulljournalname||a.source||'',a.pubdate||''].filter(Boolean).map(plEsc).join(' · ');
+      return '<a class="pl-live-item" href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/" target="_blank" rel="noopener">'
+        +'<div class="pl-live-title">'+plEsc(a.title||'(sans titre)')+'</div>'
+        +'<div class="pl-live-meta">'+meta+'</div></a>';
+    }).join('');
+    box.innerHTML=rows;
+  }catch(e){
+    box.innerHTML='<div class="pl-live-err">Impossible de charger la veille en direct (réseau bloqué ou hors-ligne). '
+      +'<a href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Ouvrir la recherche PubMed →</a></div>';
+  }
+}
+
 function renderKnowledge(){
   var w=document.getElementById('knowledge-wrap');if(!w)return;
   w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
-    +plPeriodHTML()
     +plSpeSessHTML()
     +plDomainTimeHTML()
     +plVO2HTML()
-    +plFracHTML()
     +plRecovHTML()
     +plRenfoHTML()
+    +pubmedLiveHTML()
     +plStudiesHTML();
+  fetchPubmedLive();
 }
 function renderPlanif(){
   const wrap=document.getElementById('planif-wrap');if(!wrap)return;
@@ -5489,6 +5699,8 @@ function renderPlanif(){
     +'<div style="margin-top:14px;padding:11px 13px;border-radius:9px;background:rgba(255,255,255,0.03);border-left:3px solid '+p.col+'"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px">Repères de volume</div><div style="font-size:12.5px;color:var(--text2);line-height:1.6"><b>Minimum '+PL_VOLREF[p.id].min+' '+PL_VOLREF[p.id].unit+'</b> · cible <b>'+PL_VOLREF[p.id].lo+'–'+PL_VOLREF[p.id].hi+'</b> · perf <b>'+PL_VOLREF[p.id].perf+'</b></div><div style="font-size:12px;color:var(--muted);line-height:1.55;margin-top:5px">'+PL_VOLREF[p.id].note+'</div></div></div>'
     +'<div class="card" style="padding:20px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:'+p.col+';margin-bottom:6px">Qualités à développer</div><div style="position:relative;height:280px"><canvas id="pl-radar"></canvas></div></div>'
     +'</div>'
+    // ── Repères de périodisation (FFA) ──
+    +'<div style="margin-top:16px">'+plPeriodHTML()+'</div>'
     // ── Phases dépliables ──
     +'<div class="csm-limites" style="margin-top:16px"><b>Repères, pas dogmes</b> — trames standards (périodisation, 80/20, affûtage Bosquet 2007) à adapter à l’athlète.</div>';
   plUpd();
