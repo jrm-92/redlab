@@ -340,6 +340,83 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lib-seg-plus{margin:0 7px;color:var(--muted2);font-weight:900}
   @media(max-width:600px){.lc-grid{grid-template-columns:1fr}}
 
+  .plc-leg{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px}
+  .plc-lg{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted2)}
+  .plc-lg span{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .plc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+  .plc-cell{border:1px solid var(--border);border-radius:10px;padding:10px 11px}
+  .plc-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+  .plc-top b{font-size:14px;color:var(--text)}
+  .plc-dt{font-size:11px;color:var(--muted2);font-weight:600}
+  .plc-ph{font-size:11px;font-weight:800;margin-top:4px;text-transform:uppercase;letter-spacing:.3px}
+  .plc-km{font-size:12.5px;color:var(--text2);font-weight:700;margin-top:3px}
+  .plc-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+  .plc-tag{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid var(--border2);color:var(--muted2)}
+  .plbw{width:26px;height:26px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:var(--font);font-size:16px;font-weight:800;border-radius:7px;cursor:pointer;line-height:1}
+  .plbw:hover{border-color:var(--orange);color:var(--orange)}
+  .plc-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .plc-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:2px 0 12px}
+  .plc-reset{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-family:var(--font);font-size:11.5px;font-weight:800;padding:5px 11px;cursor:pointer;white-space:nowrap}
+  .plc-reset:hover{border-color:var(--orange);color:var(--orange)}
+  .plc-send{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;color:#34D399;font-family:var(--font);font-size:11.5px;font-weight:800;padding:5px 12px;cursor:pointer;white-space:nowrap}
+  .plc-send:hover{background:rgba(52,211,153,0.2)}
+  .plc-sl{width:100%;margin:8px 0 2px;accent-color:var(--orange);cursor:ew-resize;height:16px}
+  .plc-dl{margin-top:6px;width:100%;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--font);font-size:10.5px;font-weight:800;padding:4px 6px;border-radius:7px;cursor:pointer;letter-spacing:.2px}
+  .plc-dl:hover{border-color:var(--orange);color:var(--orange)}
+  .plc-dl.on{background:rgba(148,163,184,.18);border-color:var(--muted2);color:var(--text2)}
+  .plw-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 0 5px}
+  .plw-dow span{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);text-align:center}
+  .plw-cal{display:flex;flex-direction:column;gap:8px}
+  .plw-week{border:1px solid var(--border);border-radius:11px;padding:10px 12px}
+  .plw-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;font-size:12px}
+  .plw-s b{font-size:14px;color:var(--text)}
+  .plw-km{font-weight:800;color:var(--text2)}
+  .plw-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:9px}
+  .plw-day{position:relative;min-height:104px;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;padding:5px 5px 6px}
+  .plw-dtop{display:flex;align-items:center;gap:4px;min-height:16px;position:relative}
+  .plw-dn{font-size:13px;font-weight:800;color:var(--text2)}
+  .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
+  .plw-mk{margin-left:auto;font-size:12px}
+  .plw-sess{display:flex;flex-direction:column;gap:3px;margin:5px 0;flex:1}
+  .plw-ch{display:flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:var(--text2);border-radius:5px;padding:2px 4px;line-height:1.25}
+  .plw-ch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  .plw-ch button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px}
+  .plw-ch button:hover{color:#F87171}
+  .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:9.5px;font-weight:800;padding:3px 2px;cursor:pointer;width:100%}
+  .plw-add:hover{border-color:var(--orange);color:var(--orange)}
+  .plw-kmf,.plw-dlf{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted2)}
+  .plw-kmf input{width:58px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:7px;color:var(--text);font-family:var(--font);font-weight:800;font-size:12.5px;padding:4px 6px;text-align:center}
+  .plw-dlf input{width:15px;height:15px;accent-color:var(--muted2);cursor:pointer}
+  .plw-man{font-size:10px;font-weight:800;color:var(--orange)}
+  .pl-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .pl-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:520px;width:100%;padding:18px;max-height:82vh;display:flex;flex-direction:column}
+  .pl-modal-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .pl-modal-top b{font-size:15px;color:var(--text)}
+  .pl-modal-top span{font-size:12px;color:var(--muted2);flex:1;text-transform:capitalize}
+  .pl-modal-x{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;line-height:1}
+  .pl-pick-q{width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;padding:8px 11px;margin-bottom:12px;outline:none}
+  .pl-pick-list{overflow:auto}
+  .pl-pick-grp{margin-bottom:12px}
+  .pl-pick-h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+  .pl-pick-it{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;padding:7px 10px;margin-bottom:5px;cursor:pointer}
+  .pl-pick-it:hover{border-color:var(--orange);background:rgba(255,107,26,.05)}
+  .pl-pick-it span{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+  #cloud-fab{position:fixed;right:14px;bottom:82px;z-index:250;width:46px;height:46px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center}
+  #cloud-fab:hover{border-color:var(--orange);color:var(--orange)}
+  #cloud-dot{position:absolute;top:7px;right:7px;width:10px;height:10px;border-radius:50%;background:#64748B;border:2px solid var(--bg2)}
+  @media(min-width:861px){#cloud-fab{bottom:20px}}
+  #ath-fab{position:fixed;left:14px;bottom:82px;z-index:250;min-width:46px;height:46px;border-radius:23px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:0 6px}
+  #ath-fab:hover{border-color:var(--orange)}
+  .ath-fab-av{width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,.14);border:1px solid rgba(255,107,26,.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--orange)}
+  @media(min-width:861px){#ath-fab{bottom:20px}}
+  .ath-it{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:pointer;font-family:var(--font)}
+  .ath-it:hover{border-color:var(--orange);background:rgba(255,107,26,.05)}
+  .ath-it.on{border-color:var(--orange);background:rgba(255,107,26,.08)}
+  .ath-it-av{width:36px;height:36px;border-radius:50%;background:rgba(255,107,26,.14);border:1px solid rgba(255,107,26,.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--orange);flex-shrink:0}
+  .ath-it-tx{display:flex;flex-direction:column;line-height:1.3}
+  .ath-it-tx b{font-size:14px;color:var(--text)}
+  .ath-it-tx span{font-size:11.5px;color:var(--muted2)}
+  .tool-ath-bar:hover{border-color:rgba(255,107,26,0.55)!important;background:rgba(255,107,26,0.09)!important}
   .pl-live-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
   .pl-live-hd{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900;color:var(--text)}
   .pl-live-dot{width:9px;height:9px;border-radius:50%;background:#34D399;box-shadow:0 0 0 3px rgba(52,211,153,.18);animation:plpulse 2s infinite}
@@ -351,6 +428,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .pl-live-item{display:block;padding:11px 13px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;text-decoration:none;transition:all .15s}
   .pl-live-item:hover{border-color:var(--orange);background:rgba(255,107,26,.05)}
   .pl-live-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.4}
+  .pl-live-orig{font-size:11.5px;color:var(--muted2);margin-top:2px;font-style:italic;line-height:1.35}
   .pl-live-meta{font-size:12px;color:var(--muted2);margin-top:4px}
   .pl-live-loading{font-size:13px;color:var(--muted);padding:10px 0}
   .pl-live-err{font-size:13px;color:#FB923C;padding:10px 0;line-height:1.6}
@@ -1504,6 +1582,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ══ UTILS ══ */
 function pt(s){if(!s)return null;s=s.trim();const p=s.split(':');if(p.length===2){const m=+p[0],sc=+p[1];return isNaN(m)||isNaN(sc)?null:m*60+sc;}return null;}
@@ -2031,10 +2110,10 @@ function renderProfile(){
   const _ini=(S.pseudo||'?').slice(0,2).toUpperCase();
   const b0=`
     <div class="ph-block ph-full">
-      <div style="display:flex;align-items:center;gap:14px">
+      <div onclick="athSwitcherOpen()" title="Changer d’athlète" style="display:flex;align-items:center;gap:14px;cursor:pointer">
         <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--orange);flex-shrink:0">${_ini}</div>
         <div style="min-width:0">
-          <div class="ph-b-lbl">Athlète</div>
+          <div class="ph-b-lbl" style="display:inline-flex;align-items:center;gap:6px">Athlète <span style="font-size:9px;font-weight:800;color:var(--orange);border:1px solid rgba(255,107,26,0.4);border-radius:4px;padding:1px 5px;letter-spacing:.3px">CHANGER</span></div>
           <div style="font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.4px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${S.pseudo||'—'}</div>
           ${S.testDate?`<div style="font-size:12.5px;color:var(--muted2);margin-top:3px">Profil édité le ${S.testDate}</div>`:''}
         </div>
@@ -2589,7 +2668,7 @@ function updPseudo(){
 
   if(v){
     const ini=v.slice(0,2).toUpperCase();
-    tb.innerHTML=`<button class="tb-ath" onclick="go('athletes')" title="Voir mes athlètes">
+    tb.innerHTML=`<button class="tb-ath" onclick="athSwitcherOpen()" title="Changer d'athlète">
       <span class="tb-ath-av">${ini}</span>
       <span class="tb-ath-txt"><span class="tb-ath-name">${v}</span>${S.testDate?`<span class="tb-ath-date">${S.testDate}</span>`:''}</span>
       <svg viewBox="0 0 24 24" class="tb-ath-chev"><polyline points="9 18 15 12 9 6"/></svg>
@@ -2597,6 +2676,7 @@ function updPseudo(){
   } else {
     tb.innerHTML=`<span style="font-size:13px;color:var(--muted2)">Aucun profil chargé</span>`;
   }
+  if(typeof athFabUpdate==='function')athFabUpdate();
 }
 
 /* ══ MOBILE HEADER CONTEXT ══ */
@@ -2737,7 +2817,7 @@ function loadAthlete(id){
     csPts:ath.csPts||null,
     plan:ath.plan||null,
   });
-  _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+  _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
   document.getElementById('pseudo-inp').value=ath.pseudo;
   setMode(ath.mode||'vma');
   if(ath.mode==='vma'){
@@ -2842,23 +2922,6 @@ function renderAthletes(){
       <img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running" style="max-width:130px;height:auto;display:block;margin-bottom:12px">
       <div class="input-hero-title">Athlètes enregistrés</div>
       <div class="input-hero-sub">Retrouvez et chargez les profils de vos athlètes. Depuis le Dashboard, cliquez sur <strong>Enregistrer</strong> pour sauvegarder un profil.</div>
-    </div>
-    <div class="data-card">
-      <div class="data-card-txt">
-        <div class="data-card-title">Sauvegarde de vos données</div>
-        <div class="data-card-sub">Exportez toutes vos données (profil + athlètes), ou un seul athlète via le bouton orange de sa carte. L'import reconnaît les deux types de fichiers.</div>
-      </div>
-      <div class="data-actions">
-        <button class="data-btn" onclick="exportData()">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Exporter
-        </button>
-        <button class="data-btn" onclick="document.getElementById('import-file').click()">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Importer
-        </button>
-        <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importData(this)">
-      </div>
     </div>`;
   if(!athletes.length){
     wrap.innerHTML=hd+`
@@ -2894,9 +2957,6 @@ function renderAthletes(){
         <button class="btn-load" onclick="loadAthlete(${a.id})">
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           Charger le profil
-        </button>
-        <button class="btn-del" onclick="exportOneAthlete(${a.id})" title="Exporter cet athlète" style="border-color:rgba(255,107,26,0.3);color:var(--orange)">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </button>
         <button class="btn-del" onclick="deleteAthlete(${a.id})" title="Supprimer">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -3012,11 +3072,16 @@ function renderDashPlan(){
   let wkAvail=Math.round(days/7);
   const w=Math.min(Math.max(wkAvail,p.wmin),p.wmax);
   // sauvegarde état planif
-  const save={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,d1:_plDate1,d2:_plDate2,di:_plDi,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase};
+  const save={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,d1:_plDate1,d2:_plDate2,di:_plDi,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   const cfg=(S.plan&&S.plan.D===p.id)?S.plan:null;
   _plPhaseOverride=cfg?(cfg.ph||null):null;
   _plOrient=cfg?(cfg.orient||0):0;
   _plBase=cfg?(cfg.base!==false):true;
+  _plRatio=cfg?(cfg.ratio===2?2:3):3;
+  _plBaseW=cfg?(cfg.baseW!=null?cfg.baseW:null):null;
+  _plVolOverride=cfg?(cfg.volOv||{}):{};
+  _plRecOverride=cfg?(cfg.recOv||{}):{};
+  _plSessions=cfg?(cfg.sess||{}):{};
   const wEff=(cfg&&cfg.W!=null)?Math.min(Math.max(cfg.W,p.wmin),p.wmax):w;
   _plD=p.id;_plCtx=cfg?cfg.ctx:'new';_plVol=cfg?cfg.vol:null;_plProf=cfg?cfg.prof:'rout';
   _plDate1=null;
@@ -3026,7 +3091,7 @@ function renderDashPlan(){
   const _unit=plUnit();
   window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
   // restauration
-  _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;
+  _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;_plRatio=save.ratio;_plBaseW=save.baseW;_plVolOverride=save.volOv;_plRecOverride=save.recOv;_plSessions=save.sess;
   box.innerHTML=html;
   plDrawVol(p,weeks,'db-vol-canvas');
   const bd=document.getElementById('db-plan-badge');
@@ -3186,13 +3251,13 @@ const LIB_SESSIONS=[
   {theme:'seuil',title:'Cruise intervals à allure T',tag:'seuil · ~87% VMA',desc:'Fractionné au seuil (allure « T » de Daniels) : récup courte pour accumuler du volume au seuil sans fatigue excessive.',warm:'20 min',blocks:[{r:5,d:1500,pct:87,rec:'1’'}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (allure T)'},
   {theme:'seuil',title:'Double seuil (méthode norvégienne)',tag:'2 séances / jour',desc:'Deux séances de seuil dans la journée à intensité contrôlée (lactate ~2–4,5 mmol) : matin 5×6 min, après-midi 10×1000 m. Gros volume au seuil, fatigue maîtrisée.',warm:'20 min (chaque séance)',blocks:[{r:5,m:6,pct:86,rec:'1’'},{r:10,d:1000,pct:88,rec:'1’'}],cool:'10 min',src:'Méthode norvégienne — M. Bakken / Casado, Foster, Bakken & Tjelta (Sports Medicine, 2022)'},
   {theme:'5k',title:'Répétitions à allure R',tag:'5K · vitesse',desc:'Répétitions courtes à l’allure « R » de Daniels (≈ allure mile/3000) avec récup complète : économie de course et vitesse spécifique.',warm:'20 min + 4 lignes',blocks:[{r:8,d:400,pct:[100,105],rec:'récup complète (~2’)'}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (allure R)'},
-  {theme:'10k',title:'Tempo continu au seuil',tag:'10K · ~88% VMA',desc:'Tempo continu à l’allure seuil lactique (≈ allure 15 km–semi) : la séance clé de Pfitzinger pour préparer le 10 km.',warm:'20 min',blocks:[{r:1,d:8000,pct:88}],cool:'10 min',src:'Pete Pfitzinger — Advanced Marathoning / Faster Road Racing'},
+  {theme:'seuil',title:'Tempo continu au seuil',tag:'10K · ~88% VMA',desc:'Tempo continu à l’allure seuil lactique (≈ allure 15 km–semi) : la séance clé de Pfitzinger pour préparer le 10 km.',warm:'20 min',blocks:[{r:1,d:8000,pct:88}],cool:'10 min',src:'Pete Pfitzinger — Advanced Marathoning / Faster Road Racing'},
   {theme:'semi',title:'Bloc allure spécifique semi',tag:'semi · ~87% VMA',desc:'2 × 6 km à l’allure semi avec récup courte : habitue le corps à tenir l’allure de course sur du volume.',warm:'20 min',blocks:[{r:2,d:6000,pct:[86,88],rec:'3’'}],cool:'10 min',src:'Approche Renato Canova (allure spécifique)'},
   {theme:'marathon',title:'Bloc spécifique Canova',tag:'marathon · ~103% AS',desc:'3 × 7 km légèrement plus vite que l’allure marathon, récup 1 km à allure marathon : la séance signature de Canova pour « rendre l’allure marathon facile ».',warm:'20 min',blocks:[{r:3,d:7000,pct:82,rec:'1 km à allure marathon'}],cool:'10 min',src:'Renato Canova — marathon specific (runningwritings.com)'},
   {theme:'marathon',title:'Tempo à allure marathon (Hansons)',tag:'marathon · allure objectif',desc:'Tempo continu à l’allure objectif marathon, à construire jusqu’à ~16 km : pilier de la méthode Hansons pour ancrer l’allure de course.',warm:'15 min',blocks:[{r:1,d:12000,pct:80}],cool:'10 min',src:'Hansons Marathon Method — K. & K. Hanson / L. Humphrey'},
   // ── Veille élargie · séances signatures ──
   {theme:'entretien',title:'Sortie longue foncière (base Lydiard)',tag:'90–120 min · 65–72%',desc:'Longue sortie en endurance pour développer la capacité aérobie et l’endurance de fond. Fondation de la méthode Lydiard.',warm:'—',blocks:[{r:1,m:100,pct:[65,72]}],cool:'—',src:'Arthur Lydiard — construction de la base aérobie'},
-  {theme:'entretien',title:'Mona Fartlek (20 min)',tag:'fartlek · 5K→mile',desc:'Fartlek de 20 min à récup active (« float ») : 2×90s, 4×60s, 4×30s, 4×15s en accélérant à mesure que les fractions raccourcissent. Efficace et réalisable partout.',warm:'15 min',blocks:[{r:2,sec:90,pct:95,rec:'90s float actif'},{r:4,sec:60,pct:100,rec:'60s float'},{r:4,sec:30,pct:105,rec:'30s float'},{r:4,sec:15,pct:110,rec:'15s float'}],cool:'10 min',src:'Chris Wardlaw / Steve Moneghetti — « Mona Fartlek »'},
+  {theme:'vo2',title:'Mona Fartlek (20 min)',tag:'fartlek · 5K→mile',desc:'Fartlek de 20 min à récup active (« float ») : 2×90s, 4×60s, 4×30s, 4×15s en accélérant à mesure que les fractions raccourcissent. Efficace et réalisable partout.',warm:'15 min',blocks:[{r:2,sec:90,pct:95,rec:'90s float actif'},{r:4,sec:60,pct:100,rec:'60s float'},{r:4,sec:30,pct:105,rec:'30s float'},{r:4,sec:15,pct:110,rec:'15s float'}],cool:'10 min',src:'Chris Wardlaw / Steve Moneghetti — « Mona Fartlek »'},
   {theme:'vo2',title:'Billat 30-30 (2 blocs)',tag:'vVMA · 30s/30s',desc:'Alternance 30s à vVMA (100% VMA) / 30s footing à ~50%, jusqu’à 9 répétitions par bloc, 2 blocs. Maximise le temps passé proche de VO2max.',warm:'20 min',blocks:[{r:9,sec:30,pct:100,rec:'30s @ 50% VMA',sets:2,recSet:'3 min'}],cool:'10 min',src:'Véronique Billat — protocole 30-30 (Billat et al., 2000)'},
   {theme:'vo2',title:'6 × 1000 m à allure 5K',tag:'VO2max · récup 2’',desc:'Intervalles à l’allure 5 km (≈ 95–97% VMA) avec récup 2 min : séance VO2max de référence du plan Pfitzinger.',warm:'20 min',blocks:[{r:6,d:1000,pct:[95,97],rec:'2’ jog'}],cool:'10 min',src:'Pete Pfitzinger — Advanced Marathoning (intervalles VO2max)'},
   {theme:'5k',title:'2 × 2000 m à allure 5K',tag:'5K · spécifique',desc:'Deux fractions longues à l’allure objectif 5 km : ancre l’allure de course et la résistance spécifique. Récup 3–4 min.',warm:'20 min + 4 lignes',blocks:[{r:2,d:2000,pct:[95,97],rec:'3–4’'}],cool:'10 min',src:'Jack Daniels — allure I / spécifique 5K'},
@@ -3232,6 +3297,20 @@ const LIB_SESSIONS=[
   {theme:'10k',title:'Affûtage 10K : 3 × 1000 m allure course',tag:'J-4 à J-6 · rappel d’allure',desc:'Trois fractions à l’allure objectif, récup généreuse : entretenir la vitesse spécifique pendant la décharge, sans entamer la fraîcheur.',warm:'15 min',blocks:[{r:3,d:1000,pct:90,rec:'3’'}],cool:'10 min',src:'Mujika & Padilla / Bosquet et al. 2007 (méta-analyse du tapering)'},
   {theme:'semi',title:'Affûtage semi : 3 × 2 km allure course',tag:'J-5 à J-7 · volume réduit',desc:'Dernier rappel de l’allure semi avant la course, volume minimal. La méta-analyse du tapering : réduire le volume de 40-60 % sur 8-14 jours en gardant l’intensité.',warm:'15 min',blocks:[{r:3,d:2000,pct:[86,88],rec:'3’'}],cool:'10 min',src:'Bosquet et al. 2007, Med Sci Sports Exerc (méta-analyse du tapering)'},
   {theme:'marathon',title:'Répétition générale (J-14)',tag:'dress rehearsal · 13 km',desc:'Deux semaines avant : 13 km dont 8-10 km à l’allure marathon, en tenue et ravitaillement de course. Valide l’allure, l’équipement et la nutrition.',warm:'—',blocks:[{r:1,d:4000,pct:70},{r:1,d:9000,pct:80}],cool:'—',src:'Pete Pfitzinger — Advanced Marathoning (dress rehearsal)'},
+  // ── Panel 5K — séances spécifiques (ajout) ──
+  {theme:'5k',title:'La séance mixte (5K)',tag:'5K · ladder mixte',desc:'Séance complète en escalier : fractions courtes rapides puis pyramide descendante 1200→400 m avec des allures de plus en plus vives (5 km → 3000 → 2000 → VMA). Développe la résistance à l’allure de course et la vitesse spécifique.',warm:'20 min + gammes + 3–4 lignes',blocks:[{r:4,d:300,pct:[95,98],rec:'55s marche (2’15 après la série)'},{r:1,d:1200,pct:[93,95],rec:'2’30'},{r:1,d:1000,pct:95,rec:'2’30 marche'},{r:1,d:800,pct:[95,98],rec:'2’ marche'},{r:1,d:600,pct:[98,100],rec:'1’30 marche'},{r:1,d:400,pct:[100,101]}],cool:'10 min footing'},
+  {theme:'5k',title:'Répétitions de 1000 m (5K)',tag:'6–8 × 1000 m · progressif',desc:'6 à 8 × 1000 m en négatif : départ quelques secondes plus lent que l’allure 5 km visée, milieu à l’allure visée, dernier légèrement plus rapide (allure 3000). Ancre l’allure de course et la gestion de l’effort.',warm:'20 min + 4 lignes',blocks:[{r:6,d:1000,pct:[93,96],rec:'2’30 à 3’ (marche ou trot léger)'}],cool:'10 min'},
+  {theme:'5k',title:'6 × 1000 m à variation d’allure',tag:'5K · changements de rythme',desc:'Chaque 1000 m combine une portion à allure 10 km et une portion à allure 5 km, avec une part de 5 km croissante à chaque répétition. Travaille le changement de rythme et la lucidité en fatigue.',warm:'20 min + gammes',blocks:[{label:'Rép 1',r:1,rec:'2’30',segs:[{d:800,pct:90,lbl:'allure 10 km'},{d:200,pct:94,lbl:'allure 5 km'}]},{label:'Rép 2',r:1,rec:'2’30',segs:[{d:700,pct:90,lbl:'allure 10 km'},{d:300,pct:94,lbl:'allure 5 km'}]},{label:'Rép 3',r:1,rec:'2’30',segs:[{d:600,pct:90,lbl:'allure 10 km'},{d:400,pct:94,lbl:'allure 5 km'}]},{label:'Rép 4',r:1,rec:'2’30',segs:[{d:500,pct:90,lbl:'allure 10 km'},{d:500,pct:94,lbl:'allure 5 km'}]},{label:'Rép 5',r:1,rec:'2’30',segs:[{d:400,pct:90,lbl:'allure 10 km'},{d:600,pct:94,lbl:'allure 5 km'}]},{label:'Rép 6',r:1,rec:'2’30',segs:[{d:300,pct:90,lbl:'allure 10 km'},{d:700,pct:94,lbl:'allure 5 km'}]}],cool:'10 min'},
+  {theme:'5k',title:'Blocs d’accélération (Heymans)',tag:'5K · 3 × (1000-600-400)',desc:'Trois séries d’une descente 1000 → 600 → 400 m, chaque fraction plus rapide que la précédente : allure 5 km, puis 3000, puis VMA. 6 km de qualité. Inspirée de John Heymans.',warm:'20 min + 4 lignes',blocks:[{label:'3 × (1000-600-400)',r:1,rec:'1’30 entre fractions · 3–4’ entre séries',segs:[{d:1000,pct:94,lbl:'allure 5 km'},{d:600,pct:97,lbl:'allure 3000'},{d:400,pct:100,lbl:'VMA'}]}],cool:'10 min',src:'Inspirée de John Heymans'},
+  {theme:'5k',title:'Navette de lactate — Lactate Shuttle',tag:'5K · clairance lactate',desc:'6 à 10 fois (400 m rapide / 400 m actif) enchaînés sans pause : le 1er 400 m à l’allure 5 km, le 2e couru 10–12 s plus lent, en continu. Améliore la clairance du lactate et la capacité à récupérer en courant.',warm:'20 min + gammes',blocks:[{label:'6 à 10 × (400 / 400)',r:1,rec:'enchaîné, sans pause entre les fractions',segs:[{d:400,pct:94,lbl:'allure 5 km'},{d:400,pct:84,lbl:'récup active (~10–12 s plus lent)'}]}],cool:'10 min'},
+  {theme:'5k',title:'Activation semaine de course (5K)',tag:'J-3/J-4 · fraîcheur',desc:'Séance d’activation le mercredi avant la course : un bloc continu à allure semi/marathon, des 600 m à allure 5 km pour réveiller la vitesse spécifique, puis un 400 m plus vif. Volume faible, on reste frais.',warm:'15 min + 2 lignes',blocks:[{r:1,m:8,pct:[80,86],rec:'2’'},{r:6,d:600,pct:[93,95],rec:'2’'},{r:1,d:400,pct:[95,98]}],cool:'10 min footing'},
+  // ── Panel transversal — endurance / seuil / mixtes (ajout) ──
+  {theme:'entretien',title:'Jog long progressif (haut de Zone 2)',tag:'EF · haut de Zone 2',desc:'Sortie de 60 à 90 min (progression au fil des semaines) à 70–75 % de FC Max (max 80 %). Départ en footing doux 1–2 km puis calage au rythme de croisière en haut de Zone 2/EF, sans basculer vers l’allure marathon. Développe l’endurance de base et la durabilité.',warm:'1–2 km footing doux (inclus)',blocks:[{r:1,m:75,pct:[72,76]}],cool:'—',src:'Endurance fondamentale · haut de Zone 2'},
+  {theme:'marathon',title:'Bloc d’endurance long — 30/20/10 min',tag:'marathon/semi · endurance spécifique',desc:'Trois blocs continus dégressifs en durée et progressifs en allure : 30 min autour du SV1 (allure marathon + 10–20 s), 20 min à l’allure marathon, 10 min un peu plus vite (effort très contrôlé). Bénéfique du 5 km au marathon.',warm:'20–30 min footing',blocks:[{r:1,m:30,pct:78,rec:'3–4 min (jog/marche)'},{r:1,m:20,pct:80,rec:'3–4 min (jog/marche)'},{r:1,m:10,pct:[82,84]}],cool:'10 min footing'},
+  {theme:'seuil',title:'8 km progressif (SV1 → SV2)',tag:'10K/semi/marathon · progressif',desc:'8 km d’affilée en continu, du SV1 (allure marathon + 15 s) jusqu’à frôler le SV2 (allure semi) — FC de ~75 % à ~90 % FC Max. Option pic de forme : les 500 à 800 derniers mètres à l’allure 10 km. Contrôle d’allure et endurance au seuil.',warm:'15 min footing',blocks:[{r:1,d:8000,pct:[78,86]}],cool:'10 min footing'},
+  {theme:'seuil',title:'Répétitions de 3000 m — 5 × 3000 m',tag:'semi/marathon · progressif',desc:'3 à 5 × 3000 m (ou 10 min) progressifs : premier sous l’allure marathon (SV1, allure marathon + 5–15 s), chaque répétition 4–5 s/km plus rapide que la précédente, la dernière proche de l’allure semi/10 km. Récup 3–4 min au jog. Endurance au seuil et gestion d’allure.',warm:'20 min + 3 lignes',blocks:[{r:5,d:3000,pct:[80,86],rec:'3–4 min jog'}],cool:'10 min footing'},
+  {theme:'vo2',title:'5 × 2000 m « découpé »',tag:'5/10K/semi · rythmes alternés',desc:'3 à 6 × 2000 m en continu sur piste, en alternant modéré / rapide sur des blocs de plus en plus courts au sein de chaque 2000 m (400+400, 300+300, 200+200, 100+100). Travaille les changements de rythme et la tolérance au lactate. Infiniment varié.',warm:'20 min + gammes',blocks:[{label:'3 à 6 × 2000 m (découpé)',r:5,rec:'jog 2–3 min entre les 2000 m',segs:[{d:400,pct:79,lbl:'modéré (AM+5s)'},{d:400,pct:90,lbl:'rapide (10 km)'},{d:300,pct:79,lbl:'modéré'},{d:300,pct:92,lbl:'rapide (8 km)'},{d:200,pct:79,lbl:'modéré'},{d:200,pct:94,lbl:'rapide (5 km)'},{d:100,pct:79,lbl:'modéré'},{d:100,pct:97,lbl:'rapide (3 km)'}]}],cool:'10 min footing'},
+  {theme:'10k',title:'Séance combinée — 3 × (9’ steady / 5’ vite)',tag:'10K/semi/5K · steady + relance',desc:'Trois enchaînements 9 min steady (SV1, allure marathon + 20 s ou haut de Z2), récup courte 1 min 30, puis 5 min à l’allure 10 km (changement de rythme marqué). Récup longue 3–4 min entre les blocs. Alterne endurance active et effort spécifique.',warm:'15–20 min footing',blocks:[{r:3,m:9,pct:[76,78],rec:'1’30 (jog/marche)'},{r:3,m:5,pct:90,rec:'3–4 min entre blocs'}],cool:'10 min footing'},
 ];
 const LIB_PHASES=[
   {id:'gen',lbl:'Début — base générale',short:'Début de prépa',col:'#94A3B8'},
@@ -3248,6 +3327,8 @@ const LIB_PHASE={
   'Bloc allure spécifique semi':'spe','Sortie longue + 2 × 4 km à allure semi':'spe','2 × 5 km allure semi':'spe','3 × 4 km':'spe','Sortie longue + 2 × 20 min':'spe',
   'Bloc spécifique Canova':'spe','Tempo à allure marathon (Hansons)':'spe','Yasso 800s':'spe','2 × 8 km allure marathon':'spe','Sortie longue + 3 × 15 min AM':'spe','30 km progressif':'spe','Répétition générale (J-14)':'aff',
   'Affûtage 5K : 4 × 400 m allure course':'aff','Affûtage 10K : 3 × 1000 m allure course':'aff','Affûtage semi : 3 × 2 km allure course':'aff',
+  'La séance mixte (5K)':'spe','Répétitions de 1000 m (5K)':'spe','6 × 1000 m à variation d’allure':'spe','Blocs d’accélération (Heymans)':'spe','Navette de lactate — Lactate Shuttle':'spe','Activation semaine de course (5K)':'aff',
+  'Jog long progressif (haut de Zone 2)':'gen','Bloc d’endurance long — 30/20/10 min':'spe','8 km progressif (SV1 → SV2)':'dev','Répétitions de 3000 m — 5 × 3000 m':'spe','5 × 2000 m « découpé »':'dev','Séance combinée — 3 × (9’ steady / 5’ vite)':'dev',
 };
 function libPhaseOf(sess){return LIB_PHASE[sess.title]||'dev';}
 const LIB_ORDER={
@@ -3305,6 +3386,14 @@ const LIB_ORDER={
 };
 function libOrderOf(sess){return LIB_ORDER[sess.title]||null;}
 const LIB_VARS={
+  'Jog long progressif (haut de Zone 2)':{same:'Sur tapis : +0,1 à 0,3 km/h chaque kilomètre (progression continue)',easy:'45–60 min à allure EF stable (bas de Zone 2)'},
+  'Bloc d’endurance long — 30/20/10 min':{same:'2 × 20 min · 2 × 30 min · 3 × 20 min · 40 min + 30 min',easy:'20 – 15 – 10 min, récup 3 min'},
+  '8 km progressif (SV1 → SV2)':{same:'6 km (prépa 5/10K) · 10 · 12 · 14 km · ou en durée (20–60 min)',easy:'6 km progressif SV1 → SV2'},
+  'Répétitions de 3000 m — 5 × 3000 m':{same:'3 à 8 × 3000 m · 4–5 × 2000 m · 3 × 4000 m très progressif',easy:'3 × 3000 m progressif, récup 3–4 min'},
+  'Séance combinée — 3 × (9’ steady / 5’ vite)':{same:'4 × (9’/5’) pour spé marathon/semi',easy:'2 × (9’/5’) pour un volume plus faible'},
+  'La séance mixte (5K)':{same:'2 × (1600 m – 1200 m – 800 m – 400 m) — 8 km de qualité, récup 1’30 / 3’ entre séries',easy:'1200 – 1000 – 800 – 600 – 400 m (une seule descente), récup 2’30'},
+  '6 × 1000 m à variation d’allure':{same:'6 à 8 × 1000 m (800 m allure 10K/semi + 200 m allure 1500 m), récup 1’30',easy:'5 × 1000 m (700 m allure 10K + 300 m allure 5K), récup 2’30'},
+  'Activation semaine de course (5K)':{same:'Option B : 10 à 15 × (1 min vite / 1 min lent), en partant allure 10 km pour finir allure 5 km / 3000',easy:'6 min allure semi + 4 × 500 m allure 5K (récup 2’) + 2 lignes'},
   // ── Spé 5K ──
   'Répétitions à allure R':{same:'10 × 300 m à R récup 2′ · 6 × 400 m + 4 × 200 m',easy:'6 × 300 m à R, récup complète 2′30'},
   '2 × (6 × 300 m)':{same:'3 × (4 × 300 m) · 12 × 300 m récup 45″',easy:'2 × (4 × 300 m), récup 1′ / 4′ entre blocs'},
@@ -3589,6 +3678,60 @@ function renderExtrapol(){
     +toolAthleteBar()
     +libExtrapolHTML();
 }
+/* ══ EXPORT SÉANCES → JSON (schéma générique, réutilisable API Nolio) ══ */
+function libBlockText(b){
+  if(b.segs){
+    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+(Array.isArray(sg.pct)?sg.pct.join('-'):sg.pct)+'% VMA)';}).join(' + ');
+    return (b.label?b.label+' : ':'')+(b.r>1?b.r+' × ':'')+segs+(b.rec?' — récup '+b.rec:'');
+  }
+  var val=b.d?(b.d>=1000?(String(b.d/1000).replace('.',','))+' km':b.d+' m'):(b.m?b.m+' min':(b.sec?b.sec+'s':''));
+  var pct=Array.isArray(b.pct)?b.pct.join('-'):b.pct;
+  var core=(b.r>1?b.r+' × ':'')+val+' @ '+pct+'% VMA';
+  if(b.sets)core=b.sets+' séries de '+core;
+  var rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
+  return core+(rec.length?' ('+rec.join(' · ')+')':'');
+}
+function libSessionText(s){
+  var lines=[];
+  if(s.warm&&s.warm!=='—')lines.push('Échauffement : '+s.warm);
+  s.blocks.forEach(function(b){lines.push(libBlockText(b));});
+  if(s.cool&&s.cool!=='—')lines.push('Retour au calme : '+s.cool);
+  return lines.join('\n');
+}
+function libExportData(){
+  var all=LIB_SESSIONS.concat(CUSTOM_SESSIONS||[]);
+  return all.map(function(s){
+    var th=LIB_THEMES.find(function(t){return t.id===s.theme;});
+    return {
+      title:s.title,
+      category:th?th.lbl:s.theme,
+      sport:'Course à pied',
+      objective:s.tag||'',
+      description:s.desc||'',
+      content:libSessionText(s),
+      tags:[th?th.lbl:s.theme].concat(s.custom?['Perso']:[]),
+      warm:s.warm||'',
+      cool:s.cool||'',
+      blocks:s.blocks,
+      phase:(typeof libPhaseOf==='function')?libPhaseOf(s):null,
+      order:(typeof libOrderOf==='function')?libOrderOf(s):null
+    };
+  });
+}
+function openNolioDeploy(){
+  fetch('http://localhost:8730/api/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(libExportData())})
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(){ window.open('http://localhost:8730/','_blank'); })
+    .catch(function(){ alert("L'outil Nolio n'est pas lancé. Ouvre le dossier nolio-deploy et lance « node server.js », puis réessaie."); });
+}
+function exportNolioJSON(){
+  var data=libExportData();
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='redlab_seances_nolio.json';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+
 function renderLibrary(){
   const wrap=document.getElementById('library-wrap');if(!wrap)return;
   const chips=[['all','Toutes']].concat(LIB_THEMES.map(t=>[t.id,t.lbl])).map(c=>'<button class="lib-chip'+(libTheme===c[0]?' active':'')+'" onclick="setLibTheme(\''+c[0]+'\')">'+c[1]+'</button>').join('');
@@ -3599,6 +3742,8 @@ function renderLibrary(){
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
       '<div class="lib-chips">'+chips+'</div>'+
       '<button class="lib-create-btn" onclick="toggleLibCreate()">+ Créer une séance</button>'+
+      '<button class="lib-create-btn" onclick="exportNolioJSON()" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.1);color:#60A5FA">⬇ Exporter (JSON)</button>'+
+      '<button class="lib-create-btn" onclick="openNolioDeploy()" style="border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34D399" title="Lance d\'abord node server.js dans le dossier nolio-deploy">→ Déployer vers Nolio</button>'+
     '</div>'+
     '<div id="lib-create" class="lib-create-box" style="display:none"></div>'+
     '<div id="lib-cards"></div>';
@@ -4537,16 +4682,18 @@ function toolAthleteBar(){
   if(!S.vma){
     return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;padding:11px 16px;border:1px dashed var(--border2);border-radius:10px;background:rgba(255,255,255,0.02);font-size:12.5px;color:var(--muted2)">'
       +'<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>'
-      +'Aucun profil chargé — <span style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:2px" onclick="go(\'athletes\')">charge un athlète</span> pour personnaliser cet outil (allures, discipline…).'
+      +'Aucun profil chargé — <span style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:2px" onclick="athSwitcherOpen()">charge un athlète</span> pour personnaliser cet outil (allures, discipline…).'
       +'</div>';
   }
   const ini=(S.pseudo||'?').slice(0,2).toUpperCase();
   const vc=S.csKmh?('VC '+S.csKmh.toFixed(1)+' km/h'):('VMA '+S.vma.toFixed(1)+' km/h');
-  return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding:11px 16px;border:1px solid rgba(255,107,26,0.25);border-radius:10px;background:rgba(255,107,26,0.05)">'
+  return '<div class="tool-ath-bar" onclick="athSwitcherOpen()" title="Changer d’athlète" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding:11px 16px;border:1px solid rgba(255,107,26,0.25);border-radius:10px;background:rgba(255,107,26,0.05);cursor:pointer">'
     +'<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:900;color:var(--orange);flex-shrink:0">'+ini+'</div>'
     +'<div style="font-size:13.5px;font-weight:800;color:var(--text)">'+(S.pseudo||'Athlète')+'</div>'
     +'<div style="font-size:12.5px;font-weight:700;color:var(--orange)">'+vc+'</div>'
     +(S.testDate?'<div style="font-size:11.5px;color:var(--muted2);margin-left:auto">Profil édité le '+S.testDate+'</div>':'')
+    +'<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;'+(S.testDate?'margin-left:8px':'margin-left:auto')+'"><polyline points="6 9 12 15 18 9"/></svg>'
+    +'<span style="font-size:11px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px">changer</span>'
     +'</div>';
 }
 
@@ -4734,7 +4881,7 @@ const PL_SKEL={
 };
 
 let _plD='10k',_plProf='rout',_plW=null,_plCtx='new',_plPicked=false;
-let _plDate1=null,_plDate2=null,_plDi=null,_plDatesSeeded=false,_plPhaseOverride=null,_plOrient=0,_plBase=true;
+let _plDate1=null,_plDate2=null,_plDi=null,_plDatesSeeded=false,_plPhaseOverride=null,_plOrient=0,_plBase=true,_plRatio=3,_plBaseW=null,_plVolOverride={},_plRecOverride={},_plSessions={};
 let _plTime='',_plVol=null,_plSess=null,_plQual=null,_plInj=false,_plPrep=false;
 let _plOpen={},plRadarChart=null;
 
@@ -4754,7 +4901,7 @@ function plPhases(p,w){
   }
   const rb=p.ratios.base*(_plCtx==='fit'?0.5:1);
   const tot=rb+p.ratios.dev+p.ratios.spe;
-  let base=_plBase?Math.max(1,Math.round(rest*rb/tot)):0;
+  let base=_plBase?(_plBaseW!=null?Math.max(1,Math.min(_plBaseW,rest-2)):Math.max(1,Math.round(rest*rb/tot))):0;
   let rem=rest-base;
   let dev=Math.max(1,Math.round(rem*p.ratios.dev/(p.ratios.dev+p.ratios.spe)));
   let spe=rem-dev;
@@ -4775,11 +4922,13 @@ function plPhaseJustif(p){
   return lead+(o.base===0?'pas de bloc de base':'<b>'+o.base+'</b> sem de base '+(_plCtx==='fit'?'(r\u00e9duite, d\u00e9j\u00e0 entra\u00een\u00e9)':'(g\u00e9n\u00e9rale, reprise)'))+' \u00b7 <b>'+o.dev+'</b> sem de d\u00e9veloppement \u00b7 <b>'+o.spe+'</b> sem '+sp+' \u00b7 <b>'+o.aff+'</b> sem d\u2019aff\u00fbtage (cal\u00e9 sur la distance, Bosquet).';
 }
 function plPhaseBoxHTML(p){
+  var _cb=0;plPhases(p,_plW).forEach(function(s){if(s[0]==='base')_cb=s[1];});
   return '<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">R\u00e9partition des phases</div>'
     +'<div id="pl-justif" style="font-size:12.5px;color:var(--text2);line-height:1.65;margin-bottom:12px">'+plPhaseJustif(p)+'</div>'
-    +'<label style="display:inline-flex;align-items:center;gap:9px;margin-bottom:14px;cursor:pointer;padding:8px 12px;border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,0.02)">'
+    +'<label style="display:inline-flex;align-items:center;gap:9px;margin-bottom:12px;cursor:pointer;padding:8px 12px;border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,0.02)">'
     +'<input type="checkbox" id="pl-base-cb" '+(_plBase?'checked':'')+' onchange="setPlBase(this.checked)" style="width:17px;height:17px;cursor:pointer;accent-color:'+PL_PHC.base+'">'
     +'<span style="font-size:12.5px;font-weight:700;color:var(--text2)">Inclure une phase de <b style="color:'+PL_PHC.base+'">Base</b> <span style="color:var(--muted2);font-weight:600">(retour / reprise)</span></span></label>'
+    +(_plBase?'<div style="display:flex;align-items:center;gap:8px;margin:0 0 14px 2px;font-size:12.5px;color:var(--text2)"><span style="font-weight:700">Semaines de base :</span><button type="button" class="plbw" onclick="setPlBaseW(-1)">\u2212</button><b style="min-width:22px;text-align:center;color:'+PL_PHC.base+';font-size:15px">'+_cb+'</b><button type="button" class="plbw" onclick="setPlBaseW(1)">+</button>'+(_plBaseW!=null?'<button type="button" onclick="setPlBaseW(0)" style="background:none;border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:11px;font-weight:800;padding:3px 9px;cursor:pointer;margin-left:4px">\u21ba auto</button>':'<span style="font-size:11px;color:var(--muted2)">(auto)</span>')+'</div>':'')
     +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
     +'<span style="font-size:11.5px;font-weight:800;color:'+PL_PHC.dev+'">D\u00e9veloppement</span>'
     +'<input type="range" id="pl-orient-sl" min="-5" max="5" step="1" value="'+(_plOrient||0)+'" oninput="setPlOrient(this.value)" class="sl" style="flex:1;min-width:170px;max-width:320px">'
@@ -4789,7 +4938,19 @@ function plPhaseBoxHTML(p){
     +'<div style="font-size:11px;color:var(--muted2);margin-top:8px">Le curseur d\u00e9place les semaines entre <b>D\u00e9veloppement</b> et <b>Sp\u00e9cifique</b> (dur\u00e9e totale inchang\u00e9e).</div>';
 }
 function setPlBase(v){
-  _plBase=!!v;_plPicked=true;
+  _plBase=!!v; if(!v)_plBaseW=null; _plPicked=true;
+  renderPlanif();
+}
+function setPlBaseW(v){
+  var p=PLANIF.find(function(x){return x.id===_plD;});if(!p)return;
+  if(v===0){ _plBaseW=null; }
+  else{
+    var rest=_plW-p.taper(_plW), maxB=Math.max(1,rest-2);
+    var cur=_plBaseW; if(cur==null){cur=0;plPhases(p,_plW).forEach(function(s){if(s[0]==='base')cur=s[1];});}
+    _plBaseW=Math.max(1,Math.min(maxB,cur+v));
+  }
+  _plBase=true;_plPhaseOverride=null;_plPicked=true;
+  if(typeof plSyncCfg==='function')plSyncCfg();
   renderPlanif();
 }
 function setPlOrient(v){
@@ -4800,6 +4961,13 @@ function setPlOrient(v){
   var sl=document.getElementById('pl-orient-sl');if(sl)sl.value=_plOrient;
   var ab=document.getElementById('pl-orient-auto');if(ab)ab.style.display=_plOrient?'inline-block':'none';
   if(typeof plSyncCfg==='function')plSyncCfg();
+}
+function setPlRatio(n){ _plRatio=(n===2?2:3); _plPicked=true; if(typeof plSyncCfg==='function')plSyncCfg(); renderPlanif(); }
+function plRatioToggle(){
+  return [3,2].map(function(n){
+    var on=_plRatio===n;
+    return '<button onclick="setPlRatio('+n+')" style="padding:7px 14px;border:1px solid '+(on?'var(--orange)':'var(--border)')+';background:'+(on?'rgba(255,107,26,0.14)':'transparent')+';color:'+(on?'var(--orange)':'var(--muted2)')+';font-family:var(--font);font-weight:800;font-size:13px;border-radius:8px;cursor:pointer">'+n+':1</button>';
+  }).join('');
 }
 function plPhLabel(k){return (k==='base'&&_plCtx==='race')?'Récup & relance':PL_PHL[k];}
 
@@ -4814,39 +4982,36 @@ function plWeeks(p,w){
   // décharge calée en FIN de bloc (transition, si bloc >= 4 sem), + sécurité : jamais > 4 semaines de charge d'affilée.
   // jamais sur le pic (dernière semaine de charge, qui enchaîne sur l'affûtage).
   // Décharges : jamais plus de 3 semaines de charge d'affilée (Base incluse) ; décharge calée en fin de bloc.
-  let run=0;
-  arr.forEach(function(wk){
-    if(wk.ph==='aff'){return;}
-    var isPeak=(wk._bi===_nb-1), isEnd=(wk.pi===wk.pl-1), pLen=wk.pl;
-    var rec=false;
-    if(!isPeak){
-      if(isEnd && pLen>=4 && run>=2){ rec=true; }   // décharge de transition en fin de bloc
-      else if(run>=3){ rec=true; }                   // jamais 4 semaines de charge d'affilée
-    }
-    wk.rec=rec; run = rec?0:run+1;
-  });
-  // Le pic ne peut pas être une décharge : s'il termine une série de 4 charges d'affilée,
-  // on décharge 2 semaines avant lui (montée → décharge → montée → pic).
+  // Ancré sur la DATE DE COURSE : on part du pic (dernière semaine de charge avant
+  // l'affûtage) et on remonte vers le début, en déchargeant toutes les _plRatio semaines.
+  // Le pic n'est jamais une décharge ; les semaines "en trop" tombent au tout début.
+  arr.forEach(function(wk){ wk.rec=false; });
   (function(){
-    var pk=-1; for(var i=0;i<arr.length;i++){var w=arr[i];if(w.ph!=='aff'&&w._bi===_nb-1){pk=i;break;}}
-    if(pk<0)return;
-    var cnt=0,k=pk;
-    while(k>=0 && arr[k].ph!=='aff' && !arr[k].rec){cnt++;k--;}
-    if(cnt>=4){var t=pk-1;if(t>=0 && arr[t].ph!=='aff') arr[t].rec=true;}
+    var idx=[]; arr.forEach(function(wk,i){ if(wk.ph!=='aff') idx.push(i); });
+    var run=0;
+    for(var k=idx.length-1;k>=0;k--){
+      var wk=arr[idx[k]];
+      if(wk._bi===_nb-1){ wk.rec=false; run=1; continue; } // pic : charge, jamais déchargé
+      if(run>=_plRatio){ wk.rec=true; run=0; }             // décharge tous les _plRatio blocs
+      else { wk.rec=false; run++; }
+    }
   })();
   arr.forEach(function(wk,i){
+    wk.n=i+1;
+    if(wk.ph!=='aff' && _plRecOverride[wk.n]!=null) wk.rec=!!_plRecOverride[wk.n]; // décharge placée à la main
     let v;
     if(wk.ph==='aff'){ v=(wk.pl===1)?0.50:(0.59-0.19*wk.pi/(wk.pl-1)); } // affûtage -41% (S-2) à -60% (S-1), Bosquet 2007
     else{ const prog=_nb>1?(0.72+0.28*(wk._bi/(_nb-1))):0.9; v=wk.rec?prog*0.7:prog; } // -30% la semaine allégée
-    wk.n=i+1; wk.vol=v;
+    wk.vol=v;
   });
   // km hebdo
   const baseKm=_plVol||plDefaultVol(p);
   const peakKm=Math.round(baseKm*1.2);
-  arr.forEach(wk=>{wk.km=Math.max(1,Math.round(wk.vol*peakKm));});
+  arr.forEach(wk=>{wk.km=Math.max(1,Math.round(wk.vol*peakKm));if(_plVolOverride&&_plVolOverride[wk.n]!=null)wk.km=_plVolOverride[wk.n];});
   let _d1=null;
-  if(_plDate2)_d1=new Date(new Date(_plDate2+'T00:00:00').getTime()-(arr.length*7-1)*864e5);
-  else if(_plDate1)_d1=new Date(_plDate1+'T00:00:00');
+  const _mon=d=>{const x=new Date(d.getTime());x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x;}; // lundi de la semaine
+  if(_plDate2)_d1=new Date(_mon(new Date(_plDate2+'T00:00:00')).getTime()-(arr.length-1)*7*864e5);
+  else if(_plDate1)_d1=_mon(new Date(_plDate1+'T00:00:00'));
   if(_d1){
     const d1=_d1;
     const fd=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
@@ -5207,9 +5372,9 @@ function plPhaseAdj(key,delta){
 }
 function plPhaseAuto(){_plPhaseOverride=null;renderPlanif();}
 function plSliderFill(p){const sl=document.getElementById('pl-slider');if(!sl)return;const pc=(_plW-p.wmin)/Math.max(1,(p.wmax-p.wmin))*100;sl.style.background='linear-gradient(to right,'+p.col+' 0%,'+p.col+' '+pc+'%,rgba(255,255,255,0.08) '+pc+'%,rgba(255,255,255,0.08) 100%)';}
-function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plPicked=true;renderPlanif();}
+function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plPicked=true;renderPlanif();}
 function setPlProf(id){_plProf=id;_plPicked=true;renderPlanif();}
-function setPlW(v){_plPhaseOverride=null;_plW=+v;_plPicked=true;plUpd();}
+function setPlW(v){_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=+v;_plPicked=true;plUpd();}
 function setPlCtx(c){_plCtx=c;_plPicked=true;renderPlanif();}
 function plQ(field,val){
   _plPicked=true;
@@ -5294,7 +5459,7 @@ function plRecoBox(p){
     +'<div style="font-size:11px;color:var(--muted2);max-width:200px;line-height:1.5">Repère indicatif \u2014 ajuste ensuite la prépa manuellement.</div>'
     +'</div>';
 }
-function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plW=plRecoWeeks(p);_plPicked=true;renderPlanif();}
+function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=plRecoWeeks(p);_plPicked=true;renderPlanif();}
 function plUpd(){
   const p=PLANIF.find(x=>x.id===_plD);if(!p)return;
   _plW=Math.min(Math.max(_plW,p.wmin),p.wmax);
@@ -5302,7 +5467,7 @@ function plUpd(){
   const set=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html;};
   const wl=document.getElementById('pl-weeks');if(wl)wl.textContent=_plW+' semaines';
   set('pl-load',plLoadHTML(p,weeks,{cid:'pl-vol-canvas'}));plDrawVol(p,weeks,'pl-vol-canvas');
-  set('pl-coh',plCohHTML(p,_plW,weeks));
+  set('pl-cal',plCalendarHTML(p,weeks));
   var _sl=document.getElementById('pl-slider');if(_sl)_sl.value=_plW;
   var _pe=document.getElementById('pl-phase-edit');if(_pe)_pe.innerHTML=plPhaseEditHTML(p);
   plSliderFill(p);
@@ -5312,7 +5477,7 @@ function plUpd(){
 }
 function plSyncCfg(){
   if(!_plPicked)return;
-  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase};
+  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   if(typeof saveLS==='function')saveLS();
   if(typeof renderDashPlan==='function')renderDashPlan();
 }
@@ -5327,7 +5492,7 @@ function plToDash(){
   var days=Math.round((new Date(date+'T00:00:00')-today)/864e5);
   if(days<7){warn('La course doit \u00eatre \u00e0 au moins 7 jours pour afficher un plan.');return;}
   _plPicked=true;
-  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase};
+  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   var g=S.goal||{};
   S.goal={id:_plD,t:g.t||null,date:date,name:g.name||'',url:g.url||''};
   if(typeof saveLS==='function')saveLS();
@@ -5343,6 +5508,94 @@ function plReasonHTML(p,weeks){
     ?'<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--border);font-size:13.5px;font-weight:800;color:'+p.col+'">'+r.t+'</div>'
     :'<div style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.55;margin-bottom:5px"><span style="color:'+(r.ok?'#34D399':'#FBBF24')+';font-weight:900;flex-shrink:0">'+(r.ok?'✓':'⚠')+'</span><span>'+r.t+'</span></div>').join('');
 }
+function plCalendarHTML(p,weeks){
+  if(!_plDate1) return '<div style="font-size:13px;color:var(--muted);padding:6px 0">Renseigne une date de début (ci-dessus) pour afficher le calendrier de la prépa.</div>';
+  var pha=function(h,a){h=(h||'#94A3B8').replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';};
+  var leg=['base','dev','spe','aff'].map(function(k){return '<span class="plc-lg"><span style="background:'+PL_PHC[k]+'"></span>'+PL_PHL[k]+'</span>';}).join('');
+  var maxW=Math.max.apply(null,weeks.map(function(w){return w.km;}))||60;
+  var slMin=Math.max(1,Math.round(maxW*0.30)), slMax=Math.round(maxW*1.15);
+  var DOW=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var MON=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var raceD=_plDate2?new Date(_plDate2+'T00:00:00'):null, interD=_plDi?new Date(_plDi+'T00:00:00'):null;
+  var same=function(a,b){return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();};
+  var hdr='<div class="plw-dow">'+DOW.map(function(d){return '<span>'+d+'</span>';}).join('')+'</div>';
+  var rows=weeks.map(function(wk){
+    var c=PL_PHC[wk.ph]||'#94A3B8';
+    var manual=(_plVolOverride&&_plVolOverride[wk.n]!=null);
+    var mono=wk.d0?new Date(wk.d0.getTime()):null;
+    var days='';
+    for(var d=0;d<7;d++){
+      var dt=mono?new Date(mono.getTime()+d*864e5):null;
+      var iso=dt?[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-'):'';
+      var isRace=same(dt,raceD), isInter=same(dt,interD);
+      var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
+      var mo=(dt&&(d===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
+      var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px':(isInter?';outline:2px solid #FBBF24;outline-offset:-2px':'');
+      var sess=(_plSessions[iso]||[]).map(function(sx,si){var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';return '<div class="plw-ch" style="background:'+col+'20;border-left:3px solid '+col+'" title="'+String(sx.t).replace(/"/g,'&quot;')+'"><span>'+String(sx.t).replace(/</g,'&lt;')+'</span><button type="button" onclick="plDaySessDel(\''+iso+'\','+si+')">×</button></div>';}).join('');
+      days+='<div class="plw-day" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+(iso?'<button type="button" class="plw-add" onclick="plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
+    }
+    var meta='<div class="plw-meta">'
+      +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+(wk.dates||'')+'</span></span>'
+      +'<span class="plc-ph" style="color:'+c+'">'+plPhLabel(wk.ph)+'</span>'
+      +'<label class="plw-kmf">Charge <input type="number" min="0" step="1" value="'+wk.km+'" onchange="plVolSet('+wk.n+',this.value)"> km</label>'
+      +(wk.ph!=='aff'?'<label class="plw-dlf"><input type="checkbox" '+(wk.rec?'checked':'')+' onchange="plRecToggle('+wk.n+','+(wk.rec?1:0)+')"> Décharge</label>':'')
+      +(manual?'<span class="plw-man">manuel</span>':'')
+      +'</div>';
+    return '<div class="plw-week" style="border-left:4px solid '+c+'">'+meta
+      +'<div class="plw-days">'+days+'</div></div>';
+  }).join('');
+  var hasOv=(Object.keys(_plVolOverride).length||Object.keys(_plRecOverride).length);
+  var nSess=Object.keys(_plSessions).reduce(function(a,k){return a+((_plSessions[k]&&_plSessions[k].length)||0);},0);
+  var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
+    +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':'')+'</div></div>';
+  return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
+}
+function plVolLive(n,val){var e=document.getElementById('plc-km-'+n);if(e){e.textContent=val+' km';e.style.color='var(--orange)';}}
+function plVolSet(n,val){_plVolOverride[n]=+val;_plPicked=true;plUpd();}
+function plRecToggle(n,cur){_plRecOverride[n]=!cur;_plPicked=true;plUpd();}
+function plVolReset(){_plVolOverride={};_plRecOverride={};_plPicked=true;plUpd();}
+function planifSessionsToNolio(){
+  var all=(typeof libExportData==='function')?libExportData():[];
+  var byTitle={}; all.forEach(function(s){byTitle[s.title]=s;});
+  var items=[];
+  Object.keys(_plSessions).sort().forEach(function(iso){
+    (_plSessions[iso]||[]).forEach(function(sx){
+      var base=byTitle[sx.t]; if(!base)return;
+      var copy=Object.assign({},base); copy.date=iso; items.push(copy);
+    });
+  });
+  if(!items.length){alert('Aucune séance placée dans le calendrier. Ajoute d’abord des séances aux jours (bouton « + séance »).');return;}
+  fetch('http://localhost:8730/api/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(items)})
+    .then(function(r){if(!r.ok)throw 0;return r.json();})
+    .then(function(){window.open('http://localhost:8730/','_blank');})
+    .catch(function(){alert("L'outil Nolio n'est pas lancé. Ouvre le dossier nolio-deploy et lance « node server.js », puis réessaie.");});
+}
+function plModalClose(){var e=document.getElementById('pl-sess-modal');if(e)e.remove();}
+function plDayPick(iso){
+  window._plPickList=LIB_SESSIONS.concat((typeof CUSTOM_SESSIONS!=='undefined'&&CUSTOM_SESSIONS)||[]);
+  plModalClose();
+  var byTheme={}; window._plPickList.forEach(function(s,i){(byTheme[s.theme]=byTheme[s.theme]||[]).push(i);});
+  var order=['entretien','vo2','seuil','5k','10k','semi','marathon'];
+  var list=order.filter(function(t){return byTheme[t];}).map(function(t){
+    var th=LIB_THEMES.find(function(x){return x.id===t;})||{}; var col=th.col||'#94A3B8';
+    var items=byTheme[t].map(function(i){var s=window._plPickList[i];return '<button type="button" class="pl-pick-it" data-s="'+String(s.title).toLowerCase().replace(/"/g,'')+'" onclick="plDayAddSession(\''+iso+'\','+i+')"><span style="background:'+col+'"></span>'+String(s.title).replace(/</g,'&lt;')+'</button>';}).join('');
+    return '<div class="pl-pick-grp"><div class="pl-pick-h" style="color:'+col+'">'+(th.lbl||t)+'</div>'+items+'</div>';
+  }).join('');
+  var dstr=new Date(iso+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  var host=document.createElement('div'); host.id='pl-sess-modal'; host.className='pl-modal';
+  host.onclick=function(e){if(e.target===host)plModalClose();};
+  host.innerHTML='<div class="pl-modal-box"><div class="pl-modal-top"><b>Ajouter une séance</b><span>'+dstr+'</span><button type="button" class="pl-modal-x" onclick="plModalClose()">×</button></div>'
+    +'<input type="search" class="pl-pick-q" placeholder="Filtrer les séances…" oninput="plPickFilter(this.value)">'
+    +'<div class="pl-pick-list">'+list+'</div></div>';
+  document.body.appendChild(host);
+}
+function plPickFilter(q){q=(q||'').toLowerCase();
+  document.querySelectorAll('#pl-sess-modal .pl-pick-it').forEach(function(b){b.style.display=(!q||b.getAttribute('data-s').indexOf(q)>-1)?'':'none';});
+  document.querySelectorAll('#pl-sess-modal .pl-pick-grp').forEach(function(g){var any=Array.prototype.some.call(g.querySelectorAll('.pl-pick-it'),function(b){return b.style.display!=='none';});g.style.display=any?'':'none';});
+}
+function plDayAddSession(iso,i){var s=window._plPickList[i];if(!s)return;(_plSessions[iso]=_plSessions[iso]||[]).push({t:s.title,th:s.theme});_plPicked=true;plModalClose();plUpd();if(typeof plSyncCfg==='function')plSyncCfg();}
+function plDaySessDel(iso,i){if(_plSessions[iso]){_plSessions[iso].splice(i,1);if(!_plSessions[iso].length)delete _plSessions[iso];}_plPicked=true;plUpd();if(typeof plSyncCfg==='function')plSyncCfg();}
 function plCohHTML(p,weeks,wk){
   const c=plCoherence(p,weeks,wk);
   const col=c.pct>=85?'#34D399':(c.pct>=65?'#FBBF24':'#F87171');
@@ -5367,7 +5620,7 @@ function plDates(){
   if(wkn<p.wmin){applied=p.wmin;msg+=' — trop court, calé à '+p.wmin+' sem';col='#F87171';}
   else if(wkn>p.wmax){applied=p.wmax;msg+=' — calé au max ('+p.wmax+' sem)';col='#FBBF24';}
   else{msg+=' — plan calé sur '+wkn+' sem';col='#34D399';}
-  _plPhaseOverride=null;_plW=applied;const sl=document.getElementById('pl-slider');if(sl)sl.value=applied;
+  _plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=applied;const sl=document.getElementById('pl-slider');if(sl)sl.value=applied;
   plUpd();if(out){out.innerHTML=msg;out.style.color=col;}
 }
 const PL_DJOURS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
@@ -5446,7 +5699,27 @@ function plPeriodHTML(){
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
     +'<thead><tr><th style="'+th+'">Distance</th><th style="'+th+'">Bloc spécifique</th><th style="'+th+'">Affûtage</th><th style="'+th+'">Sortie longue</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:12px"><ul style="margin:0;padding-left:18px">'+lis+'</ul></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Source : Livret CQP FFA (S2-S3).</div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Source du tableau : Livret CQP FFA (S2-S3).</div>'
+    +'<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Développement / spécifique — répartition indicative</div>'
+    +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:12px"><b>Spécificité croissante</b> à l’approche de la course : plus la distance est longue, plus le bloc spécifique s’allonge — c’est lui le facteur limitant.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:340px">'
+    +'<thead><tr><th style="'+th+'">Distance</th><th style="'+th+';color:'+PL_PHC.dev+'">Développement</th><th style="'+th+';color:'+PL_PHC.spe+'">Spécifique</th></tr></thead><tbody>'
+    +['5–10 km|55–60 %|40–45 %','Semi|≈ 50 %|≈ 50 %','Marathon|≈ 40 %|≈ 60 %'].map(function(r){var c=r.split('|');return '<tr><td style="'+td+';font-weight:800;color:var(--text)">'+c[0]+'</td><td style="'+td+';font-weight:800;color:'+PL_PHC.dev+'">'+c[1]+'</td><td style="'+td+';font-weight:800;color:'+PL_PHC.spe+'">'+c[2]+'</td></tr>';}).join('')
+    +'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Hors base et affûtage · à moduler avec le curseur <b>Dév. ↔ Spé</b> selon le profil de l’athlète.</div>'
+    +'<div style="margin-top:12px;padding:11px 14px;background:rgba(255,255,255,0.03);border-radius:9px">'
+    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:7px">Sources</div>'
+    +'<ul style="margin:0;padding-left:16px;font-size:11.5px;color:var(--muted);line-height:1.75">'
+    +'<li>Bompa &amp; Buzzichelli — <i>Periodization: Theory and Methodology of Training</i> (spécificité croissante)</li>'
+    +'<li>Renato Canova — du fondamental au spécifique</li>'
+    +'<li>Jack Daniels — <i>Daniels’ Running Formula</i> (base → qualité → spécifique)</li>'
+    +'<li>Arthur Lydiard — périodisation orientée vers le pic</li>'
+    +'<li>Pete Pfitzinger — <i>Advanced Marathoning</i> (endurance spécifique marathon)</li>'
+    +'</ul>'
+    +'<div style="font-size:11px;color:var(--muted2);font-style:italic;margin-top:8px">Les pourcentages sont une <b>synthèse pratique</b> (valeurs par défaut de l’outil, ajustables), pas une constante issue d’une étude unique.</div>'
+    +'</div>'
+    +'</div>'
     +'</div>';
 }
 function plVO2HTML(){
@@ -5592,16 +5865,24 @@ function plRenfoHTML(){
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr><th style="'+th+'">Phase</th><th style="'+th+'">Demi-fond · 10 km</th><th style="'+th+'">Semi · Marathon</th><th style="'+th+'">Trail</th><th style="'+th+'">Ultra (route &amp; trail)</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
-/* ══ VEILLE PUBMED LIVE — API NCBI E-utilities (cross-origin autorisé) ══ */
+/* ══ VEILLE PUBMED LIVE — API NCBI E-utilities + traduction FR ══ */
 const PUBMED_TERM='(running[tiab] OR runners[tiab] OR marathon[tiab] OR "half marathon"[tiab] OR "10 km"[tiab] OR "5 km"[tiab] OR "endurance training"[tiab]) AND (VO2max[tiab] OR "critical speed"[tiab] OR "critical power"[tiab] OR "lactate threshold"[tiab] OR "running economy"[tiab] OR periodization[tiab] OR "interval training"[tiab] OR "training load"[tiab] OR tapering[tiab] OR "durability"[tiab])';
 function plEsc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 function pubmedSearchURL(){return 'https://pubmed.ncbi.nlm.nih.gov/?sort=date&term='+encodeURIComponent(PUBMED_TERM);}
+async function plTranslateFR(t){
+  try{
+    const r=await fetch('https://api.mymemory.translated.net/get?langpair=en|fr&q='+encodeURIComponent(t)).then(function(x){return x.json();});
+    const tx=r&&r.responseData&&r.responseData.translatedText;
+    if(tx&&!/MYMEMORY WARNING|QUERY LENGTH|INVALID|NO QUERY|MAX ALLOWED/i.test(tx)) return tx;
+  }catch(e){}
+  return null;
+}
 function pubmedLiveHTML(){
   return '<div class="db-section" style="margin-top:30px">'
     +'<div class="pl-live-card">'
-    +'<div class="pl-live-hd"><span class="pl-live-dot"></span>Veille PubMed — dernières études<span class="pl-live-badge">live</span>'
+    +'<div class="pl-live-hd"><span class="pl-live-dot"></span>Études cliniques — veille PubMed<span class="pl-live-badge">live</span>'
     +'<button class="pl-live-refresh" onclick="fetchPubmedLive()" title="Actualiser">↻</button></div>'
-    +'<div class="pl-live-sub">Actualisé à chaque ouverture de l’onglet · 5 km / 10 km / semi / marathon croisés avec VO₂max, seuil, vitesse critique, périodisation, économie de course, affûtage.</div>'
+    +'<div class="pl-live-sub">Titres traduits en français, actualisés à chaque ouverture de l’onglet · 5 km / 10 km / semi / marathon croisés avec VO₂max, seuil, vitesse critique, périodisation, économie de course, affûtage.</div>'
     +'<div id="pl-live-list"><div class="pl-live-loading">Chargement des dernières études…</div></div>'
     +'<a class="pl-live-more" href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Voir toute la veille sur PubMed →</a>'
     +'</div></div>';
@@ -5616,21 +5897,30 @@ async function fetchPubmedLive(){
     if(!ids.length){box.innerHTML='<div class="pl-live-err">Aucune étude trouvée pour l’instant.</div>';return;}
     const sm=await fetch(base+'esummary.fcgi?db=pubmed&retmode=json&id='+ids.join(',')).then(function(r){return r.json();});
     const R=sm&&sm.result; if(!R||!R.uids){throw new Error('bad summary');}
-    const rows=R.uids.map(function(id){
+    const items=R.uids.map(function(id){
       const a=R[id]||{}; const au=(a.authors||[]).map(function(x){return x.name;});
       const authors=au.slice(0,3).join(', ')+(au.length>3?' et al.':'');
-      const meta=[authors,a.fulljournalname||a.source||'',a.pubdate||''].filter(Boolean).map(plEsc).join(' · ');
-      return '<a class="pl-live-item" href="https://pubmed.ncbi.nlm.nih.gov/'+id+'/" target="_blank" rel="noopener">'
-        +'<div class="pl-live-title">'+plEsc(a.title||'(sans titre)')+'</div>'
-        +'<div class="pl-live-meta">'+meta+'</div></a>';
-    }).join('');
-    box.innerHTML=rows;
+      return {id:id, title:a.title||'(sans titre)', meta:[authors,a.fulljournalname||a.source||'',a.pubdate||''].filter(Boolean).map(plEsc).join(' · ')};
+    });
+    function render(map){
+      box.innerHTML=items.map(function(it){
+        const fr=map&&map[it.id];
+        const titleTop=fr?plEsc(fr):plEsc(it.title);
+        const orig=fr?('<div class="pl-live-orig">'+plEsc(it.title)+'</div>'):'';
+        return '<a class="pl-live-item" href="https://pubmed.ncbi.nlm.nih.gov/'+it.id+'/" target="_blank" rel="noopener">'
+          +'<div class="pl-live-title">'+titleTop+'</div>'+orig
+          +'<div class="pl-live-meta">'+it.meta+'</div></a>';
+      }).join('');
+    }
+    render(null);
+    const trans=await Promise.all(items.map(function(it){return plTranslateFR(it.title);}));
+    const map={}; items.forEach(function(it,i){ if(trans[i]) map[it.id]=trans[i]; });
+    render(map);
   }catch(e){
     box.innerHTML='<div class="pl-live-err">Impossible de charger la veille en direct (réseau bloqué ou hors-ligne). '
       +'<a href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Ouvrir la recherche PubMed →</a></div>';
   }
 }
-
 function renderKnowledge(){
   var w=document.getElementById('knowledge-wrap');if(!w)return;
   w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
@@ -5639,13 +5929,12 @@ function renderKnowledge(){
     +plVO2HTML()
     +plRecovHTML()
     +plRenfoHTML()
-    +pubmedLiveHTML()
-    +plStudiesHTML();
+    +pubmedLiveHTML();
   fetchPubmedLive();
 }
 function renderPlanif(){
   const wrap=document.getElementById('planif-wrap');if(!wrap)return;
-  if(!_plPicked&&S.plan&&S.plan.D&&PLANIF.some(x=>x.id===S.plan.D)){_plD=S.plan.D;_plW=S.plan.W;_plCtx=S.plan.ctx;_plVol=S.plan.vol;_plProf=S.plan.prof;if(S.plan.ph)_plPhaseOverride=S.plan.ph;if('orient' in S.plan)_plOrient=S.plan.orient||0;if('base' in S.plan)_plBase=S.plan.base!==false;if('d2' in S.plan){_plDate1=S.plan.d1||null;_plDate2=S.plan.d2||null;_plDi=S.plan.di||null;}_plPicked=true;}
+  if(!_plPicked&&S.plan&&S.plan.D&&PLANIF.some(x=>x.id===S.plan.D)){_plD=S.plan.D;_plW=S.plan.W;_plCtx=S.plan.ctx;_plVol=S.plan.vol;_plProf=S.plan.prof;if(S.plan.ph)_plPhaseOverride=S.plan.ph;if('orient' in S.plan)_plOrient=S.plan.orient||0;if('base' in S.plan)_plBase=S.plan.base!==false;if('ratio' in S.plan)_plRatio=S.plan.ratio===2?2:3;if('baseW' in S.plan)_plBaseW=(S.plan.baseW!=null?S.plan.baseW:null);if('volOv' in S.plan)_plVolOverride=S.plan.volOv||{};if('recOv' in S.plan)_plRecOverride=S.plan.recOv||{};if('sess' in S.plan)_plSessions=S.plan.sess||{};if('d2' in S.plan){_plDate1=S.plan.d1||null;_plDate2=S.plan.d2||null;_plDi=S.plan.di||null;}_plPicked=true;}
   else if(!_plPicked&&S.goal&&S.goal.id&&PLANIF.some(x=>x.id===S.goal.id))_plD=S.goal.id;
   const p=PLANIF.find(x=>x.id===_plD)||PLANIF[1];
   if(_plPhaseOverride){_plW=Math.max(1,_plPhaseOverride.base+_plPhaseOverride.dev+_plPhaseOverride.spe+_plPhaseOverride.aff);}
@@ -5685,6 +5974,7 @@ function renderPlanif(){
     +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course :</span><input type="date" id="pl-d2" class="goal-date" value="'+(_plDate2||'')+'" onchange="plDates()">'
     +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course prépa :</span><input type="date" id="pl-di" class="goal-date" value="'+(_plDi||'')+'" onchange="plDates()">'
     +'<span id="pl-avail" style="font-size:12.5px;font-weight:700"></span></div>'
+    +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Ratio de charge :</span>'+plRatioToggle()+'<span style="font-size:11.5px;color:var(--muted);line-height:1.4">3:1 = 3 sem de montée / 1 allégée · 2:1 = 2 / 1 (plus de récupération)</span></div>'
     +'<div id="pl-phase-box" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'+plPhaseBoxHTML(p)+'</div>'
     +'</div>'
     +'<div id="pl-load">'+plLoadHTML(p,weeks,{cid:'pl-vol-canvas'})+'</div>'
@@ -5692,7 +5982,7 @@ function renderPlanif(){
     +'<div id="pl-dash-msg" style="text-align:center;font-size:12.5px;font-weight:700;margin-top:8px;min-height:16px"></div>'
     +'</div>'
     // ── Cohérence ──
-    +'<div class="card" style="padding:22px;margin-bottom:14px"><div id="pl-coh">'+plCohHTML(p,_plW,weeks)+'</div></div>'
+    +'<div class="card" style="padding:22px;margin-bottom:14px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Calendrier de la prépa</div><div id="pl-cal">'+plCalendarHTML(p,weeks)+'</div></div>'
     // ── Principes + radar ──
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px">'
     +'<div class="card" style="padding:20px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:'+p.col+';margin-bottom:12px">Principes clés — '+p.lbl+'</div><ul style="margin:0;padding-left:18px">'+princ+'</ul>'
@@ -5730,6 +6020,117 @@ function applyDemiCooper(){
 }
 
 /* ══ INIT ══ */
+/* ══ SYNCHRO CLOUD (Supabase) ══ */
+const SUPA_URL='https://lacvhcuqkzsrojgcsjfj.supabase.co';
+const SUPA_KEY='sb_publishable_EuJgwlBxaDTSfmKGM43oLw_BNmnkTkg';
+let _sb=null,_cloudUser=null,_cloudTimer=null;
+function _cloudBundle(){return {LS:localStorage.getItem(LS_KEY),ATH:localStorage.getItem(ATH_KEY),CUSTOM:localStorage.getItem(CUSTOM_KEY)};}
+function cloudFabState(){var d=document.getElementById('cloud-dot');if(d)d.style.background=_cloudUser?'#34D399':'#64748B';}
+function cloudStatus(txt,col){var s=document.getElementById('cloud-stat');if(s){s.textContent=txt||'';if(col)s.style.color=col;}var d=document.getElementById('cloud-dot');if(d&&col)d.style.background=col;}
+function cloudMsg(t){var e=document.getElementById('cloud-msg');if(e)e.textContent=t||'';}
+function cloudOpen(){
+  var ex=document.getElementById('cloud-modal');if(ex){ex.remove();return;}
+  var host=document.createElement('div');host.id='cloud-modal';host.className='pl-modal';
+  host.onclick=function(e){if(e.target===host)host.remove();};
+  var body;
+  if(_cloudUser){
+    body='<div style="font-size:13px;color:var(--text2);line-height:1.7">Connecté : <b>'+String(_cloudUser.email||'').replace(/</g,'&lt;')+'</b><br><span id="cloud-stat" style="color:var(--muted2)">Synchro active</span></div>'
+      +'<div style="display:flex;gap:10px;margin-top:16px"><button class="lc-save" onclick="cloudPush(true)">Forcer la synchro</button><button class="lc-cancel" onclick="cloudSignOut()">Se déconnecter</button></div>';
+  }else{
+    body='<div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6">Connecte-toi pour sauvegarder tes séances, athlètes et plans dans le cloud (synchro automatique, multi-appareils).</div>'
+      +'<div class="lc-field"><label>E-mail</label><input id="cloud-email" type="email" placeholder="toi@exemple.fr" autocomplete="username"></div>'
+      +'<div class="lc-field"><label>Mot de passe</label><input id="cloud-pass" type="password" placeholder="6 caractères minimum" autocomplete="current-password"></div>'
+      +'<div id="cloud-msg" style="font-size:12px;color:#FB923C;min-height:16px;margin:2px 0 6px"></div>'
+      +'<div style="display:flex;gap:10px"><button class="lc-save" onclick="cloudSignIn()">Se connecter</button><button class="lc-cancel" onclick="cloudSignUp()">Créer un compte</button></div>';
+  }
+  host.innerHTML='<div class="pl-modal-box" style="max-width:400px"><div class="pl-modal-top"><b>☁ Synchronisation cloud</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="var m=document.getElementById(\'cloud-modal\');if(m)m.remove()">×</button></div>'+body+'</div>';
+  document.body.appendChild(host);
+}
+async function cloudSignUp(){
+  var em=(document.getElementById('cloud-email')||{}).value,pw=(document.getElementById('cloud-pass')||{}).value;
+  if(!em||!pw){cloudMsg('E-mail et mot de passe requis.');return;}
+  cloudMsg('Création du compte…');
+  var r=await _sb.auth.signUp({email:em,password:pw});
+  if(r.error){cloudMsg(r.error.message);return;}
+  if(r.data&&r.data.session){_cloudUser=r.data.user;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();await cloudPush();}
+  else cloudMsg('Compte créé. Si une confirmation e-mail est demandée, valide-la puis connecte-toi.');
+}
+async function cloudSignIn(){
+  var em=(document.getElementById('cloud-email')||{}).value,pw=(document.getElementById('cloud-pass')||{}).value;
+  if(!em||!pw){cloudMsg('E-mail et mot de passe requis.');return;}
+  cloudMsg('Connexion…');
+  var r=await _sb.auth.signInWithPassword({email:em,password:pw});
+  if(r.error){cloudMsg(r.error.message);return;}
+  _cloudUser=r.data.user;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();await cloudPull();
+}
+async function cloudSignOut(){await _sb.auth.signOut();_cloudUser=null;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();}
+function cloudPushDebounced(){if(!_cloudUser)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(function(){cloudPush();},1500);}
+async function cloudPush(manual){
+  if(!_cloudUser)return;
+  var r=await _sb.from('redlab_state').upsert({user_id:_cloudUser.id,data:_cloudBundle(),updated_at:new Date().toISOString()});
+  if(r.error)cloudStatus('Erreur : '+r.error.message,'#F87171');
+  else cloudStatus((manual?'Sauvegardé ✓ ':'Synchronisé ')+new Date().toLocaleTimeString('fr-FR').slice(0,5),'#34D399');
+}
+async function cloudPull(){
+  if(!_cloudUser)return;
+  var r=await _sb.from('redlab_state').select('data').eq('user_id',_cloudUser.id).maybeSingle();
+  if(r.error){cloudStatus('Erreur de lecture','#F87171');return;}
+  var rem=r.data&&r.data.data;
+  if(!rem||(!rem.LS&&!rem.ATH&&!rem.CUSTOM)){await cloudPush();return;}
+  var cur=_cloudBundle();
+  if((cur.LS||'')===(rem.LS||'')&&(cur.ATH||'')===(rem.ATH||'')&&(cur.CUSTOM||'')===(rem.CUSTOM||'')){cloudStatus('À jour','#34D399');return;}
+  if(rem.LS)localStorage.setItem(LS_KEY,rem.LS);else localStorage.removeItem(LS_KEY);
+  if(rem.ATH)localStorage.setItem(ATH_KEY,rem.ATH);else localStorage.removeItem(ATH_KEY);
+  if(rem.CUSTOM)localStorage.setItem(CUSTOM_KEY,rem.CUSTOM);else localStorage.removeItem(CUSTOM_KEY);
+  location.reload();
+}
+async function cloudInit(){
+  if(!window.supabase||!window.supabase.createClient)return;
+  try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){return;}
+  var fab=document.createElement('button');fab.id='cloud-fab';fab.title='Synchronisation cloud';fab.onclick=cloudOpen;
+  fab.innerHTML='☁<span id="cloud-dot"></span>';document.body.appendChild(fab);
+  ['saveLS','_saveAthletes','saveCustomSessions'].forEach(function(fn){
+    if(typeof window[fn]==='function'){var o=window[fn];window[fn]=function(){var res=o.apply(this,arguments);cloudPushDebounced();return res;};}
+  });
+  var s=await _sb.auth.getSession();
+  if(s.data&&s.data.session){_cloudUser=s.data.session.user;cloudFabState();await cloudPull();}
+  else cloudFabState();
+}
+
+/* ══ SÉLECTEUR D'ATHLÈTE RAPIDE (partout) ══ */
+function switchAthlete(id){
+  var cur=document.querySelector('.panel.active');
+  var tab=cur?cur.id.replace(/^p-/,''):'dashboard';
+  loadAthlete(id);                 // charge le profil (redirige vers dashboard)
+  if(tab&&tab!=='dashboard')go(tab); // revient sur l'onglet où tu étais
+  if(typeof athFabUpdate==='function')athFabUpdate();
+}
+function athSwitcherOpen(){
+  var ex=document.getElementById('ath-modal'); if(ex){ex.remove();return;}
+  var list=(typeof getAthletes==='function')?getAthletes():[];
+  var host=document.createElement('div'); host.id='ath-modal'; host.className='pl-modal';
+  host.onclick=function(e){if(e.target===host)host.remove();};
+  var items=list.length?list.map(function(a){
+    var on=(S.pseudo&&a.pseudo===S.pseudo);
+    var main=(a.mode==='tests'&&a.csKmh)?('VC '+a.csKmh.toFixed(1)):('VMA '+(a.vma?a.vma.toFixed(1):'—'));
+    return '<button type="button" class="ath-it'+(on?' on':'')+'" onclick="switchAthlete('+a.id+');var m=document.getElementById(\'ath-modal\');if(m)m.remove()"><span class="ath-it-av">'+String(a.pseudo).slice(0,2).toUpperCase()+'</span><span class="ath-it-tx"><b>'+String(a.pseudo).replace(/</g,'&lt;')+'</b><span>'+main+' km/h'+(on?' · actuel':'')+'</span></span></button>';
+  }).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;line-height:1.6">Aucun athlète enregistré. Génère un profil dans <b>Saisie</b> puis clique <b>Enregistrer</b> sur le dashboard.</div>';
+  host.innerHTML='<div class="pl-modal-box" style="max-width:400px"><div class="pl-modal-top"><b>Changer d\'athlète</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="var m=document.getElementById(\'ath-modal\');if(m)m.remove()">×</button></div>'
+    +'<div style="max-height:60vh;overflow:auto">'+items+'</div>'
+    +'<button class="lc-cancel" style="margin-top:12px;width:100%" onclick="var m=document.getElementById(\'ath-modal\');if(m)m.remove();go(\'athletes\')">Gérer les athlètes</button></div>';
+  document.body.appendChild(host);
+}
+function athFabUpdate(){
+  var b=document.getElementById('ath-fab'); if(!b)return;
+  if(S&&S.pseudo){ b.innerHTML='<span class="ath-fab-av">'+String(S.pseudo).slice(0,2).toUpperCase()+'</span>'; }
+  else { b.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'; }
+}
+function athFabInit(){
+  if(document.getElementById('ath-fab'))return;
+  var b=document.createElement('button'); b.id='ath-fab'; b.title="Changer d'athlète"; b.onclick=athSwitcherOpen;
+  document.body.appendChild(b); athFabUpdate();
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   buildTestsForm();
   window._csSub='courses';
@@ -5741,6 +6142,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   updMhCtx(S.vma?'dashboard':'input');
   const ac0=document.getElementById('sbn-ath-count');
   if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
+  if(typeof cloudInit==='function')cloudInit();
 });
 
 
