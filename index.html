@@ -4401,7 +4401,7 @@ function goalReadout(){
 
 /* ══ EXPORT VUE ATHLÈTE (fichier HTML autonome, calculateurs interactifs) ══ */
 function exportAthleteView(returnDoc){
-  if(!S.vma||!S.pseudo){ if(!returnDoc)alert("Génère d'abord un profil athlète avant de le partager."); return; }
+  if((!S.vma&&!S.csKmh)||!S.pseudo){ if(!returnDoc)alert("Génère d'abord un profil athlète avant de le partager."); return; }
   try{ if(typeof renderChart==='function') renderChart(); }catch(e){}
   const src=document.getElementById('p-dashboard');
   if(!src){alert('Dashboard introuvable.');return;}
@@ -6261,18 +6261,29 @@ function copyEspaceLink(btn){
 }
 // Publie la fiche COMPLÈTE (dashboard épuré) d'un athlète vers son espace, sans quitter la page.
 async function publishAthlete(id,btn){
+  var o=btn?btn.textContent:'';
+  function restore(){ if(btn){btn.disabled=false;btn.textContent=o||'↑ Publier l\'espace';} }
+  function fail(m){ restore(); alert('Publication échouée : '+m); }
   if(typeof _cloudUser==='undefined'||!_cloudUser){alert('Connecte-toi au cloud (☁, en bas de la barre latérale) pour publier l\'espace.');return;}
   var ath=getAthletes().find(function(x){return x.id===id;});
   if(!ath)return;
   if(!ath.email||ath.email.indexOf('@')<0){alert('Renseigne d\'abord l\'email de l\'athlète (champ juste au-dessus).');return;}
-  var o=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='Publication…';}
-  // Charge les données de l'athlète dans S et rend le dashboard (dans le panneau caché) pour bâtir sa fiche.
-  Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
-  _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
-  try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
-  try{ if(typeof cloudPushSpaces==='function') await cloudPushSpaces(); }catch(e){}
+  if(btn){btn.disabled=true;btn.textContent='Publication…';}
+  // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
+  try{
+    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
+    _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+    if(typeof renderDashboard==='function')renderDashboard();
+  }catch(e){ return fail('rendu du dashboard — '+e.message); }
+  var doc;
+  try{ doc=exportAthleteView(true); }catch(e){ return fail('génération de la fiche — '+e.message); }
+  if(!doc){ return fail('fiche vide (VMA/VC manquante pour cet athlète ?)'); }
   try{ saveLS(); }catch(e){}
-  if(btn){btn.disabled=false;btn.textContent='Publié ✓';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2200);}
+  var r;
+  try{ r=await _sb.from('athlete_spaces').upsert([{email:ath.email.trim().toLowerCase(),coach_id:_cloudUser.id,data:{pseudo:ath.pseudo,updatedAt:new Date().toISOString(),html:doc},updated_at:new Date().toISOString()}],{onConflict:'email'}); }
+  catch(e){ return fail(e.message); }
+  if(r&&r.error){ return fail(r.error.message); }
+  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
 }
 async function cloudPull(){
   if(!_cloudUser)return;
