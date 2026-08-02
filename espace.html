@@ -1,0 +1,286 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace athlète — Reding Running</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1729;--bg2:#16203A;--bg3:#1C2840;--card:#212E4A;--card2:#2A3852;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --accent:#FF6B1A;--accent2:#E55A0C;--accent-soft:rgba(255,107,26,.12);
+  --success:#34D399;--info:#60A5FA;--tertiary:#A78BFA;--danger:#F87171;
+  --text:#F1F5F9;--text2:#CBD5E1;--muted:#94A3B8;--muted2:#64748B;
+  --font:'Manrope',system-ui,sans-serif;--disp:'Barlow Condensed',sans-serif;
+  --r:16px;--rs:11px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:var(--accent)}
+.wrap{max-width:920px;margin:0 auto;padding:0 16px 60px}
+
+/* Marque */
+.brand{display:flex;align-items:center;gap:16px;justify-content:center;padding:26px 16px 20px;background:radial-gradient(ellipse at 50% 0%,rgba(255,107,26,.16),transparent 70%);border-bottom:1px solid var(--border)}
+.rr{display:flex;flex-direction:column;line-height:.92;font-family:var(--disp);font-style:italic;font-weight:900;text-transform:uppercase;text-decoration:none}
+.rr .a{font-size:40px;color:var(--accent);letter-spacing:1px;text-shadow:0 6px 22px rgba(255,107,26,.45)}
+.rr .b{font-size:19px;color:var(--text);letter-spacing:7px}
+.brand .slg{display:flex;flex-direction:column;gap:3px}
+.brand .slg span{font-family:var(--disp);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:1.6px;font-size:14px;color:var(--text2)}
+
+/* Login */
+.login{max-width:420px;margin:48px auto;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px}
+.login h1{font-size:20px;font-weight:800;margin-bottom:6px}
+.login p{font-size:13.5px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.login label{display:block;font-size:11px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.login input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font);font-size:15px;font-weight:600;padding:12px 14px;outline:none}
+.login input:focus{border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--accent);color:#fff;border:none;border-radius:11px;font-family:var(--font);font-size:15px;font-weight:800;padding:13px 20px;margin-top:16px;cursor:pointer;transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.6;cursor:default}
+.note{font-size:12.5px;line-height:1.6;margin-top:14px;padding:11px 13px;border-radius:10px}
+.note.ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:var(--success)}
+.note.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--danger)}
+.login-foot{margin-top:22px;text-align:center;font-size:12px;color:var(--muted2)}
+
+/* Fiche */
+.hero{background:linear-gradient(135deg,rgba(255,107,26,.09),rgba(255,107,26,.02));border:1px solid rgba(255,107,26,.22);border-left:4px solid var(--accent);border-radius:18px;padding:22px 24px;margin:24px 0}
+.hero-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hero-av{width:52px;height:52px;border-radius:50%;background:var(--accent-soft);border:1px solid rgba(255,107,26,.3);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:var(--accent);flex-shrink:0}
+.hero-name{font-size:23px;font-weight:900;letter-spacing:-.4px}
+.hero-sub{font-size:13px;color:var(--muted);margin-top:1px}
+.hero-out{margin-left:auto;text-align:right}
+.hero-out .l{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.hero-out .v{font-size:30px;font-weight:900;color:var(--accent);line-height:1;font-family:var(--disp);font-style:italic}
+.hero-out .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+.sec-hd{display:flex;align-items:center;gap:9px;margin:30px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sec-hd b{font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.sec-hd .dot{width:8px;height:8px;border-radius:2px;background:var(--accent)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;border-top:2px solid var(--accent)}
+.kpi .l{font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2)}
+.kpi .v{font-size:26px;font-weight:900;line-height:1.1;margin-top:5px}
+.kpi .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+.tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tbl th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);padding:11px 13px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:11px 13px;font-size:13.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.zbadge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
+.tblwrap{overflow-x:auto;border-radius:12px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.rcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.rcard .nm{font-size:18px;font-weight:900;text-transform:uppercase;line-height:1}
+.rcard .di{font-size:11.5px;color:var(--muted2);margin-top:2px}
+.rcard .tm{font-size:30px;font-weight:900;color:var(--accent);line-height:1;margin:12px 0 3px;font-family:var(--disp);font-style:italic}
+.rcard .pa{font-size:13px;color:var(--text2);font-weight:600}
+
+.goal{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:14px;padding:20px}
+.goal .l{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.goal .row{display:flex;flex-wrap:wrap;gap:16px}
+.goal .row>div{min-width:110px}
+.goal .row .cl{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.goal .row .cv{font-size:16px;font-weight:800;margin-top:2px}
+
+.plan{display:flex;flex-direction:column;gap:7px}
+.pweek{border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pweek b{font-size:13px}
+.pweek .ph{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+.pweek .km{font-size:12.5px;font-weight:800;color:var(--text2)}
+
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 0;flex-wrap:wrap}
+.topbar .sp{flex:1}
+.linkbtn{background:none;border:1px solid var(--border2);border-radius:9px;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;padding:7px 13px;cursor:pointer}
+.linkbtn:hover{border-color:var(--accent);color:var(--accent)}
+.foot{text-align:center;color:var(--muted2);font-size:12px;padding:34px 16px;line-height:1.8}
+.foot b{color:var(--accent)}
+.hidden{display:none!important}
+.spin{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
+@media(max-width:640px){.hero-out{margin-left:0;text-align:left;width:100%}.rr .a{font-size:32px}.rr .b{font-size:15px;letter-spacing:5px}.brand .slg{display:none}}
+</style>
+</head><body>
+
+<div class="brand">
+  <a class="rr" href="https://reding-running.fr" target="_blank" rel="noopener"><span class="a">Reding</span><span class="b">Running</span></a>
+  <div class="slg"><span>Coach running</span><span>Tous niveaux</span><span>Courir encadré</span></div>
+</div>
+
+<div class="wrap">
+  <!-- Écran connexion -->
+  <div id="login" class="login">
+    <h1>Ton espace athlète</h1>
+    <p>Entre l'email que ton coach a associé à ton profil. Tu recevras un lien de connexion — pas de mot de passe à retenir.</p>
+    <label for="em">Email</label>
+    <input id="em" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.fr">
+    <button class="btn" id="send" onclick="sendLink()">Recevoir mon lien de connexion</button>
+    <div id="msg"></div>
+    <div class="login-foot">Un souci d'accès ? Contacte ton coach.</div>
+  </div>
+
+  <!-- Chargement -->
+  <div id="loading" class="spin hidden">Connexion…</div>
+
+  <!-- Fiche -->
+  <div id="fiche" class="hidden">
+    <div class="topbar">
+      <span id="who" style="font-size:13px;color:var(--muted)"></span>
+      <span class="sp"></span>
+      <button class="linkbtn" onclick="location.reload()">↻ Actualiser</button>
+      <button class="linkbtn" onclick="signOut()">Se déconnecter</button>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div class="foot">Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── Config (clé publiable, sans danger à exposer) ──
+var SUPA_URL='https://lacvhcuqkzsrojgcsjfj.supabase.co';
+var SUPA_KEY='sb_publishable_EuJgwlBxaDTSfmKGM43oLw_BNmnkTkg';
+var _sb=null;
+try{ _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY); }catch(e){}
+
+// ── Helpers de formatage ──
+function fAll(s){s=Math.round(s);var m=Math.floor(s/60),sc=s%60;return m+':'+String(sc).padStart(2,'0');}
+function fHMS(s){s=Math.round(s);var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;if(h>0)return h+"h"+String(m).padStart(2,'0')+"'"+String(sc).padStart(2,'0')+'"';return m+"'"+String(sc).padStart(2,'0')+'"';}
+function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── Référentiels (identiques à RedLab) ──
+var ZONES_VMA=[
+ {z:1,n:'Récupération',lo:.60,hi:.70,col:'#94A3B8',talk:'Je peux parler sans aucune difficulté',rpe:'2–3'},
+ {z:2,n:'Endurance fondamentale',lo:.70,hi:.80,col:'#60A5FA',talk:'Je peux tenir une conversation normale',rpe:'3–4'},
+ {z:3,n:'Endurance active / Tempo',lo:.80,hi:.88,col:'#34D399',talk:'Je peux parler mais je dois faire des pauses',rpe:'5–6'},
+ {z:4,n:'Seuil',lo:.88,hi:.94,col:'#FB923C',talk:'Je peux dire seulement quelques mots',rpe:'7–8'},
+ {z:5,n:'VO₂max',lo:.94,hi:1.05,col:'#F87171',talk:'Je ne peux plus parler',rpe:'9–10'}
+];
+var ZONES_VC=[
+ {z:1,n:'Modéré',lo:.60,hi:.81,col:'#94A3B8',talk:'Conversation fluide',rpe:'2–3'},
+ {z:2,n:'Intermédiaire (SV1)',lo:.81,hi:.95,col:'#60A5FA',talk:'Parole par phrases courtes',rpe:'4–5'},
+ {z:3,n:'Seuil (SV2−)',lo:.95,hi:1.00,col:'#34D399',talk:'Parole rude, soutenue',rpe:'6–7'},
+ {z:4,n:'VO₂max',lo:1.00,hi:1.07,col:'#FB923C',talk:'Respiration intense',rpe:'8–9'},
+ {z:5,n:'Anaérobie',lo:1.07,hi:1.30,col:'#F87171',talk:'Effort explosif',rpe:'9–10'}
+];
+var RACES=[
+ {id:'5k',nm:'5K',d:5000,lbl:'5 km',vmaLo:.90,vmaHi:.95},
+ {id:'10k',nm:'10K',d:10000,lbl:'10 km',vmaLo:.85,vmaHi:.90},
+ {id:'semi',nm:'Semi',d:21097.5,lbl:'21,1 km',vmaLo:.80,vmaHi:.85},
+ {id:'mara',nm:'Marathon',d:42195,lbl:'42,2 km',vmaLo:.75,vmaHi:.80}
+];
+var PH={base:['#94A3B8','Base'],dev:['#FB923C','Développement'],spe:['#34D399','Spécifique'],aff:['#A78BFA','Affûtage']};
+
+// ── Connexion par lien magique ──
+function setMsg(t,cls){var m=document.getElementById('msg');m.innerHTML=t?('<div class="note '+cls+'">'+t+'</div>'):'';}
+async function sendLink(){
+  var em=(document.getElementById('em').value||'').trim();
+  if(!em||em.indexOf('@')<0){setMsg('Entre un email valide.','err');return;}
+  if(!_sb){setMsg('Service indisponible, réessaie plus tard.','err');return;}
+  var btn=document.getElementById('send');btn.disabled=true;setMsg('Envoi…','ok');
+  var r=await _sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.href.split('#')[0].split('?')[0]}});
+  btn.disabled=false;
+  if(r.error){setMsg('Erreur : '+esc(r.error.message),'err');return;}
+  setMsg('Lien envoyé ✓ Ouvre ton email et clique sur le lien pour accéder à ton espace. (Pense à vérifier les spams.)','ok');
+}
+async function signOut(){ if(_sb)await _sb.auth.signOut(); location.href=location.href.split('#')[0].split('?')[0]; }
+
+// ── Rendu de la fiche ──
+function ref(d){ return d.csKmh? {v:d.csKmh,lbl:'VC',zones:ZONES_VC} : {v:d.vma,lbl:'VMA',zones:ZONES_VMA}; }
+function renderFiche(email,d){
+  document.getElementById('who').textContent='Connecté : '+email;
+  if(!d||(!d.vma&&!d.csKmh)){
+    document.getElementById('content').innerHTML='<div class="spin">Ton coach n\'a pas encore publié tes données. Reviens bientôt.</div>';
+    return;
+  }
+  var R=ref(d), v=R.v, vms=v/3.6;
+  var vo2=d.vma?(3.5*d.vma):null;
+  var initials=(d.pseudo||'?').slice(0,2).toUpperCase();
+  var h='';
+  // Hero
+  h+='<div class="hero"><div class="hero-top">'
+    +'<div class="hero-av">'+esc(initials)+'</div>'
+    +'<div><div class="hero-name">'+esc(d.pseudo||'Athlète')+'</div><div class="hero-sub">Mis à jour '+esc(d.savedAt||'')+'</div></div>'
+    +'<div class="hero-out"><div class="l">'+R.lbl+'</div><div class="v">'+(+v).toFixed(1)+'</div><div class="s">km/h · '+fAll(3600/v)+'/km</div></div>'
+    +'</div></div>';
+  // KPIs
+  h+='<div class="sec-hd"><span class="dot"></span><b>Repères</b></div><div class="grid">';
+  h+=kpi(R.lbl,(+v).toFixed(1),'km/h');
+  h+=kpi('Allure '+R.lbl,fAll(3600/v),'/km');
+  if(vo2)h+=kpi('VO₂max estimé',vo2.toFixed(1),'ml/kg/min');
+  if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
+  h+='</div>';
+  // Zones
+  h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div><div class="tblwrap"><table class="tbl">'
+    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th>Ressenti</th><th>RPE</th></tr></thead><tbody>';
+  R.zones.forEach(function(z){
+    var vlo=(v*z.lo),vhi=(v*z.hi);
+    h+='<tr>'
+      +'<td><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span></td>'
+      +'<td><b style="color:var(--text)">'+esc(z.n)+'</b><br><span style="color:var(--muted2);font-size:11.5px">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+'%</span></td>'
+      +'<td style="color:'+z.col+';font-weight:800">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'</td>'
+      +'<td>'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'/km</td>'
+      +'<td style="font-size:12.5px;color:var(--muted)">'+esc(z.talk)+'</td>'
+      +'<td>'+z.rpe+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  // Prédictions de course (si VMA connue)
+  if(d.vma){
+    h+='<div class="sec-hd"><span class="dot"></span><b>Allures &amp; temps cibles</b></div><div class="cards">';
+    RACES.forEach(function(r){
+      var tF=r.d/(r.vmaHi*vms), tS=r.d/(r.vmaLo*vms), tM=(tF+tS)/2;
+      h+='<div class="rcard"><div class="nm">'+r.nm+'</div><div class="di">'+r.lbl+'</div>'
+        +'<div class="tm">'+fHMS(tM)+'</div>'
+        +'<div class="pa">'+fAll(tM/r.d*1000)+'/km · fourchette '+fHMS(tF)+' – '+fHMS(tS)+'</div></div>';
+    });
+    h+='</div>';
+  }
+  // Objectif
+  if(d.goal&&(d.goal.id||d.goal.name)&&(d.goal.t||d.goal.date)){
+    var g=d.goal;var nm=g.name||({'5k':'5 km','10k':'10 km','semi':'Semi','mara':'Marathon'}[g.id]||'Course');
+    var dm={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195}[g.id]||null;
+    var pace=(g.t&&dm)?fAll(g.t/dm*1000)+'/km':'';
+    var jrs='';if(g.date){var dd=new Date(g.date+'T00:00:00'),n=Math.round((dd-new Date().setHours(0,0,0,0))/864e5);if(n>0)jrs='J-'+n;else if(n===0)jrs='Jour J';}
+    h+='<div class="sec-hd"><span class="dot"></span><b>Ton objectif</b></div>'
+      +'<div class="goal"><div class="l">À viser</div><div class="row">'
+      +'<div><div class="cl">Course</div><div class="cv">'+esc(nm)+'</div></div>'
+      +(g.t?'<div><div class="cl">Chrono</div><div class="cv" style="color:var(--accent)">'+fHMS(g.t)+(pace?' · '+pace:'')+'</div></div>':'')
+      +(g.date?'<div><div class="cl">Échéance</div><div class="cv">'+esc(jrs||g.date)+'</div></div>':'')
+      +'</div></div>';
+  }
+  // Plan de prépa (résumé semaines)
+  if(d.plan&&Array.isArray(d.plan.weeks)&&d.plan.weeks.length){
+    h+='<div class="sec-hd"><span class="dot"></span><b>Ton plan de prépa</b></div><div class="plan">';
+    d.plan.weeks.forEach(function(w){
+      var ph=PH[w.ph]||['#94A3B8',w.ph||''];
+      h+='<div class="pweek" style="border-left-color:'+ph[0]+'">'
+        +'<b>'+esc(w.dt||('S'+(w.n||'')))+'</b>'
+        +'<span class="ph" style="color:'+ph[0]+'">'+esc(ph[1])+'</span>'
+        +'<span class="km">'+esc(w.km!=null?w.km+' km':'')+'</span></div>';
+    });
+    h+='</div>';
+  }
+  document.getElementById('content').innerHTML=h;
+}
+function kpi(l,v,s){return '<div class="kpi"><div class="l">'+esc(l)+'</div><div class="v">'+esc(v)+'</div><div class="s">'+esc(s)+'</div></div>';}
+
+function show(id){['login','loading','fiche'].forEach(function(x){document.getElementById(x).classList.toggle('hidden',x!==id);});}
+
+// ── Init : session présente ? → fiche, sinon → login ──
+async function boot(){
+  if(!_sb){show('login');return;}
+  show('loading');
+  var s=await _sb.auth.getSession();
+  var sess=s&&s.data&&s.data.session;
+  if(!sess){ show('login'); return; }
+  var email=sess.user.email;
+  var q=await _sb.from('athlete_spaces').select('data').ilike('email',email).maybeSingle();
+  if(q.error){ document.getElementById('content').innerHTML='<div class="spin">Erreur de lecture : '+esc(q.error.message)+'</div>'; show('fiche'); return; }
+  renderFiche(email, q.data?q.data.data:null);
+  show('fiche');
+}
+_sb&&_sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_IN'){ history.replaceState(null,'',location.pathname); boot(); } });
+boot();
+</script>
+</body></html>
