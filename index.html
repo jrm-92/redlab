@@ -6239,7 +6239,8 @@ const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
 async function _spacesUpsert(email,doc,pseudo){
   if(!_sb)return {error:{message:'client indisponible'}};
   var sess=(await _sb.auth.getSession()).data.session;
-  if(!sess||!sess.access_token) return {error:{message:'session absente — reconnecte-toi (☁)'}};
+  if(!sess||!sess.access_token){ try{ sess=(await _sb.auth.refreshSession()).data.session; }catch(e){} }
+  if(!sess||!sess.access_token){ _cloudUser=null; if(typeof cloudFabState==='function')cloudFabState(); if(typeof showAuthGate==='function')showAuthGate(); return {error:{message:'session expirée — reconnecte-toi puis reclique Publier'}}; }
   var cli;
   try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
   return await cli.from('athlete_spaces').upsert(
