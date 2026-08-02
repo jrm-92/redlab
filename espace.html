@@ -150,7 +150,7 @@ a{color:var(--accent)}
 var SUPA_URL='https://lacvhcuqkzsrojgcsjfj.supabase.co';
 var SUPA_KEY='sb_publishable_EuJgwlBxaDTSfmKGM43oLw_BNmnkTkg';
 var _sb=null;
-try{ _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); }catch(e){}
+try{ _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storageKey:'redlab_athlete_auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); }catch(e){}
 
 // ── Helpers de formatage ──
 function fAll(s){s=Math.round(s);var m=Math.floor(s/60),sc=s%60;return m+':'+String(sc).padStart(2,'0');}

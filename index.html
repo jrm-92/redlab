@@ -6225,9 +6225,20 @@ async function cloudSignIn(){
 }
 async function cloudSignOut(){await _sb.auth.signOut();_cloudUser=null;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();showAuthGate();}
 function cloudPushDebounced(){if(!_cloudUser)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(function(){cloudPush();},1500);}
+// ID utilisateur RÉEL de la session (= auth.uid côté serveur). _cloudUser.id peut être périmé.
+async function _uid(){
+  var s=(await _sb.auth.getSession()).data.session;
+  if(!s||!s.user){ try{ s=(await _sb.auth.refreshSession()).data.session; }catch(e){} }
+  return (s&&s.user)?s.user.id:null;
+}
 async function cloudPush(manual){
   if(!_cloudUser)return;
-  var r=await _sb.from('redlab_state').upsert({user_id:_cloudUser.id,data:_cloudBundle(),updated_at:new Date().toISOString()});
+  var b=_cloudBundle();
+  // Sécurité : ne JAMAIS écraser le cloud avec un état totalement vide (évite la perte de données).
+  if(!b.LS&&!b.ATH&&!b.CUSTOM){ return; }
+  var uid=await _uid();
+  if(!uid){ cloudStatus('Session expirée — reconnecte-toi','#F87171'); _cloudUser=null; if(typeof cloudFabState==='function')cloudFabState(); if(typeof showAuthGate==='function')showAuthGate(); return; }
+  var r=await _sb.from('redlab_state').upsert({user_id:uid,data:b,updated_at:new Date().toISOString()});
   if(r.error)cloudStatus('Erreur : '+r.error.message,'#F87171');
   else cloudStatus((manual?'Sauvegardé ✓ ':'Synchronisé ')+new Date().toLocaleTimeString('fr-FR').slice(0,5),'#34D399');
   try{ await cloudPushSpaces(); }catch(e){}
@@ -6242,7 +6253,7 @@ async function _spacesUpsert(email,doc,pseudo){
   if(!sess||!sess.access_token){ try{ sess=(await _sb.auth.refreshSession()).data.session; }catch(e){} }
   if(!sess||!sess.access_token){ _cloudUser=null; if(typeof cloudFabState==='function')cloudFabState(); if(typeof showAuthGate==='function')showAuthGate(); return {error:{message:'session expirée — reconnecte-toi puis reclique Publier'}}; }
   var cli;
-  try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
+  try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false,storageKey:'redlab_tmp_auth'},global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
   return await cli.from('athlete_spaces').upsert(
     [{email:String(email).trim().toLowerCase(),coach_id:sess.user.id,
       data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc},
@@ -6298,7 +6309,8 @@ async function publishAthlete(id,btn){
 }
 async function cloudPull(){
   if(!_cloudUser)return;
-  var r=await _sb.from('redlab_state').select('data').eq('user_id',_cloudUser.id).maybeSingle();
+  var uid=await _uid(); if(!uid)return;
+  var r=await _sb.from('redlab_state').select('data').eq('user_id',uid).maybeSingle();
   if(r.error){cloudStatus('Erreur de lecture','#F87171');return;}
   var rem=r.data&&r.data.data;
   if(!rem||(!rem.LS&&!rem.ATH&&!rem.CUSTOM)){await cloudPush();return;}
@@ -6390,7 +6402,9 @@ async function gateSignUp(){
 }
 async function cloudInit(){
   if(!window.supabase||!window.supabase.createClient){showAuthGate();return;}
-  try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){showAuthGate();return;}
+  // storageKey distinct : évite que la session de l'espace athlète (même origine GitHub)
+  // n'écrase celle du coach. Chaque app garde sa propre connexion.
+  try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storageKey:'redlab_coach_auth',persistSession:true,autoRefreshToken:true}});}catch(e){showAuthGate();return;}
   var fab=document.createElement('button');fab.id='cloud-fab';fab.title='Synchronisation cloud';fab.onclick=cloudOpen;
   fab.innerHTML='☁<span id="cloud-dot"></span>';document.body.appendChild(fab);
   ['saveLS','_saveAthletes','saveCustomSessions'].forEach(function(fn){
