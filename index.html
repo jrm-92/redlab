@@ -6234,6 +6234,20 @@ async function cloudPush(manual){
 }
 // Envoi auto des données de chaque athlète (ayant un email) vers son espace client
 const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
+// Upsert vers athlete_spaces avec le jeton forcé (sinon la requête peut partir en anon
+// et la RLS « coach_id = auth.uid() » échoue) + coach_id = ID de la session courante.
+async function _spacesUpsert(email,doc,pseudo){
+  if(!_sb)return {error:{message:'client indisponible'}};
+  var sess=(await _sb.auth.getSession()).data.session;
+  if(!sess||!sess.access_token) return {error:{message:'session absente — reconnecte-toi (☁)'}};
+  var cli;
+  try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
+  return await cli.from('athlete_spaces').upsert(
+    [{email:String(email).trim().toLowerCase(),coach_id:sess.user.id,
+      data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc},
+      updated_at:new Date().toISOString()}],
+    {onConflict:'email'});
+}
 // Pousse la fiche complète (dashboard épuré) de l'athlète actuellement chargé, s'il a un email.
 async function cloudPushSpaces(){
   if(!_cloudUser||!_sb)return;
@@ -6243,11 +6257,7 @@ async function cloudPushSpaces(){
   try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
   var doc; try{ doc=exportAthleteView(true); }catch(e){ return; }
   if(!doc)return;
-  await _sb.from('athlete_spaces').upsert(
-    [{email:cur.email.trim().toLowerCase(),coach_id:_cloudUser.id,
-      data:{pseudo:S.pseudo,updatedAt:new Date().toISOString(),html:doc},
-      updated_at:new Date().toISOString()}],
-    {onConflict:'email'});
+  try{ await _spacesUpsert(cur.email,doc,S.pseudo); }catch(e){}
 }
 function setAthleteEmail(id,val){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
@@ -6280,7 +6290,7 @@ async function publishAthlete(id,btn){
   if(!doc){ return fail('fiche vide (VMA/VC manquante pour cet athlète ?)'); }
   try{ saveLS(); }catch(e){}
   var r;
-  try{ r=await _sb.from('athlete_spaces').upsert([{email:ath.email.trim().toLowerCase(),coach_id:_cloudUser.id,data:{pseudo:ath.pseudo,updatedAt:new Date().toISOString(),html:doc},updated_at:new Date().toISOString()}],{onConflict:'email'}); }
+  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
   catch(e){ return fail(e.message); }
   if(r&&r.error){ return fail(r.error.message); }
   if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
