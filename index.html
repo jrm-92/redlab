@@ -7,13 +7,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#16203A; --bg2:#1C2840; --bg3:#2A3852; --card:#212E4A;
+  /* Fonds — échelle nocturne (fond approfondi pour faire ressortir les cartes) */
+  --bg:#0F1729; --bg2:#16203A; --bg3:#1C2840; --card:#212E4A; --card2:#2A3852;
   --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
-  --orange:#FF6B1A; --orange2:#E55A0C; --og:rgba(255,107,26,0.18);
-  --blue:#3B82F6; --green:#10B981; --red:#EF4444;
+  /* Accents sémantiques — un rôle chacun */
+  --accent:#FF6B1A; --accent-600:#E55A0C; --accent-soft:rgba(255,107,26,0.12);
+  --success:#10B981; --success-300:#34D399; --success-soft:rgba(16,185,129,0.13);
+  --info:#3B82F6; --info-300:#60A5FA; --info-soft:rgba(59,130,246,0.13);
+  --tertiary:#8B5CF6; --tertiary-300:#A78BFA; --tertiary-soft:rgba(139,92,246,0.13);
+  --danger:#EF4444; --danger-300:#F87171;
+  /* Alias rétro-compat (ancien nommage encore utilisé dans le code) */
+  --orange:var(--accent); --orange2:var(--accent-600); --og:rgba(255,107,26,0.18);
+  --blue:var(--info); --green:var(--success); --red:var(--danger);
   --text:#F1F5F9; --text2:#CBD5E1; --muted:#94A3B8; --muted2:#64748B;
-  --font:'Manrope','Inter',sans-serif;
-  --r:16px; --rs:12px; --sidebar:248px;
+  --font:'Manrope','Inter',sans-serif; --font-display:'Barlow Condensed',sans-serif;
+  --r:16px; --rs:12px; --r-sm:9px; --sidebar:248px;
   --input-bg:rgba(255,255,255,0.05); --input-border:rgba(255,255,255,0.1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -45,6 +53,10 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .side-reset:hover{color:#F87171}
 .side-reset svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .side-version{margin-top:8px;font-size:10.5px;color:var(--muted2);opacity:.6;letter-spacing:1px;padding-left:4px}
+.side-cloud{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;color:var(--muted2);font-family:var(--font);font-size:12px;font-weight:700;padding:8px 4px;border-radius:8px;transition:color .15s;margin-bottom:2px}
+.side-cloud:hover{color:var(--orange)}
+.side-cloud svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#side-cloud-dot{width:9px;height:9px;border-radius:50%;background:#64748B;margin-left:auto;flex-shrink:0}
 .sidebar-logo img{max-width:150px;height:auto;display:block}
 .logo{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.5px;line-height:1}
 .logo span{color:var(--orange)}
@@ -305,6 +317,12 @@ input[type=range].rsl::-webkit-slider-thumb{-webkit-appearance:none;width:17px;h
 input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg)}
 .rc-sl-bnds{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:12px}
 .rc-splits{border-top:1px solid var(--border);padding-top:10px}
+/* Curseur 100% custom (div) piloté aux Pointer Events — aucun input[type=range],
+   donc aucun problème d'événement/repaint mobile. Piste + jauge + pouce. */
+.cs{position:relative;flex:1;min-width:0;height:26px;display:flex;align-items:center;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none}
+.cs::before{content:'';position:absolute;left:0;right:0;height:6px;border-radius:3px;background:rgba(255,255,255,0.08)}
+.cs-fill{position:absolute;left:0;height:6px;border-radius:3px;background:var(--accent);width:0}
+.cs-thumb{position:absolute;left:0;width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--accent);transform:translateX(-50%)}
 .spl-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
 .spl-row:last-child{border-bottom:none}
 .spl-lbl{font-size:13px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px}
@@ -404,7 +422,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   #cloud-fab{position:fixed;right:14px;bottom:82px;z-index:250;width:46px;height:46px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center}
   #cloud-fab:hover{border-color:var(--orange);color:var(--orange)}
   #cloud-dot{position:absolute;top:7px;right:7px;width:10px;height:10px;border-radius:50%;background:#64748B;border:2px solid var(--bg2)}
-  @media(min-width:861px){#cloud-fab{bottom:20px}}
+  @media(min-width:861px){#cloud-fab{display:none}}
   #ath-fab{position:fixed;left:14px;bottom:82px;z-index:250;min-width:46px;height:46px;border-radius:23px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:0 6px}
   #ath-fab:hover{border-color:var(--orange)}
   .ath-fab-av{width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,.14);border:1px solid rgba(255,107,26,.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--orange)}
@@ -488,25 +506,30 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   cursor:pointer;background:var(--card);transition:all .2s;text-align:left;
   font-family:var(--font);width:100%;position:relative;
 }
-.mode-card:hover{border-color:rgba(255,107,26,0.4);background:rgba(255,107,26,0.03)}
-.mode-card.active{border-color:var(--orange);background:rgba(255,107,26,0.07)}
+.mode-card:hover{border-color:var(--border2);background:var(--card2)}
+.mode-card.active{
+  border-color:var(--accent);
+  background:linear-gradient(180deg,var(--accent-soft),transparent 72%);
+  box-shadow:0 0 0 3px rgba(255,107,26,0.16), 0 8px 28px rgba(255,107,26,0.10);
+}
 .mode-card-ico{
   width:36px;height:36px;border-radius:10px;
   display:flex;align-items:center;justify-content:center;margin-bottom:12px;
   background:rgba(255,255,255,0.04);border:1px solid var(--border);transition:all .2s;
 }
-.mode-card.active .mode-card-ico{background:rgba(255,107,26,0.15);border-color:rgba(255,107,26,0.3)}
+.mode-card.active .mode-card-ico{background:var(--accent-soft);border-color:rgba(255,107,26,0.35)}
 .mode-card-ico svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
-.mode-card.active .mode-card-ico svg{stroke:var(--orange)}
+.mode-card.active .mode-card-ico svg{stroke:var(--accent)}
 .mode-card-title{font-size:14px;font-weight:800;color:var(--text2);margin-bottom:4px;letter-spacing:-0.2px;transition:color .2s}
 .mode-card.active .mode-card-title{color:var(--text)}
 .mode-card-desc{font-size:13px;color:var(--muted);line-height:1.5}
+/* Plus de faux radio : une coche discrète apparaît seulement sur la carte active */
 .mode-check{
   position:absolute;top:14px;right:14px;
   width:18px;height:18px;border-radius:50%;
-  border:2px solid var(--border);transition:all .2s;
+  background:var(--accent);opacity:0;transform:scale(.5);transition:all .2s;
 }
-.mode-card.active .mode-check{background:var(--orange);border-color:var(--orange)}
+.mode-card.active .mode-check{opacity:1;transform:scale(1)}
 .mode-card.active .mode-check::after{
   content:'';display:block;width:6px;height:4px;
   border-left:2px solid #fff;border-bottom:2px solid #fff;
@@ -679,12 +702,15 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   }
   .mh-menu::-webkit-scrollbar{display:none}
   .mh-btn{
-    flex:1 0 auto;min-width:58px;padding:8px 8px;border:none;
+    flex:1 1 0;min-width:0;padding:6px 2px;border:none;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
     background:transparent;color:var(--muted2);font-family:var(--font);
-    font-size:11.5px;font-weight:800;border-radius:11px;cursor:pointer;text-align:center;
+    font-size:9.5px;font-weight:800;border-radius:12px;cursor:pointer;text-align:center;
     white-space:nowrap;transition:all .15s;
   }
-  .mh-btn.active{background:rgba(255,107,26,0.16);color:var(--orange)}
+  .mh-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .mh-btn span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .mh-btn.active{background:var(--accent-soft);color:var(--accent)}
 
   .mh-ctx{flex:1;min-width:0;text-align:right;padding-left:10px}
   .mh-ctx:empty{display:none}
@@ -925,6 +951,12 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .lib-step-v b{color:var(--text);font-weight:700}
 .lib-calc{color:var(--orange);font-weight:700;white-space:nowrap}
 .lib-rec{color:var(--muted2);font-size:12px}
+/* Corps de séance accentué / échauffement & retour au calme discrets */
+.lib-step--core{background:linear-gradient(180deg,var(--accent-soft),transparent 150%);border:1px solid rgba(255,107,26,0.22);border-left:3px solid var(--accent);border-radius:var(--rs);padding:9px 12px}
+.lib-step--core .lib-step-k{color:var(--accent)}
+.lib-step--core .lib-step-v,.lib-step--core .lib-step-v b{color:var(--text)}
+.lib-step--soft .lib-step-k{color:var(--muted2)}
+.lib-step--soft .lib-step-v{color:var(--muted)}
 @media(max-width:860px){.lib-grid{grid-template-columns:1fr}.lib-step{grid-template-columns:78px 1fr}}
 @media(max-width:860px){.prog-modal{padding:18px 14px 24px}.prog-title{font-size:18px}.prog-head{flex-wrap:wrap;padding-right:44px}.prog-pdf{order:3;width:100%;justify-content:center;margin-top:4px}.goal-bar{gap:8px}}
 .formula{font-size:12.5px;color:var(--text2);margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2px;line-height:1.65;white-space:pre-line;background:rgba(255,255,255,0.035);border-left:2.5px solid rgba(255,107,26,0.6);border-radius:0 8px 8px 0;padding:9px 14px}
@@ -1062,7 +1094,21 @@ tbody tr:hover{background:rgba(255,107,26,0.05)}
 .lib-chip.active{box-shadow:0 4px 16px rgba(255,107,26,0.35)}
 
 /* Accessibilité clavier */
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid rgba(255,107,26,.65);outline-offset:2px}
+/* Contour clavier pour boutons/liens (ont de la place autour) */
+button:focus-visible,a:focus-visible{outline:2px solid rgba(255,107,26,.65);outline-offset:2px}
+/* Champs : pas de contour décalé (il débordait sur les labels) — halo interne à la place */
+input:not([type=range]):focus-visible,select:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(255,107,26,.35)}
+/* Curseurs : le doigt/souris pilote le curseur sans faire défiler la page (fix mobile) */
+input[type=range]{touch-action:none}
+.iw:focus-within input:focus-visible,.iw:focus-within select:focus-visible{box-shadow:none}
+/* Espace client — champ email dans les cartes athlètes */
+.ath-espace{margin:12px 0 4px}
+.ath-espace label{display:block;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px}
+.ath-espace-row{display:flex;gap:6px}
+.ath-espace-row input{flex:1;min-width:0;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:12.5px;font-weight:600;padding:8px 10px;outline:none}
+.ath-espace-row input:focus{border-color:var(--accent)}
+.ath-espace-copy{flex-shrink:0;background:var(--accent-soft);border:1px solid rgba(255,107,26,0.4);border-radius:8px;color:var(--accent);font-family:var(--font);font-size:12px;font-weight:800;padding:0 12px;cursor:pointer}
+.ath-espace-copy:hover{background:rgba(255,107,26,0.18)}
 
 /* Bannière profil : liseré lumineux */
 .profile-hero{box-shadow:inset 0 1px 0 rgba(255,255,255,0.04),0 12px 32px -16px rgba(0,0,0,0.6),0 0 0 1px rgba(255,107,26,0.06)}
@@ -1077,13 +1123,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
     <div class="mh-ctx" id="mh-ctx"></div>
   </div>
   <div class="mh-menu">
-    <button class="mh-btn active" id="mbn-input" onclick="go('input')">Saisie</button>
-    <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')">Dashboard</button>
-    <button class="mh-btn" id="mbn-library" onclick="go('library')">Bibliothèque</button>
-    <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')">Extrapolation</button>
-    <button class="mh-btn" id="mbn-planif" onclick="go('planif')">Planification</button>
-    <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')">Connaissances</button>
-    <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')">Athlètes</button>
+    <button class="mh-btn active" id="mbn-input" onclick="go('input')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Saisie</span></button>
+    <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Dashboard</span></button>
+    <button class="mh-btn" id="mbn-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Séances</span></button>
+    <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Extrapo</span></button>
+    <button class="mh-btn" id="mbn-planif" onclick="go('planif')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Plan</span></button>
+    <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Infos</span></button>
+    <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg><span>Athlètes</span></button>
   </div>
 </header>
 
@@ -1134,6 +1180,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
       </button>
     </nav>
     <div class="sidebar-footer">
+      <button class="side-cloud" id="side-cloud" onclick="cloudOpen()" title="Synchronisation cloud">
+        <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        <span id="side-cloud-txt">Se connecter</span>
+        <span id="side-cloud-dot"></span>
+      </button>
       <button class="side-reset" onclick="resetAll()">
         <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
         Réinitialiser le profil
@@ -2217,12 +2268,12 @@ function renderSlider(){
       </div>
       <div class="sl-row">
         <button class="adj" onclick="adjV(-2)">−</button>
-        <input type="range" class="sl" id="vsl" min="${slo}" max="${shi}" value="${sdf}" step="1" oninput="updSl(this.value)">
+        <div class="cs" id="cs-vsl" data-min="${slo}" data-max="${shi}" data-step="1" data-val="${sdf}" data-cb="updSl"><div class="cs-fill"></div><div class="cs-thumb"></div></div>
         <button class="adj" onclick="adjV(+2)">+</button>
       </div>
       <div class="sl-bnds"><span>${(ref*0.5).toFixed(1)} km/h · 50%</span><span>135% · ${(ref*1.35).toFixed(1)} km/h</span></div>
     </div>`;
-  updSl(sdf);
+  const _vsl=document.getElementById('cs-vsl'); if(_vsl&&typeof csSet==='function')csSet(_vsl,sdf); else updSl(sdf);
 }
 function updSl(val){
   const {csKmh,vma}=S;if(!csKmh&&!vma)return;
@@ -2239,10 +2290,12 @@ function updSl(val){
   sv.textContent=kmh.toFixed(1);sv.style.color=col;
   document.getElementById('sl-a').textContent=fAll(3600/kmh);
   document.getElementById('sl-p').textContent=` (${pct}% ${lbl} · ${zn})`;
-  const sl=document.getElementById('vsl'),p=((val-sl.min)/(sl.max-sl.min))*100;
-  sl.style.background=`linear-gradient(to right,${col} 0%,${col} ${p}%,rgba(255,255,255,0.06) ${p}%,rgba(255,255,255,0.06) 100%)`;
+  const cs=document.getElementById('cs-vsl');
+  if(cs){var cf=cs.querySelector('.cs-fill'),ct=cs.querySelector('.cs-thumb');
+    if(cf)cf.style.background=col;
+    if(ct){ct.style.background=col;ct.style.boxShadow='0 0 0 2px '+col;}}
 }
-function adjV(d){const sl=document.getElementById('vsl');if(!sl)return;const v=Math.min(Math.max(+sl.value+d,+sl.min),+sl.max);sl.value=v;updSl(v);}
+function adjV(d){const el=document.getElementById('cs-vsl');if(!el)return;csSet(el,(+el.dataset.val)+d);}
 function bldZbar(slo,shi){
   const bar=document.getElementById('zbar');if(!bar)return;
   const {csKmh,vma}=S;
@@ -2307,26 +2360,66 @@ function buildRaces(){
       <div class="rc-time" id="rt-${r.id}">${fHMS(r.d/1000*def)}</div>
       <div class="rc-sl-row">
         <button class="adj" onclick="adjR('${r.id}',-1)">−</button>
-        <input type="range" class="rsl" id="rs-${r.id}" min="${r.lo}" max="${r.hi}" value="${def}" step="1" oninput="updR('${r.id}',this.value)">
+        <div class="cs" id="cs-${r.id}" data-min="${r.lo}" data-max="${r.hi}" data-step="1" data-val="${def}" data-cb="updR" data-arg="${r.id}"><div class="cs-fill"></div><div class="cs-thumb"></div></div>
         <button class="adj" onclick="adjR('${r.id}',+1)">+</button>
       </div>
       <div class="rc-sl-bnds"><span>${fAll(r.lo)}</span><span>${fAll(r.hi)}</span></div>
       <div class="rc-splits" id="rspl-${r.id}"></div>
     </div>`}).join('');
-  RACES.forEach(r=>updR(r.id,defPace(r)));
+  RACES.forEach(r=>{const el=document.getElementById('cs-'+r.id);if(el&&typeof csSet==='function')csSet(el,+el.dataset.val);else updR(r.id,defPace(r));});
 }
-function adjR(id,d){const sl=document.getElementById('rs-'+id);if(!sl)return;const v=Math.min(Math.max(+sl.value+d,+sl.min),+sl.max);sl.value=v;updR(id,v);}
+function adjR(id,d){const el=document.getElementById('cs-'+id);if(!el)return;csSet(el,(+el.dataset.val)+d);}
 function updR(id,val){
   const r=RACES.find(x=>x.id===id);if(!r)return;const s=+val;
-  document.getElementById('rt-'+id).textContent=fHMS(r.d/1000*s);
-  document.getElementById('ra-'+id).textContent=fAll(s)+'/km';
-  const sl=document.getElementById('rs-'+id),p=((s-sl.min)/(sl.max-sl.min))*100;
-  sl.style.background=`linear-gradient(to right,var(--orange) 0%,var(--orange) ${p}%,rgba(255,255,255,0.06) ${p}%,rgba(255,255,255,0.06) 100%)`;
-  document.getElementById('rspl-'+id).innerHTML=r.spl.map(sp=>`
+  const rt=document.getElementById('rt-'+id); if(rt)rt.textContent=fHMS(r.d/1000*s);
+  const ra=document.getElementById('ra-'+id); if(ra)ra.textContent=fAll(s)+'/km';
+  const rspl=document.getElementById('rspl-'+id); if(rspl)rspl.innerHTML=r.spl.map(sp=>`
     <div class="spl-row">
       <span class="spl-lbl">${sp.l}</span>
       <span class="spl-t">${fHMS(sp.d/1000*s)}</span>
     </div>`).join('');
+}
+
+/* ══ CURSEUR CUSTOM (div, Pointer Events) — remplace input[type=range] ══
+   Structure : <div class="cs" data-min data-max data-step data-val data-cb [data-arg]>
+                 <div class="cs-fill"></div><div class="cs-thumb"></div></div>
+   csSet met à jour la position (jauge + pouce) ET appelle le callback data-cb. */
+function csRender(el){
+  var mn=+el.dataset.min,mx=+el.dataset.max,v=+el.dataset.val;
+  var p=mx>mn?((v-mn)/(mx-mn))*100:0; if(p<0)p=0; if(p>100)p=100;
+  var f=el.querySelector('.cs-fill'),t=el.querySelector('.cs-thumb');
+  if(f)f.style.width=p+'%'; if(t)t.style.left=p+'%';
+}
+function csSet(el,v,silent){
+  if(!el)return;
+  var mn=+el.dataset.min,mx=+el.dataset.max,st=+el.dataset.step||1;
+  v=Math.round(v/st)*st; if(v<mn)v=mn; if(v>mx)v=mx;
+  el.dataset.val=v; csRender(el);
+  if(!silent){var cb=el.dataset.cb,arg=el.dataset.arg;
+    if(cb&&typeof window[cb]==='function'){ (arg!==undefined&&arg!=='')?window[cb](arg,v):window[cb](v); }}
+}
+function csInit(){
+  if(window.__csInit)return; window.__csInit=true;
+  var active=null;
+  function csFrom(t){return t&&t.closest?t.closest('.cs'):null;}
+  function fromX(el,x){var r=el.getBoundingClientRect();if(!r.width)return;var ratio=(x-r.left)/r.width;if(ratio<0)ratio=0;if(ratio>1)ratio=1;var mn=+el.dataset.min,mx=+el.dataset.max;csSet(el,mn+ratio*(mx-mn));}
+  var end=function(){active=null;};
+  // Pointer Events si dispo, sinon Touch + Souris — pour marcher partout (iOS, webviews, etc.)
+  if(window.PointerEvent){
+    document.addEventListener('pointerdown',function(e){var el=csFrom(e.target);if(!el)return;e.preventDefault();active=el;fromX(el,e.clientX);try{el.setPointerCapture(e.pointerId);}catch(_){}},true);
+    document.addEventListener('pointermove',function(e){if(active)fromX(active,e.clientX);},true);
+    document.addEventListener('pointerup',end,true);
+    document.addEventListener('pointercancel',end,true);
+  } else {
+    document.addEventListener('touchstart',function(e){var el=csFrom(e.target);if(!el||!e.touches[0])return;active=el;fromX(el,e.touches[0].clientX);e.preventDefault();},{passive:false,capture:true});
+    document.addEventListener('touchmove',function(e){if(active&&e.touches[0]){fromX(active,e.touches[0].clientX);e.preventDefault();}},{passive:false,capture:true});
+    document.addEventListener('touchend',end,true);
+    document.addEventListener('touchcancel',end,true);
+    document.addEventListener('mousedown',function(e){var el=csFrom(e.target);if(!el)return;active=el;fromX(el,e.clientX);},true);
+    document.addEventListener('mousemove',function(e){if(active)fromX(active,e.clientX);},true);
+    document.addEventListener('mouseup',end,true);
+  }
+  // clic simple (souris) même quand PointerEvent existe : setPointerCapture gère déjà le drag
 }
 
 /* ══ MODIFIER LA VMA (dashboard) ══ */
@@ -2534,9 +2627,11 @@ function renderChart(){
   const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
   const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
   const data={labels,datasets:[
-    {label:'Prédiction (rapide)',data:paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(255,138,61,0.12)',borderWidth:2.5,pointRadius:0,tension:0.3,fill:'+1'},
-    {label:'Prédiction (lente)', data:paceLo,borderColor:'#38BDF8',backgroundColor:'rgba(255,138,61,0.12)',borderWidth:2.5,borderDash:[7,5],pointRadius:0,tension:0.3,fill:false},
-    {label:'Vos records',data:recPace,borderColor:'#FACC15',backgroundColor:'#FACC15',borderWidth:3,pointRadius:5,pointHoverRadius:7,tension:0.3,spanGaps:true,fill:false},
+    // Bande de prédiction (modèle) — violet discret, pointillé, sans points
+    {label:'Prédiction (rapide)',data:paceHi,borderColor:'rgba(139,92,246,0.55)',backgroundColor:'rgba(139,92,246,0.10)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0.3,fill:'+1'},
+    {label:'Prédiction (lente)', data:paceLo,borderColor:'rgba(139,92,246,0.55)',backgroundColor:'rgba(139,92,246,0.10)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
+    // Records — réel mesuré : points pleins verts, aucune ligne
+    {label:'Vos records',data:recPace,borderColor:'#10B981',backgroundColor:'#34D399',showLine:false,pointRadius:5.5,pointHoverRadius:7.5,pointStyle:'circle',spanGaps:true},
   ]};
   const opts={
     responsive:true,maintainAspectRatio:false,
@@ -2760,6 +2855,7 @@ function saveCurrentAthlete(){
   const ath={
     id:existing>=0?athletes[existing].id:Date.now(),
     pseudo:S.pseudo,
+    email:existing>=0?(athletes[existing].email||''):'',
     savedAt:new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),
     mode:S.mode,vma:S.vma,csKmh:S.csKmh,dp:S.dp,
     csMethod:S.csMethod,csR2:S.csR2,
@@ -2952,6 +3048,13 @@ function renderAthletes(){
           <div class="ath-metric-val">${mainVal.toFixed(2)} km/h</div>
         </div>
         ${metricVma}${metricDp}${metricFc}
+      </div>
+      <div class="ath-espace">
+        <label>Espace client · email de connexion</label>
+        <div class="ath-espace-row">
+          <input type="email" inputmode="email" placeholder="athlete@email.fr" value="${a.email||''}" onchange="setAthleteEmail(${a.id},this.value)">
+          <button class="ath-espace-copy" onclick="copyEspaceLink(this)" title="Copier le lien de l'espace">Lien</button>
+        </div>
       </div>
       <div class="ath-actions">
         <button class="btn-load" onclick="loadAthlete(${a.id})">
@@ -3442,7 +3545,7 @@ function libBlock(b,vma,lbl){
   if(vma){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
   const rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   const recTxt=rec.length?' <span class="lib-rec">('+rec.join(' · ')+')</span>':'';
-  return '<div class="lib-step"><span class="lib-step-k">'+lbl+'</span><span class="lib-step-v"><b>'+core+'</b>'+(calc?' <span class="lib-calc">→ '+calc+'</span>':'')+recTxt+'</span></div>';
+  return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+lbl+'</span><span class="lib-step-v"><b>'+core+'</b>'+(calc?' <span class="lib-calc">→ '+calc+'</span>':'')+recTxt+'</span></div>';
 }
 function libCard(s,vma,opts){
   opts=opts||{};
@@ -3453,8 +3556,8 @@ function libCard(s,vma,opts){
   const delBtn=opts.del?'<button class="lib-del" title="Supprimer" onclick="libDeleteSession(\''+s.id+'\')">✕</button>':'';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
   const blocks=s.blocks.map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
-  const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
-  const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
+  const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
+  const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
   return '<div class="lib-card" style="border-top:3px solid '+t.col+';position:relative">'+delBtn+
     '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
@@ -3538,7 +3641,7 @@ function libBlockSegs(b,vma){
   const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
   const rec=b.rec?' <span class="lib-rec">(récup '+b.rec+')</span>':'';
   const key=multi?b.label:((b.r>1)?'Répétitions':b.label);
-  return '<div class="lib-step"><span class="lib-step-k">'+key+'</span><span class="lib-step-v">'+body+rec+'</span></div>';
+  return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+key+'</span><span class="lib-step-v">'+body+rec+'</span></div>';
 }
 function toggleLibCreate(){
   const box=document.getElementById('lib-create'); if(!box)return;
@@ -4383,16 +4486,17 @@ function exportAthleteView(){
     'function saveLS(){}','function delManualRace(){}',
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
+    csRender.toString(), csSet.toString(), csInit.toString(),
     recSeconds.toString(), chartSeconds.toString(),
     renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
     'var PL_PHC='+JSON.stringify(PL_PHC)+';',
     'var _fVol='+JSON.stringify(window._dashVolData||null)+';',
-    'function _drawFVol(){if(!_fVol||typeof Chart===\'undefined\')return;var cv=document.getElementById(\'db-vol-canvas\');if(!cv)return;var wk=_fVol.weeks,col=_fVol.col,u=_fVol.unit;var labels=wk.map(function(x){return x.dt;});var data=wk.map(function(x){return x.km;});var _ymax=Math.max.apply(null,data.length?data:[1])*1.08;var _pha=function(hh,a){hh=hh.replace(\'#\',\'\');return \'rgba(\'+parseInt(hh.slice(0,2),16)+\',\'+parseInt(hh.slice(2,4),16)+\',\'+parseInt(hh.slice(4,6),16)+\',\'+a+\')\';};var ptc=wk.map(function(x){return x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph];});try{if(window.Chart&&Chart.getChart){var _ex=Chart.getChart(cv);if(_ex)_ex.destroy();}}catch(e){}new Chart(cv,{type:\'bar\',data:{labels:labels,datasets:[{label:\'Volume\',data:data,backgroundColor:ptc,borderColor:ptc,borderWidth:0,borderRadius:5,maxBarThickness:90,categoryPercentage:0.9,barPercentage:0.96}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return \'S\'+x.n+\' · \'+x.dt;},label:function(c){var x=wk[c.dataIndex];return x.km+\' \'+(u||\'\')+(x.rec?\' · décharge\':\'\')+(x.race?\' · course\':\'\')+(x.inter?\' · course prépa\':\'\');}}}},scales:{y:{title:{display:true,text:(u?\'Volume (\'+u+\'/sem)\':\'Volume\'),color:\'#94A3B8\',font:{size:11}},ticks:{color:\'#94A3B8\'},grid:{color:\'rgba(255,255,255,0.06)\'},suggestedMax:_ymax},x:{ticks:{color:\'#94A3B8\',maxRotation:0,autoSkip:true},grid:{color:\'rgba(255,255,255,0.04)\'}}},plugins:[{id:\'volLbl\',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign=\'center\';g.textBaseline=\'bottom\';m.data.forEach(function(pt,i){g.font=\'800 12px Manrope,sans-serif\';g.fillStyle=\'#E2E8F0\';g.fillText(ch.data.datasets[0].data[i]+(u?\' \'+u:\'\'),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font=\'800 9px Manrope,sans-serif\';g.fillStyle=\'#FBBF24\';g.fillText(\'PR\\u00c9PA\',pt.x,pt.y-26);}});g.restore();}}]});}',
+    'function _drawFVol(){if(!_fVol||typeof Chart===\'undefined\')return;var cv=document.getElementById(\'db-vol-canvas\');if(!cv)return;var wk=_fVol.weeks,col=_fVol.col,u=_fVol.unit;var labels=wk.map(function(x){return x.dt;});var data=wk.map(function(x){return x.km;});var _ymax=Math.max.apply(null,data.length?data:[1])*1.08;var _pha=function(hh,a){hh=hh.replace(\'#\',\'\');return \'rgba(\'+parseInt(hh.slice(0,2),16)+\',\'+parseInt(hh.slice(2,4),16)+\',\'+parseInt(hh.slice(4,6),16)+\',\'+a+\')\';};var ptc=wk.map(function(x){return x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph];});try{if(window.Chart&&Chart.getChart){var _ex=Chart.getChart(cv);if(_ex)_ex.destroy();}}catch(e){}new Chart(cv,{type:\'bar\',data:{labels:labels,datasets:[{label:\'Volume\',data:data,backgroundColor:ptc,borderColor:ptc,borderWidth:0,borderRadius:5,maxBarThickness:90,categoryPercentage:0.9,barPercentage:0.96}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return \'S\'+x.n+\' · \'+x.dt;},label:function(c){var x=wk[c.dataIndex];return x.km+\' \'+(u||\'\')+(x.rec?\' · décharge\':\'\')+(x.race?\' · course\':\'\')+(x.inter?\' · course prépa\':\'\');}}}},scales:{y:{title:{display:true,text:(u?\'Volume (\'+u+\'/sem)\':\'Volume\'),color:\'#94A3B8\',font:{size:11}},ticks:{color:\'#94A3B8\'},grid:{color:\'rgba(255,255,255,0.06)\'},suggestedMax:_ymax},x:{ticks:{color:\'#94A3B8\',maxRotation:0,autoSkip:true},grid:{color:\'rgba(255,255,255,0.04)\'}}}},plugins:[{id:\'volLbl\',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign=\'center\';g.textBaseline=\'bottom\';m.data.forEach(function(pt,i){g.font=\'800 12px Manrope,sans-serif\';g.fillStyle=\'#E2E8F0\';g.fillText(ch.data.datasets[0].data[i]+(u?\' \'+u:\'\'),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font=\'800 9px Manrope,sans-serif\';g.fillStyle=\'#FBBF24\';g.fillText(\'PR\\u00c9PA\',pt.x,pt.y-26);}});g.restore();}}]});}',
     csmToggle.toString(), csmSim.toString(), simUnit.toString(),
     drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
     'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
-    'document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("vsl");if(v)updSl(v.value);RACES.forEach(function(r){var s=document.getElementById("rs-"+r.id);if(s)updR(r.id,s.value);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
+    'document.addEventListener("DOMContentLoaded",function(){try{csInit();}catch(e){}document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("cs-vsl");if(v)csSet(v,+v.dataset.val);RACES.forEach(function(r){var s=document.getElementById("cs-"+r.id);if(s)csSet(s,+s.dataset.val);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
     'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},250);});'
   ].join('\n');
 
@@ -4415,9 +4519,30 @@ function exportAthleteView(){
     +'.export-brand{display:flex;justify-content:center;padding:24px 16px 18px;background:radial-gradient(ellipse at 50% 0%,rgba(255,107,26,0.16),transparent 70%);border-bottom:1px solid var(--border)}'
     +'.export-brand img{height:96px;width:auto;display:block;filter:drop-shadow(0 6px 24px rgba(255,107,26,0.5))}'
     +'.export-brand .ss{font-size:16.5px;letter-spacing:1.6px}'
-    +'.rotate-hint{display:none}'
-    +'@media (max-width:820px) and (orientation:portrait){.rotate-hint{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(90deg,rgba(255,107,26,0.16),rgba(255,107,26,0.05));border:1px solid rgba(255,107,26,0.4);color:var(--orange);font-weight:800;font-size:13.5px;line-height:1.4;padding:13px 16px;border-radius:12px;margin:12px 14px 0;text-align:center}.export-brand img{height:58px}.export-brand{padding:12px 10px;gap:12px!important}.export-brand .ss{font-size:12.5px;letter-spacing:1px}.export-av{width:38px;height:38px;font-size:14px}}'
-    +'@media(max-width:860px){.export-badge{display:none}.export-head{padding:14px 16px;gap:10px}.export-head img{height:30px!important}.export-sep{margin:0 6px 0 0!important}.export-av{width:38px;height:38px;font-size:14px}}';
+    /* Wordmark texte auto-suffisant (aucune image externe → s’affiche toujours) */
+    +'.rr-logo{display:flex;flex-direction:column;line-height:.92;font-family:var(--font-display),\'Barlow Condensed\',sans-serif;font-style:italic;font-weight:900;text-transform:uppercase}'
+    +'.rr-logo .rr-logo-a{font-size:44px;color:var(--accent);letter-spacing:1px;text-shadow:0 6px 22px rgba(255,107,26,0.45)}'
+    +'.rr-logo .rr-logo-b{font-size:21px;color:var(--text);letter-spacing:7px}'
+    +'.rotate-hint{display:none!important}'
+    /* Overflow horizontal interdit + médias qui s’adaptent */
+    +'html,body{max-width:100%;overflow-x:hidden}'
+    +'.export-wrap img,.export-wrap canvas,.export-wrap .cv-fallback{max-width:100%!important}'
+    +'.export-wrap table{max-width:100%}'
+    +'@media(max-width:860px){.export-badge{display:none}.export-head{padding:14px 16px;gap:10px}.export-head img{height:30px!important}.export-sep{margin:0 6px 0 0!important}.export-av{width:38px;height:38px;font-size:14px}}'
+    /* ── Portrait téléphone : mise en page verticale confortable ── */
+    +'@media(max-width:760px){'
+      +'.export-wrap{padding:0}'
+      +'.export-brand{padding:16px 12px;gap:14px!important}'
+      +'.rr-logo .rr-logo-a{font-size:34px}.rr-logo .rr-logo-b{font-size:16px;letter-spacing:5px}.export-brand .ss{font-size:12px;letter-spacing:1px}'
+      +'.tool-layout,.input-wrap{padding-left:12px;padding-right:12px}'
+      +'.card,.lib-card,.race-card,.rec-card,.pred-c,.sc,.sl-card{padding:16px!important}'
+      /* Grilles empilées en une colonne */
+      +'.db-grid,.race-grid,.pred-grid,.rec-grid,.stats-row,.lib-grid{grid-template-columns:1fr!important;gap:12px!important}'
+      /* Tables larges : scroll horizontal interne, jamais de débordement de page */
+      +'.tbl-wrap,.export-wrap [style*="overflow-x"]{-webkit-overflow-scrolling:touch}'
+      +'.export-wrap table{display:block;overflow-x:auto;white-space:nowrap;min-width:0!important;width:100%}'
+      +'.export-wrap thead,.export-wrap tbody,.export-wrap tr{width:max-content;min-width:100%}'
+    +'}';
 
   // Infos clés sur la course préparée (fin de fiche)
   let raceKeyHTML='';
@@ -4444,11 +4569,10 @@ function exportAthleteView(){
     +'<style>'+baseCSS+extraCSS+'</style></head><body>'
     +'<div class="export-wrap">'
     +'<div class="export-brand" style="position:relative;align-items:center;gap:22px">'
-    +'<a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" title="Reding Running" style="flex-shrink:0"><img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running"></a>'
+    +'<a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" title="Reding Running" class="rr-logo" style="flex-shrink:0;text-decoration:none"><span class="rr-logo-a">Reding</span><span class="rr-logo-b">Running</span></a>'
     +'<div class="side-slogan" style="margin:0;gap:4px"><div class="ss">Coach running</div><div class="ss">Tous niveaux</div><div class="ss">Courir encadré</div></div>'
     +'<div class="export-badge" style="position:absolute;top:14px;right:16px">Lecture seule</div>'
     +'</div>'
-    +'<div class="rotate-hint"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M2 12a10 10 0 0 1 3-7"/><polyline points="2 2 2 5 5 5"/></svg>Tourne ton téléphone en paysage pour un meilleur affichage</div>'
     +clone.outerHTML
     +'<div class="export-foot">Généré avec <b>RedLab</b> · <a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-weight:700;text-decoration:none">Reding Running</a><br>Profil transmis le '+today+'.</div>'
     +'</div>'
@@ -4456,11 +4580,14 @@ function exportAthleteView(){
     +'<script>'+embedJS+'<\/script>'
     +'</body></html>';
 
-  const blob=new Blob([doc],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
   const d=new Date();
   const stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const slug=S.pseudo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  // T\u00e9l\u00e9chargement local du fichier .html (\u00e0 envoyer \u00e0 l'athl\u00e8te par mail/message).
+  // L'athl\u00e8te l'ouvre \u2192 la fiche s'affiche. (Supabase sert les HTML en text/plain,
+  // impossible d'en faire un lien rendu sur le plan gratuit \u2014 voir historique.)
+  const blob=new Blob([doc],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download='redlab-'+(slug||'athlete')+'-'+stamp+'.html';
   document.body.appendChild(a); a.click(); a.remove();
@@ -5106,12 +5233,14 @@ function plDrawVol(p,wk,cid){
   const data=wk.map(x=>x.km);
   const _pha=function(h,a){h=h.replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';};
   const barCol=wk.map(x=>x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph]);
-  const _ymax=Math.max.apply(null,data.length?data:[1])*1.08;
+  const _hasInter=wk.some(function(x){return x&&x.inter;});
+  const _ymax=Math.max.apply(null,data.length?data:[1])*(_hasInter?1.24:1.18);
   _plVolCharts[cid]=new Chart(cv,{type:'bar',data:{labels:labels,datasets:[{
     label:'Volume',data:data,
     backgroundColor:barCol,borderColor:barCol,borderWidth:0,
-    borderRadius:5,maxBarThickness:90,categoryPercentage:0.9,barPercentage:0.96
+    borderRadius:5,maxBarThickness:64,categoryPercentage:0.82,barPercentage:0.9
   }]},options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:28}},
     plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return 'S'+x.n+(x.d0?' · '+labels[it[0].dataIndex]:'');},label:function(c){var x=wk[c.dataIndex];return c.parsed.y+' '+(u||'')+(x.rec?' · décharge':'')+(x.race?' · course':'')+(x.inter?' · ★ course prépa':'')+' · '+plPhLabel(x.ph);}}}},
     scales:{
       y:{title:{display:true,text:(u?'Volume ('+u+'/sem)':'Volume/sem'),color:'#94A3B8',font:{size:11}},ticks:{color:'#94A3B8',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'},beginAtZero:false,suggestedMax:_ymax},
@@ -5177,6 +5306,7 @@ function plDrawRadar(p){
 }
 
 const PL_SPE=[
+ {id:'5k',ep:'5 km',int:'90-95 % (rapide) → 87-92 % (lent)',vol:'3 à 5 km',frac:'600 m à 2000 m',rec:'1′ à 3′'},
  {id:'10k',ep:'10 km',int:'85-90 % (rapide) → 80-85 % (lent)',vol:'4 à 6 km',frac:'1000 m à 3000 m',rec:'1′ à 3′'},
  {id:'semi',ep:'Semi',int:'80-85 % → 75-80 %',vol:'6 à 10 km',frac:'2000 m à 5000 m',rec:'1′ à 3′'},
  {id:'mara',ep:'Marathon',int:'75-80 % → 70-75 %',vol:'8 à 15 km',frac:'3000 m à 10 000 m',rec:'1′30 à 5′'}
@@ -5492,7 +5622,7 @@ function plToDash(){
   var days=Math.round((new Date(date+'T00:00:00')-today)/864e5);
   if(days<7){warn('La course doit \u00eatre \u00e0 au moins 7 jours pour afficher un plan.');return;}
   _plPicked=true;
-  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
+  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   var g=S.goal||{};
   S.goal={id:_plD,t:g.t||null,date:date,name:g.name||'',url:g.url||''};
   if(typeof saveLS==='function')saveLS();
@@ -6025,7 +6155,12 @@ const SUPA_URL='https://lacvhcuqkzsrojgcsjfj.supabase.co';
 const SUPA_KEY='sb_publishable_EuJgwlBxaDTSfmKGM43oLw_BNmnkTkg';
 let _sb=null,_cloudUser=null,_cloudTimer=null;
 function _cloudBundle(){return {LS:localStorage.getItem(LS_KEY),ATH:localStorage.getItem(ATH_KEY),CUSTOM:localStorage.getItem(CUSTOM_KEY)};}
-function cloudFabState(){var d=document.getElementById('cloud-dot');if(d)d.style.background=_cloudUser?'#34D399':'#64748B';}
+function cloudFabState(){
+  var col=_cloudUser?'#34D399':'#64748B';
+  var d=document.getElementById('cloud-dot');if(d)d.style.background=col;
+  var sd=document.getElementById('side-cloud-dot');if(sd)sd.style.background=col;
+  var st=document.getElementById('side-cloud-txt');if(st)st.textContent=_cloudUser?'Synchronisé':'Se connecter';
+}
 function cloudStatus(txt,col){var s=document.getElementById('cloud-stat');if(s){s.textContent=txt||'';if(col)s.style.color=col;}var d=document.getElementById('cloud-dot');if(d&&col)d.style.background=col;}
 function cloudMsg(t){var e=document.getElementById('cloud-msg');if(e)e.textContent=t||'';}
 function cloudOpen(){
@@ -6070,6 +6205,31 @@ async function cloudPush(manual){
   var r=await _sb.from('redlab_state').upsert({user_id:_cloudUser.id,data:_cloudBundle(),updated_at:new Date().toISOString()});
   if(r.error)cloudStatus('Erreur : '+r.error.message,'#F87171');
   else cloudStatus((manual?'Sauvegardé ✓ ':'Synchronisé ')+new Date().toLocaleTimeString('fr-FR').slice(0,5),'#34D399');
+  try{ await cloudPushSpaces(); }catch(e){}
+}
+// Envoi auto des données de chaque athlète (ayant un email) vers son espace client
+const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
+function _athPublic(a){
+  return {pseudo:a.pseudo,savedAt:a.savedAt||'',mode:a.mode||'vma',
+    vma:a.vma||null,csKmh:a.csKmh||null,dp:a.dp||null,fcMax:a.fcMax||null,
+    records:a.records||{},raceHistory:a.raceHistory||[],goal:a.goal||null};
+}
+async function cloudPushSpaces(){
+  if(!_cloudUser||!_sb)return;
+  var withMail=getAthletes().filter(function(a){return a.email&&a.email.indexOf('@')>0;});
+  if(!withMail.length)return;
+  var rows=withMail.map(function(a){return {email:a.email.trim().toLowerCase(),coach_id:_cloudUser.id,data:_athPublic(a),updated_at:new Date().toISOString()};});
+  await _sb.from('athlete_spaces').upsert(rows,{onConflict:'email'});
+}
+function setAthleteEmail(id,val){
+  var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
+  a.email=(val||'').trim();
+  _saveAthletes(list);
+  if(typeof _cloudUser!=='undefined'&&_cloudUser){ try{ cloudPushSpaces(); }catch(e){} }
+}
+function copyEspaceLink(btn){
+  try{ navigator.clipboard.writeText(ESPACE_URL); }catch(e){}
+  if(btn){var o=btn.textContent; btn.textContent='Copié ✓'; setTimeout(function(){btn.textContent=o;},1500);}
 }
 async function cloudPull(){
   if(!_cloudUser)return;
@@ -6084,6 +6244,47 @@ async function cloudPull(){
   if(rem.CUSTOM)localStorage.setItem(CUSTOM_KEY,rem.CUSTOM);else localStorage.removeItem(CUSTOM_KEY);
   location.reload();
 }
+async function shareFicheCloud(doc, slug){
+  try{
+    // supabase-js ne rattache pas toujours le jeton aux requêtes Storage quand la
+    // session a été restaurée ; on force un client avec le Bearer courant.
+    var sess=(await _sb.auth.getSession()).data.session;
+    if(!sess){ try{ sess=(await _sb.auth.refreshSession()).data.session; }catch(e){} }
+    var role='?';
+    if(sess&&sess.access_token){ try{ role=JSON.parse(atob(sess.access_token.split('.')[1])).role; }catch(e){} }
+    var cli=_sb;
+    if(sess&&sess.access_token){ try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; } }
+    // Sur un upsert, Supabase conserve l'ancien mimetype (celui du 1er envoi, souvent
+    // text/plain) et sert alors le code source au lieu de la page. On écrit donc un
+    // fichier NEUF à chaque partage (vraie création INSERT → le bon type text/html est
+    // enregistré), et on supprime au passage les anciennes versions de l'athlète.
+    var folder=_cloudUser.id;
+    try{
+      var lst=await cli.storage.from('fiches').list(folder);
+      var olds=((lst&&lst.data)||[]).filter(function(f){return f.name===slug+'.html'||f.name.indexOf(slug+'-')===0;}).map(function(f){return folder+'/'+f.name;});
+      if(olds.length) await cli.storage.from('fiches').remove(olds);
+    }catch(e){}
+    var path=folder+'/'+slug+'-'+Date.now().toString(36)+'.html';
+    var up=await cli.storage.from('fiches').upload(path, doc, {contentType:'text/html', upsert:false});
+    if(up.error){ ficheLinkModal(null, up.error.message+' — [session:'+(sess?'oui':'non')+' · rôle:'+role+']'); return; }
+    var pub=cli.storage.from('fiches').getPublicUrl(path);
+    var link=pub&&pub.data&&pub.data.publicUrl;
+    try{ await navigator.clipboard.writeText(link); }catch(e){}
+    ficheLinkModal(link);
+  }catch(e){ ficheLinkModal(null, e.message); }
+}
+function ficheLinkModal(link, err){
+  var host=document.createElement('div'); host.className='pl-modal';
+  host.onclick=function(e){ if(e.target===host)host.remove(); };
+  var body=err
+    ? '<div style="color:#F87171;font-size:13px;line-height:1.65">Échec de l’envoi : '+String(err).replace(/</g,'&lt;')+'<br><br>Vérifie que le bucket <b>fiches</b> existe (public) et que la règle d’écriture est en place (voir les étapes).</div>'
+    : '<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.55">Fiche en ligne ✓ — <b style="color:#34D399">lien copié</b> dans le presse-papiers. Envoie-le à ton athlète :</div>'
+      +'<input type="text" readonly value="'+String(link).replace(/"/g,'&quot;')+'" onclick="this.select()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:12.5px;padding:9px 11px;outline:none">'
+      +'<div style="display:flex;gap:10px;margin-top:12px"><a class="lc-save" style="text-decoration:none;text-align:center;line-height:1.4" href="'+String(link).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">Ouvrir la fiche</a><button class="lc-cancel" onclick="this.closest(\'.pl-modal\').remove()">Fermer</button></div>';
+  host.innerHTML='<div class="pl-modal-box" style="max-width:460px"><div class="pl-modal-top"><b>Partager la fiche</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="this.closest(\'.pl-modal\').remove()">×</button></div>'+body+'</div>';
+  document.body.appendChild(host);
+}
+
 async function cloudInit(){
   if(!window.supabase||!window.supabase.createClient)return;
   try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){return;}
@@ -6143,6 +6344,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const ac0=document.getElementById('sbn-ath-count');
   if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
   if(typeof cloudInit==='function')cloudInit();
+  if(typeof csInit==='function')csInit();
 });
 
 
