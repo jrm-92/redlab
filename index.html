@@ -1109,6 +1109,26 @@ input[type=range]{touch-action:none}
 .ath-espace-row input:focus{border-color:var(--accent)}
 .ath-espace-copy{flex-shrink:0;background:var(--accent-soft);border:1px solid rgba(255,107,26,0.4);border-radius:8px;color:var(--accent);font-family:var(--font);font-size:12px;font-weight:800;padding:0 12px;cursor:pointer}
 .ath-espace-copy:hover{background:rgba(255,107,26,0.18)}
+.ath-espace-pub{width:100%;margin-top:7px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;color:var(--success-300);font-family:var(--font);font-size:12.5px;font-weight:800;padding:8px;cursor:pointer;transition:background .15s}
+.ath-espace-pub:hover{background:rgba(52,211,153,0.2)}
+.ath-espace-pub:disabled{opacity:.6;cursor:default}
+/* Écran de connexion coach (porte d'entrée) */
+#auth-gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+#auth-gate::before{content:'';position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:520px;height:320px;background:radial-gradient(ellipse at center,rgba(255,107,26,0.16),transparent 70%);pointer-events:none}
+.ag-box{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 28px;box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
+.ag-logo{display:flex;flex-direction:column;line-height:.9;font-family:var(--font-display),sans-serif;font-style:italic;font-weight:900;text-transform:uppercase;margin-bottom:18px}
+.ag-logo .ag-a{font-size:34px;color:var(--accent);letter-spacing:1px}
+.ag-logo .ag-b{font-size:16px;color:var(--text);letter-spacing:6px}
+.ag-t{font-size:19px;font-weight:800;color:var(--text);margin-bottom:5px}
+.ag-s{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+#auth-gate label{display:block;font-size:11px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted2);margin:14px 0 7px}
+#auth-gate input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font);font-size:15px;font-weight:600;padding:12px 14px;outline:none}
+#auth-gate input:focus{border-color:var(--accent)}
+.ag-btn{width:100%;margin-top:20px;background:var(--accent);color:#fff;border:none;border-radius:11px;font-family:var(--font);font-size:15px;font-weight:800;padding:13px;cursor:pointer;transition:filter .15s}
+.ag-btn:hover{filter:brightness(1.08)}
+.ag-alt{width:100%;margin-top:10px;background:none;border:1px solid var(--border2);color:var(--muted);border-radius:11px;font-family:var(--font);font-size:13.5px;font-weight:700;padding:11px;cursor:pointer}
+.ag-alt:hover{border-color:var(--accent);color:var(--accent)}
+.ag-msg{font-size:12.5px;line-height:1.6;margin-top:14px;min-height:1px}
 
 /* Bannière profil : liseré lumineux */
 .profile-hero{box-shadow:inset 0 1px 0 rgba(255,255,255,0.04),0 12px 32px -16px rgba(0,0,0,0.6),0 0 0 1px rgba(255,107,26,0.06)}
@@ -3055,6 +3075,7 @@ function renderAthletes(){
           <input type="email" inputmode="email" placeholder="athlete@email.fr" value="${a.email||''}" onchange="setAthleteEmail(${a.id},this.value)">
           <button class="ath-espace-copy" onclick="copyEspaceLink(this)" title="Copier le lien de l'espace">Lien</button>
         </div>
+        <button class="ath-espace-pub" onclick="publishAthlete(${a.id},this)" title="Envoyer/mettre à jour la fiche complète dans l'espace de l'athlète">↑ Publier l'espace</button>
       </div>
       <div class="ath-actions">
         <button class="btn-load" onclick="loadAthlete(${a.id})">
@@ -4379,8 +4400,8 @@ function goalReadout(){
 
 
 /* ══ EXPORT VUE ATHLÈTE (fichier HTML autonome, calculateurs interactifs) ══ */
-function exportAthleteView(){
-  if(!S.vma||!S.pseudo){alert("Génère d'abord un profil athlète avant de le partager.");return;}
+function exportAthleteView(returnDoc){
+  if(!S.vma||!S.pseudo){ if(!returnDoc)alert("Génère d'abord un profil athlète avant de le partager."); return; }
   try{ if(typeof renderChart==='function') renderChart(); }catch(e){}
   const src=document.getElementById('p-dashboard');
   if(!src){alert('Dashboard introuvable.');return;}
@@ -4406,6 +4427,8 @@ function exportAthleteView(){
   const phAct=clone.querySelector('.ph-actions'); if(phAct) phAct.remove();
   // Retirer toutes les formules (fiche athlète épurée)
   clone.querySelectorAll('.formula,.csm-formula-bar,.csm-formula-exp,.csm-detail,.ph-b-calc,.sim-formula,.csm-toggle').forEach(el=>el.remove());
+  // Retrait des sous-textes / précisions explicatives (fiche épurée)
+  clone.querySelectorAll('.fhint,.input-hero-sub,.ph-b-desc,.calc-exp,.rh-sub,.pred-pct,.sc-sub,.lib-src,.mode-card-desc,.opt-body,.db-section-badge,.info-box').forEach(el=>el.remove());
   // Retirer les invites coach (test TMI / données cardiaques) si non renseignés
   clone.querySelectorAll('#db-profile .ph-b-desc').forEach(el=>{
     const h=el.innerHTML||'';
@@ -4579,6 +4602,8 @@ function exportAthleteView(){
     +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>'
     +'<script>'+embedJS+'<\/script>'
     +'</body></html>';
+
+  if(returnDoc) return doc;   // pour l'espace client (pas de téléchargement)
 
   const d=new Date();
   const stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -6176,7 +6201,7 @@ function cloudOpen(){
       +'<div class="lc-field"><label>E-mail</label><input id="cloud-email" type="email" placeholder="toi@exemple.fr" autocomplete="username"></div>'
       +'<div class="lc-field"><label>Mot de passe</label><input id="cloud-pass" type="password" placeholder="6 caractères minimum" autocomplete="current-password"></div>'
       +'<div id="cloud-msg" style="font-size:12px;color:#FB923C;min-height:16px;margin:2px 0 6px"></div>'
-      +'<div style="display:flex;gap:10px"><button class="lc-save" onclick="cloudSignIn()">Se connecter</button><button class="lc-cancel" onclick="cloudSignUp()">Créer un compte</button></div>';
+      +'<div style="display:flex;gap:10px"><button class="lc-save" onclick="cloudSignIn()">Se connecter</button></div>';
   }
   host.innerHTML='<div class="pl-modal-box" style="max-width:400px"><div class="pl-modal-top"><b>☁ Synchronisation cloud</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="var m=document.getElementById(\'cloud-modal\');if(m)m.remove()">×</button></div>'+body+'</div>';
   document.body.appendChild(host);
@@ -6198,7 +6223,7 @@ async function cloudSignIn(){
   if(r.error){cloudMsg(r.error.message);return;}
   _cloudUser=r.data.user;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();await cloudPull();
 }
-async function cloudSignOut(){await _sb.auth.signOut();_cloudUser=null;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();}
+async function cloudSignOut(){await _sb.auth.signOut();_cloudUser=null;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();showAuthGate();}
 function cloudPushDebounced(){if(!_cloudUser)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(function(){cloudPush();},1500);}
 async function cloudPush(manual){
   if(!_cloudUser)return;
@@ -6209,17 +6234,20 @@ async function cloudPush(manual){
 }
 // Envoi auto des données de chaque athlète (ayant un email) vers son espace client
 const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
-function _athPublic(a){
-  return {pseudo:a.pseudo,savedAt:a.savedAt||'',mode:a.mode||'vma',
-    vma:a.vma||null,csKmh:a.csKmh||null,dp:a.dp||null,fcMax:a.fcMax||null,
-    records:a.records||{},raceHistory:a.raceHistory||[],goal:a.goal||null};
-}
+// Pousse la fiche complète (dashboard épuré) de l'athlète actuellement chargé, s'il a un email.
 async function cloudPushSpaces(){
   if(!_cloudUser||!_sb)return;
-  var withMail=getAthletes().filter(function(a){return a.email&&a.email.indexOf('@')>0;});
-  if(!withMail.length)return;
-  var rows=withMail.map(function(a){return {email:a.email.trim().toLowerCase(),coach_id:_cloudUser.id,data:_athPublic(a),updated_at:new Date().toISOString()};});
-  await _sb.from('athlete_spaces').upsert(rows,{onConflict:'email'});
+  if(!S.vma&&!S.csKmh)return;
+  var cur=getAthletes().find(function(a){return a.pseudo===S.pseudo;});
+  if(!cur||!cur.email||cur.email.indexOf('@')<0)return;
+  try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
+  var doc; try{ doc=exportAthleteView(true); }catch(e){ return; }
+  if(!doc)return;
+  await _sb.from('athlete_spaces').upsert(
+    [{email:cur.email.trim().toLowerCase(),coach_id:_cloudUser.id,
+      data:{pseudo:S.pseudo,updatedAt:new Date().toISOString(),html:doc},
+      updated_at:new Date().toISOString()}],
+    {onConflict:'email'});
 }
 function setAthleteEmail(id,val){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
@@ -6230,6 +6258,21 @@ function setAthleteEmail(id,val){
 function copyEspaceLink(btn){
   try{ navigator.clipboard.writeText(ESPACE_URL); }catch(e){}
   if(btn){var o=btn.textContent; btn.textContent='Copié ✓'; setTimeout(function(){btn.textContent=o;},1500);}
+}
+// Publie la fiche COMPLÈTE (dashboard épuré) d'un athlète vers son espace, sans quitter la page.
+async function publishAthlete(id,btn){
+  if(typeof _cloudUser==='undefined'||!_cloudUser){alert('Connecte-toi au cloud (☁, en bas de la barre latérale) pour publier l\'espace.');return;}
+  var ath=getAthletes().find(function(x){return x.id===id;});
+  if(!ath)return;
+  if(!ath.email||ath.email.indexOf('@')<0){alert('Renseigne d\'abord l\'email de l\'athlète (champ juste au-dessus).');return;}
+  var o=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='Publication…';}
+  // Charge les données de l'athlète dans S et rend le dashboard (dans le panneau caché) pour bâtir sa fiche.
+  Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
+  _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+  try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
+  try{ if(typeof cloudPushSpaces==='function') await cloudPushSpaces(); }catch(e){}
+  try{ saveLS(); }catch(e){}
+  if(btn){btn.disabled=false;btn.textContent='Publié ✓';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2200);}
 }
 async function cloudPull(){
   if(!_cloudUser)return;
@@ -6285,9 +6328,47 @@ function ficheLinkModal(link, err){
   document.body.appendChild(host);
 }
 
+/* ══ PORTE DE CONNEXION (accès à l'outil réservé au coach connecté) ══ */
+function showAuthGate(){
+  if(document.getElementById('auth-gate'))return;
+  var g=document.createElement('div');g.id='auth-gate';
+  g.innerHTML='<div class="ag-box">'
+    +'<div class="ag-logo"><span class="ag-a">Reding</span><span class="ag-b">Running</span></div>'
+    +'<div class="ag-t">Connexion</div>'
+    +'<div class="ag-s">Connecte-toi pour accéder à ton outil et retrouver tes données (synchro cloud).</div>'
+    +'<label>Email</label><input id="ag-email" type="email" autocomplete="username" placeholder="toi@exemple.fr">'
+    +'<label>Mot de passe</label><input id="ag-pass" type="password" autocomplete="current-password" placeholder="••••••••">'
+    +'<button class="ag-btn" onclick="gateSignIn()">Se connecter</button>'
+    +'<div id="ag-msg" class="ag-msg"></div>'
+    +'</div>';
+  document.body.appendChild(g);
+  var p=document.getElementById('ag-pass');if(p)p.addEventListener('keydown',function(e){if(e.key==='Enter')gateSignIn();});
+  var e=document.getElementById('ag-email');if(e)e.focus();
+}
+function hideAuthGate(){var g=document.getElementById('auth-gate');if(g)g.remove();}
+function agMsg(t,err){var m=document.getElementById('ag-msg');if(m){m.textContent=t||'';m.style.color=err?'#F87171':'#34D399';}}
+async function gateSignIn(){
+  var em=(document.getElementById('ag-email')||{}).value||'',pw=(document.getElementById('ag-pass')||{}).value||'';
+  if(!em.trim()||!pw){agMsg('Email et mot de passe requis.',true);return;}
+  if(!_sb){agMsg('Service de connexion indisponible (réseau ?).',true);return;}
+  agMsg('Connexion…');
+  var r=await _sb.auth.signInWithPassword({email:em.trim(),password:pw});
+  if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
+  _cloudUser=r.data.user;cloudFabState();hideAuthGate();await cloudPull();
+}
+async function gateSignUp(){
+  var em=(document.getElementById('ag-email')||{}).value||'',pw=(document.getElementById('ag-pass')||{}).value||'';
+  if(!em.trim()||pw.length<6){agMsg('Email + mot de passe (6 caractères minimum).',true);return;}
+  if(!_sb){agMsg('Service indisponible.',true);return;}
+  agMsg('Création du compte…');
+  var r=await _sb.auth.signUp({email:em.trim(),password:pw});
+  if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
+  if(r.data&&r.data.session){_cloudUser=r.data.user;cloudFabState();hideAuthGate();await cloudPush();}
+  else agMsg('Compte créé. Confirme ton email si demandé, puis connecte-toi.');
+}
 async function cloudInit(){
-  if(!window.supabase||!window.supabase.createClient)return;
-  try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){return;}
+  if(!window.supabase||!window.supabase.createClient){showAuthGate();return;}
+  try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){showAuthGate();return;}
   var fab=document.createElement('button');fab.id='cloud-fab';fab.title='Synchronisation cloud';fab.onclick=cloudOpen;
   fab.innerHTML='☁<span id="cloud-dot"></span>';document.body.appendChild(fab);
   ['saveLS','_saveAthletes','saveCustomSessions'].forEach(function(fn){
@@ -6295,7 +6376,7 @@ async function cloudInit(){
   });
   var s=await _sb.auth.getSession();
   if(s.data&&s.data.session){_cloudUser=s.data.session.user;cloudFabState();await cloudPull();}
-  else cloudFabState();
+  else { cloudFabState(); showAuthGate(); }
 }
 
 /* ══ SÉLECTEUR D'ATHLÈTE RAPIDE (partout) ══ */
