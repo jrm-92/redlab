@@ -791,6 +791,16 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .test-row{grid-template-columns:48px 1fr}
   .test-row .field:nth-child(3){grid-column:2}
 }
+@media(max-width:560px){
+  /* Carte profil (VMA / FC…) : la grille forcée à 2 colonnes écrase le
+     stepper VMA (il passe sur 3 lignes) et déséquilibre la hauteur des
+     blocs quand l'un est vide ("—"). En dessous de 560px, chaque bloc
+     prend toute la largeur et s'empile, comme "Athlète"/"Profil" déjà. */
+  .profile-hero{grid-template-columns:1fr!important}
+  .ph-block{border-right:none!important;border-bottom:1px solid var(--border)!important;padding:12px 0!important;margin-right:0!important}
+  .ph-block:last-child{border-bottom:none!important;padding-bottom:6px!important}
+  .vma-edit{flex-wrap:nowrap}
+}
 
 /* ══ ATHLETES ══ */
 .ath-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
