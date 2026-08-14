@@ -455,8 +455,6 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .pl-live-err a,.pl-live-more{color:var(--orange);font-weight:700;text-decoration:none}
   .pl-live-more{display:inline-block;margin-top:10px;font-size:13px}
 
-@media(max-width:860px){.rec-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
-@media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .rec-name{font-size:20px;font-weight:900;text-transform:uppercase;line-height:1}
@@ -755,8 +753,23 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .pred-c{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:16px 14px 14px}
   .stats-row{gap:10px}
   .sc{padding:14px 12px}.sc-val{font-size:24px}
-  .race-grid{grid-template-columns:1fr 1fr;gap:10px}
-  .race-card{padding:14px}.rc-time{font-size:26px}
+
+  /* Temps de passage : grille → carousel, cartes resserrées */
+  .race-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .race-grid::-webkit-scrollbar{display:none}
+  .race-card{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:14px}
+  .rc-time{font-size:28px;margin-bottom:8px}
+  .rc-sl-bnds{margin-bottom:8px}
+  .rc-splits{padding-top:8px}
+  .spl-row{padding:3px 0}
+
+  /* Records : grille → carousel, cartes resserrées */
+  .rec-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px;gap:10px}
+  .rec-grid::-webkit-scrollbar{display:none}
+  .rec-card{scroll-snap-align:center;flex:0 0 74%;min-width:0;padding:14px}
+  .rec-top{margin-bottom:10px}
+  .rec-out{padding-top:10px;margin-top:10px}
+
   thead th{padding:10px 12px;font-size:11px}
   tbody td{padding:10px 12px;font-size:13.5px}
   .slabel{margin-top:24px}
@@ -785,8 +798,9 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 }
 @media(max-width:480px){
   .g2{grid-template-columns:1fr}
-  .race-grid{grid-template-columns:1fr}
   .pred-c{flex-basis:86%}
+  .race-card{flex-basis:86%}
+  .rec-card{flex-basis:82%}
   .ph-b-val{font-size:20px}
   .ph-b-sub{font-size:12px}
   .ph-b-lbl{font-size:11px}
@@ -1560,6 +1574,7 @@ input[type=range]{touch-action:none}
               </div>
               <div class="db-section-title">Temps de passage</div>
             </div>
+            <div class="plw-swipe-hint">👉 Fais glisser pour voir les autres distances</div>
             <div class="race-grid" id="db-races"></div>
           </div>
 
@@ -2593,7 +2608,8 @@ function renderRecords(){
       :'<button type="button" class="btn-road-apply" onclick="recAddToggle()" style="width:auto;margin:0;padding:8px 16px">+ Ajouter une distance</button>')
     +'</div>'):'';
   const empty=shown.length?'':'<div class="rec-out-empty" style="padding:20px;text-align:center">Aucun record. Importe une fiche FFA (les records s\u2019extraient de l\u2019historique) ou ajoute une distance manuellement.</div>';
-  el.innerHTML=`<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
+  const swipeHint=shown.length>1?'<div class="plw-swipe-hint">\ud83d\udc49 Fais glisser pour voir les autres distances</div>':'';
+  el.innerHTML=`${swipeHint}<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
   shown.forEach(r=>updRecord(r.id,true));
 }
 function updRecord(id,skipSave){
@@ -2629,7 +2645,6 @@ function updRecord(id,skipSave){
     <div>
       <div class="rec-metric-lbl">Allure</div>
       <div class="rec-pace" style="color:${r.col}">${pace}<span> /km</span></div>
-      <div class="rec-kmh">${kmh.toFixed(2)} km/h · ${fHMS(T)}</div>
     </div>`;
   if(badge)badge.style.display='none';
   if(!skipSave){saveLS();renderChart();}
