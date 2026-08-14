@@ -231,6 +231,7 @@ input::placeholder,textarea::placeholder{color:var(--muted2)!important;opacity:.
 
 /* ── TABLE ── */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+.hist-chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-family:var(--font)}
 thead th{
   text-align:left;padding:12px 16px;font-size:11.5px;font-weight:700;
@@ -766,6 +767,11 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   /* Périodisation de la charge : le graphique gardait sa hauteur desktop (460px)
      sur mobile, ce qui exagère la taille des barres pour peu de largeur disponible */
   .pl-vol-wrap{height:260px!important}
+
+  /* Historique des courses : plusieurs distances sur un même axe temporel,
+     en portrait les points se tassent et les lignes deviennent illisibles.
+     Le graphique garde une largeur confortable et défile horizontalement. */
+  #hist-chart-wrap{min-width:700px}
 
   /* Records : grille → carousel, cartes resserrées */
   .rec-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px;gap:10px}
@@ -1623,7 +1629,8 @@ input[type=range]{touch-action:none}
                 <button class="btn-road-apply" onclick="addManualRace()" style="width:auto;margin:0;padding:8px 16px">+ Ajouter</button>
               </div>
               <div id="hist-empty" style="text-align:center;color:var(--muted2);font-size:13px;padding:18px 10px;line-height:1.6">Aucune course. Utilise <strong style="color:var(--orange)">Importer depuis une fiche</strong> (section Records) ou ajoute une course manuellement ci-dessus.</div>
-              <div id="hist-chart-wrap" style="position:relative;height:300px;display:none"><canvas id="hist-chart"></canvas></div>
+              <div id="hist-swipe-hint" class="plw-swipe-hint" style="display:none">👉 Fais glisser pour voir toute la chronologie</div>
+              <div class="hist-chart-scroll"><div id="hist-chart-wrap" style="position:relative;height:300px;display:none"><canvas id="hist-chart"></canvas></div></div>
               <div id="hist-list"></div>
             </div>
           </div>
@@ -4834,17 +4841,20 @@ function renderRaceHistory(){
   const sec=document.getElementById('db-history-section');if(!sec)return;
   const list=(S.raceHistory||[]).filter(r=>r&&r.ts!=null);
   const wrap=document.getElementById('hist-chart-wrap');
+  const hint=document.getElementById('hist-swipe-hint');
   const empty=document.getElementById('hist-empty');
   const box=document.getElementById('hist-list');
   const cv=document.getElementById('hist-chart');
   if(!list.length){
     if(empty)empty.style.display='block';
     if(wrap)wrap.style.display='none';
+    if(hint)hint.style.display='none';
     if(box)box.innerHTML='';
     if(histChart){histChart.destroy();histChart=null;}
     return;
   }
   if(empty)empty.style.display='none';
+  if(hint)hint.style.display='';
   if(wrap)wrap.style.display='block';
   const byDist={};
   list.forEach(r=>{(byDist[r.dist]=byDist[r.dist]||[]).push(r);});
