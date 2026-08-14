@@ -581,6 +581,16 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .input-hero-title{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-0.7px;margin-bottom:8px}
 .input-hero-sub{font-size:14px;color:var(--muted);line-height:1.6}
 
+/* ══ ACCORDÉON (onglet Infos) : replié par défaut, un titre suffit pour tout lire sans scroller ══ */
+.acc-item{margin-bottom:10px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card)}
+.acc-hd{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:none;border:none;cursor:pointer;padding:16px 18px;text-align:left;font-family:var(--font)}
+.acc-hd:hover{background:rgba(255,255,255,0.025)}
+.acc-title{font-size:14.5px;font-weight:800;color:var(--text)}
+.acc-chev{font-size:17px;font-weight:900;color:var(--muted2);flex-shrink:0;width:20px;text-align:center;transition:transform .15s}
+.acc-body .card{border:none;border-radius:0;margin-bottom:0;box-shadow:none;border-top:1px solid var(--border);padding-top:16px}
+.acc-body .db-section{margin-top:0!important;padding:14px 18px 16px;border-top:1px solid var(--border)}
+.acc-hint{font-size:11.5px;color:var(--muted2);margin:2px 0 12px}
+
 /* ══ TEST ROWS ══ */
 .test-row{display:grid;grid-template-columns:48px 250px 120px 90px;gap:12px;align-items:center;margin-bottom:14px}
 .test-row:last-child{margin-bottom:0}
@@ -6131,23 +6141,6 @@ function plStudiesHTML(){
     +'<div style="font-size:11px;color:var(--muted2);margin-top:6px">Veille automatique — dernière mise à jour : '+PL_STUDIES_UPD+'.</div>'
     +'</div>';
 }
-function plFracHTML(){
-  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
-  var FR=[
-   ['Nombre de répétitions','À calculer pour tenir <b>≥ 10 min à > 90 % VO₂max</b> (latence incluse)','À calculer pour tenir <b>≥ 10 min à > 90 % VO₂max</b> (latence incluse)'],
-   ['Durée des répétitions','<b>&gt; 2 min</b> · idéal 4-6 min','<b>&lt; 2 min</b>'],
-   ['Intensité','&gt; 90 % VO₂max · &gt; 90 % VMA/PMA · 90-95 % FC max','&gt; 90 % VO₂max · <b>100-120 % VMA/PMA</b>'],
-   ['Mode de contrôle','Essentiellement <b>FC</b> (+ puissance/vitesse)','<b>Puissance ou vitesse</b>'],
-   ['Récup entre répétitions','&lt; temps d’effort (50-100 %) · 2-3 min passives ou 3-4 min à 40 % VMA/PMA','&lt; temps d’effort (50-100 %) · <b>50-70 % VMA/PMA</b>'],
-   ['Nombre de séries','Condenser sur le moins de séries possible','Condenser sur le moins de séries possible']
-  ];
-  var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
-  return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Fractionné VMA — long vs court (en résumé)</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Objectif commun : passer le plus de temps possible &gt; 90 % de VO₂max.</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
-}
 function plRenfoHTML(){
   var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
   var td='padding:9px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
@@ -6239,15 +6232,35 @@ async function fetchPubmedLive(){
       +'<a href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Ouvrir la recherche PubMed →</a></div>';
   }
 }
+function accSection(id,title,bodyHTML,openByDefault){
+  return '<div class="acc-item">'
+    +'<button type="button" class="acc-hd" onclick="accToggle(\''+id+'\')" aria-expanded="'+(openByDefault?'true':'false')+'">'
+    +'<span class="acc-title">'+title+'</span><span class="acc-chev" id="acc-chev-'+id+'">'+(openByDefault?'−':'+')+'</span>'
+    +'</button>'
+    +'<div class="acc-body" id="acc-body-'+id+'"'+(openByDefault?'':' style="display:none"')+'>'+bodyHTML+'</div>'
+    +'</div>';
+}
+function accToggle(id){
+  var body=document.getElementById('acc-body-'+id);
+  var chev=document.getElementById('acc-chev-'+id);
+  if(!body)return;
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  if(chev)chev.textContent=open?'+':'−';
+}
 function renderKnowledge(){
   var w=document.getElementById('knowledge-wrap');if(!w)return;
-  w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
-    +plSpeSessHTML()
-    +plDomainTimeHTML()
-    +plVO2HTML()
-    +plRecovHTML()
-    +plRenfoHTML()
-    +pubmedLiveHTML();
+  var accHTML=accSection('spesess','Séance spécifique — référentiel FFA',plSpeSessHTML(),true)
+    +accSection('domtime','Temps de travail par domaine — référentiel FFA',plDomainTimeHTML(),false)
+    +accSection('vo2','VMA / VO₂max — fractionné long vs court',plVO2HTML(),false)
+    +accSection('recov','Délais de récupération — référentiel FFA',plRecovHTML(),false)
+    +accSection('renfo','Renforcement / musculation — périodisation par distance',plRenfoHTML(),false)
+    +accSection('combine','Muscu + course — combiner sans interférence',plCombineHTML(),false)
+    +accSection('nutrition','Nutrition — course d’endurance',plNutritionHTML(),false)
+    +accSection('studies','Études cliniques (sélection)',plStudiesHTML(),false)
+    +accSection('pubmed','Veille scientifique PubMed (en direct)',pubmedLiveHTML(),false);
+  w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="acc-hint">👉 Touche un titre pour l’ouvrir ou le refermer</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
+    +accHTML;
   fetchPubmedLive();
 }
 function renderPlanif(){
