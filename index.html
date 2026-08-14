@@ -771,9 +771,21 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   /* Plages de performance : grille → carousel défilant (une carte + un aperçu de la suivante) */
   .pred-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px}
   .pred-grid::-webkit-scrollbar{display:none}
-  .pred-c{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:16px 14px 14px}
+  .pred-c{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:14px}
   .stats-row{gap:10px}
   .sc{padding:14px 12px}.sc-val{font-size:24px}
+
+  /* Taille de carte unique et la plus resserrée possible sur mobile,
+     cohérente sur toutes les cards du site (padding desktop bien plus large).
+     !important nécessaire : certaines déclarations de base (.ath-card, .lib-card,
+     .csm-sim, .goal-readout-card) apparaissent plus loin dans la feuille de style
+     que ce bloc et gagneraient sinon la cascade malgré la media query. */
+  .card{padding:14px!important}
+  .ath-card{padding:14px!important}
+  .lib-card{padding:14px!important}
+  .sl-card{padding:14px!important}
+  .csm-sim{padding:14px!important}
+  .goal-readout-card{padding:14px!important}
 
   /* Temps de passage : grille → carousel, cartes resserrées */
   .race-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px}
