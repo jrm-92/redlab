@@ -3073,7 +3073,7 @@ function renderAthletes(){
         <label>Espace client · email de connexion</label>
         <div class="ath-espace-row">
           <input type="email" inputmode="email" placeholder="athlete@email.fr" value="${a.email||''}" onchange="setAthleteEmail(${a.id},this.value)">
-          <button class="ath-espace-copy" onclick="copyEspaceLink(this)" title="Copier le lien de l'espace">Lien</button>
+          <button class="ath-espace-copy" onclick="copyEspaceLink(${a.id},this)" title="Copier le lien de l'espace">Lien</button>
         </div>
         <button class="ath-espace-pub" onclick="publishAthlete(${a.id},this)" title="Envoyer/mettre à jour la fiche complète dans l'espace de l'athlète">↑ Publier l'espace</button>
       </div>
@@ -6277,8 +6277,18 @@ function setAthleteEmail(id,val){
   _saveAthletes(list);
   if(typeof _cloudUser!=='undefined'&&_cloudUser){ try{ cloudPushSpaces(); }catch(e){} }
 }
-function copyEspaceLink(btn){
-  try{ navigator.clipboard.writeText(ESPACE_URL); }catch(e){}
+// Copie le lien personnel de l'athlète (avec son jeton d'accès) s'il a déjà été publié une fois,
+// sinon retombe sur le lien générique (écran email/lien magique).
+async function copyEspaceLink(id,btn){
+  var url=ESPACE_URL;
+  try{
+    var ath=getAthletes().find(function(x){return x.id===id;});
+    if(ath&&ath.email&&_sb){
+      var r=await _sb.from('athlete_spaces').select('access_token').eq('email',String(ath.email).trim().toLowerCase()).maybeSingle();
+      if(r.data&&r.data.access_token) url=ESPACE_URL+'?a='+r.data.access_token;
+    }
+  }catch(e){}
+  try{ navigator.clipboard.writeText(url); }catch(e){}
   if(btn){var o=btn.textContent; btn.textContent='Copié ✓'; setTimeout(function(){btn.textContent=o;},1500);}
 }
 // Publie la fiche COMPLÈTE (dashboard épuré) d'un athlète vers son espace, sans quitter la page.

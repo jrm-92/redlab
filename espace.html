@@ -136,7 +136,7 @@ a{color:var(--accent)}
       <span id="who" style="font-size:13px;color:var(--muted)"></span>
       <span class="sp"></span>
       <button class="linkbtn" onclick="location.reload()">↻ Actualiser</button>
-      <button class="linkbtn" onclick="signOut()">Se déconnecter</button>
+      <button class="linkbtn" id="signout-btn" onclick="signOut()">Se déconnecter</button>
     </div>
     <div id="content"></div>
   </div>
@@ -275,18 +275,10 @@ function kpi(l,v,s){return '<div class="kpi"><div class="l">'+esc(l)+'</div><div
 
 function show(id){['login','loading','fiche'].forEach(function(x){document.getElementById(x).classList.toggle('hidden',x!==id);});}
 
-// ── Init : session présente ? → fiche, sinon → login ──
-async function boot(){
-  if(!_sb){show('login');return;}
-  show('loading');
-  var s=await _sb.auth.getSession();
-  var sess=s&&s.data&&s.data.session;
-  if(!sess){ show('login'); return; }
-  var email=sess.user.email;
-  var q=await _sb.from('athlete_spaces').select('data').ilike('email',email).maybeSingle();
-  if(q.error){ document.getElementById('content').innerHTML='<div class="spin">Erreur de lecture : '+esc(q.error.message)+'</div>'; show('fiche'); return; }
-  var row=q.data?q.data.data:null;
-  document.getElementById('who').textContent='Connecté : '+email;
+// Affiche la fiche (ou le message d'attente) pour une ligne athlete_spaces donnée,
+// que ce soit via session email ou via lien personnel (jeton).
+function showRow(label,row){
+  document.getElementById('who').textContent='Connecté : '+label;
   if(row&&row.html){
     // Fiche complète (dashboard épuré) rendue telle quelle dans un cadre isolé
     var br=document.querySelector('.brand'); if(br)br.style.display='none';
@@ -298,8 +290,32 @@ async function boot(){
     host.appendChild(f); f.srcdoc=row.html;
     show('fiche'); return;
   }
-  renderFiche(email, row);
+  renderFiche(label, row);
   show('fiche');
+}
+
+// ── Init : lien personnel (jeton) en priorité, sinon session email, sinon login ──
+async function boot(){
+  if(!_sb){show('login');return;}
+  show('loading');
+  var tok=new URLSearchParams(location.search).get('a');
+  if(tok){
+    var rt=await _sb.rpc('get_athlete_space_by_token',{p_token:tok});
+    if(!rt.error&&rt.data){
+      var sob=document.getElementById('signout-btn'); if(sob)sob.style.display='none';
+      showRow(rt.data.pseudo||'Athlète', rt.data);
+      return;
+    }
+    // Jeton absent/invalide → on retombe sur le flux email ci-dessous.
+  }
+  var s=await _sb.auth.getSession();
+  var sess=s&&s.data&&s.data.session;
+  if(!sess){ show('login'); return; }
+  var email=sess.user.email;
+  var q=await _sb.from('athlete_spaces').select('data').ilike('email',email).maybeSingle();
+  if(q.error){ document.getElementById('content').innerHTML='<div class="spin">Erreur de lecture : '+esc(q.error.message)+'</div>'; show('fiche'); return; }
+  var row=q.data?q.data.data:null;
+  showRow(email, row);
 }
 _sb&&_sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_IN'){ history.replaceState(null,'',location.pathname); boot(); } });
 boot();
