@@ -484,13 +484,12 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   transition:transform .15s,box-shadow .15s;
 }
 .pred-c:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.3)}
-.pred-c-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.pred-c-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .pred-name{font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-0.3px;line-height:1}
 .pred-dist{font-size:11.5px;color:var(--muted2);margin-top:3px;font-weight:600;letter-spacing:.5px}
 .pred-pct-badge{padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .pred-time{font-size:28px;font-weight:900;line-height:1;letter-spacing:-1px;text-align:center;margin:4px 0 6px}
-.pred-pace{font-size:15px;font-weight:700;color:var(--text2);text-align:center}
-.pred-kmh{font-size:13px;color:var(--muted2);text-align:center;margin-top:2px;margin-bottom:14px}
+.pred-pace{font-size:15px;font-weight:700;color:var(--text2);text-align:center;margin-bottom:12px}
 .pred-range{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)}
 .pred-range-bar{position:relative;height:4px;border-radius:2px;margin-bottom:7px;overflow:visible}
 .pred-range-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2)}
@@ -750,7 +749,10 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .test-live{display:none}
   .hide-mob{display:none}
   .show-mob{display:inline}
-  .pred-grid{grid-template-columns:1fr 1fr}
+  /* Plages de performance : grille → carousel défilant (une carte + un aperçu de la suivante) */
+  .pred-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .pred-grid::-webkit-scrollbar{display:none}
+  .pred-c{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:16px 14px 14px}
   .stats-row{gap:10px}
   .sc{padding:14px 12px}.sc-val{font-size:24px}
   .race-grid{grid-template-columns:1fr 1fr;gap:10px}
@@ -784,7 +786,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 @media(max-width:480px){
   .g2{grid-template-columns:1fr}
   .race-grid{grid-template-columns:1fr}
-  .pred-grid{grid-template-columns:1fr 1fr}
+  .pred-c{flex-basis:86%}
   .ph-b-val{font-size:20px}
   .ph-b-sub{font-size:12px}
   .ph-b-lbl{font-size:11px}
@@ -1996,7 +1998,6 @@ function renderPredCards(){
     const paceF=fAll(tF/r.d*1000),paceM=fAll(tM/r.d*1000),paceS=fAll(tS/r.d*1000);
     const pctLo=Math.round(r.vmaLo*100), pctHi=Math.round(r.vmaHi*100);
     const vcBadge=M.csKmh?`<div class="pred-pct-badge" style="background:rgba(${r.rgb},0.12);border:1px solid rgba(${r.rgb},0.25);color:${r.col}">${Math.round(r.d*3.6/(tS*M.csKmh)*100)}–${Math.round(r.d*3.6/(tF*M.csKmh)*100)}% VC</div>`:'';
-    const topRight=(r.id==='mara')?`<div style="text-align:right"><div style="font-size:15px;font-weight:900;color:${r.col};line-height:1.15">${fHMS(tM)}<span style="font-size:11.5px;font-weight:600;color:var(--muted2)"> · ${paceM}/km</span></div>${vcBadge}</div>`:vcBadge;
     let goalHtml='',extraStyle='';
     if(g.id===r.id && g.t){
       const frac=Math.max(0,Math.min(1,(g.t-tF)/(tS-tF)));
@@ -2006,11 +2007,10 @@ function renderPredCards(){
     return `<div class="pred-c" style="border-top:3px solid ${r.col};${extraStyle}">
       <div class="pred-c-top">
         <div><div class="pred-name" style="color:${r.col}">${r.nm}</div><div class="pred-dist">${r.lbl}</div></div>
-        ${topRight}
+        ${vcBadge}
       </div>
       <div class="pred-time" style="color:${r.col};font-size:26px;letter-spacing:-0.5px">${fHMS(tM)}</div>
       <div class="pred-pace">${paceM}<span style="font-weight:400;color:var(--muted2)">/km · médiane</span></div>
-      <div class="pred-kmh">${(r.d/tM*3.6).toFixed(1)} km/h</div>
       <div class="pred-range">
         <div class="pred-range-bar" style="background:rgba(${r.rgb},0.18)"><div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(${r.rgb},0.2),rgba(${r.rgb},0.55),rgba(${r.rgb},0.2));border-radius:2px"></div></div>
         <div class="pred-range-lbl"><span>${fHMS(tF)} · ${paceF}</span><span>${fHMS(tS)} · ${paceS}</span></div>
@@ -2372,7 +2372,7 @@ function renderCSPredictions(){
   const box=document.getElementById('db-cs');
   const titleEl=document.getElementById('db-pred-title');
   if(titleEl) titleEl.textContent='Plages de performance';
-  box.innerHTML='<div id="pred-cards"></div>';
+  box.innerHTML='<div class="plw-swipe-hint">👉 Fais glisser pour voir les autres distances</div><div id="pred-cards"></div>';
   renderPredCards();
 }
 
