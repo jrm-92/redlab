@@ -383,6 +383,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plc-dl{margin-top:6px;width:100%;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--font);font-size:10.5px;font-weight:800;padding:4px 6px;border-radius:7px;cursor:pointer;letter-spacing:.2px}
   .plc-dl:hover{border-color:var(--orange);color:var(--orange)}
   .plc-dl.on{background:rgba(148,163,184,.18);border-color:var(--muted2);color:var(--text2)}
+  .plw-swipe-hint{display:none}
   .plw-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 0 5px}
   .plw-dow span{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);text-align:center}
   .plw-cal{display:flex;flex-direction:column;gap:8px}
@@ -771,6 +772,14 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .zones-tbl td.hide-mob{display:none!important}
   .zones-tbl td.col-num{width:auto!important}
   .zones-tbl td[data-label]:not([data-label=""])::before{content:attr(data-label);font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
+
+  /* Tableau "Tes tests" (modèle VC) : 6 colonnes → défilement horizontal plutôt que compression illisible */
+  .csm-tt{min-width:520px}
+
+  /* Plan de prépa : semaine à 7 colonnes → défilement horizontal dédié (en-tête + jours alignés) */
+  .plw-swipe-hint{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted2);margin:2px 0 8px}
+  .plw-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .plw-dow,.plw-days{min-width:640px}
 }
 @media(max-width:480px){
   .g2{grid-template-columns:1fr}
@@ -4223,7 +4232,7 @@ function renderCsModel(){
   syn.push({t:'tip',x:(pts.length<3?'Ajoute un effort de 6–10 min':(mrel?'Modèle robuste — poursuis le suivi':'Refais le test le moins cohérent'))});
   const synth='<div class="csm-synth">'+syn.map(o=>'<span class="sy '+o.t+'">'+(o.t==='ok'?'✔':(o.t==='warn'?'⚠':'💡'))+' '+o.x+'</span>').join('')+'</div>';
   const trows=pts.map((p,i)=>{const pred=csMs*p.t+dp;const res=p.d-pred;const nm=p.lbl||(p.t===180?'Test 3 min':(p.t===720?'Test 12 min':'Effort '+(i+1)));const big=pts.length>=3&&Math.abs(res)>Math.max(2.5*(rmse||0),0.05*(dm||p.d));return '<tr'+(big?' class="tt-out"':'')+'><td>'+nm+'</td><td>'+R(p.d)+' m</td><td>'+fHMS(p.t)+'</td><td>'+fAll(1000/(p.d/p.t))+' /km</td><td>'+(p.d/p.t*3.6).toFixed(1)+' km/h</td><td>'+(res>=0?'+':'')+R(res)+' m</td></tr>';}).join('');
-  const testTable='<div class="csm-h" style="margin-top:22px">Tes tests</div><table class="csm-tt"><thead><tr><th>Test</th><th>Distance</th><th>Temps</th><th>Allure</th><th>Vitesse</th><th>Écart au modèle</th></tr></thead><tbody>'+trows+'</tbody></table>'+(pts.length<3?'<div class="csm-mini">Avec 2 tests, l’écart est nul par construction. Les résidus deviennent informatifs à partir de 3 tests et permettent de repérer un test aberrant.</div>':'');
+  const testTable='<div class="csm-h" style="margin-top:22px">Tes tests</div><div class="tbl-wrap"><table class="csm-tt"><thead><tr><th>Test</th><th>Distance</th><th>Temps</th><th>Allure</th><th>Vitesse</th><th>Écart au modèle</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+(pts.length<3?'<div class="csm-mini">Avec 2 tests, l’écart est nul par construction. Les résidus deviennent informatifs à partir de 3 tests et permettent de repérer un test aberrant.</div>':'');
   const simVmax=Math.max(csKmh*1.35,(vmaRef||csKmh)*1.05), simVdef=Math.min(simVmax,csKmh+1.5), simVmin=Math.max(csKmh*0.8,csKmh-2.5);
   const sim='<div class="csm-h" style="margin-top:22px">Simulateur — tenue d’allure</div>'+
     '<div class="csm-sim">'+
@@ -5720,7 +5729,9 @@ function plCalendarHTML(p,weeks){
   var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'
     +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
     +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':'')+'</div></div>';
-  return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
+  return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'
+    +'<div class="plw-swipe-hint">👉 Fais glisser latéralement pour voir toute la semaine</div>'
+    +'<div class="plw-scroll">'+hdr+'<div class="plw-cal">'+rows+'</div></div>';
 }
 function plVolLive(n,val){var e=document.getElementById('plc-km-'+n);if(e){e.textContent=val+' km';e.style.color='var(--orange)';}}
 function plVolSet(n,val){_plVolOverride[n]=+val;_plPicked=true;plUpd();}

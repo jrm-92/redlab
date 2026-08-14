@@ -76,6 +76,7 @@ a{color:var(--accent)}
 .tbl tr:last-child td{border-bottom:none}
 .zbadge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
 .tblwrap{overflow-x:auto;border-radius:12px}
+.zn-break{display:none}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .rcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden}
@@ -107,6 +108,18 @@ a{color:var(--accent)}
 .hidden{display:none!important}
 .spin{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
 @media(max-width:640px){.hero-out{margin-left:0;text-align:left;width:100%}.rr .a{font-size:32px}.rr .b{font-size:15px;letter-spacing:5px}.brand .slg{display:none}}
+@media(max-width:700px){
+  .zones-tbl thead{display:none}
+  .zones-tbl,.zones-tbl tbody{display:block;width:100%}
+  .zones-tbl tr{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;padding:12px 13px!important;border-bottom:1px solid var(--border)}
+  .zones-tbl tr:last-child{border-bottom:none}
+  .zones-tbl td{display:inline-flex;align-items:baseline;gap:5px;padding:0!important;border:none!important;font-size:13px}
+  .zones-tbl td.zn-badge{flex:0 0 auto}
+  .zones-tbl td.zn-domain{flex:1 1 160px;min-width:0;display:block}
+  .zones-tbl td.zn-break{flex-basis:100%;height:0;display:block;overflow:hidden}
+  .zones-tbl td.hide-mob{display:none!important}
+  .zones-tbl td[data-label]:not([data-label=""])::before{content:attr(data-label);font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
+}
 </style>
 </head><body>
 
@@ -220,17 +233,18 @@ function renderFiche(email,d){
   if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
   h+='</div>';
   // Zones
-  h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div><div class="tblwrap"><table class="tbl">'
-    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th>Ressenti</th><th>RPE</th></tr></thead><tbody>';
+  h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div><div class="tblwrap"><table class="tbl zones-tbl">'
+    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th class="hide-mob">Ressenti</th><th>RPE</th></tr></thead><tbody>';
   R.zones.forEach(function(z){
     var vlo=(v*z.lo),vhi=(v*z.hi);
     h+='<tr>'
-      +'<td><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span></td>'
-      +'<td><b style="color:var(--text)">'+esc(z.n)+'</b><br><span style="color:var(--muted2);font-size:11.5px">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+'%</span></td>'
-      +'<td style="color:'+z.col+';font-weight:800">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'</td>'
-      +'<td>'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'/km</td>'
-      +'<td style="font-size:12.5px;color:var(--muted)">'+esc(z.talk)+'</td>'
-      +'<td>'+z.rpe+'</td></tr>';
+      +'<td class="zn-badge" data-label=""><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span></td>'
+      +'<td class="zn-domain" data-label=""><b style="color:var(--text)">'+esc(z.n)+'</b><br><span style="color:var(--muted2);font-size:11.5px">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+'%</span></td>'
+      +'<td class="zn-break" aria-hidden="true"></td>'
+      +'<td data-label="Vitesse" style="color:'+z.col+';font-weight:800">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'</td>'
+      +'<td data-label="Allure">'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'/km</td>'
+      +'<td class="hide-mob" data-label="Ressenti" style="font-size:12.5px;color:var(--muted)">'+esc(z.talk)+'</td>'
+      +'<td data-label="RPE">'+z.rpe+'</td></tr>';
   });
   h+='</tbody></table></div>';
   // Prédictions de course (si VMA connue)
