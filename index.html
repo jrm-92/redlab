@@ -763,6 +763,10 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .rc-splits{padding-top:8px}
   .spl-row{padding:3px 0}
 
+  /* Périodisation de la charge : le graphique gardait sa hauteur desktop (460px)
+     sur mobile, ce qui exagère la taille des barres pour peu de largeur disponible */
+  .pl-vol-wrap{height:260px!important}
+
   /* Records : grille → carousel, cartes resserrées */
   .rec-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px;gap:10px}
   .rec-grid::-webkit-scrollbar{display:none}
@@ -5296,7 +5300,7 @@ function plLoadHTML(p,wk,opts){
   const legend=[['base','Base'],['dev','Développement'],['spe','Spécifique'],['aff','Affûtage']].map(l=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2)"><i style="width:10px;height:10px;border-radius:50%;background:'+PL_PHC[l[0]]+'"></i>'+l[1]+'</span>').join('');
   return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
     +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
-    +'<div style="position:relative;height:460px"><canvas id="'+cid+'"></canvas></div>'
+    +'<div class="pl-vol-wrap" style="position:relative;height:460px"><canvas id="'+cid+'"></canvas></div>'
     +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 3 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
 }
 let _plVolCharts={};
