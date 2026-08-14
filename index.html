@@ -242,6 +242,7 @@ tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,0.02)}
 tbody td{padding:13px 16px;font-size:14.5px;vertical-align:middle;color:var(--text2)}
 .col-num{width:1%;padding-left:4px!important;padding-right:4px!important;white-space:nowrap}
+.zn-break{display:none}
 .zb{
   display:inline-block;padding:3px 9px;border-radius:20px;
   font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;
@@ -757,6 +758,19 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   tbody td{padding:10px 12px;font-size:13.5px}
   .slabel{margin-top:24px}
   .db-section{margin-bottom:28px}
+
+  /* Zones d'entraînement : tableau → liste empilée, lisible sans scroll horizontal */
+  .zones-tbl thead{display:none}
+  .zones-tbl,.zones-tbl tbody{display:block;width:100%}
+  .zones-tbl tr{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;padding:13px 4px!important;border-bottom:1px solid var(--border)}
+  .zones-tbl tr:last-child{border-bottom:none}
+  .zones-tbl td{display:inline-flex;align-items:baseline;gap:5px;padding:0!important;border:none!important;font-size:13px!important;vertical-align:baseline}
+  .zones-tbl td.zn-badge{flex:0 0 auto}
+  .zones-tbl td.zn-domain{flex:1 1 160px;min-width:0;display:block}
+  .zones-tbl td.zn-break{flex-basis:100%;height:0;display:block;overflow:hidden}
+  .zones-tbl td.hide-mob{display:none!important}
+  .zones-tbl td.col-num{width:auto!important}
+  .zones-tbl td[data-label]:not([data-label=""])::before{content:attr(data-label);font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
 }
 @media(max-width:480px){
   .g2{grid-template-columns:1fr}
@@ -2222,7 +2236,7 @@ function renderZones(){
     if(!hasFc) return '';
     const flo=Math.round(fcRest+loP/100*fcReserve);
     const fhi=Math.round(fcRest+hiP/100*fcReserve);
-    return `<td class="hide-mob" style="color:var(--muted2)">${loP}–${hiP}%</td><td><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
+    return `<td class="hide-mob" data-label="% FC Rés." style="color:var(--muted2)">${loP}–${hiP}%</td><td data-label="FC"><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
   }
 
   const vcBadge=`<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--orange)"><span class="hide-mob">VC${isReal?'':' est.'} = ${vc.toFixed(2)} km/h · ${fAll(3600/vc)}/km</span><span class="show-mob" style="display:none">VC ${fAll(3600/vc)}/km</span></span>`;
@@ -2237,13 +2251,14 @@ function renderZones(){
     const isZ4=z.z===4;
     const pctStr=z.pct;
     rows+=`<tr>
-      <td><span class="zb ${z.cls}">Z${z.z}</span></td>
-      <td style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}</td>
-      <td class="col-num" style="color:var(--muted2)">${pctStr}</td>
-      <td class="col-num" style="font-weight:600;color:${z.col}">${vStr}</td>
-      <td style="color:var(--text2)">${aStr}</td>
-      <td style="color:var(--muted2);font-size:12px">${z.talk}</td>
-      <td style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
+      <td class="zn-badge" data-label=""><span class="zb ${z.cls}">Z${z.z}</span></td>
+      <td class="zn-domain" data-label="" style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}</td>
+      <td class="zn-break" aria-hidden="true"></td>
+      <td class="col-num hide-mob" data-label="${pctCol}" style="color:var(--muted2)">${pctStr}</td>
+      <td class="col-num" data-label="Vitesse" style="font-weight:600;color:${z.col}">${vStr}</td>
+      <td data-label="Allure" style="color:var(--text2)">${aStr}</td>
+      <td class="hide-mob" data-label="Talk test" style="color:var(--muted2);font-size:12px">${z.talk}</td>
+      <td data-label="RPE" style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
       ${fcC(z.fcLo,z.fcHi,z.col)}
     </tr>`;
   });
@@ -2255,10 +2270,10 @@ function renderZones(){
     : 'Zones <b>VMA</b> (Talk test / RPE) — référentiel croisé FFA (secteurs aérobie, seuil) &amp; INSEP (VMA 95-105 %).';
   document.getElementById('db-zones').innerHTML=`
     ${vcNote}
-    <div class="tbl-wrap"><table>
+    <div class="tbl-wrap"><table class="zones-tbl">
       <thead><tr>
-        <th>Zone</th><th>Domaine d'intensité</th><th class="col-num">${pctCol}</th><th class="col-num">Vitesse</th><th>Allure /km</th>
-        <th>Talk test</th><th>RPE</th>
+        <th>Zone</th><th>Domaine d'intensité</th><th class="col-num hide-mob">${pctCol}</th><th class="col-num">Vitesse</th><th>Allure /km</th>
+        <th class="hide-mob">Talk test</th><th>RPE</th>
         ${fcH}
       </tr></thead>
       <tbody>${rows}</tbody>
@@ -4561,10 +4576,11 @@ function exportAthleteView(returnDoc){
       +'.card,.lib-card,.race-card,.rec-card,.pred-c,.sc,.sl-card{padding:16px!important}'
       /* Grilles empilées en une colonne */
       +'.db-grid,.race-grid,.pred-grid,.rec-grid,.stats-row,.lib-grid{grid-template-columns:1fr!important;gap:12px!important}'
-      /* Tables larges : scroll horizontal interne, jamais de débordement de page */
+      /* Tables larges : scroll horizontal interne, jamais de débordement de page
+         (le tableau des zones a sa propre mise en page empilée, voir .zones-tbl) */
       +'.tbl-wrap,.export-wrap [style*="overflow-x"]{-webkit-overflow-scrolling:touch}'
-      +'.export-wrap table{display:block;overflow-x:auto;white-space:nowrap;min-width:0!important;width:100%}'
-      +'.export-wrap thead,.export-wrap tbody,.export-wrap tr{width:max-content;min-width:100%}'
+      +'.export-wrap table:not(.zones-tbl){display:block;overflow-x:auto;white-space:nowrap;min-width:0!important;width:100%}'
+      +'.export-wrap thead:not(.zones-tbl thead),.export-wrap tbody:not(.zones-tbl tbody),.export-wrap tr:not(.zones-tbl tr){width:max-content;min-width:100%}'
     +'}';
 
   // Infos clés sur la course préparée (fin de fiche)
