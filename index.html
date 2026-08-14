@@ -233,10 +233,10 @@ input::placeholder,textarea::placeholder{color:var(--muted2)!important;opacity:.
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
 .hist-chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
-/* ── Carousel de cartes (flèches + barre) : masqué par défaut, activé sur mobile ── */
-.crsl{position:relative}
-.crsl-arrow{display:none}
-.crsl-track{display:none}
+/* ── Carousel de cartes (flèches + barre) : masqué par défaut, activé sur mobile ──
+   Flèches + barre vivent dans une rangée dédiée SOUS les cartes (jamais superposées
+   à leur contenu, quelle que soit la position de défilement). */
+.crsl-nav{display:none}
 table{width:100%;border-collapse:collapse;font-family:var(--font)}
 thead th{
   text-align:left;padding:12px 16px;font-size:11.5px;font-weight:700;
@@ -754,22 +754,18 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .hide-mob{display:none}
   .show-mob{display:inline}
 
-  /* Carousel de cartes : flèches + barre de défilement personnalisée.
-     Les flèches vivent dans une gouttière réservée (padding du scroller) pour ne
-     jamais recouvrir le contenu des cartes (titre, curseur, boutons…). */
-  .crsl-scroll{padding-left:30px!important;padding-right:30px!important}
+  /* Carousel de cartes : flèches + barre de défilement dans une rangée dédiée
+     sous les cartes — jamais superposées au contenu, à aucune position de scroll. */
+  .crsl-nav{display:flex;align-items:center;gap:10px;margin-top:10px}
   .crsl-arrow{
-    display:flex;align-items:center;justify-content:center;
-    position:absolute;top:50%;transform:translateY(-50%);
-    width:26px;height:26px;border-radius:50%;flex-shrink:0;
-    background:rgba(15,20,33,0.8);border:1px solid var(--border2);
-    color:var(--text2);font-size:15px;font-weight:900;line-height:1;
-    cursor:pointer;z-index:5;padding:0;font-family:var(--font);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    width:28px;height:28px;border-radius:50%;
+    background:rgba(255,255,255,0.05);border:1px solid var(--border2);
+    color:var(--text2);font-size:16px;font-weight:900;line-height:1;
+    cursor:pointer;padding:0;font-family:var(--font);
   }
   .crsl-arrow:active{background:rgba(255,107,26,0.25);border-color:var(--orange);color:var(--orange)}
-  .crsl-prev{left:2px}
-  .crsl-next{right:2px}
-  .crsl-track{display:block;position:relative;height:4px;border-radius:2px;background:rgba(255,255,255,0.08);margin:10px 32px 0}
+  .crsl-track{flex:1;position:relative;height:4px;border-radius:2px;background:rgba(255,255,255,0.08)}
   .crsl-thumb{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--orange)}
 
   /* Plages de performance : grille → carousel défilant (une carte + un aperçu de la suivante) */
@@ -1609,10 +1605,12 @@ input[type=range]{touch-action:none}
               <div class="db-section-title">Temps de passage</div>
             </div>
             <div class="crsl">
-              <button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance précédente">‹</button>
-              <button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">›</button>
               <div class="race-grid crsl-scroll" id="db-races"></div>
-              <div class="crsl-track"><div class="crsl-thumb"></div></div>
+              <div class="crsl-nav">
+                <button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance précédente">‹</button>
+                <div class="crsl-track"><div class="crsl-thumb"></div></div>
+                <button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">›</button>
+              </div>
             </div>
           </div>
 
@@ -2426,7 +2424,8 @@ function bldZbar(slo,shi){
    .crsl = conteneur relatif ; .crsl-scroll = grille défilante (overflow-x auto) ;
    .crsl-track/.crsl-thumb = jauge indiquant la position/l'étendue du scroll. */
 function crslNav(btn,dir){
-  const grid=btn.parentElement&&btn.parentElement.querySelector('.crsl-scroll');
+  const wrap=btn.closest('.crsl');
+  const grid=wrap&&wrap.querySelector('.crsl-scroll');
   if(grid) grid.scrollBy({left:dir*grid.clientWidth*0.85,behavior:'smooth'});
 }
 function crslUpdate(grid){
@@ -2465,10 +2464,12 @@ function renderCSPredictions(){
   const titleEl=document.getElementById('db-pred-title');
   if(titleEl) titleEl.textContent='Plages de performance';
   box.innerHTML='<div class="crsl">'
-    +'<button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance précédente">‹</button>'
-    +'<button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">›</button>'
     +'<div class="pred-grid crsl-scroll" id="pred-cards"></div>'
+    +'<div class="crsl-nav">'
+    +'<button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance précédente">‹</button>'
     +'<div class="crsl-track"><div class="crsl-thumb"></div></div>'
+    +'<button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">›</button>'
+    +'</div>'
     +'</div>';
   renderPredCards();
 }
@@ -2693,10 +2694,12 @@ function renderRecords(){
   const empty=shown.length?'':'<div class="rec-out-empty" style="padding:20px;text-align:center">Aucun record. Importe une fiche FFA (les records s\u2019extraient de l\u2019historique) ou ajoute une distance manuellement.</div>';
   const grid=shown.length>1
     ? '<div class="crsl">'
-      +'<button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance pr\u00e9c\u00e9dente">\u2039</button>'
-      +'<button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">\u203a</button>'
       +'<div class="rec-grid crsl-scroll">'+cards+'</div>'
+      +'<div class="crsl-nav">'
+      +'<button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance pr\u00e9c\u00e9dente">\u2039</button>'
       +'<div class="crsl-track"><div class="crsl-thumb"></div></div>'
+      +'<button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">\u203a</button>'
+      +'</div>'
       +'</div>'
     : '<div class="rec-grid">'+cards+'</div>';
   el.innerHTML=`${grid}${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
