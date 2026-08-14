@@ -2771,10 +2771,12 @@ function renderChart(){
   const cv=document.getElementById('perf-chart');
   if(!cv||typeof Chart==='undefined'||!S.vma)return;
   const vmaMs=S.vma/3.6;
-  const labels=CHART_DISTS.map(r=>r.nm);
-  const paceHi=CHART_DISTS.map(r=>Math.round(1000/(r.vmaHi*vmaMs)));
-  const paceLo=CHART_DISTS.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
-  const recPace=CHART_DISTS.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
+  // Ne garder que les distances pour lesquelles un temps a été renseigné (record ou historique récent)
+  const dists=CHART_DISTS.filter(r=>chartSeconds(r.id)!=null);
+  const labels=dists.map(r=>r.nm);
+  const paceHi=dists.map(r=>Math.round(1000/(r.vmaHi*vmaMs)));
+  const paceLo=dists.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
+  const recPace=dists.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
   const hasRec=recPace.some(v=>v!=null);
   const emptyEl=document.getElementById('perf-empty');
   if(emptyEl){
@@ -2799,7 +2801,7 @@ function renderChart(){
     plugins:{
       legend:{display:false},
       tooltip:{callbacks:{label:ctx=>{
-        const r=CHART_DISTS[ctx.dataIndex];const sec=ctx.parsed.y;if(sec==null)return null;
+        const r=dists[ctx.dataIndex];const sec=ctx.parsed.y;if(sec==null)return null;
         const pct=Math.round((1000/sec)*3.6/S.vma*100);
         return `${ctx.dataset.label}: ${fmt(sec)}/km · ${pct}% VMA · ${fh(sec*r.d/1000)}`;
       }}}
