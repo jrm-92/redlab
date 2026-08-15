@@ -3044,9 +3044,10 @@ function refreshPubBadge(id){
   var newEl=tmp.firstElementChild;
   if(newEl)el.replaceWith(newEl); else el.remove();
 }
-function markPublished(id){
+function markPublished(id,token){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
   a.pubAt=Date.now();
+  if(token)a.accessToken=token;
   _persistAthletes(list);
   refreshPubBadge(id);
 }
@@ -3068,7 +3069,7 @@ async function publishAthleteCore(id){
   try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
   catch(e){ return {error:e.message}; }
   if(r&&r.error)return {error:r.error.message};
-  markPublished(id);
+  markPublished(id,r&&r.data&&r.data.access_token);
   return {ok:true,size:doc.length};
 }
 var _autoPubTimers={};
@@ -3087,6 +3088,7 @@ function saveCurrentAthlete(){
     pseudo:S.pseudo,
     email:existing>=0?(athletes[existing].email||''):'',
     pubAt:existing>=0?athletes[existing].pubAt:null,
+    accessToken:existing>=0?athletes[existing].accessToken:null,
     modAt:Date.now(),
     savedAt:new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),
     mode:S.mode,vma:S.vma,csKmh:S.csKmh,dp:S.dp,
@@ -6484,11 +6486,14 @@ async function _spacesUpsert(email,doc,pseudo){
   if(!sess||!sess.access_token){ _cloudUser=null; if(typeof cloudFabState==='function')cloudFabState(); if(typeof showAuthGate==='function')showAuthGate(); return {error:{message:'session expirée — reconnecte-toi puis reclique Publier'}}; }
   var cli;
   try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false,storageKey:'redlab_tmp_auth'},global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
+  // .select() ici (sur le client fraîchement (re)authentifié ci-dessus) pour récupérer le jeton
+  // tout de suite : une lecture différée via _sb (session éventuellement périmée) peut échouer
+  // silencieusement côté RLS et faire retomber « Lien » sur l'URL générique.
   return await cli.from('athlete_spaces').upsert(
     [{email:String(email).trim().toLowerCase(),coach_id:sess.user.id,
       data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc},
       updated_at:new Date().toISOString()}],
-    {onConflict:'email'});
+    {onConflict:'email'}).select('access_token').maybeSingle();
 }
 // Pousse la fiche complète (dashboard épuré) de l'athlète actuellement chargé, s'il a un email.
 // Exporte l'état LIVE de S (brouillon non encore « Sauvegardé ») afin que l'espace suive
@@ -6505,7 +6510,7 @@ async function cloudPushSpaces(){
   if(!doc)return;
   try{
     var r=await _spacesUpsert(cur.email,doc,S.pseudo);
-    if(!r||!r.error)markPublished(cur.id);
+    if(!r||!r.error)markPublished(cur.id,r&&r.data&&r.data.access_token);
   }catch(e){}
 }
 function setAthleteEmail(id,val){
@@ -6521,13 +6526,22 @@ function setAthleteEmail(id,val){
 }
 // Copie le lien personnel de l'athlète (avec son jeton d'accès) s'il a déjà été publié une fois,
 // sinon retombe sur le lien générique (écran email/lien magique).
+// Le jeton est d'abord cherché en local (capturé lors de la dernière publication) : une lecture
+// réseau via _sb peut échouer silencieusement (session périmée / RLS) et faire retomber sur le
+// lien générique alors que l'espace est bel et bien publié.
 async function copyEspaceLink(id,btn){
   var url=ESPACE_URL;
   try{
     var ath=getAthletes().find(function(x){return x.id===id;});
-    if(ath&&ath.email&&_sb){
+    if(ath&&ath.accessToken){
+      url=ESPACE_URL+'?a='+ath.accessToken;
+    } else if(ath&&ath.email&&_sb){
       var r=await _sb.from('athlete_spaces').select('access_token').eq('email',String(ath.email).trim().toLowerCase()).maybeSingle();
-      if(r.data&&r.data.access_token) url=ESPACE_URL+'?a='+r.data.access_token;
+      if(r.data&&r.data.access_token){
+        url=ESPACE_URL+'?a='+r.data.access_token;
+        var list=getAthletes(); var a2=list.find(function(x){return x.id===id;});
+        if(a2){ a2.accessToken=r.data.access_token; _persistAthletes(list); }
+      }
     }
   }catch(e){}
   try{ navigator.clipboard.writeText(url); }catch(e){}
