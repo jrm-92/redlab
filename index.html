@@ -1218,6 +1218,9 @@ input[type=range]{touch-action:none}
 .ath-espace-pub{width:100%;margin-top:7px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;color:var(--success-300);font-family:var(--font);font-size:12.5px;font-weight:800;padding:8px;cursor:pointer;transition:background .15s}
 .ath-espace-pub:hover{background:rgba(52,211,153,0.2)}
 .ath-espace-pub:disabled{opacity:.6;cursor:default}
+.ath-pub-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;margin:2px 0 6px;letter-spacing:.2px}
+.ath-pub-badge.ok{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.4);color:#34D399}
+.ath-pub-badge.pending{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#FBBF24}
 /* Écran de connexion coach (porte d'entrée) */
 #auth-gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
 #auth-gate::before{content:'';position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:520px;height:320px;background:radial-gradient(ellipse at center,rgba(255,107,26,0.16),transparent 70%);pointer-events:none}
@@ -3015,8 +3018,64 @@ const ATH_KEY='redlab_athletes_v1';
 function getAthletes(){
   try{const r=localStorage.getItem(ATH_KEY);return r?JSON.parse(r):[];}catch(e){return [];}
 }
-function _saveAthletes(list){
+function _persistAthletes(list){
   try{localStorage.setItem(ATH_KEY,JSON.stringify(list));}catch(e){}
+}
+function _saveAthletes(list){ _persistAthletes(list); }
+// ── Statut de publication espace (badge) ──
+function _fmtDT(ts){
+  if(!ts)return '';
+  var d=new Date(ts);
+  return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+function pubBadgeHTML(a){
+  if(!a.email)return '';
+  var synced=a.pubAt&&(!a.modAt||a.pubAt>=a.modAt);
+  if(synced)return '<span class="ath-pub-badge ok" id="pub-badge-'+a.id+'">✓ Publié le '+_fmtDT(a.pubAt)+'</span>';
+  if(a.pubAt)return '<span class="ath-pub-badge pending" id="pub-badge-'+a.id+'">● Modifications non publiées</span>';
+  return '<span class="ath-pub-badge pending" id="pub-badge-'+a.id+'">○ Jamais publié</span>';
+}
+function refreshPubBadge(id){
+  var el=document.getElementById('pub-badge-'+id);
+  var a=getAthletes().find(function(x){return x.id===id;});
+  if(!el||!a)return;
+  var html=pubBadgeHTML(a);
+  var tmp=document.createElement('div'); tmp.innerHTML=html;
+  var newEl=tmp.firstElementChild;
+  if(newEl)el.replaceWith(newEl); else el.remove();
+}
+function markPublished(id){
+  var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
+  a.pubAt=Date.now();
+  _persistAthletes(list);
+  refreshPubBadge(id);
+}
+// Publie la fiche d'un athlète (par id) vers son espace, sans exiger qu'il soit chargé dans le dashboard.
+async function publishAthleteCore(id){
+  var ath=getAthletes().find(function(x){return x.id===id;});
+  if(!ath)return {error:'athlète introuvable'};
+  if(!ath.email||ath.email.indexOf('@')<0)return {error:'email manquant'};
+  try{
+    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
+    _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+    if(typeof renderDashboard==='function')renderDashboard();
+  }catch(e){ return {error:'rendu du dashboard — '+e.message}; }
+  var doc;
+  try{ doc=exportAthleteView(true); }catch(e){ return {error:'génération de la fiche — '+e.message}; }
+  if(!doc)return {error:'fiche vide (VMA/VC manquante pour cet athlète ?)'};
+  try{ saveLS(); }catch(e){}
+  var r;
+  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
+  catch(e){ return {error:e.message}; }
+  if(r&&r.error)return {error:r.error.message};
+  markPublished(id);
+  return {ok:true,size:doc.length};
+}
+var _autoPubTimers={};
+function autoPublish(id){
+  if(typeof _cloudUser==='undefined'||!_cloudUser)return;
+  clearTimeout(_autoPubTimers[id]);
+  _autoPubTimers[id]=setTimeout(function(){ publishAthleteCore(id); },900);
 }
 
 function saveCurrentAthlete(){
@@ -3027,6 +3086,8 @@ function saveCurrentAthlete(){
     id:existing>=0?athletes[existing].id:Date.now(),
     pseudo:S.pseudo,
     email:existing>=0?(athletes[existing].email||''):'',
+    pubAt:existing>=0?athletes[existing].pubAt:null,
+    modAt:Date.now(),
     savedAt:new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),
     mode:S.mode,vma:S.vma,csKmh:S.csKmh,dp:S.dp,
     csMethod:S.csMethod,csR2:S.csR2,
@@ -3052,6 +3113,7 @@ function saveCurrentAthlete(){
   ath.history=hist;
   if(existing>=0){athletes[existing]=ath;}else{athletes.unshift(ath);}
   _saveAthletes(athletes);
+  if(ath.email)autoPublish(ath.id);
   // Feedback visuel
   const btn=document.getElementById('btn-save-ath');
   if(btn){
@@ -3222,6 +3284,7 @@ function renderAthletes(){
       </div>
       <div class="ath-espace">
         <label>Espace client · email de connexion</label>
+        ${pubBadgeHTML(a)}
         <div class="ath-espace-row">
           <input type="email" inputmode="email" placeholder="athlete@email.fr" value="${a.email||''}" onchange="setAthleteEmail(${a.id},this.value)">
           <button class="ath-espace-copy" onclick="copyEspaceLink(${a.id},this)" title="Copier le lien de l'espace">Lien</button>
@@ -6428,21 +6491,33 @@ async function _spacesUpsert(email,doc,pseudo){
     {onConflict:'email'});
 }
 // Pousse la fiche complète (dashboard épuré) de l'athlète actuellement chargé, s'il a un email.
+// Exporte l'état LIVE de S (brouillon non encore « Sauvegardé ») afin que l'espace suive
+// les modifications en cours sans attendre un clic explicite sur Sauvegarder.
 async function cloudPushSpaces(){
   if(!_cloudUser||!_sb)return;
   if(!S.vma&&!S.csKmh)return;
-  var cur=getAthletes().find(function(a){return a.pseudo===S.pseudo;});
+  var list=getAthletes();
+  var cur=list.find(function(a){return a.pseudo===S.pseudo;});
   if(!cur||!cur.email||cur.email.indexOf('@')<0)return;
+  cur.modAt=Date.now(); _persistAthletes(list); refreshPubBadge(cur.id);
   try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
   var doc; try{ doc=exportAthleteView(true); }catch(e){ return; }
   if(!doc)return;
-  try{ await _spacesUpsert(cur.email,doc,S.pseudo); }catch(e){}
+  try{
+    var r=await _spacesUpsert(cur.email,doc,S.pseudo);
+    if(!r||!r.error)markPublished(cur.id);
+  }catch(e){}
 }
 function setAthleteEmail(id,val){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
+  var hadEmail=!!a.email;
   a.email=(val||'').trim();
+  a.modAt=Date.now();
   _saveAthletes(list);
-  if(typeof _cloudUser!=='undefined'&&_cloudUser){ try{ cloudPushSpaces(); }catch(e){} }
+  // Le badge n'existe pas encore dans le DOM si la carte a été rendue avant que l'email soit renseigné.
+  if(!hadEmail&&a.email&&typeof renderAthletes==='function')renderAthletes();
+  else refreshPubBadge(id);
+  autoPublish(id);
 }
 // Copie le lien personnel de l'athlète (avec son jeton d'accès) s'il a déjà été publié une fois,
 // sinon retombe sur le lien générique (écran email/lien magique).
@@ -6462,27 +6537,14 @@ async function copyEspaceLink(id,btn){
 async function publishAthlete(id,btn){
   var o=btn?btn.textContent:'';
   function restore(){ if(btn){btn.disabled=false;btn.textContent=o||'↑ Publier l\'espace';} }
-  function fail(m){ restore(); alert('Publication échouée : '+m); }
   if(typeof _cloudUser==='undefined'||!_cloudUser){alert('Connecte-toi au cloud (☁, en bas de la barre latérale) pour publier l\'espace.');return;}
   var ath=getAthletes().find(function(x){return x.id===id;});
   if(!ath)return;
   if(!ath.email||ath.email.indexOf('@')<0){alert('Renseigne d\'abord l\'email de l\'athlète (champ juste au-dessus).');return;}
   if(btn){btn.disabled=true;btn.textContent='Publication…';}
-  // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
-  try{
-    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
-    _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
-    if(typeof renderDashboard==='function')renderDashboard();
-  }catch(e){ return fail('rendu du dashboard — '+e.message); }
-  var doc;
-  try{ doc=exportAthleteView(true); }catch(e){ return fail('génération de la fiche — '+e.message); }
-  if(!doc){ return fail('fiche vide (VMA/VC manquante pour cet athlète ?)'); }
-  try{ saveLS(); }catch(e){}
-  var r;
-  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
-  catch(e){ return fail(e.message); }
-  if(r&&r.error){ return fail(r.error.message); }
-  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
+  var r=await publishAthleteCore(id);
+  if(r&&r.error){ restore(); alert('Publication échouée : '+r.error); return; }
+  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(r.size/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
 }
 async function cloudPull(){
   if(!_cloudUser)return;
