@@ -2481,6 +2481,11 @@ function buildRaces(){
   const dRef=vma*100;
   function defPace(r){
     let tSec;
+    // Course à venir (objectif) : caler le curseur sur le chrono visé plutôt que sur la prédiction du modèle
+    if(S.goal&&S.goal.id===r.id&&S.goal.t){
+      tSec=S.goal.t;
+      return Math.min(Math.max(Math.round(tSec/r.d*1000),r.lo),r.hi);
+    }
     // Calé sur les Plages de performance : médiane de perfRange (même modèle, mêmes coefficients)
     const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===r.id):null;
     if(pr&&(csKmh||vma)){
