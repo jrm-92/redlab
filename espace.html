@@ -107,6 +107,8 @@ a{color:var(--accent)}
 .save-hint-txt b{color:var(--text)}
 .save-hint-x{background:none;border:none;color:var(--muted2);font-size:19px;line-height:1;cursor:pointer;padding:0 2px;flex-shrink:0}
 .save-hint-x:hover{color:var(--text)}
+.save-hint-mail{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;border:1px solid rgba(255,107,26,.4);border-radius:8px;padding:6px 11px}
+.save-hint-mail:hover{background:rgba(255,107,26,.12)}
 .foot{text-align:center;color:var(--muted2);font-size:12px;padding:34px 16px;line-height:1.8}
 .foot b{color:var(--accent)}
 .hidden{display:none!important}
@@ -307,13 +309,22 @@ function isStandalone(){
 function isIOS(){
   return /iP(hone|od|ad)/.test(navigator.platform||'') || (/Mac/.test(navigator.platform||'')&&'ontouchend' in document);
 }
+function mailtoMyLink(){
+  if(!_myLink) return '';
+  var subject=encodeURIComponent('Mon espace RedLab');
+  var body=encodeURIComponent('Voici le lien permanent vers mon espace RedLab (accessible même après avoir vidé le navigateur) :\n\n'+_myLink+'\n\n— Reding Running');
+  return 'mailto:'+(_myEmail?encodeURIComponent(_myEmail):'')+'?subject='+subject+'&body='+body;
+}
 function initSaveHint(){
   var el=document.getElementById('save-hint'); if(!el) return;
   if(isStandalone()||localStorage.getItem('redlab_save_hint_dismissed')){ el.innerHTML=''; return; }
   var msg=isIOS()
     ? 'Appuie sur <b>Partager</b> (icône ⬆️ en bas de Safari) puis <b>« Sur l’écran d’accueil »</b>.'
     : 'Menu du navigateur → <b>« Ajouter à l’écran d’accueil »</b> (mobile) ou ajoute cette page à tes favoris (ordinateur).';
-  el.innerHTML='<div class="save-hint"><div class="save-hint-txt">📲 <b>Garde cet accès sous la main :</b> '+msg+' Tu retrouveras ta fiche en un geste, sans redemander de lien.</div>'
+  var mailto=mailtoMyLink();
+  var mailBtn=mailto?'<a class="save-hint-mail" href="'+mailto+'">✉️ Recevoir ce lien par email</a>':'';
+  el.innerHTML='<div class="save-hint"><div class="save-hint-txt">📲 <b>Garde cet accès sous la main :</b> '+msg+' Tu retrouveras ta fiche en un geste, sans redemander de lien.'
+    +(mailBtn?'<div style="margin-top:9px">'+mailBtn+'</div>':'')+'</div>'
     +'<button type="button" class="save-hint-x" onclick="dismissSaveHint()" aria-label="Fermer">×</button></div>';
 }
 function dismissSaveHint(){
@@ -342,14 +353,17 @@ function showRow(label,row){
 }
 
 // ── Init : lien personnel (jeton) en priorité, sinon session email, sinon login ──
+var _myLink=null,_myEmail=null;
 async function boot(){
   if(!_sb){show('login');return;}
   show('loading');
+  var base=location.href.split('?')[0].split('#')[0];
   var tok=new URLSearchParams(location.search).get('a');
   if(tok){
     var rt=await _sb.rpc('get_athlete_space_by_token',{p_token:tok});
     if(!rt.error&&rt.data){
       var sob=document.getElementById('signout-btn'); if(sob)sob.style.display='none';
+      _myLink=base+'?a='+tok;
       showRow(rt.data.pseudo||'Athlète', rt.data);
       return;
     }
@@ -359,9 +373,11 @@ async function boot(){
   var sess=s&&s.data&&s.data.session;
   if(!sess){ show('login'); return; }
   var email=sess.user.email;
-  var q=await _sb.from('athlete_spaces').select('data').ilike('email',email).maybeSingle();
+  var q=await _sb.from('athlete_spaces').select('data,access_token').ilike('email',email).maybeSingle();
   if(q.error){ document.getElementById('content').innerHTML='<div class="spin">Erreur de lecture : '+esc(q.error.message)+'</div>'; show('fiche'); return; }
   var row=q.data?q.data.data:null;
+  _myEmail=email;
+  if(q.data&&q.data.access_token) _myLink=base+'?a='+q.data.access_token;
   showRow(email, row);
 }
 _sb&&_sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_IN'){ history.replaceState(null,'',location.pathname); boot(); } });
