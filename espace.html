@@ -103,6 +103,10 @@ a{color:var(--accent)}
 .topbar .sp{flex:1}
 .linkbtn{background:none;border:1px solid var(--border2);border-radius:9px;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;padding:7px 13px;cursor:pointer}
 .linkbtn:hover{border-color:var(--accent);color:var(--accent)}
+.save-hint{display:flex;align-items:flex-start;gap:10px;background:rgba(255,107,26,.08);border:1px solid rgba(255,107,26,.28);border-radius:12px;padding:12px 14px;margin:4px 0 16px;font-size:12.5px;line-height:1.6;color:var(--text2)}
+.save-hint-txt b{color:var(--text)}
+.save-hint-x{background:none;border:none;color:var(--muted2);font-size:19px;line-height:1;cursor:pointer;padding:0 2px;flex-shrink:0}
+.save-hint-x:hover{color:var(--text)}
 .foot{text-align:center;color:var(--muted2);font-size:12px;padding:34px 16px;line-height:1.8}
 .foot b{color:var(--accent)}
 .hidden{display:none!important}
@@ -157,6 +161,7 @@ a{color:var(--accent)}
       <button class="linkbtn" onclick="location.reload()">↻ Actualiser</button>
       <button class="linkbtn" id="signout-btn" onclick="signOut()">Se déconnecter</button>
     </div>
+    <div id="save-hint"></div>
     <div id="content"></div>
   </div>
 </div>
@@ -294,10 +299,33 @@ function kpi(l,v,s){return '<div class="kpi"><div class="l">'+esc(l)+'</div><div
 
 function show(id){['login','loading','fiche'].forEach(function(x){document.getElementById(x).classList.toggle('hidden',x!==id);});}
 
+// Incite à enregistrer la page (écran d'accueil mobile / favoris PC) pour y revenir
+// en un tap, sans repasser par un lien par email à chaque fois.
+function isStandalone(){
+  try{ return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true; }catch(e){ return false; }
+}
+function isIOS(){
+  return /iP(hone|od|ad)/.test(navigator.platform||'') || (/Mac/.test(navigator.platform||'')&&'ontouchend' in document);
+}
+function initSaveHint(){
+  var el=document.getElementById('save-hint'); if(!el) return;
+  if(isStandalone()||localStorage.getItem('redlab_save_hint_dismissed')){ el.innerHTML=''; return; }
+  var msg=isIOS()
+    ? 'Appuie sur <b>Partager</b> (icône ⬆️ en bas de Safari) puis <b>« Sur l’écran d’accueil »</b>.'
+    : 'Menu du navigateur → <b>« Ajouter à l’écran d’accueil »</b> (mobile) ou ajoute cette page à tes favoris (ordinateur).';
+  el.innerHTML='<div class="save-hint"><div class="save-hint-txt">📲 <b>Garde cet accès sous la main :</b> '+msg+' Tu retrouveras ta fiche en un geste, sans redemander de lien.</div>'
+    +'<button type="button" class="save-hint-x" onclick="dismissSaveHint()" aria-label="Fermer">×</button></div>';
+}
+function dismissSaveHint(){
+  localStorage.setItem('redlab_save_hint_dismissed','1');
+  var el=document.getElementById('save-hint'); if(el) el.innerHTML='';
+}
+
 // Affiche la fiche (ou le message d'attente) pour une ligne athlete_spaces donnée,
 // que ce soit via session email ou via lien personnel (jeton).
 function showRow(label,row){
   document.getElementById('who').textContent='Connecté : '+label;
+  initSaveHint();
   if(row&&row.html){
     // Fiche complète (dashboard épuré) rendue telle quelle dans un cadre isolé
     var br=document.querySelector('.brand'); if(br)br.style.display='none';
