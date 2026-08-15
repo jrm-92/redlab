@@ -2170,18 +2170,18 @@ function resetAll(){
 
 /* ══ ZONES ══ */
 const ZONES_VC=[
-  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile — base aérobie, filière lipidique'},
-  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues, allure marathon'},
-  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, efforts 30 min à 1h30 (2×20 min, 3×15 min)'},
-  {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min (1000-1600 m), allure 10 km — puissance aérobie'},
-  {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m — vitesse neuromusculaire, capacité anaérobie'},
+  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile'},
+  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues'},
+  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, 30 min à 1h30'},
+  {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min, allure 10 km'},
+  {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m'},
 ];
 const ZONES_VMA=[
-  {z:1,n:'Récupération',             pct:'60–70%', lo:0.60,hi:0.70, fcLo:55, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Je peux parler sans aucune difficulté',     rpe:'2–3',  use:'Footing très facile, récupération entre séances, décrassage'},
-  {z:2,n:'Endurance fondamentale',   pct:'70–80%', lo:0.70,hi:0.80, fcLo:65, fcHi:75,  cls:'z2',col:'#60A5FA', talk:'Je peux tenir une conversation normale',     rpe:'3–4',  use:'Footings quotidiens, sorties longues, développement de la base aérobie'},
-  {z:3,n:'Endurance active / Tempo', pct:'80–88%', lo:0.80,hi:0.88, fcLo:75, fcHi:83,  cls:'z3',col:'#34D399', talk:'Je peux parler mais je dois faire des pauses', rpe:'5–6',  use:'Footings soutenus, blocs d’endurance active, travail d’allure marathon'},
-  {z:4,n:'Seuil',                    pct:'88–93%', lo:0.88,hi:0.94, fcLo:83, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Je peux dire seulement quelques mots',       rpe:'7–8',  use:'Intervalles longs, tempo soutenu, travail au seuil lactique'},
-  {z:5,n:'VO₂max',                   pct:'95–105%',lo:0.94,hi:1.05, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'Je ne peux plus parler',                    rpe:'9–10', use:'Intervalles courts à moyens, répétitions VMA, développement VO₂max'},
+  {z:1,n:'Récupération',             pct:'60–70%', lo:0.60,hi:0.70, fcLo:55, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Aucune difficulté à parler',   rpe:'2–3',  use:'Footing très facile, récup'},
+  {z:2,n:'Endurance fondamentale',   pct:'70–80%', lo:0.70,hi:0.80, fcLo:65, fcHi:75,  cls:'z2',col:'#60A5FA', talk:'Conversation normale',         rpe:'3–4',  use:'Footings, sorties longues, base aérobie'},
+  {z:3,n:'Endurance active / Tempo', pct:'80–88%', lo:0.80,hi:0.88, fcLo:75, fcHi:83,  cls:'z3',col:'#34D399', talk:'Parler avec des pauses',       rpe:'5–6',  use:'Footings soutenus, allure marathon'},
+  {z:4,n:'Seuil',                    pct:'88–93%', lo:0.88,hi:0.94, fcLo:83, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Quelques mots seulement',      rpe:'7–8',  use:'Intervalles longs, tempo, seuil lactique'},
+  {z:5,n:'VO₂max',                   pct:'95–105%',lo:0.94,hi:1.05, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'Impossible de parler',         rpe:'9–10', use:'Intervalles courts/moyens, répétitions VMA'},
 ];
 
 /* ══ RENDER DASHBOARD ══ */
@@ -2326,12 +2326,11 @@ function renderZones(){
     const pctStr=z.pct;
     rows+=`<tr>
       <td class="zn-badge" data-label=""><span class="zb ${z.cls}">Z${z.z}</span></td>
-      <td class="zn-domain" data-label="" style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}</td>
+      <td class="zn-domain" data-label="" style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}${z.talk?`<div style="font-size:10.5px;font-style:italic;color:var(--muted);margin-top:3px;line-height:1.4">💬 ${z.talk}</div>`:''}</td>
       <td class="zn-break" aria-hidden="true"></td>
       <td class="col-num hide-mob" data-label="${pctCol}" style="color:var(--muted2)">${pctStr}</td>
       <td class="col-num" data-label="Vitesse" style="font-weight:600;color:${z.col}">${vStr}</td>
       <td data-label="Allure" style="color:var(--text2)">${aStr}</td>
-      <td class="hide-mob" data-label="Talk test" style="color:var(--muted2);font-size:12px">${z.talk}</td>
       <td data-label="RPE" style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
       ${fcC(z.fcLo,z.fcHi,z.col)}
     </tr>`;
@@ -2347,7 +2346,7 @@ function renderZones(){
     <div class="tbl-wrap"><table class="zones-tbl">
       <thead><tr>
         <th>Zone</th><th>Domaine d'intensité</th><th class="col-num hide-mob">${pctCol}</th><th class="col-num">Vitesse</th><th>Allure /km</th>
-        <th class="hide-mob">Talk test</th><th>RPE</th>
+        <th>RPE</th>
         ${fcH}
       </tr></thead>
       <tbody>${rows}</tbody>

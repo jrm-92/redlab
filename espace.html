@@ -178,11 +178,11 @@ function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'
 
 // ── Référentiels (identiques à RedLab) ──
 var ZONES_VMA=[
- {z:1,n:'Récupération',lo:.60,hi:.70,col:'#94A3B8',talk:'Je peux parler sans aucune difficulté',rpe:'2–3'},
- {z:2,n:'Endurance fondamentale',lo:.70,hi:.80,col:'#60A5FA',talk:'Je peux tenir une conversation normale',rpe:'3–4'},
- {z:3,n:'Endurance active / Tempo',lo:.80,hi:.88,col:'#34D399',talk:'Je peux parler mais je dois faire des pauses',rpe:'5–6'},
- {z:4,n:'Seuil',lo:.88,hi:.94,col:'#FB923C',talk:'Je peux dire seulement quelques mots',rpe:'7–8'},
- {z:5,n:'VO₂max',lo:.94,hi:1.05,col:'#F87171',talk:'Je ne peux plus parler',rpe:'9–10'}
+ {z:1,n:'Récupération',lo:.60,hi:.70,col:'#94A3B8',talk:'Aucune difficulté à parler',rpe:'2–3'},
+ {z:2,n:'Endurance fondamentale',lo:.70,hi:.80,col:'#60A5FA',talk:'Conversation normale',rpe:'3–4'},
+ {z:3,n:'Endurance active / Tempo',lo:.80,hi:.88,col:'#34D399',talk:'Parler avec des pauses',rpe:'5–6'},
+ {z:4,n:'Seuil',lo:.88,hi:.94,col:'#FB923C',talk:'Quelques mots seulement',rpe:'7–8'},
+ {z:5,n:'VO₂max',lo:.94,hi:1.05,col:'#F87171',talk:'Impossible de parler',rpe:'9–10'}
 ];
 var ZONES_VC=[
  {z:1,n:'Modéré',lo:.60,hi:.81,col:'#94A3B8',talk:'Conversation fluide',rpe:'2–3'},
@@ -240,16 +240,15 @@ function renderFiche(email,d){
   h+='</div>';
   // Zones
   h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div><div class="tblwrap"><table class="tbl zones-tbl">'
-    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th class="hide-mob">Ressenti</th><th>RPE</th></tr></thead><tbody>';
+    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th>RPE</th></tr></thead><tbody>';
   R.zones.forEach(function(z){
     var vlo=(v*z.lo),vhi=(v*z.hi);
     h+='<tr>'
       +'<td class="zn-badge" data-label=""><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span></td>'
-      +'<td class="zn-domain" data-label=""><b style="color:var(--text)">'+esc(z.n)+'</b><br><span style="color:var(--muted2);font-size:11.5px">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+'%</span></td>'
+      +'<td class="zn-domain" data-label=""><b style="color:var(--text)">'+esc(z.n)+'</b><br><span style="color:var(--muted2);font-size:11.5px">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+'%</span>'+(z.talk?'<div style="font-size:10.5px;font-style:italic;color:var(--muted);margin-top:3px;line-height:1.4">💬 '+esc(z.talk)+'</div>':'')+'</td>'
       +'<td class="zn-break" aria-hidden="true"></td>'
       +'<td data-label="Vitesse" style="color:'+z.col+';font-weight:800">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'</td>'
       +'<td data-label="Allure">'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'/km</td>'
-      +'<td class="hide-mob" data-label="Ressenti" style="font-size:12.5px;color:var(--muted)">'+esc(z.talk)+'</td>'
       +'<td data-label="RPE">'+z.rpe+'</td></tr>';
   });
   h+='</tbody></table></div>';
