@@ -2220,30 +2220,6 @@ function renderProfile(){
   const vcMode=S.mode==='tests'&&!!csKmh;
   const ref=csKmh||(vma*0.87);
 
-  // Bloc 1 — Profil
-  let profileName='',profileDesc='',profileCol='var(--orange)';
-  if(vcMode&&vma){
-    const r=csKmh/vma;
-    if(r>0.92){profileName='Profil Endurance';profileDesc='Forte capacité aérobie — performances optimales sur longues distances';profileCol='#34D399';}
-    else if(r>0.87){profileName='Profil Équilibré';profileDesc='Bonne polyvalence entre vitesse de pointe et endurance';profileCol='var(--orange)';}
-    else{profileName='Profil Vitesse';profileDesc='Profil explosif — meilleures performances sur courtes distances';profileCol='#60A5FA';}
-  } else if(!vcMode&&vma&&tmiSec!==null){
-    if(tmiSec<=240){profileName='VMA surestimée';profileDesc='Temps de maintien ≤ 4 min — votre VMA réelle est probablement inférieure';profileCol='#F87171';}
-    else if(tmiSec<=420){profileName='VMA correcte';profileDesc='Temps de maintien 5–7 min — votre VMA est validée';profileCol='#34D399';}
-    else{profileName='VMA sous-estimée';profileDesc='Temps de maintien > 7 min — votre VMA réelle est probablement supérieure';profileCol='#60A5FA';}
-  }
-  const b1=profileName?`
-    <div class="ph-block ph-full">
-      <div class="ph-b-lbl">Profil</div>
-      <div class="ph-b-val" style="color:${profileCol}">${profileName}</div>
-      <div class="ph-b-desc">${profileDesc}</div>
-    </div>`:
-    `<div class="ph-block ph-full">
-      <div class="ph-b-lbl">Profil</div>
-      <div class="ph-b-val" style="color:var(--muted2);font-size:14px">—</div>
-      <div class="ph-b-desc">${!vcMode&&vma?`<span onclick="go('input');openOpt('tmi-body','tmi-chev')" style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:3px">Effectuez le test TMI pour définir votre profil →</span>`:'Renseignez votre VMA pour obtenir votre profil'}</div>
-    </div>`;
-
   // Bloc 2 — VC / allure / D'
   const b2val=vcMode?csKmh:vma;
   const b2=`
@@ -2261,19 +2237,14 @@ function renderProfile(){
       <div class="ph-b-sub">capacité anaérobie</div>
     </div>`:'';
 
-  // Bloc 4 — FC
+  // Bloc 4 — FC : uniquement si renseignée en amont (saisie), plus de rappel/invite ici
   const b3=fcMax?`
     <div class="ph-block">
       <div class="ph-b-lbl">Fréquence Cardiaque</div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val" style="color:#F87171">${fcMax}</span><span class="ph-b-fc-lbl">bpm max</span></div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val" style="color:var(--muted)">${fcRest}</span><span class="ph-b-fc-lbl">bpm repos</span></div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val">${fcReserve}</span><span class="ph-b-fc-lbl">bpm réserve</span></div>
-    </div>`:
-    `<div class="ph-block">
-      <div class="ph-b-lbl">Fréquence Cardiaque</div>
-      <div class="ph-b-val" style="color:var(--muted2);font-size:14px">—</div>
-      <div class="ph-b-desc"><span onclick="go('input');openOpt('fc-opt-body','fc-chev')" style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:3px">Renseignez vos données cardiaques →</span></div>
-    </div>`;
+    </div>`:'';
 
   // Alertes qualité (mode tests)
   let warnHtml='';
@@ -2310,8 +2281,8 @@ function renderProfile(){
       </button>
     </div>`;
   document.getElementById('db-profile').innerHTML=`
-    <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
-      ${b0}${b1}${b2}${b3vma}${b3}${bActions}
+    <div class="profile-hero${(vcMode&&dp&&fcMax)?' ph-3col':''}">
+      ${b0}${b2}${b3vma}${b3}${bActions}
     </div>
     ${warnHtml}`;
 }
