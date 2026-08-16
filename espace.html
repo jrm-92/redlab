@@ -111,7 +111,19 @@ a{color:var(--accent)}
 .save-hint-mail:hover{background:rgba(255,107,26,.12)}
 .foot{text-align:center;color:var(--muted2);font-size:12px;padding:34px 16px;line-height:1.8}
 .foot b{color:var(--accent)}
+.foot a{color:var(--muted);text-decoration:underline}
+.foot a:hover{color:var(--accent)}
 .hidden{display:none!important}
+.priv-overlay{position:fixed;inset:0;z-index:9998;background:rgba(6,10,20,.72);display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto}
+.priv-modal{background:var(--card);border:1px solid var(--border2);border-radius:16px;max-width:620px;width:100%;padding:24px 22px 26px;margin:20px 0}
+.priv-modal h2{font-size:19px;margin:0 0 4px}
+.priv-modal .priv-sub{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+.priv-modal h3{font-size:13.5px;color:var(--accent);margin:20px 0 6px;text-transform:uppercase;letter-spacing:.4px}
+.priv-modal p,.priv-modal li{font-size:13.5px;color:var(--text2);line-height:1.7}
+.priv-modal ul{margin:6px 0 0;padding-left:18px}
+.priv-modal a{color:var(--accent)}
+.priv-close{display:block;margin:22px auto 0;background:var(--accent-soft,rgba(255,107,26,.12));border:1px solid rgba(255,107,26,.4);border-radius:9px;color:var(--accent);font-family:var(--font);font-size:13px;font-weight:800;padding:9px 20px;cursor:pointer}
+.priv-close:hover{background:rgba(255,107,26,.2)}
 .spin{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
 @media(max-width:640px){.hero-out{margin-left:0;text-align:left;width:100%}.rr .a{font-size:32px}.rr .b{font-size:15px;letter-spacing:5px}.brand .slg{display:none}}
 @media(max-width:700px){
@@ -168,7 +180,41 @@ a{color:var(--accent)}
   </div>
 </div>
 
-<div class="foot">Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.</div>
+<div class="foot">Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.<br><a href="#" onclick="showPrivacy();return false;">Confidentialité &amp; données personnelles</a></div>
+
+<div id="privacy-overlay" class="priv-overlay hidden" onclick="if(event.target===this)hidePrivacy();">
+  <div class="priv-modal">
+    <h2>Confidentialité &amp; données personnelles</h2>
+    <div class="priv-sub">Dernière mise à jour : 16 août 2026</div>
+
+    <h3>Responsable de traitement</h3>
+    <p><b>Reding Running</b> (Jérémy Reding), coach running, responsable du traitement des données présentées sur cet espace. Contact : <a href="mailto:jeremy.reding@outlook.fr">jeremy.reding@outlook.fr</a>.</p>
+
+    <h3>Données collectées</h3>
+    <p>Dans le cadre du suivi sportif, sont traitées : ton email (identifiant de connexion), ton pseudo/prénom, tes données de performance (VMA, vitesse critique, records, historique de courses), ta fréquence cardiaque si renseignée, tes objectifs de course et ton plan d'entraînement.</p>
+
+    <h3>Finalité et base légale</h3>
+    <p>Ces données sont utilisées exclusivement pour assurer ton suivi et ton coaching sportif personnalisé, dans le cadre de la relation contractuelle avec ton coach (exécution du contrat / intérêt légitime du suivi sportif).</p>
+
+    <h3>Destinataires</h3>
+    <ul>
+      <li>Ton coach (Reding Running), qui saisit et consulte tes données.</li>
+      <li><b>Supabase</b> (hébergeur de la base de données) agit comme sous-traitant technique pour le stockage sécurisé des données.</li>
+      <li>Le code de cette application est hébergé sur GitHub Pages, qui ne stocke aucune donnée personnelle : tes données ne transitent que via Supabase, jamais via GitHub.</li>
+    </ul>
+
+    <h3>Durée de conservation</h3>
+    <p>Tes données sont conservées le temps du suivi avec ton coach, puis supprimées sur simple demande ou à la fin de la relation de coaching.</p>
+
+    <h3>Tes droits</h3>
+    <p>Conformément au RGPD, tu disposes d'un droit d'accès, de rectification, d'effacement, de limitation et de portabilité de tes données. Pour les exercer, contacte ton coach à l'adresse ci-dessus. Tu peux aussi introduire une réclamation auprès de la <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">CNIL</a>.</p>
+
+    <h3>Sécurité</h3>
+    <p>L'accès à tes données est protégé (connexion chiffrée HTTPS, règles d'accès strictes en base : seul toi et ton coach pouvez consulter ta fiche). Aucune donnée n'est utilisée à des fins publicitaires, aucun traceur ni cookie de suivi n'est présent sur ce site — seul un stockage technique local (navigateur) est utilisé pour ton confort de connexion.</p>
+
+    <button type="button" class="priv-close" onclick="hidePrivacy()">Fermer</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -331,6 +377,8 @@ function dismissSaveHint(){
   localStorage.setItem('redlab_save_hint_dismissed','1');
   var el=document.getElementById('save-hint'); if(el) el.innerHTML='';
 }
+function showPrivacy(){ var el=document.getElementById('privacy-overlay'); if(el)el.classList.remove('hidden'); }
+function hidePrivacy(){ var el=document.getElementById('privacy-overlay'); if(el)el.classList.add('hidden'); }
 
 // Affiche la fiche (ou le message d'attente) pour une ligne athlete_spaces donnée,
 // que ce soit via session email ou via lien personnel (jeton).
