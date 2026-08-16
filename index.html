@@ -477,6 +477,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .rec-tw input::-webkit-inner-spin-button,.rec-tw input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .rec-tw .u{font-size:11.5px;color:var(--muted2);padding-right:7px;flex-shrink:0}
 .rec-colon{color:var(--muted2);font-weight:900;font-size:15px;text-align:center;flex-shrink:0}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .rec-out{border-top:1px solid var(--border);padding-top:14px;margin-top:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;min-height:30px}
 .rec-out-empty{font-size:12px;color:var(--muted2);text-align:center;width:100%;line-height:1.5}
 .rec-metric-lbl{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:4px}
@@ -1971,7 +1973,7 @@ table.lm-laps tbody tr{cursor:pointer}
                 <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
               </div>
               <div class="db-section-title">Courbe de performance</div>
-              <div class="db-section-badge">Prédictions vs résultats &lt; 6 mois</div>
+              <div class="db-section-badge">Prédictions vs vos records</div>
             </div>
             <div class="card" style="padding:20px">
               <div id="perf-legend" class="perf-legend"></div>
@@ -3002,7 +3004,7 @@ function renderRecords(){
     const mm=rec.mm!=null?rec.mm:'';
     const ss=rec.ss!=null?rec.ss:'';
     const timeRow=r.hasH
-      ? `<div style="display:grid;grid-template-columns:1fr 8px 1fr 8px 1fr;align-items:center;gap:3px">
+      ? `<div style="display:grid;grid-template-columns:46px 6px 1fr 6px 1fr;align-items:center;gap:3px">
           <div class="rec-tw"><input type="number" id="rec-hh-${r.id}" min="0" max="9" step="1" placeholder="1" value="${hh}" oninput="updRecord('${r.id}')"><span class="u">h</span></div>
           <span class="rec-colon">:</span>
           <div class="rec-tw"><input type="number" id="rec-mm-${r.id}" min="0" max="59" step="1" placeholder="45" value="${mm}" oninput="updRecord('${r.id}')"><span class="u">min</span></div>
@@ -3097,10 +3099,9 @@ const PERF_WINDOW_DAYS=183; // ~6 mois
 function chartSeconds(id){
   const rh=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id);
   if(rh.length){
-    const cutoff=Date.now()-PERF_WINDOW_DAYS*24*3600*1000;
-    const recent=rh.filter(r=>r.ts>=cutoff&&r.sec>=30);
-    if(!recent.length)return null;
-    return Math.min.apply(null,recent.map(r=>r.sec));
+    const valid=rh.filter(r=>r.sec>=30);
+    if(!valid.length)return null;
+    return Math.min.apply(null,valid.map(r=>r.sec));
   }
   return recSeconds(id);
 }
@@ -3121,7 +3122,7 @@ function renderChart(){
     emptyEl.style.display=hasRec?'none':'block';
     const hasHist=(S.raceHistory||[]).some(r=>r&&r.ts!=null);
     emptyEl.textContent=hasHist
-      ? "Aucun résultat de moins de 6 mois : la courbe reflète la forme récente. Importe une fiche à jour ou saisis un record."
+      ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
       : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.";
   }
   const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
