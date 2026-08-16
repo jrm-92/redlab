@@ -231,6 +231,11 @@ input::placeholder,textarea::placeholder{color:var(--muted2)!important;opacity:.
 
 /* ── TABLE ── */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+.tbl-wrap,.hscroll{scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.55) transparent;-webkit-overflow-scrolling:touch}
+.tbl-wrap::-webkit-scrollbar,.hscroll::-webkit-scrollbar{height:9px}
+.tbl-wrap::-webkit-scrollbar-track,.hscroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.05);border-radius:9px}
+.tbl-wrap::-webkit-scrollbar-thumb,.hscroll::-webkit-scrollbar-thumb{background:rgba(255,107,26,.5);border-radius:9px}
+.tbl-wrap::-webkit-scrollbar-thumb:hover,.hscroll::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 table{width:100%;border-collapse:collapse;font-family:var(--font)}
 thead th{
   text-align:left;padding:12px 16px;font-size:11.5px;font-weight:700;
@@ -1954,7 +1959,7 @@ table.lm-laps tbody tr{cursor:pointer}
                 <button class="btn-road-apply" onclick="addManualRace()" style="width:auto;margin:0;padding:8px 16px">+ Ajouter</button>
               </div>
               <div id="hist-empty" style="text-align:center;color:var(--muted2);font-size:13px;padding:18px 10px;line-height:1.6">Aucune course. Utilise <strong style="color:var(--orange)">Importer depuis une fiche</strong> (section Records) ou ajoute une course manuellement ci-dessus.</div>
-              <div id="hist-chart-wrap" style="position:relative;height:300px;display:none"><canvas id="hist-chart"></canvas></div>
+              <div id="hist-chart-wrap" class="hscroll" style="height:300px;display:none;overflow-x:auto"><div id="hist-chart-inner" style="position:relative;height:300px;min-width:100%"><canvas id="hist-chart"></canvas></div></div>
               <div id="hist-list"></div>
             </div>
           </div>
@@ -2630,19 +2635,14 @@ function renderProfile(){
       <div class="ph-b-sub">capacité anaérobie</div>
     </div>`:'';
 
-  // Bloc 4 — FC
+  // Bloc 4 — FC (masqué si la FC n'est pas renseignée)
   const b3=fcMax?`
     <div class="ph-block">
       <div class="ph-b-lbl">Fréquence Cardiaque</div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val" style="color:#F87171">${fcMax}</span><span class="ph-b-fc-lbl">bpm max</span></div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val" style="color:var(--muted)">${fcRest}</span><span class="ph-b-fc-lbl">bpm repos</span></div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val">${fcReserve}</span><span class="ph-b-fc-lbl">bpm réserve</span></div>
-    </div>`:
-    `<div class="ph-block">
-      <div class="ph-b-lbl">Fréquence Cardiaque</div>
-      <div class="ph-b-val" style="color:var(--muted2);font-size:14px">—</div>
-      <div class="ph-b-desc"><span onclick="go('input');openOpt('fc-opt-body','fc-chev')" style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:3px">Renseignez vos données cardiaques →</span></div>
-    </div>`;
+    </div>`:'';
 
   // Alertes qualité (mode tests)
   let warnHtml='';
@@ -2680,7 +2680,7 @@ function renderProfile(){
     </div>`;
   document.getElementById('db-profile').innerHTML=`
     <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
-      ${b0}${b1}${b2}${b3vma}${b3}${bActions}
+      ${b0}${b2}${b3vma}${b3}${bActions}
     </div>
     ${warnHtml}`;
 }
@@ -5294,6 +5294,7 @@ function renderRaceHistory(){
   }
   if(empty)empty.style.display='none';
   if(wrap)wrap.style.display='block';
+  var _hi=document.getElementById('hist-chart-inner'); if(_hi)_hi.style.minWidth='max(100%,'+(Math.max(1,list.length)*68)+'px)';
   const byDist={};
   list.forEach(r=>{(byDist[r.dist]=byDist[r.dist]||[]).push(r);});
   const order=['1500','3000','5k','10k','semi','mara'];
@@ -5748,7 +5749,7 @@ function plLoadHTML(p,wk,opts){
   const legend=[['base','Base'],['dev','Développement'],['spe','Spécifique'],['aff','Affûtage']].map(l=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2)"><i style="width:10px;height:10px;border-radius:50%;background:'+PL_PHC[l[0]]+'"></i>'+l[1]+'</span>').join('');
   return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
     +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
-    +'<div style="position:relative;height:460px"><canvas id="'+cid+'"></canvas></div>'
+    +'<div class="hscroll" style="overflow-x:auto"><div style="position:relative;height:460px;min-width:max(100%,'+(Math.max(1,wk.length)*42)+'px)"><canvas id="'+cid+'"></canvas></div></div>'
     +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 3 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
 }
 let _plVolCharts={};
