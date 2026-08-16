@@ -2829,9 +2829,12 @@ const RACES=[
 function buildRaces(){
   const g=document.getElementById('db-races');if(!g)return;
   const {csKmh,dp,vma}=S;
+  const goal=S.goal||{};
   const csMs=csKmh?csKmh/3.6:null;
   const dRef=vma*100;
   function defPace(r){
+    // Course à venir : caler la carte sur le chrono visé (objectif)
+    if(goal.id===r.id && goal.t){ return Math.min(Math.max(Math.round(goal.t/(r.d/1000)),r.lo),r.hi); }
     let tSec;
     // Calé sur les Plages de performance : médiane de perfRange (même modèle, mêmes coefficients)
     const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===r.id):null;
@@ -2851,7 +2854,7 @@ function buildRaces(){
   g.innerHTML=RACES.map(r=>{const def=defPace(r);return`
     <div class="race-card">
       <div class="rc-top">
-        <div><div class="rc-name">${r.nm}</div></div>
+        <div><div class="rc-name">${r.nm}${(goal.id===r.id&&goal.t)?' <span style="font-size:10px;font-weight:800;color:var(--orange);background:rgba(255,107,26,.14);border:1px solid rgba(255,107,26,.35);border-radius:5px;padding:1px 5px;vertical-align:middle;letter-spacing:.3px">OBJECTIF</span>':''}</div></div>
         <div><div class="rc-allure-lbl">Allure</div><div class="rc-allure" id="ra-${r.id}">${fAll(def)}/km</div></div>
       </div>
       <div class="rc-time" id="rt-${r.id}">${fHMS(r.d/1000*def)}</div>
