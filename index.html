@@ -2675,10 +2675,6 @@ function renderProfile(){
         <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       <span>Enregistrer</span>
       </button>
-      <button class="btn-save-athlete" id="btn-share-ath" onclick="exportAthleteView()">
-        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-      <span>Partager à l'athlète</span>
-      </button>
     </div>`;
   document.getElementById('db-profile').innerHTML=`
     <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
@@ -3349,6 +3345,13 @@ function _saveAthletes(list){
   try{localStorage.setItem(ATH_KEY,JSON.stringify(list));}catch(e){}
 }
 
+// Enregistrement depuis l'onglet Athlètes (avec message si aucun profil chargé + rafraîchissement de la liste).
+function athSaveCurrent(btn){
+  if(!S.vma||!S.pseudo){ alert("Aucun profil chargé. Va d'abord dans Saisie ou Dashboard pour charger/générer un profil, puis reviens l'enregistrer."); return; }
+  saveCurrentAthlete();
+  if(btn){ var sp=btn.querySelector('span'); if(sp)sp.textContent='Enregistré ✓'; setTimeout(function(){ renderAthletes(); }, 1200); }
+  else renderAthletes();
+}
 function saveCurrentAthlete(){
   if(!S.vma||!S.pseudo){return;}
   const athletes=getAthletes();
@@ -3518,7 +3521,11 @@ function renderAthletes(){
     <div class="input-hero" style="margin-bottom:18px">
       <img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running" style="max-width:130px;height:auto;display:block;margin-bottom:12px">
       <div class="input-hero-title">Athlètes enregistrés</div>
-      <div class="input-hero-sub">Retrouvez et chargez les profils de vos athlètes. Depuis le Dashboard, cliquez sur <strong>Enregistrer</strong> pour sauvegarder un profil.</div>
+      <div class="input-hero-sub">Retrouvez et chargez les profils de vos athlètes. Le bouton ci-dessous enregistre le profil actuellement ouvert.</div>
+      <button class="btn-save-athlete" onclick="athSaveCurrent(this)" style="margin-top:14px">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span>Enregistrer le profil ouvert</span>
+      </button>
     </div>`;
   if(!athletes.length){
     wrap.innerHTML=hd+`
