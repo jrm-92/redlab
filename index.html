@@ -299,7 +299,7 @@ input[type=range].sl::-moz-range-thumb{width:20px;height:20px;border-radius:50%;
 .zbar{position:relative;height:16px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.04)}
 
 /* ── RACE CARDS ── */
-.race-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.race-grid{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) transparent}
 .race-card{
   background:var(--card);border:1px solid var(--border);
   border-radius:14px;padding:22px;position:relative;overflow:hidden;
@@ -329,7 +329,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .spl-t{font-size:15px;font-weight:700;color:var(--text2)}
 
 /* ── RECORDS ── */
-.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rec-grid{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) transparent}
+.rec-grid::-webkit-scrollbar{height:8px}
+.rec-grid::-webkit-scrollbar-track{background:transparent}
+.rec-grid::-webkit-scrollbar-thumb{background:rgba(255,107,26,.45);border-radius:8px}
+.rec-grid::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.rec-grid>.rec-card{flex:0 0 260px;scroll-snap-align:start}
+@media(max-width:640px){.rec-grid>.rec-card{flex-basis:82vw}}
   .lib-create-btn{margin-left:auto;padding:9px 15px;border:1px solid rgba(255,107,26,0.4);background:rgba(255,107,26,0.1);color:var(--orange);font-family:var(--font);font-weight:800;font-size:13px;border-radius:9px;cursor:pointer;white-space:nowrap}
   .lib-create-btn:hover{background:rgba(255,107,26,0.18)}
   .lib-create-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:2px 0 22px}
@@ -475,7 +481,14 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .rec-pct{font-size:24px;font-weight:900;line-height:1}
 
 /* ── PREDICTOR ── */
-.pred-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
+.pred-grid{display:flex;gap:14px;margin-top:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) transparent}
+.race-grid::-webkit-scrollbar,.pred-grid::-webkit-scrollbar{height:8px}
+.race-grid::-webkit-scrollbar-track,.pred-grid::-webkit-scrollbar-track{background:transparent}
+.race-grid::-webkit-scrollbar-thumb,.pred-grid::-webkit-scrollbar-thumb{background:rgba(255,107,26,.45);border-radius:8px}
+.race-grid::-webkit-scrollbar-thumb:hover,.pred-grid::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.race-grid>.race-card{flex:0 0 260px;scroll-snap-align:start}
+.pred-grid>.pred-c{flex:0 0 260px;scroll-snap-align:start}
+@media(max-width:640px){.race-grid>.race-card,.pred-grid>.pred-c{flex-basis:82vw}}
 .pred-c{
   background:var(--card);border:1px solid var(--border);border-radius:16px;
   padding:20px 16px 16px;display:flex;flex-direction:column;
@@ -1581,7 +1594,7 @@ table.lm-laps tbody tr{cursor:pointer}
         <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
         Réinitialiser le profil
       </button>
-      <div class="side-version">RedLab · Reding Running · build 2026-07-22 18:45</div>
+      <div class="side-version">RedLab · Reding Running · build 2026-08-16 (sécu + carrousels)</div>
     </div>
   </aside>
 
@@ -6734,8 +6747,8 @@ async function cloudPush(manual){
 }
 // Envoi auto des données de chaque athlète (ayant un email) vers son espace client
 const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
-// Upsert vers athlete_spaces avec le jeton forcé (sinon la requête peut partir en anon
-// et la RLS « coach_id = auth.uid() » échoue) + coach_id = ID de la session courante.
+// Upsert vers athlete_spaces via le client principal authentifié (jeton rafraîchi) :
+// coach_id = ID de la session courante = auth.uid(), donc la RLS « coach_id = auth.uid() » passe.
 async function _spacesUpsert(email,doc,pseudo){
   if(!_sb)return {error:{message:'client indisponible'}};
   var sess=(await _sb.auth.getSession()).data.session;
@@ -6744,9 +6757,10 @@ async function _spacesUpsert(email,doc,pseudo){
   // (« new row violates row-level security policy »).
   try{ var _rr=await _sb.auth.refreshSession(); if(_rr&&_rr.data&&_rr.data.session) sess=_rr.data.session; }catch(e){}
   if(!sess||!sess.access_token){ _cloudUser=null; if(typeof cloudFabState==='function')cloudFabState(); if(typeof showAuthGate==='function')showAuthGate(); return {error:{message:'session expirée — reconnecte-toi puis reclique Publier'}}; }
-  var cli;
-  try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false,storageKey:'redlab_tmp_auth'},global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
-  return await cli.from('athlete_spaces').upsert(
+  // Publication via le CLIENT PRINCIPAL authentifié (_sb), exactement comme la synchro cloud
+  // (redlab_state) qui fonctionne. L'ancien « client temporaire à jeton forcé » était ignoré
+  // par supabase-js : la requête partait en anonyme → auth.uid() vide → RLS « new row violates ».
+  return await _sb.from('athlete_spaces').upsert(
     [{email:String(email).trim().toLowerCase(),coach_id:sess.user.id,
       data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc},
       updated_at:new Date().toISOString()}],
