@@ -231,13 +231,6 @@ input::placeholder,textarea::placeholder{color:var(--muted2)!important;opacity:.
 
 /* ── TABLE ── */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
-.hist-chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.pl-vol-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-
-/* ── Carousel de cartes (flèches + barre) : masqué par défaut, activé sur mobile ──
-   Flèches + barre vivent dans une rangée dédiée SOUS les cartes (jamais superposées
-   à leur contenu, quelle que soit la position de défilement). */
-.crsl-nav{display:none}
 table{width:100%;border-collapse:collapse;font-family:var(--font)}
 thead th{
   text-align:left;padding:12px 16px;font-size:11.5px;font-weight:700;
@@ -249,7 +242,6 @@ tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,0.02)}
 tbody td{padding:13px 16px;font-size:14.5px;vertical-align:middle;color:var(--text2)}
 .col-num{width:1%;padding-left:4px!important;padding-right:4px!important;white-space:nowrap}
-.zn-break{display:none}
 .zb{
   display:inline-block;padding:3px 9px;border-radius:20px;
   font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;
@@ -390,7 +382,6 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plc-dl{margin-top:6px;width:100%;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--font);font-size:10.5px;font-weight:800;padding:4px 6px;border-radius:7px;cursor:pointer;letter-spacing:.2px}
   .plc-dl:hover{border-color:var(--orange);color:var(--orange)}
   .plc-dl.on{background:rgba(148,163,184,.18);border-color:var(--muted2);color:var(--text2)}
-  .plw-swipe-hint{display:none}
   .plw-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 0 5px}
   .plw-dow span{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);text-align:center}
   .plw-cal{display:flex;flex-direction:column;gap:8px}
@@ -462,6 +453,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .pl-live-err a,.pl-live-more{color:var(--orange);font-weight:700;text-decoration:none}
   .pl-live-more{display:inline-block;margin-top:10px;font-size:13px}
 
+@media(max-width:860px){.rec-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+@media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .rec-name{font-size:20px;font-weight:900;text-transform:uppercase;line-height:1}
@@ -489,20 +482,17 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   transition:transform .15s,box-shadow .15s;
 }
 .pred-c:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.3)}
-.pred-c-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.pred-c-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
 .pred-name{font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-0.3px;line-height:1}
 .pred-dist{font-size:11.5px;color:var(--muted2);margin-top:3px;font-weight:600;letter-spacing:.5px}
 .pred-pct-badge{padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .pred-time{font-size:28px;font-weight:900;line-height:1;letter-spacing:-1px;text-align:center;margin:4px 0 6px}
-.pred-pace{font-size:15px;font-weight:700;color:var(--text2);text-align:center;margin-bottom:12px}
+.pred-pace{font-size:15px;font-weight:700;color:var(--text2);text-align:center}
+.pred-kmh{font-size:13px;color:var(--muted2);text-align:center;margin-top:2px;margin-bottom:14px}
 .pred-range{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)}
-.pred-range-hd{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;text-align:center}
-.pred-range-bar{position:relative;height:4px;border-radius:2px;margin-bottom:9px;overflow:visible}
+.pred-range-bar{position:relative;height:4px;border-radius:2px;margin-bottom:7px;overflow:visible}
 .pred-range-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2)}
-.pred-range-lbl{display:flex;justify-content:space-between;align-items:flex-start}
-.pred-range-v{font-size:17px;font-weight:800;line-height:1.15}
-.pred-range-v:last-child{text-align:right}
-.pred-range-v i{display:block;font-style:normal;font-weight:600;font-size:11px;color:var(--muted2);margin-top:1px}
+.pred-range-lbl{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--muted2)}
 .pred-pct{font-size:12px;color:var(--muted2);margin-top:2px}
 
 /* ── EMPTY ── */
@@ -585,16 +575,6 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .tool-eyebrow::before{content:'';width:12px;height:2px;background:var(--orange)}
 .input-hero-title{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-0.7px;margin-bottom:8px}
 .input-hero-sub{font-size:14px;color:var(--muted);line-height:1.6}
-
-/* ══ ACCORDÉON (onglet Infos) : replié par défaut, un titre suffit pour tout lire sans scroller ══ */
-.acc-item{margin-bottom:10px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card)}
-.acc-hd{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:none;border:none;cursor:pointer;padding:16px 18px;text-align:left;font-family:var(--font)}
-.acc-hd:hover{background:rgba(255,255,255,0.025)}
-.acc-title{font-size:14.5px;font-weight:800;color:var(--text)}
-.acc-chev{font-size:17px;font-weight:900;color:var(--muted2);flex-shrink:0;width:20px;text-align:center;transition:transform .15s}
-.acc-body .card{border:none;border-radius:0;margin-bottom:0;box-shadow:none;border-top:1px solid var(--border);padding-top:16px}
-.acc-body .db-section{margin-top:0!important;padding:14px 18px 16px;border-top:1px solid var(--border)}
-.acc-hint{font-size:11.5px;color:var(--muted2);margin:2px 0 12px}
 
 /* ══ TEST ROWS ══ */
 .test-row{display:grid;grid-template-columns:48px 250px 120px 90px;gap:12px;align-items:center;margin-bottom:14px}
@@ -768,115 +748,43 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .test-live{display:none}
   .hide-mob{display:none}
   .show-mob{display:inline}
-
-  /* Carousel de cartes : flèches + barre de défilement dans une rangée dédiée
-     sous les cartes — jamais superposées au contenu, à aucune position de scroll. */
-  .crsl-nav{display:flex;align-items:center;gap:10px;margin-top:10px}
-  .crsl-arrow{
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    width:28px;height:28px;border-radius:50%;
-    background:rgba(255,255,255,0.05);border:1px solid var(--border2);
-    color:var(--text2);font-size:16px;font-weight:900;line-height:1;
-    cursor:pointer;padding:0;font-family:var(--font);
-  }
-  .crsl-arrow:active{background:rgba(255,107,26,0.25);border-color:var(--orange);color:var(--orange)}
-  .crsl-track{flex:1;position:relative;height:4px;border-radius:2px;background:rgba(255,255,255,0.08)}
-  .crsl-thumb{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--orange)}
-
-  /* Potentiel de performance : grille → carousel défilant (une carte + un aperçu de la suivante) */
-  .pred-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px}
-  .pred-grid::-webkit-scrollbar{display:none}
-  .pred-c{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:14px}
+  .pred-grid{grid-template-columns:1fr 1fr}
   .stats-row{gap:10px}
   .sc{padding:14px 12px}.sc-val{font-size:24px}
-
-  /* Taille de carte unique et la plus resserrée possible sur mobile,
-     cohérente sur toutes les cards du site (padding desktop bien plus large).
-     !important nécessaire : certaines déclarations de base (.ath-card, .lib-card,
-     .csm-sim, .goal-readout-card) apparaissent plus loin dans la feuille de style
-     que ce bloc et gagneraient sinon la cascade malgré la media query. */
-  .card{padding:14px!important}
-  .ath-card{padding:14px!important}
-  .lib-card{padding:14px!important}
-  .sl-card{padding:14px!important}
-  .csm-sim{padding:14px!important}
-  .goal-readout-card{padding:14px!important}
-
-  /* Temps de passage : grille → carousel, cartes resserrées */
-  .race-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px}
-  .race-grid::-webkit-scrollbar{display:none}
-  .race-card{scroll-snap-align:center;flex:0 0 78%;min-width:0;padding:14px}
-  .rc-time{font-size:28px;margin-bottom:8px}
-  .rc-sl-bnds{margin-bottom:8px}
-  .rc-splits{padding-top:8px}
-  .spl-row{padding:3px 0}
-
-  /* Périodisation de la charge : le graphique gardait sa hauteur desktop (460px)
-     sur mobile, ce qui exagère la taille des barres pour peu de largeur disponible */
-  .pl-vol-wrap{height:260px!important}
-
-  /* Historique des courses : plusieurs distances sur un même axe temporel,
-     en portrait les points se tassent et les lignes deviennent illisibles.
-     Le graphique garde une largeur confortable et défile horizontalement. */
-  #hist-chart-wrap{min-width:700px}
-
-  /* Records : grille → carousel, cartes resserrées */
-  .rec-grid{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:2px;gap:10px}
-  .rec-grid::-webkit-scrollbar{display:none}
-  .rec-card{scroll-snap-align:center;flex:0 0 74%;min-width:0;padding:14px}
-  .rec-top{margin-bottom:10px}
-  .rec-out{padding-top:10px;margin-top:10px}
-
+  .race-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .race-card{padding:14px}.rc-time{font-size:26px}
   thead th{padding:10px 12px;font-size:11px}
   tbody td{padding:10px 12px;font-size:13.5px}
   .slabel{margin-top:24px}
   .db-section{margin-bottom:28px}
-
-  /* Zones d'entraînement : tableau → liste empilée, lisible sans scroll horizontal */
-  .zones-tbl thead{display:none}
-  .zones-tbl,.zones-tbl tbody{display:block;width:100%}
-  .zones-tbl tr{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;padding:13px 4px!important;border-bottom:1px solid var(--border)}
-  .zones-tbl tr:last-child{border-bottom:none}
-  .zones-tbl td{display:inline-flex;align-items:baseline;gap:5px;padding:0!important;border:none!important;font-size:13px!important;vertical-align:baseline}
-  .zones-tbl td.zn-badge{flex:0 0 auto}
-  .zones-tbl td.zn-domain{flex:1 1 160px;min-width:0;display:block}
-  .zones-tbl td.zn-break{flex-basis:100%;height:0;display:block;overflow:hidden}
-  .zones-tbl td.hide-mob{display:none!important}
-  .zones-tbl td.col-num{width:auto!important}
-  .zones-tbl td[data-label]:not([data-label=""])::before{content:attr(data-label);font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
-
-  /* Tableau "Tes tests" (modèle VC) : 6 colonnes → défilement horizontal plutôt que compression illisible */
-  .csm-tt{min-width:520px}
-
-  /* Plan de prépa : semaine à 7 colonnes → défilement horizontal dédié (en-tête + jours alignés) */
-  .plw-swipe-hint{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted2);margin:2px 0 8px}
-  .plw-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .plw-dow,.plw-days{min-width:640px}
 }
 @media(max-width:480px){
   .g2{grid-template-columns:1fr}
-  .pred-c{flex-basis:86%}
-  .race-card{flex-basis:86%}
-  .rec-card{flex-basis:82%}
+  .race-grid{grid-template-columns:1fr}
+  .pred-grid{grid-template-columns:1fr 1fr}
   .ph-b-val{font-size:20px}
   .ph-b-sub{font-size:12px}
   .ph-b-lbl{font-size:11px}
   .test-row{grid-template-columns:48px 1fr}
   .test-row .field:nth-child(3){grid-column:2}
 }
-@media(max-width:560px){
-  /* Carte profil (VMA / FC…) : la grille forcée à 2 colonnes écrase le
-     stepper VMA (il passe sur 3 lignes) et déséquilibre la hauteur des
-     blocs quand l'un est vide ("—"). En dessous de 560px, chaque bloc
-     prend toute la largeur et s'empile, comme "Athlète"/"Profil" déjà. */
-  .profile-hero{grid-template-columns:1fr!important}
-  .ph-block{border-right:none!important;border-bottom:1px solid var(--border)!important;padding:12px 0!important;margin-right:0!important}
-  .ph-block:last-child{border-bottom:none!important;padding-bottom:6px!important}
-  .vma-edit{flex-wrap:nowrap}
-}
 
 /* ══ ATHLETES ══ */
-.ath-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.ath-grid{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:4px 2px 14px;scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.55) transparent}
+.ath-grid.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.ath-grid::-webkit-scrollbar{height:8px}
+.ath-grid::-webkit-scrollbar-track{background:transparent}
+.ath-grid::-webkit-scrollbar-thumb{background:rgba(255,107,26,.45);border-radius:8px}
+.ath-grid::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.ath-grid>.ath-card{flex:0 0 300px;scroll-snap-align:start}
+@media(max-width:640px){.ath-grid>.ath-card{flex-basis:82vw}}
+.ath-carousel{position:relative}
+.ath-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:opacity .15s,background .15s,border-color .15s}
+.ath-arrow:hover{background:var(--card2);border-color:var(--accent);color:var(--accent)}
+.ath-arrow.left{left:-18px}
+.ath-arrow.right{right:-18px}
+.ath-arrow[disabled]{opacity:0;pointer-events:none}
+@media(max-width:640px){.ath-arrow{display:none}}
 .ath-card{
   background:var(--card);border:1px solid var(--border);
   border-radius:14px;padding:20px;position:relative;overflow:hidden;
@@ -1218,9 +1126,6 @@ input[type=range]{touch-action:none}
 .ath-espace-pub{width:100%;margin-top:7px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;color:var(--success-300);font-family:var(--font);font-size:12.5px;font-weight:800;padding:8px;cursor:pointer;transition:background .15s}
 .ath-espace-pub:hover{background:rgba(52,211,153,0.2)}
 .ath-espace-pub:disabled{opacity:.6;cursor:default}
-.ath-pub-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;margin:2px 0 6px;letter-spacing:.2px}
-.ath-pub-badge.ok{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.4);color:#34D399}
-.ath-pub-badge.pending{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#FBBF24}
 /* Écran de connexion coach (porte d'entrée) */
 #auth-gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
 #auth-gate::before{content:'';position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:520px;height:320px;background:radial-gradient(ellipse at center,rgba(255,107,26,0.16),transparent 70%);pointer-events:none}
@@ -1242,6 +1147,359 @@ input[type=range]{touch-action:none}
 /* Bannière profil : liseré lumineux */
 .profile-hero{box-shadow:inset 0 1px 0 rgba(255,255,255,0.04),0 12px 32px -16px rgba(0,0,0,0.6),0 0 0 1px rgba(255,107,26,0.06)}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style id="lm-styles">
+
+#lm-root{
+  color-scheme:dark;
+  --bg:#000;
+  --surface:#17191c;
+  --surface-2:#1f2225;
+  --row-a:#0d0f11;
+  --row-b:#15181a;
+  --line:#2a2e32;
+  --text:#fff;
+  --muted:#9ba1a6;
+  --muted-2:#6d7378;
+  --blue:#1b8cf5;
+  --pace:#3d9bfa;
+  --hr:#ef3e36;
+  --ele:#8aa85a;
+  --cad:#a274e0;
+  --pw:#f0a03c;
+  --radius:10px;
+  --pad:16px;
+}
+#lm-root *{box-sizing:border-box}
+#lm-root{background:var(--bg);color:var(--text);min-height:100%}
+/* calque de fond : garantit le thème sombre même si l'hôte impose un fond clair */
+
+#lm-app,.lm-start,.lm-wrap,.lm-panel{background:var(--bg)}
+#lm-root{
+  font-family:Roboto,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  font-size:15px;line-height:1.4;
+  overscroll-behavior-y:none;
+}
+#lm-root button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#lm-root :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+.lm-num{font-variant-numeric:tabular-nums}
+#lm-root [hidden]{display:none !important}
+
+/* ---------- écran d'accueil ---------- */
+.lm-start{
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;text-align:center;gap:6px;
+}
+.lm-start.lm-drag .lm-drop{border-color:var(--blue);background:#0e1b28}
+.lm-start-logo{
+  width:52px;height:52px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#1b8cf5,#0b5fb0);margin-bottom:18px;
+}
+.lm-start h1{font-size:22px;font-weight:500;margin:0}
+.lm-start p{color:var(--muted);max-width:42ch;margin:8px 0 24px;font-size:14px}
+.lm-drop{
+  width:100%;max-width:420px;border:1.5px dashed var(--line);border-radius:14px;
+  padding:28px 20px;transition:border-color .15s,background .15s;
+}
+.lm-drop-title{font-size:15px;margin-bottom:4px}
+.lm-drop-sub{color:var(--muted-2);font-size:13px}
+.lm-btn-primary{
+  margin-top:18px;background:var(--blue);color:#fff;border-radius:22px;
+  padding:11px 24px;font-size:15px;font-weight:500;
+}
+.lm-btn-primary:hover{background:#3d9df8}
+.lm-start-foot{color:var(--muted-2);font-size:12px;margin-top:22px;max-width:38ch}
+.lm-error{color:#ff6b60;font-size:13px;margin-top:14px;min-height:18px}
+
+/* ---------- barre du haut ---------- */
+.lm-topbar{
+  position:sticky;top:0;z-index:40;background:var(--bg);
+  display:grid;grid-template-columns:44px 1fr 44px;align-items:center;
+  height:52px;padding-top:env(safe-area-inset-top);
+}
+.lm-topbar-title{text-align:center;font-size:17px;font-weight:500}
+.lm-icon-btn{height:44px;display:grid;place-items:center;color:var(--blue);font-size:20px}
+.lm-icon-btn.lm-dots{color:var(--blue);letter-spacing:1px}
+
+.lm-tabs{
+  position:sticky;top:calc(52px + env(safe-area-inset-top));z-index:39;background:var(--bg);
+  display:flex;gap:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);
+}
+.lm-tabs::-webkit-scrollbar{display:none}
+.lm-tab{
+  flex:0 0 auto;padding:12px 16px 11px;color:var(--muted);font-size:15px;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.lm-tab[aria-selected="true"]{color:#fff;font-weight:500;border-bottom-color:#fff}
+
+.lm-wrap{max-width:760px;margin:0 auto;padding-bottom:56px}
+.lm-panel{display:none}
+.lm-panel.lm-on{display:block}
+
+/* ---------- carte ---------- */
+.lm-map-wrap{position:relative;height:290px;background:#111}
+#lm-map{position:absolute;inset:0;background:#0b0d0f}
+.leaflet-container{background:#0b0d0f;font-family:inherit}
+.lm-map-legend{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;
+  background:rgba(20,22,24,.92);border-radius:20px;padding:7px 14px;
+  display:flex;align-items:center;gap:9px;font-size:12px;color:#dfe3e6;white-space:nowrap;
+}
+.lm-legend-bar{width:110px;height:7px;border-radius:4px;
+  background:linear-gradient(90deg,#2b6cff,#00b6d4,#3fbf52,#ffd23f,#ff8a1f,#ff2f2f)}
+.lm-map-note{
+  position:absolute;left:12px;top:12px;z-index:5;background:rgba(20,22,24,.9);
+  color:var(--muted);font-size:11.5px;padding:5px 10px;border-radius:14px;
+}
+.lm-map-empty{
+  position:absolute;inset:0;display:grid;place-content:center;text-align:center;
+  color:var(--muted);font-size:14px;gap:6px;padding:20px;
+}
+
+/* ---------- entête activité ---------- */
+.lm-head{padding:18px var(--pad) 0}
+.lm-head-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-bottom:10px}
+.lm-head h2{font-size:26px;font-weight:500;margin:0 0 2px;letter-spacing:-.2px}
+.lm-head-sub{color:var(--blue);font-size:13.5px;margin-bottom:2px}
+
+.lm-kpis{padding:8px var(--pad) 0;display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
+.lm-kpi{padding:14px 0;border-bottom:1px solid var(--line)}
+.lm-kpi.lm-hero{grid-column:1/-1}
+.lm-kpi-val{font-size:26px;font-weight:400;letter-spacing:-.4px}
+.lm-kpi.lm-hero .lm-kpi-val{font-size:38px}
+.lm-kpi-unit{font-size:14px;color:var(--muted);margin-left:3px;font-weight:400}
+.lm-kpi-lab{color:var(--muted);font-size:13px;margin-top:2px}
+
+.lm-actions{display:flex;gap:12px;padding:18px var(--pad) 22px}
+.lm-act{
+  flex:1;background:var(--surface-2);border-radius:6px;padding:11px 8px;text-align:center;
+  font-size:14px;color:#e6e9eb;
+}
+.lm-act:hover{background:#2a2e33}
+
+/* ---------- listes de stats ---------- */
+.lm-sec-title{
+  padding:22px var(--pad) 9px;color:var(--muted);font-size:12px;
+  text-transform:uppercase;letter-spacing:.07em;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.lm-rows{display:flex;flex-direction:column}
+.lm-row{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:12px var(--pad);font-size:15px;
+}
+.lm-row:nth-child(odd){background:var(--row-a)}
+.lm-row:nth-child(even){background:var(--row-b)}
+.lm-row-lab{color:#c9ced2}
+.lm-row-val{color:#fff;text-align:right;white-space:nowrap}
+
+/* zones FC */
+.lm-zones{padding:2px var(--pad) 0}
+.lm-zone{display:grid;grid-template-columns:26px 1fr 68px;align-items:center;gap:10px;padding:8px 0}
+.lm-zone-n{font-size:13px;color:var(--muted)}
+.lm-zone-track{height:16px;background:#1c1f22;border-radius:3px;overflow:hidden}
+.lm-zone-fill{height:100%;border-radius:3px;transition:width .35s ease}
+.lm-zone-t{text-align:right;font-size:13.5px;color:#dfe3e6}
+.lm-zone-sub{font-size:11px;color:var(--muted-2)}
+.lm-fcmax{
+  display:flex;align-items:center;gap:10px;padding:12px var(--pad) 4px;color:var(--muted);font-size:13px;
+}
+.lm-fcmax input{
+  width:74px;background:var(--surface-2);border:1px solid var(--line);color:#fff;
+  border-radius:6px;padding:7px 9px;font:inherit;font-size:14px;text-align:center;
+}
+
+/* ---------- intervalles ---------- */
+.lm-chips{display:flex;gap:10px;overflow-x:auto;padding:14px var(--pad);scrollbar-width:none}
+.lm-chips::-webkit-scrollbar{display:none}
+.lm-chip{
+  flex:0 0 auto;border:1px solid #55595d;border-radius:20px;padding:8px 18px;font-size:14px;color:#e6e9eb;
+}
+.lm-chip[aria-pressed="true"]{background:#8b9095;border-color:#8b9095;color:#000;font-weight:500}
+.lm-tbl-tools{display:flex;justify-content:flex-end;padding:0 var(--pad) 10px}
+.lm-link-btn{color:var(--blue);font-size:13px}
+.lm-tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.lm-laps{border-collapse:collapse;width:100%;font-size:14px;min-width:100%}
+table.lm-laps th{
+  position:sticky;top:0;background:#0a0c0d;color:#fff;font-weight:500;font-size:13px;
+  text-align:right;padding:10px 8px;line-height:1.15;vertical-align:bottom;
+  border-bottom:1px solid var(--line);
+}
+table.lm-laps th small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+table.lm-laps td:nth-child(2){max-width:140px;white-space:normal;line-height:1.25}
+table.lm-laps th:nth-child(1),table.lm-laps th:nth-child(2){text-align:left}
+table.lm-laps td{padding:13px 8px;text-align:right;white-space:nowrap;color:#e8ebed}
+table.lm-laps td:nth-child(1),table.lm-laps td:nth-child(2){text-align:left}
+table.lm-laps th:first-child,table.lm-laps td:first-child{padding-left:var(--pad)}
+table.lm-laps th:last-child,table.lm-laps td:last-child{padding-right:var(--pad)}
+table.lm-laps tbody tr:nth-child(odd){background:var(--row-a)}
+table.lm-laps tbody tr:nth-child(even){background:var(--row-b)}
+table.lm-laps tbody tr.lm-sel{background:#123553}
+table.lm-laps tbody tr{cursor:pointer}
+.lm-lap-n{color:var(--muted);width:34px}
+.lm-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:1px}
+
+/* ---------- graphiques ---------- */
+.lm-seg{display:flex;background:var(--surface-2);border-radius:7px;margin:14px var(--pad);overflow:hidden}
+.lm-seg button{flex:1;padding:10px;font-size:14px;color:var(--muted)}
+.lm-seg button[aria-pressed="true"]{background:#4a4f54;color:#fff}
+.lm-card{background:var(--surface);border-radius:var(--radius);margin:0 var(--pad) 14px;padding:16px 14px 12px}
+.lm-card-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.lm-card-head h3{margin:0;font-size:19px;font-weight:400;display:flex;align-items:center;gap:7px}
+.lm-caret{color:var(--muted);transition:transform .2s;font-size:13px}
+.lm-card.lm-closed .lm-caret{transform:rotate(-90deg)}
+.lm-card.lm-closed .lm-card-body{display:none}
+.lm-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin:14px 0 6px}
+.lm-card-stat{border-top:1px solid var(--line);padding-top:9px}
+.lm-cs-val{font-size:23px;font-weight:400}
+.lm-cs-unit{font-size:13px;color:var(--muted);margin-left:3px}
+.lm-cs-lab{font-size:13px;color:var(--muted)}
+.lm-chart-holder{position:relative;height:190px;margin-top:6px;touch-action:pan-y}
+.lm-chart-holder canvas{width:100%;height:100%;display:block}
+.lm-chart-x{text-align:center;color:var(--muted);font-size:12px;margin-top:6px}
+.lm-chart-key{display:flex;gap:16px;justify-content:center;margin-top:8px;color:#dfe3e6;font-size:12.5px}
+.lm-chart-key span{display:flex;align-items:center;gap:6px}
+.lm-key-dot{width:9px;height:9px;border-radius:50%}
+.lm-note{color:var(--muted-2);font-size:12.5px;padding:0 var(--pad) 26px;line-height:1.5}
+.lm-empty-tab{padding:60px var(--pad);text-align:center;color:var(--muted);font-size:14px}
+
+@media (max-width:440px){
+  .lm-tab{padding-left:11px;padding-right:11px;font-size:14.5px}
+}
+@media (min-width:820px){
+  .lm-wrap{max-width:1080px}
+  .lm-map-wrap{height:360px;border-radius:12px;overflow:hidden;margin:14px var(--pad) 0}
+  .lm-overview-top{display:grid;grid-template-columns:1.25fr 1fr;align-items:start;gap:8px}
+  .lm-charts-grid{display:grid;grid-template-columns:1fr 1fr}
+  .lm-chart-holder{height:210px}
+}
+@media (prefers-reduced-motion:reduce){#lm-root *{transition:none !important;animation:none !important}}
+
+</style>
+<style id="lm-theme">
+/* ===== Reskin charte RedLab pour « Lecteur fichier montre » ===== */
+#lm-root{
+  --bg:#0F1729;
+  --surface:#212E4A;        /* cartes graphiques */
+  --surface-2:#2A3852;      /* surfaces secondaires : seg, boutons, inputs */
+  --row-a:#16203A;
+  --row-b:#1C2840;
+  --line:rgba(255,255,255,0.09);
+  --text:#F1F5F9;
+  --muted:#94A3B8;
+  --muted-2:#64748B;
+  --blue:#FF6B1A;           /* accent d'interface = orange RedLab */
+  --radius:14px; --pad:18px;
+  font-family:'Manrope','Inter',sans-serif;
+  background:var(--bg);
+  line-height:1.6;
+}
+/* Les couleurs de données (allure=bleu, FC=rouge, altitude=vert, cadence=violet, puissance=orange)
+   restent distinctes pour la lisibilité des graphiques. */
+
+/* barre du haut */
+#lm-root .lm-topbar{background:rgba(15,23,41,0.9);border-bottom:1px solid rgba(255,255,255,0.08);height:56px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#lm-root .lm-topbar-title{font-weight:800;letter-spacing:.2px}
+#lm-root .lm-icon-btn{color:#FF6B1A}
+
+/* onglets */
+#lm-root .lm-tabs{background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);gap:2px;padding:0 10px}
+#lm-root .lm-tab{color:#94A3B8;font-weight:700;font-size:14.5px}
+#lm-root .lm-tab:hover{color:#F1F5F9}
+#lm-root .lm-tab[aria-selected="true"]{color:#FF6B1A;border-bottom-color:#FF6B1A;font-weight:800}
+
+/* entête activité */
+#lm-root .lm-head h2{font-weight:800;letter-spacing:-.3px}
+#lm-root .lm-head-sub{color:#FF6B1A;font-weight:700}
+#lm-root .lm-head-meta{color:#94A3B8}
+
+/* KPIs */
+#lm-root .lm-kpi{border-bottom:1px solid rgba(255,255,255,0.07)}
+#lm-root .lm-kpi-val{font-weight:800;color:#F1F5F9}
+#lm-root .lm-kpi-lab{color:#94A3B8;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+#lm-root .lm-kpi-unit{color:#64748B}
+#lm-root .lm-kpi.lm-hero .lm-kpi-val{color:#FF6B1A;font-family:'Barlow Condensed',sans-serif;font-size:46px;letter-spacing:.5px}
+
+/* actions */
+#lm-root .lm-actions{gap:10px}
+#lm-root .lm-act{background:#2A3852;border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#E2E8F0;font-weight:700;padding:12px 10px;transition:.15s}
+#lm-root .lm-act:hover{background:#33425f;border-color:rgba(255,255,255,0.16)}
+
+/* titres de section */
+#lm-root .lm-sec-title{color:#FF6B1A;font-weight:800;font-size:11.5px;letter-spacing:.09em}
+
+/* listes de stats → cartes RedLab */
+#lm-root .lm-rows{background:#16203A;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden}
+#lm-root .lm-row-lab{color:#CBD5E1}
+#lm-root .lm-row-val{color:#F1F5F9;font-weight:700}
+
+/* zones FC */
+#lm-root .lm-zones{background:#16203A;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px 16px;margin-top:8px}
+#lm-root .lm-zone-track{background:#0F1729;height:18px;border-radius:6px}
+#lm-root .lm-zone-fill{border-radius:6px}
+#lm-root .lm-zone-sub{color:#64748B}
+#lm-root .lm-zone-t{color:#E2E8F0}
+#lm-root .lm-fcmax{color:#94A3B8}
+#lm-root .lm-fcmax input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);border-radius:9px;color:#fff}
+
+/* chips (filtres d'intervalles) */
+#lm-root .lm-chips{padding:16px 18px 6px}
+#lm-root .lm-chip{border:1px solid rgba(255,255,255,0.14);border-radius:20px;color:#CBD5E1;font-weight:700;background:transparent}
+#lm-root .lm-chip[aria-pressed="true"]{background:#FF6B1A;border-color:#FF6B1A;color:#0F1729;font-weight:800}
+
+/* tableau des intervalles */
+#lm-root .lm-tbl-scroll{border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;margin:0 18px}
+#lm-root .lm-laps th{background:#1C2840;color:#CBD5E1;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.1)}
+#lm-root .lm-laps th small{color:#64748B}
+#lm-root .lm-laps td{color:#E2E8F0}
+#lm-root .lm-laps tbody tr:nth-child(odd){background:#16203A}
+#lm-root .lm-laps tbody tr:nth-child(even){background:#18223d}
+#lm-root .lm-laps tbody tr:hover{background:#1e2b49}
+#lm-root .lm-laps tbody tr.lm-sel{background:rgba(255,107,26,0.14);box-shadow:inset 3px 0 0 #FF6B1A}
+#lm-root .lm-lap-n{color:#64748B}
+#lm-root .lm-tbl-tools{padding-right:18px}
+#lm-root .lm-link-btn{color:#FF6B1A;font-weight:700}
+#lm-root .lm-note{color:#64748B}
+
+/* graphiques */
+#lm-root .lm-seg{background:#1C2840;border-radius:12px;margin:16px 18px;padding:3px}
+#lm-root .lm-seg button{color:#94A3B8;font-weight:700;border-radius:10px}
+#lm-root .lm-seg button[aria-pressed="true"]{background:rgba(255,107,26,0.16);color:#FF8A45}
+#lm-root .lm-card{background:#212E4A;border:1px solid rgba(255,255,255,0.07);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+#lm-root .lm-card-head h3{font-weight:800}
+#lm-root .lm-cs-val{font-weight:800}
+#lm-root .lm-cs-lab,#lm-root .lm-cs-unit{color:#94A3B8}
+#lm-root .lm-card-stat{border-top:1px solid rgba(255,255,255,0.08)}
+#lm-root .lm-caret{color:#64748B}
+
+/* carte */
+#lm-root .lm-map-wrap{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.07)}
+#lm-root .lm-map-legend,#lm-root .lm-map-note{background:rgba(22,32,58,0.92);border:1px solid rgba(255,255,255,0.08);color:#CBD5E1}
+#lm-root .lm-map-empty{color:#94A3B8}
+
+/* écran d'accueil */
+#lm-root .lm-start-logo{background:linear-gradient(145deg,#FF6B1A,#E55A0C)}
+#lm-root .lm-start h1{font-weight:800}
+#lm-root .lm-drop{border-color:rgba(255,255,255,0.14);border-radius:16px}
+#lm-root .lm-start.lm-drag .lm-drop{border-color:#FF6B1A;background:rgba(255,107,26,0.08)}
+#lm-root .lm-btn-primary{background:#FF6B1A;border-radius:12px;font-weight:800}
+#lm-root .lm-btn-primary:hover{background:#E55A0C}
+#lm-root .lm-error{color:#F87171}
+#lm-root :focus-visible{outline:2px solid #FF6B1A}
+
+/* ===== Desktop : exploiter la largeur ===== */
+@media(min-width:980px){
+  #lm-root .lm-wrap{max-width:1180px;padding-left:10px;padding-right:10px}
+  #lm-root .lm-overview-top{grid-template-columns:1.4fr 1fr;gap:18px}
+  #lm-root .lm-map-wrap{height:400px}
+  #lm-root #lm-p-stats{columns:2;column-gap:28px;padding:10px 18px 26px}
+  #lm-root #lm-p-stats .lm-sec-title{break-after:avoid;margin-top:0}
+  #lm-root #lm-p-stats .lm-rows,#lm-root #lm-p-stats .lm-zones,#lm-root #lm-p-stats .lm-fcmax{break-inside:avoid}
+  #lm-root #lm-p-stats .lm-rows,#lm-root #lm-p-stats .lm-zones{margin-bottom:18px}
+}
+</style>
 </head>
 <body>
 
@@ -1258,6 +1516,7 @@ input[type=range]{touch-action:none}
     <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Extrapo</span></button>
     <button class="mh-btn" id="mbn-planif" onclick="go('planif')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Plan</span></button>
     <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Infos</span></button>
+    <button class="mh-btn" id="mbn-watch" onclick="go('watch')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13.5 13.5"/><path d="M9 3h6M9 21h6"/></svg><span>Montre</span></button>
     <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg><span>Athlètes</span></button>
   </div>
 </header>
@@ -1300,6 +1559,10 @@ input[type=range]{touch-action:none}
       <button class="nav-btn" id="sbn-knowledge" onclick="go('knowledge')">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h5"/></svg>
         Connaissances
+      </button>
+      <button class="nav-btn" id="sbn-watch" onclick="go('watch')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13.5 13.5"/><path d="M9 3h6M9 21h6M8.5 5.2 8 3M15.5 5.2 16 3M8.5 18.8 8 21M15.5 18.8 16 21"/></svg>
+        Lecteur fichier montre
       </button>
       <div class="nav-section">Gestion</div>
       <button class="nav-btn" id="sbn-athletes" onclick="go('athletes')">
@@ -1619,7 +1882,7 @@ input[type=range]{touch-action:none}
               <div class="db-section-ico">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <div class="db-section-title" id="db-pred-title">Potentiel de performance</div>
+              <div class="db-section-title" id="db-pred-title">Plages de performance</div>
               <div class="db-section-badge" id="db-pred-badge">Follador 2022</div>
             </div>
             <div id="db-cs"></div>
@@ -1634,14 +1897,7 @@ input[type=range]{touch-action:none}
               </div>
               <div class="db-section-title">Temps de passage</div>
             </div>
-            <div class="crsl">
-              <div class="race-grid crsl-scroll" id="db-races"></div>
-              <div class="crsl-nav">
-                <button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance précédente">‹</button>
-                <div class="crsl-track"><div class="crsl-thumb"></div></div>
-                <button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">›</button>
-              </div>
-            </div>
+            <div class="race-grid" id="db-races"></div>
           </div>
 
           <!-- Records personnels -->
@@ -1685,8 +1941,7 @@ input[type=range]{touch-action:none}
                 <button class="btn-road-apply" onclick="addManualRace()" style="width:auto;margin:0;padding:8px 16px">+ Ajouter</button>
               </div>
               <div id="hist-empty" style="text-align:center;color:var(--muted2);font-size:13px;padding:18px 10px;line-height:1.6">Aucune course. Utilise <strong style="color:var(--orange)">Importer depuis une fiche</strong> (section Records) ou ajoute une course manuellement ci-dessus.</div>
-              <div id="hist-swipe-hint" class="plw-swipe-hint" style="display:none">👉 Fais glisser pour voir toute la chronologie</div>
-              <div class="hist-chart-scroll"><div id="hist-chart-wrap" style="position:relative;height:300px;display:none"><canvas id="hist-chart"></canvas></div></div>
+              <div id="hist-chart-wrap" style="position:relative;height:300px;display:none"><canvas id="hist-chart"></canvas></div>
               <div id="hist-list"></div>
             </div>
           </div>
@@ -1745,6 +2000,97 @@ input[type=range]{touch-action:none}
         <div id="knowledge-wrap" style="padding:36px 28px 80px"></div>
       </div>
 
+      <!-- ══════════ PANEL LECTEUR FICHIER MONTRE ══════════ -->
+      <div id="p-watch" class="panel">
+<div id="lm-root" class="lm-scope">
+<!-- ====== accueil ====== -->
+<div class="lm-start" id="lm-start">
+  <div class="lm-start-logo" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 4a1.6 1.6 0 1 0 0-.01"/><path d="M7 21l3.2-5.4 2.1-3.6-1.4-4 3.4 2.1 2.7.6"/>
+      <path d="M10.2 8.1L7.4 9.6 6 13"/><path d="M12.3 12l3.1 2.2 1.4 4.6"/>
+    </svg>
+  </div>
+  <h1>Lecteur FIT &amp; TCX</h1>
+  <p>Ouvrez un fichier exporté de votre montre et lisez la séance : carte, tours, allure, fréquence cardiaque.</p>
+
+  <div class="lm-drop" id="lm-drop">
+    <div class="lm-drop-title">Déposez un fichier .FIT ou .TCX ici</div>
+    <div class="lm-drop-sub">Garmin, Polar, Suunto, Coros, Wahoo, Strava — .gz accepté</div>
+    <button class="lm-btn-primary" id="lm-btnPick">Choisir un fichier</button>
+  </div>
+  <div class="lm-error" id="lm-err" role="alert"></div>
+  <div class="lm-start-foot">Le fichier est lu directement dans le navigateur. Rien n'est envoyé sur un serveur.</div>
+</div>
+
+<!-- ====== application ====== -->
+<div id="lm-app" hidden>
+  <header class="lm-topbar">
+    <button class="lm-icon-btn" id="lm-btnBack" aria-label="Revenir à l'ouverture de fichier">‹</button>
+    <div class="lm-topbar-title" id="lm-sportTitle">Course à pied</div>
+    <button class="lm-icon-btn lm-dots" id="lm-btnOther" aria-label="Ouvrir un autre fichier">⋮</button>
+  </header>
+
+  <nav class="lm-tabs" id="lm-tabs" role="tablist">
+    <button class="lm-tab" role="tab" aria-selected="true"  data-tab="apercu">Aperçu</button>
+    <button class="lm-tab" role="tab" aria-selected="false" data-tab="stats">Statistiques</button>
+    <button class="lm-tab" role="tab" aria-selected="false" data-tab="laps">Intervalles</button>
+    <button class="lm-tab" role="tab" aria-selected="false" data-tab="charts">Graphiques</button>
+  </nav>
+
+  <div class="lm-wrap">
+    <!-- Aperçu -->
+    <section class="lm-panel lm-on" id="lm-p-apercu" role="tabpanel">
+      <div class="lm-overview-top">
+        <div class="lm-map-wrap" id="lm-mapWrap">
+          <div id="lm-map"></div>
+          <div class="lm-map-note" id="lm-mapNote" hidden>Fond de carte indisponible — le tracé reste affiché</div>
+          <div class="lm-map-legend" id="lm-mapLegend"><span>Plus lente</span><span class="lm-legend-bar"></span><span>Plus rapide</span></div>
+          <div class="lm-map-empty" id="lm-mapEmpty" hidden><div>Aucune trace GPS</div><div style="color:var(--muted-2);font-size:13px">Séance enregistrée sans position (tapis, intérieur)</div></div>
+        </div>
+        <div>
+          <div class="lm-head">
+            <div class="lm-head-meta"><span id="lm-ovDate"></span></div>
+            <h2 id="lm-ovName">Activité</h2>
+            <div class="lm-head-sub" id="lm-ovDevice"></div>
+          </div>
+          <div class="lm-kpis" id="lm-ovKpis"></div>
+          <div class="lm-actions">
+            <button class="lm-act" id="lm-btnCsv">Exporter les tours (CSV)</button>
+            <button class="lm-act" id="lm-btnCopy">Copier le résumé</button>
+          </div>
+        </div>
+      </div>
+      <div id="lm-ovSelect"></div>
+    </section>
+
+    <!-- Statistiques -->
+    <section class="lm-panel" id="lm-p-stats" role="tabpanel"></section>
+
+    <!-- Intervalles -->
+    <section class="lm-panel" id="lm-p-laps" role="tabpanel">
+      <div class="lm-chips" id="lm-lapChips"></div>
+      <div class="lm-tbl-tools"><button class="lm-link-btn" id="lm-btnExpand">Développer ⌄</button></div>
+      <div class="lm-tbl-scroll"><table class="lm-laps" id="lm-lapTable"></table></div>
+      <div class="lm-note" id="lm-lapNote"></div>
+    </section>
+
+    <!-- Graphiques -->
+    <section class="lm-panel" id="lm-p-charts" role="tabpanel">
+      <div class="lm-seg" id="lm-axisSeg">
+        <button aria-pressed="true"  data-axis="t">Temps</button>
+        <button aria-pressed="false" data-axis="d">Distance</button>
+      </div>
+      <div class="lm-charts-grid" id="lm-chartsHost"></div>
+    </section>
+  </div>
+</div>
+
+<!-- pas d'attribut accept : iOS grise les .tcx/.fit, dont il ignore le type -->
+<input type="file" id="lm-fileInput" hidden>
+</div>
+      </div>
+
     </div><!-- /scroll -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1795,6 +2141,7 @@ function go(id){
   if(id==='extrapol') renderExtrapol();
   if(id==='planif') renderPlanif();
   if(id==='knowledge') renderKnowledge();
+  if(id==='watch'&&window.__lmResize)window.__lmResize();
   updMhCtx(id);
   const sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;
   window.scrollTo({top:0,behavior:'smooth'});
@@ -2063,7 +2410,7 @@ function renderPredCards(){
   if(!el) return;
   const vma=S.vma;
   const badgeEl=document.getElementById('db-pred-badge');
-  if(!vma){el.innerHTML='';if(badgeEl)badgeEl.textContent='';crslBind(el);return;}
+  if(!vma){el.innerHTML='';if(badgeEl)badgeEl.textContent='';return;}
   if(badgeEl) badgeEl.textContent=S.csKmh?'Modèle CS · D′':'Fourchette VMA';
   const expl=document.getElementById('pred-explain');
   if(expl){
@@ -2080,6 +2427,7 @@ function renderPredCards(){
     const paceF=fAll(tF/r.d*1000),paceM=fAll(tM/r.d*1000),paceS=fAll(tS/r.d*1000);
     const pctLo=Math.round(r.vmaLo*100), pctHi=Math.round(r.vmaHi*100);
     const vcBadge=M.csKmh?`<div class="pred-pct-badge" style="background:rgba(${r.rgb},0.12);border:1px solid rgba(${r.rgb},0.25);color:${r.col}">${Math.round(r.d*3.6/(tS*M.csKmh)*100)}–${Math.round(r.d*3.6/(tF*M.csKmh)*100)}% VC</div>`:'';
+    const topRight=(r.id==='mara')?`<div style="text-align:right"><div style="font-size:15px;font-weight:900;color:${r.col};line-height:1.15">${fHMS(tM)}<span style="font-size:11.5px;font-weight:600;color:var(--muted2)"> · ${paceM}/km</span></div>${vcBadge}</div>`:vcBadge;
     let goalHtml='',extraStyle='';
     if(g.id===r.id && g.t){
       const frac=Math.max(0,Math.min(1,(g.t-tF)/(tS-tF)));
@@ -2089,23 +2437,19 @@ function renderPredCards(){
     return `<div class="pred-c" style="border-top:3px solid ${r.col};${extraStyle}">
       <div class="pred-c-top">
         <div><div class="pred-name" style="color:${r.col}">${r.nm}</div><div class="pred-dist">${r.lbl}</div></div>
-        ${vcBadge}
+        ${topRight}
       </div>
       <div class="pred-time" style="color:${r.col};font-size:26px;letter-spacing:-0.5px">${fHMS(tM)}</div>
       <div class="pred-pace">${paceM}<span style="font-weight:400;color:var(--muted2)">/km · médiane</span></div>
+      <div class="pred-kmh">${(r.d/tM*3.6).toFixed(1)} km/h</div>
       <div class="pred-range">
-        <div class="pred-range-hd">Chronos possibles</div>
         <div class="pred-range-bar" style="background:rgba(${r.rgb},0.18)"><div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(${r.rgb},0.2),rgba(${r.rgb},0.55),rgba(${r.rgb},0.2));border-radius:2px"></div></div>
-        <div class="pred-range-lbl">
-          <span class="pred-range-v" style="color:${r.col}">${fHMS(tF)}<i>${paceF}/km</i></span>
-          <span class="pred-range-v" style="color:${r.col}">${fHMS(tS)}<i>${paceS}/km</i></span>
-        </div>
+        <div class="pred-range-lbl"><span>${fHMS(tF)} · ${paceF}</span><span>${fHMS(tS)} · ${paceS}</span></div>
       </div>
       ${goalHtml}
     </div>`;
   }).join('');
-  el.innerHTML=cards;
-  crslBind(el);
+  el.innerHTML=`<div class="pred-grid">${cards}</div>`;
 }
 
 /* ══ LOCAL STORAGE ══ */
@@ -2173,18 +2517,18 @@ function resetAll(){
 
 /* ══ ZONES ══ */
 const ZONES_VC=[
-  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile'},
-  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues'},
-  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, 30 min à 1h30'},
-  {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min, allure 10 km'},
-  {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m'},
+  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile — base aérobie, filière lipidique'},
+  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues, allure marathon'},
+  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, efforts 30 min à 1h30 (2×20 min, 3×15 min)'},
+  {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min (1000-1600 m), allure 10 km — puissance aérobie'},
+  {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m — vitesse neuromusculaire, capacité anaérobie'},
 ];
 const ZONES_VMA=[
-  {z:1,n:'Récupération',             pct:'60–70%', lo:0.60,hi:0.70, fcLo:55, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Aucune difficulté à parler',   rpe:'2–3',  use:'Footing très facile, récup'},
-  {z:2,n:'Endurance fondamentale',   pct:'70–80%', lo:0.70,hi:0.80, fcLo:65, fcHi:75,  cls:'z2',col:'#60A5FA', talk:'Conversation normale',         rpe:'3–4',  use:'Footings, sorties longues, base aérobie'},
-  {z:3,n:'Endurance active / Tempo', pct:'80–88%', lo:0.80,hi:0.88, fcLo:75, fcHi:83,  cls:'z3',col:'#34D399', talk:'Parler avec des pauses',       rpe:'5–6',  use:'Footings soutenus, allure marathon'},
-  {z:4,n:'Seuil',                    pct:'88–93%', lo:0.88,hi:0.94, fcLo:83, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Quelques mots seulement',      rpe:'7–8',  use:'Intervalles longs, tempo, seuil lactique'},
-  {z:5,n:'VO₂max',                   pct:'95–105%',lo:0.94,hi:1.05, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'Impossible de parler',         rpe:'9–10', use:'Intervalles courts/moyens, répétitions VMA'},
+  {z:1,n:'Récupération',             pct:'60–70%', lo:0.60,hi:0.70, fcLo:55, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Je peux parler sans aucune difficulté',     rpe:'2–3',  use:'Footing très facile, récupération entre séances, décrassage'},
+  {z:2,n:'Endurance fondamentale',   pct:'70–80%', lo:0.70,hi:0.80, fcLo:65, fcHi:75,  cls:'z2',col:'#60A5FA', talk:'Je peux tenir une conversation normale',     rpe:'3–4',  use:'Footings quotidiens, sorties longues, développement de la base aérobie'},
+  {z:3,n:'Endurance active / Tempo', pct:'80–88%', lo:0.80,hi:0.88, fcLo:75, fcHi:83,  cls:'z3',col:'#34D399', talk:'Je peux parler mais je dois faire des pauses', rpe:'5–6',  use:'Footings soutenus, blocs d’endurance active, travail d’allure marathon'},
+  {z:4,n:'Seuil',                    pct:'88–93%', lo:0.88,hi:0.94, fcLo:83, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Je peux dire seulement quelques mots',       rpe:'7–8',  use:'Intervalles longs, tempo soutenu, travail au seuil lactique'},
+  {z:5,n:'VO₂max',                   pct:'95–105%',lo:0.94,hi:1.05, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'Je ne peux plus parler',                    rpe:'9–10', use:'Intervalles courts à moyens, répétitions VMA, développement VO₂max'},
 ];
 
 /* ══ RENDER DASHBOARD ══ */
@@ -2232,6 +2576,30 @@ function renderProfile(){
   const vcMode=S.mode==='tests'&&!!csKmh;
   const ref=csKmh||(vma*0.87);
 
+  // Bloc 1 — Profil
+  let profileName='',profileDesc='',profileCol='var(--orange)';
+  if(vcMode&&vma){
+    const r=csKmh/vma;
+    if(r>0.92){profileName='Profil Endurance';profileDesc='Forte capacité aérobie — performances optimales sur longues distances';profileCol='#34D399';}
+    else if(r>0.87){profileName='Profil Équilibré';profileDesc='Bonne polyvalence entre vitesse de pointe et endurance';profileCol='var(--orange)';}
+    else{profileName='Profil Vitesse';profileDesc='Profil explosif — meilleures performances sur courtes distances';profileCol='#60A5FA';}
+  } else if(!vcMode&&vma&&tmiSec!==null){
+    if(tmiSec<=240){profileName='VMA surestimée';profileDesc='Temps de maintien ≤ 4 min — votre VMA réelle est probablement inférieure';profileCol='#F87171';}
+    else if(tmiSec<=420){profileName='VMA correcte';profileDesc='Temps de maintien 5–7 min — votre VMA est validée';profileCol='#34D399';}
+    else{profileName='VMA sous-estimée';profileDesc='Temps de maintien > 7 min — votre VMA réelle est probablement supérieure';profileCol='#60A5FA';}
+  }
+  const b1=profileName?`
+    <div class="ph-block ph-full">
+      <div class="ph-b-lbl">Profil</div>
+      <div class="ph-b-val" style="color:${profileCol}">${profileName}</div>
+      <div class="ph-b-desc">${profileDesc}</div>
+    </div>`:
+    `<div class="ph-block ph-full">
+      <div class="ph-b-lbl">Profil</div>
+      <div class="ph-b-val" style="color:var(--muted2);font-size:14px">—</div>
+      <div class="ph-b-desc">${!vcMode&&vma?`<span onclick="go('input');openOpt('tmi-body','tmi-chev')" style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:3px">Effectuez le test TMI pour définir votre profil →</span>`:'Renseignez votre VMA pour obtenir votre profil'}</div>
+    </div>`;
+
   // Bloc 2 — VC / allure / D'
   const b2val=vcMode?csKmh:vma;
   const b2=`
@@ -2249,14 +2617,19 @@ function renderProfile(){
       <div class="ph-b-sub">capacité anaérobie</div>
     </div>`:'';
 
-  // Bloc 4 — FC : uniquement si renseignée en amont (saisie), plus de rappel/invite ici
+  // Bloc 4 — FC
   const b3=fcMax?`
     <div class="ph-block">
       <div class="ph-b-lbl">Fréquence Cardiaque</div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val" style="color:#F87171">${fcMax}</span><span class="ph-b-fc-lbl">bpm max</span></div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val" style="color:var(--muted)">${fcRest}</span><span class="ph-b-fc-lbl">bpm repos</span></div>
       <div class="ph-b-fc-row"><span class="ph-b-fc-val">${fcReserve}</span><span class="ph-b-fc-lbl">bpm réserve</span></div>
-    </div>`:'';
+    </div>`:
+    `<div class="ph-block">
+      <div class="ph-b-lbl">Fréquence Cardiaque</div>
+      <div class="ph-b-val" style="color:var(--muted2);font-size:14px">—</div>
+      <div class="ph-b-desc"><span onclick="go('input');openOpt('fc-opt-body','fc-chev')" style="cursor:pointer;color:var(--orange);text-decoration:underline;text-underline-offset:3px">Renseignez vos données cardiaques →</span></div>
+    </div>`;
 
   // Alertes qualité (mode tests)
   let warnHtml='';
@@ -2293,8 +2666,8 @@ function renderProfile(){
       </button>
     </div>`;
   document.getElementById('db-profile').innerHTML=`
-    <div class="profile-hero${(vcMode&&dp&&fcMax)?' ph-3col':''}">
-      ${b0}${b2}${b3vma}${b3}${bActions}
+    <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
+      ${b0}${b1}${b2}${b3vma}${b3}${bActions}
     </div>
     ${warnHtml}`;
 }
@@ -2313,7 +2686,7 @@ function renderZones(){
     if(!hasFc) return '';
     const flo=Math.round(fcRest+loP/100*fcReserve);
     const fhi=Math.round(fcRest+hiP/100*fcReserve);
-    return `<td class="hide-mob" data-label="% FC Rés." style="color:var(--muted2)">${loP}–${hiP}%</td><td data-label="FC"><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
+    return `<td class="hide-mob" style="color:var(--muted2)">${loP}–${hiP}%</td><td><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
   }
 
   const vcBadge=`<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--orange)"><span class="hide-mob">VC${isReal?'':' est.'} = ${vc.toFixed(2)} km/h · ${fAll(3600/vc)}/km</span><span class="show-mob" style="display:none">VC ${fAll(3600/vc)}/km</span></span>`;
@@ -2328,13 +2701,13 @@ function renderZones(){
     const isZ4=z.z===4;
     const pctStr=z.pct;
     rows+=`<tr>
-      <td class="zn-badge" data-label=""><span class="zb ${z.cls}">Z${z.z}</span></td>
-      <td class="zn-domain" data-label="" style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}${z.talk?`<div style="font-size:10.5px;font-style:italic;color:var(--muted);margin-top:3px;line-height:1.4">💬 ${z.talk}</div>`:''}</td>
-      <td class="zn-break" aria-hidden="true"></td>
-      <td class="col-num hide-mob" data-label="${pctCol}" style="color:var(--muted2)">${pctStr}</td>
-      <td class="col-num" data-label="Vitesse" style="font-weight:600;color:${z.col}">${vStr}</td>
-      <td data-label="Allure" style="color:var(--text2)">${aStr}</td>
-      <td data-label="RPE" style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
+      <td><span class="zb ${z.cls}">Z${z.z}</span></td>
+      <td style="font-weight:700;color:var(--text)">${z.n}${z.use?`<div style="font-size:11px;font-weight:500;color:var(--muted2);margin-top:2px;line-height:1.4">${z.use}</div>`:''}</td>
+      <td class="col-num" style="color:var(--muted2)">${pctStr}</td>
+      <td class="col-num" style="font-weight:600;color:${z.col}">${vStr}</td>
+      <td style="color:var(--text2)">${aStr}</td>
+      <td style="color:var(--muted2);font-size:12px">${z.talk}</td>
+      <td style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
       ${fcC(z.fcLo,z.fcHi,z.col)}
     </tr>`;
   });
@@ -2346,10 +2719,10 @@ function renderZones(){
     : 'Zones <b>VMA</b> (Talk test / RPE) — référentiel croisé FFA (secteurs aérobie, seuil) &amp; INSEP (VMA 95-105 %).';
   document.getElementById('db-zones').innerHTML=`
     ${vcNote}
-    <div class="tbl-wrap"><table class="zones-tbl">
+    <div class="tbl-wrap"><table>
       <thead><tr>
-        <th>Zone</th><th>Domaine d'intensité</th><th class="col-num hide-mob">${pctCol}</th><th class="col-num">Vitesse</th><th>Allure /km</th>
-        <th>RPE</th>
+        <th>Zone</th><th>Domaine d'intensité</th><th class="col-num">${pctCol}</th><th class="col-num">Vitesse</th><th>Allure /km</th>
+        <th>Talk test</th><th>RPE</th>
         ${fcH}
       </tr></thead>
       <tbody>${rows}</tbody>
@@ -2424,57 +2797,12 @@ function bldZbar(slo,shi){
   bar.innerHTML=html;
 }
 
-/* ── Carousel de cartes (mobile) : flèches + barre de défilement personnalisée ──
-   .crsl = conteneur relatif ; .crsl-scroll = grille défilante (overflow-x auto) ;
-   .crsl-track/.crsl-thumb = jauge indiquant la position/l'étendue du scroll. */
-function crslNav(btn,dir){
-  const wrap=btn.closest('.crsl');
-  const grid=wrap&&wrap.querySelector('.crsl-scroll');
-  if(grid) grid.scrollBy({left:dir*grid.clientWidth*0.85,behavior:'smooth'});
-}
-function crslUpdate(grid){
-  if(!grid)return;
-  const track=grid.parentElement&&grid.parentElement.querySelector('.crsl-track');
-  const thumb=track&&track.querySelector('.crsl-thumb');
-  if(!track||!thumb)return;
-  const sw=grid.scrollWidth,cw=grid.clientWidth;
-  if(sw<=cw+2){track.style.visibility='hidden';return;}
-  track.style.visibility='visible';
-  const ratio=Math.min(1,cw/sw),max=sw-cw;
-  const pos=max>0?grid.scrollLeft/max:0;
-  thumb.style.width=(ratio*100)+'%';
-  thumb.style.left=(pos*(100-ratio*100))+'%';
-}
-function crslBind(grid){
-  if(!grid)return;
-  if(grid.dataset.crslBound){
-    // Le rendu peut arriver pendant que l'onglet est encore caché (scrollWidth pas fiable) :
-    // on remesure après le prochain frame pour capter la vraie largeur une fois affiché.
-    requestAnimationFrame(function(){crslUpdate(grid);});
-    return;
-  }
-  grid.dataset.crslBound='1';
-  grid.addEventListener('scroll',function(){crslUpdate(grid);},{passive:true});
-  window.addEventListener('resize',function(){crslUpdate(grid);});
-  requestAnimationFrame(function(){crslUpdate(grid);});
-}
-function crslBindAll(root){
-  (root||document).querySelectorAll('.crsl-scroll').forEach(crslBind);
-}
-
 /* ── CS Predictions ── */
 function renderCSPredictions(){
   const box=document.getElementById('db-cs');
   const titleEl=document.getElementById('db-pred-title');
-  if(titleEl) titleEl.textContent='Potentiel de performance';
-  box.innerHTML='<div class="crsl">'
-    +'<div class="pred-grid crsl-scroll" id="pred-cards"></div>'
-    +'<div class="crsl-nav">'
-    +'<button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance précédente">‹</button>'
-    +'<div class="crsl-track"><div class="crsl-thumb"></div></div>'
-    +'<button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">›</button>'
-    +'</div>'
-    +'</div>';
+  if(titleEl) titleEl.textContent='Plages de performance';
+  box.innerHTML='<div id="pred-cards"></div>';
   renderPredCards();
 }
 
@@ -2492,12 +2820,7 @@ function buildRaces(){
   const dRef=vma*100;
   function defPace(r){
     let tSec;
-    // Course à venir (objectif) : caler le curseur sur le chrono visé plutôt que sur la prédiction du modèle
-    if(S.goal&&S.goal.id===r.id&&S.goal.t){
-      tSec=S.goal.t;
-      return Math.min(Math.max(Math.round(tSec/r.d*1000),r.lo),r.hi);
-    }
-    // Calé sur le Potentiel de performance : médiane de perfRange (même modèle, mêmes coefficients)
+    // Calé sur les Plages de performance : médiane de perfRange (même modèle, mêmes coefficients)
     const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===r.id):null;
     if(pr&&(csKmh||vma)){
       tSec=perfRange(pr,{vma:vma,csKmh:csKmh||null,dp:dp||0}).tMed;
@@ -2528,7 +2851,6 @@ function buildRaces(){
       <div class="rc-splits" id="rspl-${r.id}"></div>
     </div>`}).join('');
   RACES.forEach(r=>{const el=document.getElementById('cs-'+r.id);if(el&&typeof csSet==='function')csSet(el,+el.dataset.val);else updR(r.id,defPace(r));});
-  crslBind(g);
 }
 function adjR(id,d){const el=document.getElementById('cs-'+id);if(!el)return;csSet(el,(+el.dataset.val)+d);}
 function updR(id,val){
@@ -2701,19 +3023,8 @@ function renderRecords(){
       :'<button type="button" class="btn-road-apply" onclick="recAddToggle()" style="width:auto;margin:0;padding:8px 16px">+ Ajouter une distance</button>')
     +'</div>'):'';
   const empty=shown.length?'':'<div class="rec-out-empty" style="padding:20px;text-align:center">Aucun record. Importe une fiche FFA (les records s\u2019extraient de l\u2019historique) ou ajoute une distance manuellement.</div>';
-  const grid=shown.length>1
-    ? '<div class="crsl">'
-      +'<div class="rec-grid crsl-scroll">'+cards+'</div>'
-      +'<div class="crsl-nav">'
-      +'<button type="button" class="crsl-arrow crsl-prev" onclick="crslNav(this,-1)" aria-label="Distance pr\u00e9c\u00e9dente">\u2039</button>'
-      +'<div class="crsl-track"><div class="crsl-thumb"></div></div>'
-      +'<button type="button" class="crsl-arrow crsl-next" onclick="crslNav(this,1)" aria-label="Distance suivante">\u203a</button>'
-      +'</div>'
-      +'</div>'
-    : '<div class="rec-grid">'+cards+'</div>';
-  el.innerHTML=`${grid}${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
+  el.innerHTML=`<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
   shown.forEach(r=>updRecord(r.id,true));
-  crslBindAll(el);
 }
 function updRecord(id,skipSave){
   const r=REC_DISTS.find(x=>x.id===id);if(!r)return;
@@ -2748,6 +3059,7 @@ function updRecord(id,skipSave){
     <div>
       <div class="rec-metric-lbl">Allure</div>
       <div class="rec-pace" style="color:${r.col}">${pace}<span> /km</span></div>
+      <div class="rec-kmh">${kmh.toFixed(2)} km/h · ${fHMS(T)}</div>
     </div>`;
   if(badge)badge.style.display='none';
   if(!skipSave){saveLS();renderChart();}
@@ -2783,12 +3095,10 @@ function renderChart(){
   const cv=document.getElementById('perf-chart');
   if(!cv||typeof Chart==='undefined'||!S.vma)return;
   const vmaMs=S.vma/3.6;
-  // Ne garder que les distances pour lesquelles un temps a été renseigné (record ou historique récent)
-  const dists=CHART_DISTS.filter(r=>chartSeconds(r.id)!=null);
-  const labels=dists.map(r=>r.nm);
-  const paceHi=dists.map(r=>Math.round(1000/(r.vmaHi*vmaMs)));
-  const paceLo=dists.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
-  const recPace=dists.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
+  const labels=CHART_DISTS.map(r=>r.nm);
+  const paceHi=CHART_DISTS.map(r=>Math.round(1000/(r.vmaHi*vmaMs)));
+  const paceLo=CHART_DISTS.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
+  const recPace=CHART_DISTS.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
   const hasRec=recPace.some(v=>v!=null);
   const emptyEl=document.getElementById('perf-empty');
   if(emptyEl){
@@ -2802,8 +3112,8 @@ function renderChart(){
   const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
   const data={labels,datasets:[
     // Bande de prédiction (modèle) — violet discret, pointillé, sans points
-    {label:'Prédiction (rapide)',data:paceHi,borderColor:'rgba(255,107,26,0.75)',backgroundColor:'rgba(139,92,246,0.10)',borderWidth:1.5,pointRadius:0,tension:0.3,fill:'+1'},
-    {label:'Prédiction (lente)', data:paceLo,borderColor:'rgba(56,189,248,0.75)',backgroundColor:'rgba(139,92,246,0.10)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
+    {label:'Prédiction (rapide)',data:paceHi,borderColor:'rgba(139,92,246,0.55)',backgroundColor:'rgba(139,92,246,0.10)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0.3,fill:'+1'},
+    {label:'Prédiction (lente)', data:paceLo,borderColor:'rgba(139,92,246,0.55)',backgroundColor:'rgba(139,92,246,0.10)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
     // Records — réel mesuré : points pleins verts, aucune ligne
     {label:'Vos records',data:recPace,borderColor:'#10B981',backgroundColor:'#34D399',showLine:false,pointRadius:5.5,pointHoverRadius:7.5,pointStyle:'circle',spanGaps:true},
   ]};
@@ -2813,7 +3123,7 @@ function renderChart(){
     plugins:{
       legend:{display:false},
       tooltip:{callbacks:{label:ctx=>{
-        const r=dists[ctx.dataIndex];const sec=ctx.parsed.y;if(sec==null)return null;
+        const r=CHART_DISTS[ctx.dataIndex];const sec=ctx.parsed.y;if(sec==null)return null;
         const pct=Math.round((1000/sec)*3.6/S.vma*100);
         return `${ctx.dataset.label}: ${fmt(sec)}/km · ${pct}% VMA · ${fh(sec*r.d/1000)}`;
       }}}
@@ -3018,65 +3328,8 @@ const ATH_KEY='redlab_athletes_v1';
 function getAthletes(){
   try{const r=localStorage.getItem(ATH_KEY);return r?JSON.parse(r):[];}catch(e){return [];}
 }
-function _persistAthletes(list){
+function _saveAthletes(list){
   try{localStorage.setItem(ATH_KEY,JSON.stringify(list));}catch(e){}
-}
-function _saveAthletes(list){ _persistAthletes(list); }
-// ── Statut de publication espace (badge) ──
-function _fmtDT(ts){
-  if(!ts)return '';
-  var d=new Date(ts);
-  return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-}
-function pubBadgeHTML(a){
-  if(!a.email)return '';
-  var synced=a.pubAt&&(!a.modAt||a.pubAt>=a.modAt);
-  if(synced)return '<span class="ath-pub-badge ok" id="pub-badge-'+a.id+'">✓ Publié le '+_fmtDT(a.pubAt)+'</span>';
-  if(a.pubAt)return '<span class="ath-pub-badge pending" id="pub-badge-'+a.id+'">● Modifications non publiées</span>';
-  return '<span class="ath-pub-badge pending" id="pub-badge-'+a.id+'">○ Jamais publié</span>';
-}
-function refreshPubBadge(id){
-  var el=document.getElementById('pub-badge-'+id);
-  var a=getAthletes().find(function(x){return x.id===id;});
-  if(!el||!a)return;
-  var html=pubBadgeHTML(a);
-  var tmp=document.createElement('div'); tmp.innerHTML=html;
-  var newEl=tmp.firstElementChild;
-  if(newEl)el.replaceWith(newEl); else el.remove();
-}
-function markPublished(id,token){
-  var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
-  a.pubAt=Date.now();
-  if(token)a.accessToken=token;
-  _persistAthletes(list);
-  refreshPubBadge(id);
-}
-// Publie la fiche d'un athlète (par id) vers son espace, sans exiger qu'il soit chargé dans le dashboard.
-async function publishAthleteCore(id){
-  var ath=getAthletes().find(function(x){return x.id===id;});
-  if(!ath)return {error:'athlète introuvable'};
-  if(!ath.email||ath.email.indexOf('@')<0)return {error:'email manquant'};
-  try{
-    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
-    _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
-    if(typeof renderDashboard==='function')renderDashboard();
-  }catch(e){ return {error:'rendu du dashboard — '+e.message}; }
-  var doc;
-  try{ doc=exportAthleteView(true); }catch(e){ return {error:'génération de la fiche — '+e.message}; }
-  if(!doc)return {error:'fiche vide (VMA/VC manquante pour cet athlète ?)'};
-  try{ saveLS(); }catch(e){}
-  var r;
-  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
-  catch(e){ return {error:e.message}; }
-  if(r&&r.error)return {error:r.error.message};
-  markPublished(id,r&&r.data&&r.data.access_token);
-  return {ok:true,size:doc.length};
-}
-var _autoPubTimers={};
-function autoPublish(id){
-  if(typeof _cloudUser==='undefined'||!_cloudUser)return;
-  clearTimeout(_autoPubTimers[id]);
-  _autoPubTimers[id]=setTimeout(function(){ publishAthleteCore(id); },900);
 }
 
 function saveCurrentAthlete(){
@@ -3087,9 +3340,6 @@ function saveCurrentAthlete(){
     id:existing>=0?athletes[existing].id:Date.now(),
     pseudo:S.pseudo,
     email:existing>=0?(athletes[existing].email||''):'',
-    pubAt:existing>=0?athletes[existing].pubAt:null,
-    accessToken:existing>=0?athletes[existing].accessToken:null,
-    modAt:Date.now(),
     savedAt:new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}),
     mode:S.mode,vma:S.vma,csKmh:S.csKmh,dp:S.dp,
     csMethod:S.csMethod,csR2:S.csR2,
@@ -3115,7 +3365,6 @@ function saveCurrentAthlete(){
   ath.history=hist;
   if(existing>=0){athletes[existing]=ath;}else{athletes.unshift(ath);}
   _saveAthletes(athletes);
-  if(ath.email)autoPublish(ath.id);
   // Feedback visuel
   const btn=document.getElementById('btn-save-ath');
   if(btn){
@@ -3286,10 +3535,9 @@ function renderAthletes(){
       </div>
       <div class="ath-espace">
         <label>Espace client · email de connexion</label>
-        ${pubBadgeHTML(a)}
         <div class="ath-espace-row">
           <input type="email" inputmode="email" placeholder="athlete@email.fr" value="${a.email||''}" onchange="setAthleteEmail(${a.id},this.value)">
-          <button class="ath-espace-copy" onclick="copyEspaceLink(${a.id},this)" title="Copier le lien de l'espace">Lien</button>
+          <button class="ath-espace-copy" onclick="inviteAthlete(${a.id},this)" title="Copier l'invitation à envoyer (lien + email + mode d'emploi)">Inviter</button>
         </div>
         <button class="ath-espace-pub" onclick="publishAthlete(${a.id},this)" title="Envoyer/mettre à jour la fiche complète dans l'espace de l'athlète">↑ Publier l'espace</button>
       </div>
@@ -3304,7 +3552,32 @@ function renderAthletes(){
       </div>
     </div>`;
   }).join('');
-  wrap.innerHTML=hd+`<div class="ath-grid">${cards}</div>`;
+  wrap.innerHTML=hd+`<div class="ath-carousel"><button class="ath-arrow left" aria-label="Précédent" tabindex="-1">‹</button><div class="ath-grid">${cards}</div><button class="ath-arrow right" aria-label="Suivant" tabindex="-1">›</button></div>`;
+  athCarouselInit(wrap.querySelector('.ath-carousel'));
+}
+// Carrousel : flèches (clic) + glisser à la souris. Le tactile utilise le défilement natif.
+function athCarouselInit(cont){
+  if(!cont)return;
+  var g=cont.querySelector('.ath-grid'); if(!g)return;
+  var L=cont.querySelector('.ath-arrow.left'), R=cont.querySelector('.ath-arrow.right');
+  function step(){ var c=g.querySelector('.ath-card'); return (c?c.getBoundingClientRect().width:300)+14; }
+  function upd(){ if(!L||!R)return; var max=g.scrollWidth-g.clientWidth-1; L.disabled=g.scrollLeft<=2; R.disabled=g.scrollLeft>=max; }
+  if(L)L.onclick=function(){ g.scrollBy({left:-step(),behavior:'smooth'}); };
+  if(R)R.onclick=function(){ g.scrollBy({left:step(),behavior:'smooth'}); };
+  g.addEventListener('scroll',upd);
+  // glisser à la souris (desktop)
+  var down=false,sx=0,sl=0;
+  g.addEventListener('pointerdown',function(e){
+    if(e.pointerType!=='mouse')return;
+    if(e.target.closest('input,button,a,select,textarea'))return;
+    down=true;sx=e.clientX;sl=g.scrollLeft;g.classList.add('dragging');
+    try{g.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  g.addEventListener('pointermove',function(e){ if(down)g.scrollLeft=sl-(e.clientX-sx); });
+  function end(){ down=false;g.classList.remove('dragging'); }
+  g.addEventListener('pointerup',end);
+  g.addEventListener('pointercancel',end);
+  setTimeout(upd,60); upd();
 }
 
 /* ══ PROGRESSION ══ */
@@ -4424,7 +4697,7 @@ function renderCsModel(){
   syn.push({t:'tip',x:(pts.length<3?'Ajoute un effort de 6–10 min':(mrel?'Modèle robuste — poursuis le suivi':'Refais le test le moins cohérent'))});
   const synth='<div class="csm-synth">'+syn.map(o=>'<span class="sy '+o.t+'">'+(o.t==='ok'?'✔':(o.t==='warn'?'⚠':'💡'))+' '+o.x+'</span>').join('')+'</div>';
   const trows=pts.map((p,i)=>{const pred=csMs*p.t+dp;const res=p.d-pred;const nm=p.lbl||(p.t===180?'Test 3 min':(p.t===720?'Test 12 min':'Effort '+(i+1)));const big=pts.length>=3&&Math.abs(res)>Math.max(2.5*(rmse||0),0.05*(dm||p.d));return '<tr'+(big?' class="tt-out"':'')+'><td>'+nm+'</td><td>'+R(p.d)+' m</td><td>'+fHMS(p.t)+'</td><td>'+fAll(1000/(p.d/p.t))+' /km</td><td>'+(p.d/p.t*3.6).toFixed(1)+' km/h</td><td>'+(res>=0?'+':'')+R(res)+' m</td></tr>';}).join('');
-  const testTable='<div class="csm-h" style="margin-top:22px">Tes tests</div><div class="tbl-wrap"><table class="csm-tt"><thead><tr><th>Test</th><th>Distance</th><th>Temps</th><th>Allure</th><th>Vitesse</th><th>Écart au modèle</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+(pts.length<3?'<div class="csm-mini">Avec 2 tests, l’écart est nul par construction. Les résidus deviennent informatifs à partir de 3 tests et permettent de repérer un test aberrant.</div>':'');
+  const testTable='<div class="csm-h" style="margin-top:22px">Tes tests</div><table class="csm-tt"><thead><tr><th>Test</th><th>Distance</th><th>Temps</th><th>Allure</th><th>Vitesse</th><th>Écart au modèle</th></tr></thead><tbody>'+trows+'</tbody></table>'+(pts.length<3?'<div class="csm-mini">Avec 2 tests, l’écart est nul par construction. Les résidus deviennent informatifs à partir de 3 tests et permettent de repérer un test aberrant.</div>':'');
   const simVmax=Math.max(csKmh*1.35,(vmaRef||csKmh)*1.05), simVdef=Math.min(simVmax,csKmh+1.5), simVmin=Math.max(csKmh*0.8,csKmh-2.5);
   const sim='<div class="csm-h" style="margin-top:22px">Simulateur — tenue d’allure</div>'+
     '<div class="csm-sim">'+
@@ -4777,11 +5050,10 @@ function exportAthleteView(returnDoc){
       +'.card,.lib-card,.race-card,.rec-card,.pred-c,.sc,.sl-card{padding:16px!important}'
       /* Grilles empilées en une colonne */
       +'.db-grid,.race-grid,.pred-grid,.rec-grid,.stats-row,.lib-grid{grid-template-columns:1fr!important;gap:12px!important}'
-      /* Tables larges : scroll horizontal interne, jamais de débordement de page
-         (le tableau des zones a sa propre mise en page empilée, voir .zones-tbl) */
+      /* Tables larges : scroll horizontal interne, jamais de débordement de page */
       +'.tbl-wrap,.export-wrap [style*="overflow-x"]{-webkit-overflow-scrolling:touch}'
-      +'.export-wrap table:not(.zones-tbl){display:block;overflow-x:auto;white-space:nowrap;min-width:0!important;width:100%}'
-      +'.export-wrap thead:not(.zones-tbl thead),.export-wrap tbody:not(.zones-tbl tbody),.export-wrap tr:not(.zones-tbl tr){width:max-content;min-width:100%}'
+      +'.export-wrap table{display:block;overflow-x:auto;white-space:nowrap;min-width:0!important;width:100%}'
+      +'.export-wrap thead,.export-wrap tbody,.export-wrap tr{width:max-content;min-width:100%}'
     +'}';
 
   // Infos clés sur la course préparée (fin de fiche)
@@ -4997,20 +5269,17 @@ function renderRaceHistory(){
   const sec=document.getElementById('db-history-section');if(!sec)return;
   const list=(S.raceHistory||[]).filter(r=>r&&r.ts!=null);
   const wrap=document.getElementById('hist-chart-wrap');
-  const hint=document.getElementById('hist-swipe-hint');
   const empty=document.getElementById('hist-empty');
   const box=document.getElementById('hist-list');
   const cv=document.getElementById('hist-chart');
   if(!list.length){
     if(empty)empty.style.display='block';
     if(wrap)wrap.style.display='none';
-    if(hint)hint.style.display='none';
     if(box)box.innerHTML='';
     if(histChart){histChart.destroy();histChart=null;}
     return;
   }
   if(empty)empty.style.display='none';
-  if(hint)hint.style.display='';
   if(wrap)wrap.style.display='block';
   const byDist={};
   list.forEach(r=>{(byDist[r.dist]=byDist[r.dist]||[]).push(r);});
@@ -5464,16 +5733,9 @@ function plLoadHTML(p,wk,opts){
   const cid=opts.cid||'pl-vol-canvas';
   const title=opts.noTitle?'':'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Périodisation de la charge</div>';
   const legend=[['base','Base'],['dev','Développement'],['spe','Spécifique'],['aff','Affûtage']].map(l=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2)"><i style="width:10px;height:10px;border-radius:50%;background:'+PL_PHC[l[0]]+'"></i>'+l[1]+'</span>').join('');
-  // Préparations longues : garder ~46px par semaine plutôt que compresser toutes les
-  // barres dans la largeur de la carte (illisible au-delà d'une dizaine de semaines).
-  // Le graphique défile horizontalement au lieu de tasser les barres.
-  const nWeeks=(wk&&wk.length)||0;
-  const minW=Math.max(nWeeks*46,280);
-  const swipeHint=nWeeks>7?'<div class="plw-swipe-hint" style="justify-content:center">👉 Fais glisser pour voir toute la préparation</div>':'';
   return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
     +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
-    +swipeHint
-    +'<div class="pl-vol-scroll"><div class="pl-vol-wrap" style="position:relative;height:460px;min-width:'+minW+'px"><canvas id="'+cid+'"></canvas></div></div>'
+    +'<div style="position:relative;height:460px"><canvas id="'+cid+'"></canvas></div>'
     +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 3 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
 }
 let _plVolCharts={};
@@ -5931,9 +6193,7 @@ function plCalendarHTML(p,weeks){
   var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'
     +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
     +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':'')+'</div></div>';
-  return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'
-    +'<div class="plw-swipe-hint">👉 Fais glisser latéralement pour voir toute la semaine</div>'
-    +'<div class="plw-scroll">'+hdr+'<div class="plw-cal">'+rows+'</div></div>';
+  return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
 }
 function plVolLive(n,val){var e=document.getElementById('plc-km-'+n);if(e){e.textContent=val+' km';e.style.color='var(--orange)';}}
 function plVolSet(n,val){_plVolOverride[n]=+val;_plPicked=true;plUpd();}
@@ -6197,6 +6457,23 @@ function plStudiesHTML(){
     +'<div style="font-size:11px;color:var(--muted2);margin-top:6px">Veille automatique — dernière mise à jour : '+PL_STUDIES_UPD+'.</div>'
     +'</div>';
 }
+function plFracHTML(){
+  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
+  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
+  var FR=[
+   ['Nombre de répétitions','À calculer pour tenir <b>≥ 10 min à > 90 % VO₂max</b> (latence incluse)','À calculer pour tenir <b>≥ 10 min à > 90 % VO₂max</b> (latence incluse)'],
+   ['Durée des répétitions','<b>&gt; 2 min</b> · idéal 4-6 min','<b>&lt; 2 min</b>'],
+   ['Intensité','&gt; 90 % VO₂max · &gt; 90 % VMA/PMA · 90-95 % FC max','&gt; 90 % VO₂max · <b>100-120 % VMA/PMA</b>'],
+   ['Mode de contrôle','Essentiellement <b>FC</b> (+ puissance/vitesse)','<b>Puissance ou vitesse</b>'],
+   ['Récup entre répétitions','&lt; temps d’effort (50-100 %) · 2-3 min passives ou 3-4 min à 40 % VMA/PMA','&lt; temps d’effort (50-100 %) · <b>50-70 % VMA/PMA</b>'],
+   ['Nombre de séries','Condenser sur le moins de séries possible','Condenser sur le moins de séries possible']
+  ];
+  var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Fractionné VMA — long vs court (en résumé)</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Objectif commun : passer le plus de temps possible &gt; 90 % de VO₂max.</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
 function plRenfoHTML(){
   var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
   var td='padding:9px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
@@ -6288,35 +6565,15 @@ async function fetchPubmedLive(){
       +'<a href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Ouvrir la recherche PubMed →</a></div>';
   }
 }
-function accSection(id,title,bodyHTML,openByDefault){
-  return '<div class="acc-item">'
-    +'<button type="button" class="acc-hd" onclick="accToggle(\''+id+'\')" aria-expanded="'+(openByDefault?'true':'false')+'">'
-    +'<span class="acc-title">'+title+'</span><span class="acc-chev" id="acc-chev-'+id+'">'+(openByDefault?'−':'+')+'</span>'
-    +'</button>'
-    +'<div class="acc-body" id="acc-body-'+id+'"'+(openByDefault?'':' style="display:none"')+'>'+bodyHTML+'</div>'
-    +'</div>';
-}
-function accToggle(id){
-  var body=document.getElementById('acc-body-'+id);
-  var chev=document.getElementById('acc-chev-'+id);
-  if(!body)return;
-  var open=body.style.display!=='none';
-  body.style.display=open?'none':'';
-  if(chev)chev.textContent=open?'+':'−';
-}
 function renderKnowledge(){
   var w=document.getElementById('knowledge-wrap');if(!w)return;
-  var accHTML=accSection('spesess','Séance spécifique — référentiel FFA',plSpeSessHTML(),true)
-    +accSection('domtime','Temps de travail par domaine — référentiel FFA',plDomainTimeHTML(),false)
-    +accSection('vo2','VMA / VO₂max — fractionné long vs court',plVO2HTML(),false)
-    +accSection('recov','Délais de récupération — référentiel FFA',plRecovHTML(),false)
-    +accSection('renfo','Renforcement / musculation — périodisation par distance',plRenfoHTML(),false)
-    +accSection('combine','Muscu + course — combiner sans interférence',plCombineHTML(),false)
-    +accSection('nutrition','Nutrition — course d’endurance',plNutritionHTML(),false)
-    +accSection('studies','Études cliniques (sélection)',plStudiesHTML(),false)
-    +accSection('pubmed','Veille scientifique PubMed (en direct)',pubmedLiveHTML(),false);
-  w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="acc-hint">👉 Touche un titre pour l’ouvrir ou le refermer</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
-    +accHTML;
+  w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
+    +plSpeSessHTML()
+    +plDomainTimeHTML()
+    +plVO2HTML()
+    +plRecovHTML()
+    +plRenfoHTML()
+    +pubmedLiveHTML();
   fetchPubmedLive();
 }
 function renderPlanif(){
@@ -6431,7 +6688,7 @@ function cloudOpen(){
   }else{
     body='<div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6">Connecte-toi pour sauvegarder tes séances, athlètes et plans dans le cloud (synchro automatique, multi-appareils).</div>'
       +'<div class="lc-field"><label>E-mail</label><input id="cloud-email" type="email" placeholder="toi@exemple.fr" autocomplete="username"></div>'
-      +'<div class="lc-field"><label>Mot de passe</label><input id="cloud-pass" type="password" placeholder="6 caractères minimum" autocomplete="current-password"></div>'
+      +'<div class="lc-field"><label>Mot de passe</label><input id="cloud-pass" type="password" placeholder="12 caractères minimum" autocomplete="current-password"></div>'
       +'<div id="cloud-msg" style="font-size:12px;color:#FB923C;min-height:16px;margin:2px 0 6px"></div>'
       +'<div style="display:flex;gap:10px"><button class="lc-save" onclick="cloudSignIn()">Se connecter</button></div>';
   }
@@ -6482,83 +6739,76 @@ const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
 async function _spacesUpsert(email,doc,pseudo){
   if(!_sb)return {error:{message:'client indisponible'}};
   var sess=(await _sb.auth.getSession()).data.session;
-  if(!sess||!sess.access_token){ try{ sess=(await _sb.auth.refreshSession()).data.session; }catch(e){} }
+  // On rafraîchit TOUJOURS le jeton : un access_token expiré ferait partir la requête en
+  // anonyme (auth.uid() vide) et la RLS « coach_id = auth.uid() » la rejetterait
+  // (« new row violates row-level security policy »).
+  try{ var _rr=await _sb.auth.refreshSession(); if(_rr&&_rr.data&&_rr.data.session) sess=_rr.data.session; }catch(e){}
   if(!sess||!sess.access_token){ _cloudUser=null; if(typeof cloudFabState==='function')cloudFabState(); if(typeof showAuthGate==='function')showAuthGate(); return {error:{message:'session expirée — reconnecte-toi puis reclique Publier'}}; }
   var cli;
   try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false,storageKey:'redlab_tmp_auth'},global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; }
-  // .select() ici (sur le client fraîchement (re)authentifié ci-dessus) pour récupérer le jeton
-  // tout de suite : une lecture différée via _sb (session éventuellement périmée) peut échouer
-  // silencieusement côté RLS et faire retomber « Lien » sur l'URL générique.
   return await cli.from('athlete_spaces').upsert(
     [{email:String(email).trim().toLowerCase(),coach_id:sess.user.id,
       data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc},
       updated_at:new Date().toISOString()}],
-    {onConflict:'email'}).select('access_token').maybeSingle();
+    {onConflict:'email'});
 }
 // Pousse la fiche complète (dashboard épuré) de l'athlète actuellement chargé, s'il a un email.
-// Exporte l'état LIVE de S (brouillon non encore « Sauvegardé ») afin que l'espace suive
-// les modifications en cours sans attendre un clic explicite sur Sauvegarder.
 async function cloudPushSpaces(){
   if(!_cloudUser||!_sb)return;
   if(!S.vma&&!S.csKmh)return;
-  var list=getAthletes();
-  var cur=list.find(function(a){return a.pseudo===S.pseudo;});
+  var cur=getAthletes().find(function(a){return a.pseudo===S.pseudo;});
   if(!cur||!cur.email||cur.email.indexOf('@')<0)return;
-  cur.modAt=Date.now(); _persistAthletes(list); refreshPubBadge(cur.id);
   try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
   var doc; try{ doc=exportAthleteView(true); }catch(e){ return; }
   if(!doc)return;
-  try{
-    var r=await _spacesUpsert(cur.email,doc,S.pseudo);
-    if(!r||!r.error)markPublished(cur.id,r&&r.data&&r.data.access_token);
-  }catch(e){}
+  try{ await _spacesUpsert(cur.email,doc,S.pseudo); }catch(e){}
 }
 function setAthleteEmail(id,val){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
-  var hadEmail=!!a.email;
   a.email=(val||'').trim();
-  a.modAt=Date.now();
   _saveAthletes(list);
-  // Le badge n'existe pas encore dans le DOM si la carte a été rendue avant que l'email soit renseigné.
-  if(!hadEmail&&a.email&&typeof renderAthletes==='function')renderAthletes();
-  else refreshPubBadge(id);
-  autoPublish(id);
+  if(typeof _cloudUser!=='undefined'&&_cloudUser){ try{ cloudPushSpaces(); }catch(e){} }
 }
-// Copie le lien personnel de l'athlète (avec son jeton d'accès) s'il a déjà été publié une fois,
-// sinon retombe sur le lien générique (écran email/lien magique).
-// Le jeton est d'abord cherché en local (capturé lors de la dernière publication) : une lecture
-// réseau via _sb peut échouer silencieusement (session périmée / RLS) et faire retomber sur le
-// lien générique alors que l'espace est bel et bien publié.
-async function copyEspaceLink(id,btn){
-  var url=ESPACE_URL;
-  try{
-    var ath=getAthletes().find(function(x){return x.id===id;});
-    if(ath&&ath.accessToken){
-      url=ESPACE_URL+'?a='+ath.accessToken;
-    } else if(ath&&ath.email&&_sb){
-      var r=await _sb.from('athlete_spaces').select('access_token').eq('email',String(ath.email).trim().toLowerCase()).maybeSingle();
-      if(r.data&&r.data.access_token){
-        url=ESPACE_URL+'?a='+r.data.access_token;
-        var list=getAthletes(); var a2=list.find(function(x){return x.id===id;});
-        if(a2){ a2.accessToken=r.data.access_token; _persistAthletes(list); }
-      }
-    }
-  }catch(e){}
-  try{ navigator.clipboard.writeText(url); }catch(e){}
+function copyEspaceLink(btn){
+  try{ navigator.clipboard.writeText(ESPACE_URL); }catch(e){}
   if(btn){var o=btn.textContent; btn.textContent='Copié ✓'; setTimeout(function(){btn.textContent=o;},1500);}
+}
+// Copie un message d'invitation prêt à envoyer (WhatsApp/SMS/mail) : lien + email + mode d'emploi.
+function inviteAthlete(id,btn){
+  var a=getAthletes().find(function(x){return x.id===id;});
+  var email=(a&&a.email)||'';
+  var msg='Ton espace Reding Running 🏃\n'+ESPACE_URL+'\n\n'
+    +'1) Ouvre ce lien\n'
+    +'2) Connecte-toi avec ton email'+(email?(' : '+email):'')+' — tu reçois un lien par mail, aucun mot de passe\n'
+    +'3) Ajoute la page à ton écran d’accueil : tu la retrouves en 1 clic et tes données y sont toujours à jour.';
+  try{ navigator.clipboard.writeText(msg); }catch(e){}
+  if(btn){var o=btn.textContent; btn.textContent='Copié ✓'; setTimeout(function(){btn.textContent=o;},1600);}
 }
 // Publie la fiche COMPLÈTE (dashboard épuré) d'un athlète vers son espace, sans quitter la page.
 async function publishAthlete(id,btn){
   var o=btn?btn.textContent:'';
   function restore(){ if(btn){btn.disabled=false;btn.textContent=o||'↑ Publier l\'espace';} }
+  function fail(m){ restore(); alert('Publication échouée : '+m); }
   if(typeof _cloudUser==='undefined'||!_cloudUser){alert('Connecte-toi au cloud (☁, en bas de la barre latérale) pour publier l\'espace.');return;}
   var ath=getAthletes().find(function(x){return x.id===id;});
   if(!ath)return;
   if(!ath.email||ath.email.indexOf('@')<0){alert('Renseigne d\'abord l\'email de l\'athlète (champ juste au-dessus).');return;}
   if(btn){btn.disabled=true;btn.textContent='Publication…';}
-  var r=await publishAthleteCore(id);
-  if(r&&r.error){ restore(); alert('Publication échouée : '+r.error); return; }
-  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(r.size/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
+  // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
+  try{
+    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
+    _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+    if(typeof renderDashboard==='function')renderDashboard();
+  }catch(e){ return fail('rendu du dashboard — '+e.message); }
+  var doc;
+  try{ doc=exportAthleteView(true); }catch(e){ return fail('génération de la fiche — '+e.message); }
+  if(!doc){ return fail('fiche vide (VMA/VC manquante pour cet athlète ?)'); }
+  try{ saveLS(); }catch(e){}
+  var r;
+  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
+  catch(e){ return fail(e.message); }
+  if(r&&r.error){ return fail(r.error.message); }
+  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
 }
 async function cloudPull(){
   if(!_cloudUser)return;
@@ -6597,19 +6847,28 @@ async function shareFicheCloud(doc, slug){
     var path=folder+'/'+slug+'-'+Date.now().toString(36)+'.html';
     var up=await cli.storage.from('fiches').upload(path, doc, {contentType:'text/html', upsert:false});
     if(up.error){ ficheLinkModal(null, up.error.message+' — [session:'+(sess?'oui':'non')+' · rôle:'+role+']'); return; }
-    var pub=cli.storage.from('fiches').getPublicUrl(path);
-    var link=pub&&pub.data&&pub.data.publicUrl;
+    // Bucket privé : lien SIGNÉ à durée limitée (pas d'URL publique permanente).
+    var EXPIRE=7*24*3600; // 7 jours
+    var sg=await cli.storage.from('fiches').createSignedUrl(path, EXPIRE);
+    if(sg.error||!sg.data||!sg.data.signedUrl){ ficheLinkModal(null, (sg.error&&sg.error.message)||'lien signé indisponible'); return; }
+    var link=sg.data.signedUrl;
     try{ await navigator.clipboard.writeText(link); }catch(e){}
-    ficheLinkModal(link);
+    ficheLinkModal(link, null, EXPIRE);
   }catch(e){ ficheLinkModal(null, e.message); }
 }
-function ficheLinkModal(link, err){
+function ficheLinkModal(link, err, expireSec){
   var host=document.createElement('div'); host.className='pl-modal';
   host.onclick=function(e){ if(e.target===host)host.remove(); };
+  var expTxt='';
+  if(expireSec){
+    var _d=new Date(Date.now()+expireSec*1000), _j=Math.round(expireSec/86400);
+    expTxt='<div style="font-size:12px;color:var(--muted2);margin-top:10px;line-height:1.5">⏳ Ce lien <b>expire le '+_d.toLocaleDateString('fr-FR')+'</b> (durée '+_j+' jours). Passé ce délai, re-partage la fiche pour un nouveau lien. L’espace athlète, lui, reste accessible en permanence.</div>';
+  }
   var body=err
-    ? '<div style="color:#F87171;font-size:13px;line-height:1.65">Échec de l’envoi : '+String(err).replace(/</g,'&lt;')+'<br><br>Vérifie que le bucket <b>fiches</b> existe (public) et que la règle d’écriture est en place (voir les étapes).</div>'
+    ? '<div style="color:#F87171;font-size:13px;line-height:1.65">Échec de l’envoi : '+String(err).replace(/</g,'&lt;')+'<br><br>Vérifie que le bucket <b>fiches</b> existe et que la règle d’écriture est en place (voir les étapes).</div>'
     : '<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.55">Fiche en ligne ✓ — <b style="color:#34D399">lien copié</b> dans le presse-papiers. Envoie-le à ton athlète :</div>'
       +'<input type="text" readonly value="'+String(link).replace(/"/g,'&quot;')+'" onclick="this.select()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:12.5px;padding:9px 11px;outline:none">'
+      +expTxt
       +'<div style="display:flex;gap:10px;margin-top:12px"><a class="lc-save" style="text-decoration:none;text-align:center;line-height:1.4" href="'+String(link).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">Ouvrir la fiche</a><button class="lc-cancel" onclick="this.closest(\'.pl-modal\').remove()">Fermer</button></div>';
   host.innerHTML='<div class="pl-modal-box" style="max-width:460px"><div class="pl-modal-top"><b>Partager la fiche</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="this.closest(\'.pl-modal\').remove()">×</button></div>'+body+'</div>';
   document.body.appendChild(host);
@@ -6645,7 +6904,7 @@ async function gateSignIn(){
 }
 async function gateSignUp(){
   var em=(document.getElementById('ag-email')||{}).value||'',pw=(document.getElementById('ag-pass')||{}).value||'';
-  if(!em.trim()||pw.length<6){agMsg('Email + mot de passe (6 caractères minimum).',true);return;}
+  if(!em.trim()||pw.length<12){agMsg('Email + mot de passe (12 caractères minimum).',true);return;}
   if(!_sb){agMsg('Service indisponible.',true);return;}
   agMsg('Création du compte…');
   var r=await _sb.auth.signUp({email:em.trim(),password:pw});
@@ -6719,6 +6978,1232 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 </script>
+<script>
+/* ══ Pont RedLab ↔ Lecteur fichier montre ══ */
+window.__rlCtx = {
+  fcMax: function(){
+    if (typeof S !== 'undefined' && S.fcMax) return S.fcMax;
+    var el = document.getElementById('fc-max');
+    return (el && +el.value) ? +el.value : null;
+  }
+};
+</script>
+<script>
+(function(){
+
+/* =======================================================================
+   Lecteur TCX — analyse et affichage d'un fichier de montre connectée
+   ======================================================================= */
+'use strict';
+
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+/* ---------------------- formats (FR) ---------------------- */
+const nf = (n, d = 0) => (n == null || !isFinite(n))
+  ? '--'
+  : n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+function fmtPace(sPerKm) {                       // 313 -> "5:13"
+  if (!isFinite(sPerKm) || sPerKm <= 0 || sPerKm > 5400) return '--';
+  let m = Math.floor(sPerKm / 60), s = Math.round(sPerKm - m * 60);
+  if (s === 60) { m++; s = 0; }
+  return m + ':' + String(s).padStart(2, '0');
+}
+function fmtClock(sec) {                          // 3841 -> "1:04:01"
+  if (!isFinite(sec) || sec < 0) return '--';
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+           : `${m}:${String(s).padStart(2,'0')}`;
+}
+function fmtLapTime(sec) {                        // 1062.2 -> "17:42.2"
+  if (!isFinite(sec) || sec < 0) return '--';
+  const h = Math.floor(sec / 3600);
+  if (h) return fmtClock(sec);
+  const m = Math.floor(sec / 60), s = sec - m * 60;
+  return `${m}:${s < 10 ? '0' : ''}${s.toFixed(1).replace('.', ',')}`;
+}
+const DATE_FMT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
+const TIME_FMT = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
+const fmtDate = ms => `${DATE_FMT.format(ms)} @ ${TIME_FMT.format(ms)}`;
+
+const SPORTS = { Running: 'Course à pied', Biking: 'Vélo', Swimming: 'Natation',
+                 Walking: 'Marche', Hiking: 'Randonnée', Other: 'Activité' };
+
+/* ---------------------- lecture du XML ---------------------- */
+const tags  = (el, n) => el.getElementsByTagNameNS('*', n);
+const one   = (el, n) => { const l = tags(el, n); return l.length ? l[0] : null; };
+const numOf = (el, n) => { const e = one(el, n); if (!e) return null;
+                           const v = parseFloat(e.textContent); return isFinite(v) ? v : null; };
+
+function haversine(a, b) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+  const s = Math.sin(dLat / 2) ** 2 +
+            Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+}
+
+function parseTCX(text) {
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length)
+    throw new Error("Ce fichier n'est pas un XML valide.");
+
+  const acts = doc.getElementsByTagNameNS('*', 'Activity');
+  if (!acts.length) throw new Error("Aucune activité trouvée dans ce fichier TCX.");
+
+  return Array.from(acts).map(act => {
+    const sportRaw = act.getAttribute('Sport') || 'Other';
+    const idEl = one(act, 'Id');
+    const creator = one(act, 'Creator');
+    const device = creator ? (one(creator, 'Name')?.textContent || '').trim() : '';
+
+    const laps = Array.from(tags(act, 'Lap')).map((lapEl, i) => {
+      const avgHrEl = one(lapEl, 'AverageHeartRateBpm');
+      const maxHrEl = one(lapEl, 'MaximumHeartRateBpm');
+      const points = [];
+      for (const tp of tags(lapEl, 'Trackpoint')) {
+        const tEl = one(tp, 'Time'); if (!tEl) continue;
+        const t = Date.parse(tEl.textContent); if (!isFinite(t)) continue;
+        const pos = one(tp, 'Position');
+        const hrEl = one(tp, 'HeartRateBpm');
+        const ext = one(tp, 'Extensions');
+        const runCad = ext ? numOf(ext, 'RunCadence') : null;
+        const rawCad = numOf(tp, 'Cadence');
+        points.push({
+          t,
+          lat  : pos ? numOf(pos, 'LatitudeDegrees')  : null,
+          lon  : pos ? numOf(pos, 'LongitudeDegrees') : null,
+          ele  : numOf(tp, 'AltitudeMeters'),
+          dist : numOf(tp, 'DistanceMeters'),
+          hr   : hrEl ? numOf(hrEl, 'Value') : null,
+          cad  : rawCad != null ? rawCad : runCad,
+          speed: ext ? numOf(ext, 'Speed') : null,
+          pw   : ext ? numOf(ext, 'Watts') : null
+        });
+      }
+      return {
+        i,
+        start    : Date.parse(lapEl.getAttribute('StartTime')),
+        time     : numOf(lapEl, 'TotalTimeSeconds'),
+        dist     : numOf(lapEl, 'DistanceMeters'),
+        maxSpeed : numOf(lapEl, 'MaximumSpeed'),
+        cal      : numOf(lapEl, 'Calories'),
+        avgHr    : avgHrEl ? numOf(avgHrEl, 'Value') : null,
+        maxHr    : maxHrEl ? numOf(maxHrEl, 'Value') : null,
+        intensity: one(lapEl, 'Intensity')?.textContent || 'Active',
+        points
+      };
+    }).filter(l => l.time != null || l.points.length);
+
+    return {
+      sport: SPORTS[sportRaw] || SPORTS.Other,
+      sportRaw,
+      startMs: idEl ? Date.parse(idEl.textContent) : (laps[0]?.start ?? NaN),
+      device,
+      notes: (one(act, 'Notes')?.textContent || '').trim(),
+      laps
+    };
+  }).filter(a => a.laps.length);
+}
+
+/* =======================================================================
+   Lecture des fichiers FIT (binaire, Garmin / ANT+)
+   ======================================================================= */
+const FIT_EPOCH = 631065600000;                    // 31/12/1989 00:00 UTC, en ms
+const fitTime = v => v == null ? null : FIT_EPOCH + v * 1000;
+const semi    = v => v == null ? null : v * (180 / 2147483648);
+
+const BT = {
+  0 : { s:1, r:(d,o)   => d.getUint8(o),        inv:0xFF },
+  1 : { s:1, r:(d,o)   => d.getInt8(o),         inv:0x7F },
+  2 : { s:1, r:(d,o)   => d.getUint8(o),        inv:0xFF },
+  3 : { s:2, r:(d,o,l) => d.getInt16(o,l),      inv:0x7FFF },
+  4 : { s:2, r:(d,o,l) => d.getUint16(o,l),     inv:0xFFFF },
+  5 : { s:4, r:(d,o,l) => d.getInt32(o,l),      inv:0x7FFFFFFF },
+  6 : { s:4, r:(d,o,l) => d.getUint32(o,l),     inv:0xFFFFFFFF },
+  7 : { s:1, str:true },
+  8 : { s:4, r:(d,o,l) => d.getFloat32(o,l),    inv:null },
+  9 : { s:8, r:(d,o,l) => d.getFloat64(o,l),    inv:null },
+  10: { s:1, r:(d,o)   => d.getUint8(o),        inv:0 },
+  11: { s:2, r:(d,o,l) => d.getUint16(o,l),     inv:0 },
+  12: { s:4, r:(d,o,l) => d.getUint32(o,l),     inv:0 },
+  13: { s:1, r:(d,o)   => d.getUint8(o),        inv:0xFF },
+  14: { s:8, r:(d,o,l) => Number(d.getBigInt64(o,l)),  inv:null },
+  15: { s:8, r:(d,o,l) => Number(d.getBigUint64(o,l)), inv:null },
+  16: { s:8, r:(d,o,l) => Number(d.getBigUint64(o,l)), inv:0 }
+};
+const UTF8 = new TextDecoder('utf-8');
+
+/* --- décodage bas niveau : renvoie { numéro de message global : [champs] } --- */
+function fitRecords(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  const out = {};
+  let p = 0;
+  while (p + 12 <= dv.byteLength) {                // les fichiers FIT peuvent être chaînés
+    const hs = dv.getUint8(p);
+    if (hs !== 12 && hs !== 14) break;
+    if (String.fromCharCode(u8[p+8], u8[p+9], u8[p+10], u8[p+11]) !== '.FIT') break;
+    const size = dv.getUint32(p + 4, true);
+    const end = Math.min(p + hs + size, dv.byteLength);
+    readFitBlock(dv, u8, p + hs, end, out);
+    p = end + 2;                                   // + CRC
+  }
+  if (!Object.keys(out).length) throw new Error("Ce fichier n'est pas un FIT lisible.");
+  return out;
+}
+
+function readFitBlock(dv, u8, p, end, out) {
+  const defs = {};
+  let lastTs = null;
+  while (p < end) {
+    const h = dv.getUint8(p++);
+
+    if (h & 0x80) {                                 // en-tête à horodatage compressé
+      const d = defs[(h >> 5) & 3];
+      if (!d) return;
+      const off = h & 0x1F;
+      if (lastTs != null) {
+        const prev = lastTs & 0x1F;
+        lastTs = (lastTs & ~0x1F) + off + (off < prev ? 0x20 : 0);
+      }
+      const res = readFitData(dv, u8, p, d);
+      p = res.p;
+      if (res.m[253] == null && lastTs != null) res.m[253] = lastTs;
+      (out[d.gnum] = out[d.gnum] || []).push(res.m);
+      continue;
+    }
+
+    if (h & 0x40) {                                 // message de définition
+      p++;                                          // octet réservé
+      const le = dv.getUint8(p++) === 0;
+      const gnum = dv.getUint16(p, le); p += 2;
+      const nf = dv.getUint8(p++);
+      const fields = [];
+      for (let i = 0; i < nf; i++) {
+        fields.push({ n: dv.getUint8(p), size: dv.getUint8(p + 1), bt: dv.getUint8(p + 2) & 0x1F });
+        p += 3;
+      }
+      let devSize = 0;
+      if (h & 0x20) {                               // champs développeur : on saute
+        const nd = dv.getUint8(p++);
+        for (let i = 0; i < nd; i++) { devSize += dv.getUint8(p + 1); p += 3; }
+      }
+      defs[h & 0x0F] = { gnum, le, fields, devSize };
+      continue;
+    }
+
+    const d = defs[h & 0x0F];                       // message de données
+    if (!d) return;
+    const res = readFitData(dv, u8, p, d);
+    p = res.p;
+    if (res.m[253] != null) lastTs = res.m[253];
+    (out[d.gnum] = out[d.gnum] || []).push(res.m);
+  }
+}
+
+function readFitData(dv, u8, p, d) {
+  const m = {};
+  for (const f of d.fields) {
+    const t = BT[f.bt] || BT[13];
+    if (f.bt === 7) {
+      let z = p; while (z < p + f.size && u8[z] !== 0) z++;
+      const s = UTF8.decode(u8.subarray(p, z)).trim();
+      m[f.n] = s || null;
+    } else {
+      const n = Math.max(1, Math.floor(f.size / t.s));
+      let v = null;
+      for (let i = 0; i < n; i++) {                 // première valeur valide du tableau
+        const raw = t.r(dv, p + i * t.s, d.le);
+        if (t.inv == null || raw !== t.inv) { v = raw; break; }
+      }
+      m[f.n] = v;
+    }
+    p += f.size;
+  }
+  return { p: p + d.devSize, m };
+}
+
+/* --- traduction vers la structure interne (même forme que le TCX) --- */
+const FIT_SPORT = { 0:'Activité', 1:'Course à pied', 2:'Vélo', 4:'Cardio', 5:'Natation',
+  10:'Entraînement', 11:'Marche', 12:'Ski de fond', 13:'Ski alpin', 15:'Aviron',
+  16:'Alpinisme', 17:'Randonnée', 18:'Multisport', 19:'Kayak' };
+const FIT_SUB = { 1:'Tapis', 3:'Trail', 4:'Piste', 5:'Home trainer', 6:'Vélo en salle',
+  7:'Route', 8:'VTT', 17:'Intérieur', 58:'Virtuel' };
+const FIT_INT = { 1:'Récupération', 2:'Échauffement', 3:'Retour au calme',
+                  4:'Récupération', 5:'Intervalle', 6:'Autre' };
+const FIT_MANUF = { 1:'Garmin', 23:'Suunto', 32:'Wahoo', 95:'Stryd', 260:'Zwift' };
+
+function fitToActivities(msgs) {
+  const recs = (msgs[20] || []).map(r => ({
+    t    : fitTime(r[253]),
+    lat  : semi(r[0]), lon: semi(r[1]),
+    ele  : r[78] != null ? r[78] / 5 - 500 : (r[2] != null ? r[2] / 5 - 500 : null),
+    dist : r[5] != null ? r[5] / 100 : null,
+    hr   : r[3] != null ? r[3] : null,
+    cad  : r[4] != null ? r[4] + (r[53] != null ? r[53] / 128 : 0) : null,
+    speed: r[73] != null ? r[73] / 1000 : (r[6] != null ? r[6] / 1000 : null),
+    pw   : r[7] != null ? r[7] : null,
+    vo   : r[39] != null ? r[39] / 10 : null,        // oscillation verticale, mm
+    gct  : r[41] != null ? r[41] / 10 : null,        // contact au sol, ms
+    vr   : r[83] != null ? r[83] / 100 : null,       // ratio vertical, %
+    sl   : r[85] != null ? r[85] / 10000 : null,     // longueur de foulée, m
+    temp : r[13] != null ? r[13] : null
+  })).filter(p => p.t != null).sort((a, b) => a.t - b.t);
+
+  const steps = {};
+  (msgs[27] || []).forEach(s => { if (s[254] != null) steps[s[254]] = { name: s[0], intensity: s[7] }; });
+
+  let laps = (msgs[19] || []).map((l, i) => ({
+    i,
+    start   : fitTime(l[2]) || fitTime(l[253]),
+    end     : fitTime(l[253]),
+    time    : l[8] != null ? l[8] / 1000 : (l[7] != null ? l[7] / 1000 : null),
+    dist    : l[9] != null ? l[9] / 100 : null,
+    maxSpeed: l[111] != null ? l[111] / 1000 : (l[14] != null ? l[14] / 1000 : null),
+    cal     : l[11] != null ? l[11] : null,
+    avgHr   : l[15] != null ? l[15] : null,
+    maxHr   : l[16] != null ? l[16] : null,
+    intensity: l[23] === 1 ? 'Resting' : 'Active',
+    fitInt  : l[23] != null ? l[23] : 0,
+    step    : l[71] != null ? steps[l[71]] : null,
+    points  : []
+  })).filter(l => l.time != null).sort((a, b) => a.start - b.start);
+
+  if (!laps.length && recs.length) {                 // fichier sans tour explicite
+    laps = [{ i: 0, start: recs[0].t, end: recs[recs.length - 1].t,
+              time: (recs[recs.length - 1].t - recs[0].t) / 1000,
+              dist: recs[recs.length - 1].dist, intensity: 'Active', fitInt: 0, points: [] }];
+  }
+
+  let k = 0;                                         // répartition des points dans les tours
+  for (const lap of laps) {
+    const stop = lap.end || Infinity;
+    while (k < recs.length && recs[k].t < lap.start) k++;
+    while (k < recs.length && recs[k].t <= stop) lap.points.push(recs[k++]);
+  }
+  if (k < recs.length && laps.length) laps[laps.length - 1].points.push(...recs.slice(k));
+
+  const device = (msgs[23] || []).map(d => d[27]).find(Boolean) ||
+                 FIT_MANUF[(msgs[0] || [])[0]?.[1]] || '';
+  const wktName = (msgs[26] || [])[0]?.[8] || null;
+
+  const sessions = (msgs[18] || []);
+  const make = (sess, ls) => {
+    const sport = sess ? FIT_SPORT[sess[5]] || FIT_SPORT[0] : FIT_SPORT[0];
+    const sub = sess && FIT_SUB[sess[6]] ? FIT_SUB[sess[6]] : null;
+    ls.forEach(l => {
+      l.typeName = l.step?.name || FIT_INT[l.fitInt] ||
+                   (l.step && FIT_INT[l.step.intensity]) || sport;
+      l.work = l.fitInt === 0 && !(l.step && [1, 4].includes(l.step.intensity));
+    });
+    return {
+      fit: true, sport, sub, sportRaw: sess ? String(sess[5]) : '0',
+      startMs: sess ? fitTime(sess[2]) : (ls[0]?.start ?? NaN),
+      device,
+      notes: wktName || (sub ? `${sport} — ${sub}` : ''),
+      laps: ls.map((l, i) => ({ ...l, i }))
+    };
+  };
+
+  if (sessions.length > 1) {
+    return sessions.map(s => {
+      const a = fitTime(s[2]), b = fitTime(s[253]);
+      return make(s, laps.filter(l => l.start >= a - 1000 && l.start <= b + 1000));
+    }).filter(a => a.laps.length);
+  }
+  if (!laps.length) throw new Error("Ce FIT ne contient aucune séance exploitable.");
+  return [make(sessions[0] || null, laps)];
+}
+
+/* ---------------------- calculs ---------------------- */
+function smooth(arr, win) {                       // moyenne glissante centrée
+  const out = new Array(arr.length).fill(null);
+  const half = Math.max(1, Math.floor(win / 2));
+  for (let i = 0; i < arr.length; i++) {
+    let s = 0, n = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(arr.length - 1, i + half); j++)
+      if (arr[j] != null && isFinite(arr[j])) { s += arr[j]; n++; }
+    out[i] = n ? s / n : null;
+  }
+  return out;
+}
+
+function buildActivity(act) {
+  /* --- points en une seule série, distance/vitesse comblées si absentes --- */
+  const pts = [];
+  act.laps.forEach((lap, li) => lap.points.forEach(p => pts.push({ ...p, lap: li })));
+  pts.sort((a, b) => a.t - b.t);
+
+  let cum = 0, prevGps = null;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    if (p.dist == null) {
+      if (p.lat != null && prevGps) cum += haversine(prevGps, p);
+      p.dist = cum;
+    } else cum = p.dist;
+    if (p.lat != null) prevGps = p;
+  }
+  for (let i = 0; i < pts.length; i++) {
+    if (pts[i].speed == null) {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+      const dt = (b.t - a.t) / 1000, dd = b.dist - a.dist;
+      pts[i].speed = dt > 0 ? Math.max(0, dd / dt) : 0;
+    }
+  }
+
+  const t0 = pts.length ? pts[0].t : act.startMs;
+  const hasGps = pts.some(p => p.lat != null);
+  const hasHr  = pts.some(p => p.hr  != null);
+  const hasCad = pts.some(p => p.cad != null);
+  const hasEle = pts.some(p => p.ele != null);
+  const hasPw  = pts.some(p => p.pw  != null);
+  const hasDyn = pts.some(p => p.gct != null || p.vo != null);
+  const hasTemp= pts.some(p => p.temp != null);
+
+  /* --- séries lissées --- */
+  const spdS = smooth(pts.map(p => p.speed), 15);
+  const eleS = smooth(pts.map(p => p.ele), 11);
+  const cadRaw = pts.map(p => p.cad);
+  const cadFactor = (() => {                       // ramène la cadence en pas/min
+    const vals = cadRaw.filter(v => v != null && v > 20);
+    if (!vals.length) return 1;
+    vals.sort((a, b) => a - b);
+    return vals[Math.floor(vals.length / 2)] < 120 ? 2 : 1;
+  })();
+
+  const samples = pts.map((p, i) => ({
+    i,
+    t   : (p.t - t0) / 1000,
+    d   : p.dist,
+    lat : p.lat, lon: p.lon,
+    speed: spdS[i],
+    pace: spdS[i] > 0.28 ? 1000 / spdS[i] : null,
+    hr  : p.hr,
+    cad : p.cad != null ? p.cad * cadFactor : null,
+    ele : eleS[i],
+    pw  : p.pw,
+    vo  : p.vo, gct: p.gct, vr: p.vr, sl: p.sl, temp: p.temp,
+    lap : p.lap
+  }));
+
+  /* --- totaux --- */
+  const sum = (f) => act.laps.reduce((s, l) => s + (f(l) || 0), 0);
+  const totalTime = sum(l => l.time);
+  const distance  = sum(l => l.dist) || (pts.length ? pts[pts.length - 1].dist - pts[0].dist : 0);
+  const calories  = sum(l => l.cal);
+  const elapsed   = pts.length ? (pts[pts.length - 1].t - pts[0].t) / 1000 : totalTime;
+
+  let moving = 0, still = 0, walking = 0, running = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const dt = (pts[i].t - pts[i - 1].t) / 1000;
+    if (dt <= 0 || dt > 30 || pts[i].lap !== pts[i - 1].lap) continue;   // pauses exclues
+    const v = spdS[i] || 0;
+    if (v < 0.35) still += dt; else { moving += dt; if (v < 1.7) walking += dt; else running += dt; }
+  }
+
+  if (totalTime) moving = Math.min(moving, totalTime);   // jamais plus que le temps de séance
+
+  const finite = a => a.filter(v => v != null && isFinite(v));
+  const hrs  = finite(samples.map(s => s.hr));
+  const cads = finite(samples.map(s => s.cad)).filter(v => v > 40);
+  const pws  = finite(samples.map(s => s.pw));
+  const eles = finite(samples.map(s => s.ele));
+  const avg  = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+
+  let gain = 0, loss = 0;
+  for (let i = 1; i < eles.length; i++) {
+    const d = eles[i] - eles[i - 1];
+    if (d > 0) gain += d; else loss -= d;
+  }
+
+  const bestSpeed = Math.max(0, ...finite(smooth(pts.map(p => p.speed), 21)));
+  const maxSpeedLap = Math.max(0, ...act.laps.map(l => l.maxSpeed || 0));
+  const maxSpeed = Math.max(maxSpeedLap, Math.max(0, ...finite(pts.map(p => p.speed))));
+
+  const dyn = k => avg(finite(samples.map(s => s[k])));
+
+  return {
+    raw: act, samples, hasGps, hasHr, hasCad, hasEle, hasPw, hasDyn, hasTemp,
+    avgVo: dyn('vo'), avgGct: dyn('gct'), avgVr: dyn('vr'), avgSl: dyn('sl'),
+    avgTemp: dyn('temp'),
+    maxTemp: hasTemp ? Math.max(...finite(samples.map(s => s.temp))) : null,
+    t0, distance, totalTime, elapsed, moving, still, walking, running, calories,
+    avgSpeed: totalTime ? distance / totalTime : null,
+    movSpeed: moving ? distance / moving : null,
+    bestSpeed, maxSpeed,
+    avgHr: avg(hrs), maxHr: hrs.length ? Math.max(...hrs) : null,
+    avgCad: avg(cads), maxCad: cads.length ? Math.max(...cads) : null,
+    avgPw: avg(pws), maxPw: pws.length ? Math.max(...pws) : null,
+    gain, loss,
+    eleMin: eles.length ? Math.min(...eles) : null,
+    eleMax: eles.length ? Math.max(...eles) : null,
+    laps: classifyLaps(act.laps, distance, totalTime, act.sport)
+  };
+}
+
+/* type de tour déduit : le TCX ne transporte pas le nom des étapes */
+function classifyLaps(laps, totalDist, totalTime, sportLabel) {
+  const avgPace = totalDist ? totalTime / (totalDist / 1000) : 0;
+  const active = sportLabel || 'Course à pied';
+  const declared = laps.some(l => l.typeName);         // le FIT nomme les étapes
+  const out = laps.map((l, i) => {
+    const pace = l.dist ? l.time / (l.dist / 1000) : null;
+    if (l.typeName) return { ...l, pace, type: l.typeName };
+    let type = active;
+    if (l.intensity === 'Resting') type = 'Récupération';
+    else if (pace && avgPace && pace > avgPace * 1.28 && l.time < 240) type = 'Récupération';
+    return { ...l, pace, type, work: type === active };
+  });
+  const long = out.filter(l => l.time > 420);
+  if (!declared && long.length >= 2) {
+    const first = out.indexOf(long[0]);
+    if (first <= 1 && out[first].pace > avgPace) out[first].type = 'Échauffement';
+    const lastIdx = out.lastIndexOf(long[long.length - 1]);
+    if (lastIdx >= out.length - 2 && lastIdx !== first && out[lastIdx].pace > avgPace)
+      out[lastIdx].type = 'Retour au calme';
+  }
+  if (!declared) out.forEach(l => { l.work = l.type === active; });
+  let n = 0;
+  out.forEach(l => { l.num = l.work ? ++n : null; });
+  return out;
+}
+
+/* =======================================================================
+   Graphiques (canvas)
+   ======================================================================= */
+const CH = { grid: '#2a2e32', axis: '#8f959a' };
+
+class Chart {
+  constructor(holder, cfg) {
+    this.cv = document.createElement('canvas');
+    holder.appendChild(this.cv);
+    this.ctx = this.cv.getContext('2d');
+    this.cfg = cfg;                    // {values, color, invert, fmtY, unit}
+    this.cursor = null;
+    this.cv.addEventListener('pointermove', e => this.onMove(e));
+    this.cv.addEventListener('pointerdown', e => this.onMove(e));
+    this.cv.addEventListener('pointerleave', () => setCursor(null));
+  }
+  onMove(e) {
+    const r = this.cv.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const f = (x - this.pad.l) / Math.max(1, r.width - this.pad.l - this.pad.r);
+    const xs = App.axisValues;
+    const target = xs[0] + f * (xs[xs.length - 1] - xs[0]);
+    let lo = 0, hi = xs.length - 1;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (xs[m] < target) lo = m + 1; else hi = m; }
+    setCursor(Math.max(0, Math.min(xs.length - 1, lo)));
+  }
+  layout() {
+    const dpr = Math.min(2.5, window.devicePixelRatio || 1);
+    const r = this.cv.getBoundingClientRect();
+    this.w = r.width; this.h = r.height;
+    this.cv.width = Math.round(r.width * dpr);
+    this.cv.height = Math.round(r.height * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.pad = { l: 46, r: 8, t: 10, b: 26 };
+  }
+  draw() {
+    this.layout();
+    const { ctx, w, h, pad, cfg } = this;
+    const xs = App.axisValues, ys = cfg.values;
+    ctx.clearRect(0, 0, w, h);
+    if (!xs.length) return;
+
+    const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+    const x0 = xs[0], x1 = xs[xs.length - 1] || 1;
+
+    /* --- bornes Y --- */
+    const vals = ys.filter(v => v != null && isFinite(v));
+    if (!vals.length) return;
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (cfg.clampLow  != null) lo = Math.max(lo, cfg.clampLow);
+    if (cfg.clampHigh != null) hi = Math.min(hi, cfg.clampHigh);
+    if (hi - lo < 1e-6) { hi = lo + 1; }
+    const span = hi - lo; lo -= span * 0.08; hi += span * 0.08;
+
+    const px = v => pad.l + ((v - x0) / (x1 - x0 || 1)) * iw;
+    const py = v => {
+      const f = (v - lo) / (hi - lo);
+      return pad.t + (cfg.invert ? f : 1 - f) * ih;
+    };
+    this.px = px; this.py = py;
+
+    /* --- grille + libellés Y --- */
+    const ticks = niceTicks(lo, hi, cfg.step);
+    ctx.font = '11px Roboto, system-ui, sans-serif';
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+    ctx.lineWidth = 1;
+    ticks.forEach(v => {
+      const y = Math.round(py(v)) + .5;
+      if (y < pad.t - 2 || y > h - pad.b + 2) return;
+      ctx.strokeStyle = CH.grid;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+      ctx.fillStyle = CH.axis;
+      ctx.fillText(cfg.fmtY(v), pad.l - 8, y);
+    });
+
+    /* --- courbe (une valeur par pixel) --- */
+    const cols = Math.max(2, Math.round(iw));
+    const acc = new Array(cols).fill(null), cnt = new Array(cols).fill(0);
+    for (let i = 0; i < ys.length; i++) {
+      const v = ys[i]; if (v == null || !isFinite(v)) continue;
+      const c = Math.max(0, Math.min(cols - 1,
+        Math.round(((xs[i] - x0) / (x1 - x0 || 1)) * (cols - 1))));
+      acc[c] = (acc[c] || 0) + Math.max(lo, Math.min(hi, v)); cnt[c]++;
+    }
+    const pathPts = [];
+    let last = null;
+    for (let c = 0; c < cols; c++) {
+      let v = cnt[c] ? acc[c] / cnt[c] : last;
+      if (v == null) continue;
+      last = v;
+      pathPts.push([pad.l + (c / (cols - 1)) * iw, py(v)]);
+    }
+    if (pathPts.length < 2) return;
+
+    const base = h - pad.b;                       // l'aire descend toujours vers le bas
+    const g = ctx.createLinearGradient(0, pad.t, 0, h - pad.b);
+    g.addColorStop(0, cfg.fillFrom);
+    g.addColorStop(1, cfg.fillTo);
+    ctx.beginPath();
+    ctx.moveTo(pathPts[0][0], base);
+    pathPts.forEach(p => ctx.lineTo(p[0], p[1]));
+    ctx.lineTo(pathPts[pathPts.length - 1][0], base);
+    ctx.closePath();
+    ctx.fillStyle = g; ctx.fill();
+
+    ctx.beginPath();
+    pathPts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.strokeStyle = cfg.color; ctx.lineWidth = 1.4; ctx.lineJoin = 'round'; ctx.stroke();
+
+    /* --- axe X --- */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = CH.axis;
+    const n = w < 380 ? 4 : 6;
+    for (let k = 0; k < n; k++) {
+      const f = k / (n - 1), x = pad.l + f * iw, v = x0 + f * (x1 - x0);
+      ctx.beginPath(); ctx.arc(x, h - pad.b + 4, 3, 0, 7); ctx.fillStyle = '#6d7378'; ctx.fill();
+      ctx.fillStyle = CH.axis;
+      const lab = App.fmtAxis(v), lw = ctx.measureText(lab).width;
+      ctx.fillText(lab, Math.max(lw / 2 + 2, Math.min(w - lw / 2 - 2, x)), h - pad.b + 11);
+    }
+
+    /* --- curseur --- */
+    const ci = App.cursor;
+    if (ci != null && ci < ys.length) {
+      const cx = px(xs[ci]);
+      ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx, pad.t); ctx.lineTo(cx, h - pad.b); ctx.stroke();
+      const v = ys[ci];
+      if (v != null && isFinite(v)) {
+        const cy = py(Math.max(lo, Math.min(hi, v)));
+        ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, 7); ctx.fillStyle = cfg.color; ctx.fill();
+        const label = cfg.fmtY(v) + (cfg.unit ? ' ' + cfg.unit : '');
+        ctx.font = '12px Roboto, system-ui, sans-serif';
+        const tw = ctx.measureText(label).width + 14;
+        const bx = Math.max(pad.l, Math.min(w - pad.r - tw, cx - tw / 2));
+        ctx.fillStyle = 'rgba(38,42,46,.96)';
+        roundRect(ctx, bx, pad.t + 2, tw, 21, 5); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, bx + tw / 2, pad.t + 13);
+      }
+    }
+  }
+}
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+function niceTicks(lo, hi, forced) {
+  const span = hi - lo;
+  let step = forced;
+  if (!step) {
+    const rough = span / 4;
+    const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+    step = [1, 2, 2.5, 5, 10].map(m => m * pow).find(s => s >= rough) || pow * 10;
+  }
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) out.push(v);
+  return out;
+}
+
+/* =======================================================================
+   Carte
+   ======================================================================= */
+const RAMP = ['#2b6cff', '#0093d8', '#00b184', '#5ec24a', '#ffd23f', '#ff8a1f', '#ff2f2f'];
+function rampColor(f) {
+  f = Math.max(0, Math.min(1, f));
+  const x = f * (RAMP.length - 1), i = Math.floor(x), t = x - i;
+  const a = hex(RAMP[i]), b = hex(RAMP[Math.min(RAMP.length - 1, i + 1)]);
+  return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`;
+}
+const hex = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+
+const MapView = {
+  map: null, layer: null, marker: null, lapLayer: null,
+  init() {
+    if (this.map || typeof L === 'undefined') return;
+    this.map = L.map('lm-map', { zoomControl: false, attributionControl: false, preferCanvas: true });
+    const tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      { maxZoom: 19, subdomains: 'abcd' }).addTo(this.map);
+    let ok = false, bad = 0;                      // hors ligne : on garde le tracé seul
+    tiles.on('tileload', () => { ok = true; });
+    tiles.on('tileerror', () => {
+      if (!ok && ++bad > 3) { tiles.remove(); $('#lm-mapNote').hidden = false; }
+    });
+    L.control.zoom({ position: 'topright' }).addTo(this.map);
+  },
+  render(A) {
+    const gps = A.samples.filter(s => s.lat != null && s.lon != null);
+    $('#lm-mapEmpty').hidden = gps.length > 0;
+    $('#lm-mapLegend').hidden = gps.length === 0;
+    if (!gps.length) { $('#lm-map').style.display = 'none'; return; }
+    if (typeof L === 'undefined') {                 // carte indisponible hors ligne
+      $('#lm-map').style.display = 'none';
+      $('#lm-mapLegend').hidden = true;
+      const e = $('#lm-mapEmpty'); e.hidden = false;
+      e.innerHTML = '<div>Carte indisponible</div><div style="color:var(--muted-2);font-size:13px">Le fond de carte n\'a pas pu être chargé. Les données de la séance restent lisibles.</div>';
+      return;
+    }
+    $('#lm-map').style.display = '';
+    this.init();
+    if (this.layer) this.layer.remove();
+    this.layer = L.layerGroup().addTo(this.map);
+
+    const sp = gps.map(s => s.speed).filter(v => v > 0.2).sort((a, b) => a - b);
+    const q = f => sp[Math.floor(f * (sp.length - 1))] || 1;
+    const vLo = q(0.05), vHi = q(0.95);
+    const bucket = s => Math.max(0, Math.min(23,
+      Math.round(((s.speed - vLo) / Math.max(.01, vHi - vLo)) * 23)));
+
+    let run = [gps[0]], cur = bucket(gps[0]);
+    const flush = (b) => {
+      if (run.length > 1)
+        L.polyline(run.map(s => [s.lat, s.lon]),
+          { color: rampColor(b / 23), weight: 4.5, opacity: .95, lineCap: 'round' }).addTo(this.layer);
+    };
+    for (let i = 1; i < gps.length; i++) {
+      const b = bucket(gps[i]);
+      run.push(gps[i]);
+      if (b !== cur) { flush(cur); run = [gps[i]]; cur = b; }
+    }
+    flush(cur);
+
+    const pin = (s, color, sym) => L.marker([s.lat, s.lon], {
+      icon: L.divIcon({ className: '', iconSize: [22, 22], iconAnchor: [11, 11],
+        html: `<div style="width:22px;height:22px;border-radius:50%;background:${color};border:2px solid #fff;display:grid;place-items:center;font-size:11px;color:#fff">${sym}</div>` })
+    }).addTo(this.layer);
+    pin(gps[0], '#2fa84f', '▶');
+    pin(gps[gps.length - 1], '#c9302c', '■');
+
+    this.marker = L.circleMarker([gps[0].lat, gps[0].lon],
+      { radius: 6, color: '#fff', weight: 2, fillColor: '#1b8cf5', fillOpacity: 1 });
+
+    const b = L.latLngBounds(gps.map(s => [s.lat, s.lon]));
+    this.map.fitBounds(b, { padding: [26, 26] });
+    setTimeout(() => this.map.invalidateSize(), 60);
+  },
+  cursor(s) {
+    if (!this.map || !this.marker) return;
+    if (!s || s.lat == null) { this.marker.remove(); return; }
+    this.marker.setLatLng([s.lat, s.lon]).addTo(this.map);
+  },
+  highlightLap(idx, A) {
+    if (!this.map) return;
+    if (this.lapLayer) { this.lapLayer.remove(); this.lapLayer = null; }
+    if (idx == null) return;
+    const seg = A.samples.filter(s => s.lap === idx && s.lat != null);
+    if (seg.length < 2) return;
+    this.lapLayer = L.polyline(seg.map(s => [s.lat, s.lon]),
+      { color: '#fff', weight: 7, opacity: .5 }).addTo(this.map);
+    this.map.fitBounds(this.lapLayer.getBounds(), { padding: [40, 40], maxZoom: 17 });
+  }
+};
+
+/* =======================================================================
+   Application
+   ======================================================================= */
+const App = {
+  activities: [], A: null, axis: 't', cursor: null, charts: [],
+  axisValues: [], lapFilter: 'Tout', expanded: false, selLap: null, fcMax: null,
+  fmtAxis(v) { return this.axis === 't' ? fmtClock(v) : nf(v / 1000, 2) + ' km'; }
+};
+
+function setCursor(i) {
+  App.cursor = i;
+  App.charts.forEach(c => c.draw());
+  MapView.cursor(i == null ? null : App.A.samples[i]);
+}
+
+/* ---------------------- Aperçu ---------------------- */
+function renderOverview() {
+  const A = App.A, r = A.raw;
+  $('#lm-sportTitle').textContent = r.sport;
+  $('#lm-ovDate').textContent = isFinite(A.t0) ? fmtDate(A.t0) : '';
+  const hour = isFinite(A.t0) ? new Date(A.t0).getHours() : 12;
+  const moment = hour < 12 ? 'du matin' : hour < 18 ? "de l'après-midi" : 'du soir';
+  $('#lm-ovName').textContent = r.notes || `${r.sport} ${moment}`;
+  const dev = [r.device, r.sub].filter(Boolean).join(' · ');
+  $('#lm-ovDevice').textContent = dev;
+  $('#lm-ovDevice').hidden = !dev;
+
+  const kpi = (val, unit, lab, hero) =>
+    `<div class="lm-kpi${hero ? ' lm-hero' : ''}"><div class="lm-kpi-val lm-num">${val}<span class="lm-kpi-unit">${unit || ''}</span></div><div class="lm-kpi-lab">${lab}</div></div>`;
+
+  let html = kpi(nf(A.distance / 1000, 2), 'km', 'Distance', true);
+  if (A.avgHr) html += kpi(nf(A.avgHr), 'bpm', 'FC moyenne');
+  html += kpi(fmtPace(A.avgSpeed ? 1000 / A.avgSpeed : NaN), '/km', 'Allure moyenne');
+  html += kpi(fmtClock(A.totalTime), '', 'Temps total');
+  if (A.calories) html += kpi(nf(A.calories), '', 'Calories dépensées');
+  if (A.gain) html += kpi(nf(A.gain), 'm', 'Dénivelé positif');
+  if (A.avgCad) html += kpi(nf(A.avgCad), 'spm', 'Cadence moyenne');
+  $('#lm-ovKpis').innerHTML = html;
+
+  MapView.render(A);
+
+  /* sélecteur si le fichier contient plusieurs activités */
+  const host = $('#lm-ovSelect');
+  if (App.activities.length < 2) { host.innerHTML = ''; return; }
+  host.innerHTML = `<div class="lm-sec-title">Autres activités du fichier</div><div class="lm-rows">` +
+    App.activities.map((a, i) => {
+      const d = a.laps.reduce((s, l) => s + (l.dist || 0), 0);
+      return `<button class="lm-row" data-act="${i}" style="width:100%;text-align:left">
+        <span class="lm-row-lab">${a.sport} — ${isFinite(a.startMs) ? fmtDate(a.startMs) : ''}</span>
+        <span class="lm-row-val lm-num">${nf(d / 1000, 2)} km</span></button>`;
+    }).join('') + '</div>';
+  $$('#lm-ovSelect [data-act]').forEach(b =>
+    b.onclick = () => load(App.activities[+b.dataset.act]));
+}
+
+/* ---------------------- Statistiques ---------------------- */
+function renderStats() {
+  const A = App.A;
+  const sec = (title, rows) => rows.length
+    ? `<div class="lm-sec-title">${title}</div><div class="lm-rows">` +
+      rows.map(([l, v]) => `<div class="lm-row"><span class="lm-row-lab">${l}</span><span class="lm-row-val lm-num">${v}</span></div>`).join('') +
+      '</div>' : '';
+  const pace = v => v ? fmtPace(1000 / v) + ' /km' : '--';
+  const kmh  = v => v ? nf(v * 3.6, 1) + ' km/h' : '--';
+
+  let h = '';
+  h += sec('Allure', [
+    ['Allure moyenne', pace(A.avgSpeed)],
+    ['Allure moy. en déplacement', pace(A.movSpeed)],
+    ['Meilleure allure', pace(A.bestSpeed)]
+  ]);
+  h += sec('Vitesse', [
+    ['Vitesse moyenne', kmh(A.avgSpeed)],
+    ['Vitesse moy. en déplacement', kmh(A.movSpeed)],
+    ['Vitesse max', kmh(A.maxSpeed)]
+  ]);
+  h += sec('Chronométrage', [
+    ['Temps total', fmtClock(A.totalTime)],
+    ['Temps de déplacement', fmtClock(A.moving)],
+    ['Temps écoulé', fmtClock(A.elapsed)]
+  ]);
+  h += sec('Détection course / marche', [
+    ['Temps de course', fmtClock(A.running)],
+    ['Temps de marche', fmtClock(A.walking)],
+    ['Temps immobile', fmtClock(A.still)]
+  ]);
+  if (A.hasHr) h += sec('Fréquence cardiaque', [
+    ['FC moyenne', nf(A.avgHr) + ' bpm'],
+    ['FC max', nf(A.maxHr) + ' bpm']
+  ]) + renderZones();
+  if (A.hasCad) h += sec('Cadence de course', [
+    ['Cadence moyenne', nf(A.avgCad) + ' spm'],
+    ['Cadence max', nf(A.maxCad) + ' spm'],
+    ['Longueur de foulée moyenne', A.avgSl ? nf(A.avgSl, 2) + ' m'
+      : (A.avgCad && A.avgSpeed ? nf(A.avgSpeed * 60 / A.avgCad, 2) + ' m' : '--')]
+  ]);
+  if (A.hasEle) h += sec('Élévation', [
+    ['Dénivelé positif', nf(A.gain) + ' m'],
+    ['Dénivelé négatif', nf(A.loss) + ' m'],
+    ['Altitude min', nf(A.eleMin) + ' m'],
+    ['Altitude max', nf(A.eleMax) + ' m']
+  ]);
+  if (A.hasDyn) h += sec('Dynamique de course', [
+    ['Oscillation verticale', A.avgVo ? nf(A.avgVo / 10, 1) + ' cm' : '--'],
+    ['Temps de contact au sol', A.avgGct ? nf(A.avgGct) + ' ms' : '--'],
+    ['Ratio vertical', A.avgVr ? nf(A.avgVr, 1) + ' %' : '--'],
+    ['Longueur de foulée', A.avgSl ? nf(A.avgSl, 2) + ' m' : '--']
+  ]);
+  if (A.hasTemp) h += sec('Température', [
+    ['Température moyenne', nf(A.avgTemp) + ' °C'],
+    ['Température max', nf(A.maxTemp) + ' °C']
+  ]);
+  if (A.hasPw) h += sec('Puissance', [
+    ['Puissance moyenne', nf(A.avgPw) + ' W'],
+    ['Puissance max', nf(A.maxPw) + ' W']
+  ]);
+  h += sec('Séance', [
+    ['Distance', nf(A.distance / 1000, 2) + ' km'],
+    ['Calories', A.calories ? nf(A.calories) + ' kcal' : '--'],
+    ['Nombre de tours', nf(A.laps.length)],
+    ['Points enregistrés', nf(A.samples.length)]
+  ]);
+  $('#lm-p-stats').innerHTML = h;
+  bindFcMax();
+}
+
+const ZONE_DEF = [
+  [50, 60, '#8a9096', 'Récupération'],
+  [60, 70, '#2f8fe0', 'Endurance fondamentale'],
+  [70, 80, '#3fae4a', 'Endurance active'],
+  [80, 90, '#e8a13a', 'Seuil'],
+  [90, 100, '#e0483c', 'VO₂ max']
+];
+function renderZones() {
+  const A = App.A;
+  const fcMax = App.fcMax || Math.round(A.maxHr || 190);
+  const t = new Array(5).fill(0);
+  const S = A.samples;
+  for (let i = 1; i < S.length; i++) {
+    const dt = S[i].t - S[i - 1].t;
+    if (dt <= 0 || dt > 120 || S[i].hr == null) continue;
+    const p = (S[i].hr / fcMax) * 100;
+    let z = ZONE_DEF.findIndex(d => p >= d[0] && p < d[1]);
+    if (p >= 100) z = 4;
+    if (z >= 0) t[z] += dt;
+  }
+  const tot = t.reduce((a, b) => a + b, 0) || 1;
+  return `<div class="lm-sec-title">Temps dans les zones de FC</div>
+    <div class="lm-fcmax"><label for="lm-fcMaxIn">FC max utilisée</label>
+      <input id="lm-fcMaxIn" type="number" min="120" max="230" value="${fcMax}"> bpm</div>
+    <div class="lm-zones">` +
+    ZONE_DEF.map((d, i) => `<div class="lm-zone">
+      <div><div class="lm-zone-n">Z${i + 1}</div></div>
+      <div><div class="lm-zone-track"><div class="lm-zone-fill" style="width:${(t[i] / tot * 100).toFixed(1)}%;background:${d[2]}"></div></div>
+        <div class="lm-zone-sub">${d[3]} · ${Math.round(fcMax * d[0] / 100)}–${Math.round(fcMax * d[1] / 100)} bpm</div></div>
+      <div class="lm-zone-t lm-num">${fmtClock(t[i])}<div class="lm-zone-sub">${nf(t[i] / tot * 100)} %</div></div>
+    </div>`).join('') + '</div>';
+}
+function bindFcMax() {
+  const el = $('#lm-fcMaxIn'); if (!el) return;
+  el.onchange = () => {
+    const v = parseInt(el.value, 10);
+    if (v >= 120 && v <= 230) {
+      const y = window.scrollY;
+      App.fcMax = v; renderStats();
+      window.scrollTo(0, y); $('#lm-fcMaxIn')?.focus();
+    }
+  };
+}
+
+/* ---------------------- Intervalles ---------------------- */
+function renderLaps() {
+  const A = App.A;
+  const types = ['Tout', ...new Set(A.laps.map(l => l.type))];
+  if (!types.includes(App.lapFilter)) App.lapFilter = 'Tout';
+  $('#lm-lapChips').innerHTML = types.map(t =>
+    `<button class="lm-chip" data-type="${t}" aria-pressed="${t === App.lapFilter}">${t}</button>`).join('');
+  $$('#lm-lapChips .lm-chip').forEach(c => c.onclick = () => { App.lapFilter = c.dataset.type; renderLaps(); });
+
+  const lapColor = l =>                       // couleur par rôle, pas par libellé
+    l.work                                                  ? '#3d9bfa' :
+    (l.fitInt === 2 || l.type === 'Échauffement')           ? '#3fae4a' :
+    (l.fitInt === 3 || l.type === 'Retour au calme')        ? '#e8a13a' : '#8a9096';
+  const ex = App.expanded;
+  let head = `<tr><th>Inter.</th><th>Type</th><th>Temps</th><th>Distance<small>km</small></th><th>Allure moy.<small>/km</small></th>`;
+  if (ex) {
+    if (A.hasHr)  head += `<th>FC moy<small>bpm</small></th><th>FC max<small>bpm</small></th>`;
+    if (A.hasCad) head += `<th>Cadence<small>spm</small></th>`;
+    if (A.hasEle) head += `<th>D+<small>m</small></th>`;
+    head += `<th>Calories</th>`;
+  }
+  head += '</tr>';
+
+  const rows = A.laps.filter(l => App.lapFilter === 'Tout' || l.type === App.lapFilter).map(l => {
+    const seg = A.samples.filter(s => s.lap === l.i);
+    const cad = seg.map(s => s.cad).filter(v => v > 40);
+    let gain = 0;
+    for (let i = 1; i < seg.length; i++)
+      if (seg[i].ele != null && seg[i - 1].ele != null && seg[i].ele > seg[i - 1].ele)
+        gain += seg[i].ele - seg[i - 1].ele;
+    let tr = `<tr data-lap="${l.i}" class="lm-${App.selLap === l.i ? 'sel' : ''}">
+      <td class="lm-lap-n lm-num">${l.num ?? ''}</td>
+      <td><span class="lm-dot" style="background:${lapColor(l)}"></span>${l.type}</td>
+      <td class="lm-num">${fmtLapTime(l.time)}</td>
+      <td class="lm-num">${nf((l.dist || 0) / 1000, 2)}</td>
+      <td class="lm-num">${fmtPace(l.pace)}</td>`;
+    if (ex) {
+      if (A.hasHr)  tr += `<td class="lm-num">${l.avgHr ? nf(l.avgHr) : '--'}</td><td class="lm-num">${l.maxHr ? nf(l.maxHr) : '--'}</td>`;
+      if (A.hasCad) tr += `<td class="lm-num">${cad.length ? nf(cad.reduce((a, b) => a + b, 0) / cad.length) : '--'}</td>`;
+      if (A.hasEle) tr += `<td class="lm-num">${nf(gain)}</td>`;
+      tr += `<td class="lm-num">${l.cal ? nf(l.cal) : '--'}</td>`;
+    }
+    return tr + '</tr>';
+  }).join('');
+
+  $('#lm-lapTable').innerHTML = `<thead>${head}</thead><tbody>${rows}</tbody>`;
+  $('#lm-btnExpand').textContent = ex ? 'Réduire ⌃' : 'Développer ⌄';
+  $('#lm-lapNote').textContent = A.raw.fit && A.laps.some(l => l.typeName)
+    ? "Les types de tour proviennent des étapes enregistrées dans le fichier FIT."
+    : "Le type de tour est déduit de l'intensité enregistrée et de la durée : le TCX ne transporte pas le nom des étapes de la séance.";
+  $$('#lm-lapTable tbody tr').forEach(tr => tr.onclick = () => {
+    const i = +tr.dataset.lap;
+    App.selLap = App.selLap === i ? null : i;
+    MapView.highlightLap(App.selLap, A);
+    renderLaps();
+    if (App.selLap != null) go('apercu');
+  });
+}
+
+/* ---------------------- Graphiques ---------------------- */
+function paceStep(lo, hi) {
+  const rough = (hi - lo) / 4;
+  return [10, 15, 20, 30, 60, 100, 120, 180, 300, 600].find(s => s >= rough) || 900;
+}
+function renderCharts() {
+  const A = App.A;
+  App.charts = [];
+  const host = $('#lm-chartsHost'); host.innerHTML = '';
+  App.axisValues = A.samples.map(s => App.axis === 't' ? s.t : s.d);
+
+  const defs = [];
+  const paces = A.samples.map(s => s.pace).filter(v => v);
+  if (paces.length) {
+    const lo = Math.min(...paces), hi = Math.min(Math.max(...paces), Math.min(...paces) * 3.2 + 60);
+    defs.push({
+      key: 'pace', title: 'Allure', color: '#3d9bfa',
+      fillFrom: 'rgba(61,155,250,.40)', fillTo: 'rgba(61,155,250,.10)',
+      values: A.samples.map(s => s.pace), invert: true, unit: '/km',
+      fmtY: fmtPace, step: paceStep(lo, hi), clampHigh: hi,
+      stats: [[fmtPace(A.avgSpeed ? 1000 / A.avgSpeed : NaN), '/km', 'Moyenne'],
+              [fmtPace(A.bestSpeed ? 1000 / A.bestSpeed : NaN), '/km', 'Meilleure']]
+    });
+  }
+  if (A.hasHr) defs.push({
+    key: 'hr', title: 'Fréquence cardiaque', color: '#ef3e36',
+    fillFrom: 'rgba(239,62,54,.30)', fillTo: 'rgba(239,62,54,.92)',
+    values: A.samples.map(s => s.hr), unit: 'bpm', fmtY: v => nf(v),
+    stats: [[nf(A.avgHr), 'bpm', 'Moyenne'], [nf(A.maxHr), 'bpm', 'Maximum']]
+  });
+  if (A.hasEle) defs.push({
+    key: 'ele', title: 'Altitude', color: '#8aa85a',
+    fillFrom: 'rgba(138,168,90,.10)', fillTo: 'rgba(138,168,90,.55)',
+    values: A.samples.map(s => s.ele), unit: 'm', fmtY: v => nf(v),
+    stats: [[nf(A.gain), 'm', 'Dénivelé +'], [nf(A.loss), 'm', 'Dénivelé −']]
+  });
+  if (A.hasCad) defs.push({
+    key: 'cad', title: 'Cadence', color: '#a274e0',
+    fillFrom: 'rgba(162,116,224,.10)', fillTo: 'rgba(162,116,224,.55)',
+    values: A.samples.map(s => s.cad != null && s.cad > 40 ? s.cad : null),
+    unit: 'spm', fmtY: v => nf(v),
+    stats: [[nf(A.avgCad), 'spm', 'Moyenne'], [nf(A.maxCad), 'spm', 'Maximum']]
+  });
+  if (A.hasDyn && A.samples.some(s => s.gct != null)) defs.push({
+    key: 'gct', title: 'Temps de contact au sol', color: '#2fb6a8',
+    fillFrom: 'rgba(47,182,168,.10)', fillTo: 'rgba(47,182,168,.55)',
+    values: A.samples.map(s => s.gct), unit: 'ms', fmtY: v => nf(v),
+    stats: [[nf(A.avgGct), 'ms', 'Moyenne'], [nf(A.avgVr, 1), '%', 'Ratio vertical']]
+  });
+  if (A.hasDyn && A.samples.some(s => s.vo != null)) defs.push({
+    key: 'vo', title: 'Oscillation verticale', color: '#e07ea8',
+    fillFrom: 'rgba(224,126,168,.10)', fillTo: 'rgba(224,126,168,.55)',
+    values: A.samples.map(s => s.vo != null ? s.vo / 10 : null), unit: 'cm',
+    fmtY: v => nf(v, 1),
+    stats: [[nf(A.avgVo / 10, 1), 'cm', 'Moyenne'],
+            [A.avgSl ? nf(A.avgSl, 2) : '--', 'm', 'Longueur de foulée']]
+  });
+  if (A.hasPw) defs.push({
+    key: 'pw', title: 'Puissance', color: '#f0a03c',
+    fillFrom: 'rgba(240,160,60,.10)', fillTo: 'rgba(240,160,60,.55)',
+    values: A.samples.map(s => s.pw), unit: 'W', fmtY: v => nf(v),
+    stats: [[nf(A.avgPw), 'W', 'Moyenne'], [nf(A.maxPw), 'W', 'Maximum']]
+  });
+
+  defs.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'lm-card';
+    card.innerHTML = `
+      <div class="lm-card-head" role="button" tabindex="0" aria-expanded="true">
+        <h3>${d.title}</h3><span class="lm-caret">▼</span>
+      </div>
+      <div class="lm-card-body">
+        <div class="lm-card-stats">
+          ${d.stats.map(s => `<div class="lm-card-stat"><div class="lm-cs-val lm-num">${s[0]}<span class="lm-cs-unit">${s[1]}</span></div><div class="lm-cs-lab">${s[2]}</div></div>`).join('')}
+        </div>
+        <div class="lm-chart-holder"></div>
+        <div class="lm-chart-x">${App.axis === 't' ? 'Temps (h:m:s)' : 'Distance (km)'}</div>
+        <div class="lm-chart-key"><span><i class="lm-key-dot" style="background:${d.color}"></i>${d.title}</span></div>
+      </div>`;
+    host.appendChild(card);
+    const ch = new Chart(card.querySelector('.lm-chart-holder'), d);
+    App.charts.push(ch);
+    const head = card.querySelector('.lm-card-head');
+    const toggle = () => {
+      card.classList.toggle('lm-closed');
+      head.setAttribute('aria-expanded', String(!card.classList.contains('lm-closed')));
+      if (!card.classList.contains('lm-closed')) requestAnimationFrame(() => ch.draw());
+    };
+    head.onclick = toggle;
+    head.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+  });
+
+  if (!defs.length) host.innerHTML = `<div class="lm-empty-tab">Ce fichier ne contient aucune donnée à tracer.</div>`;
+  requestAnimationFrame(() => App.charts.forEach(c => c.draw()));
+}
+
+/* ---------------------- navigation ---------------------- */
+function go(tab) {
+  $$('#lm-tabs .lm-tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  $$('.lm-panel').forEach(p => p.classList.toggle('lm-on', p.id === 'lm-p-' + tab));
+  if (tab === 'charts') requestAnimationFrame(() => App.charts.forEach(c => c.draw()));
+  if (tab === 'apercu' && MapView.map) setTimeout(() => MapView.map.invalidateSize(), 60);
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------------------- chargement ---------------------- */
+function load(rawAct) {
+  App.A = buildActivity(rawAct);
+  App.cursor = null; App.selLap = null; App.fcMax = (window.__rlCtx && window.__rlCtx.fcMax && window.__rlCtx.fcMax()) || null;
+  App.lapFilter = 'Tout';
+  renderOverview(); renderStats(); renderLaps(); renderCharts();
+  $('#lm-start').hidden = true; $('#lm-app').hidden = false;
+  go('apercu');
+}
+
+const isFit = u8 => u8.length > 12 &&
+  String.fromCharCode(u8[8], u8[9], u8[10], u8[11]) === '.FIT';
+
+async function gunzip(u8) {
+  if (typeof DecompressionStream === 'undefined')
+    throw new Error("Fichier compressé : décompressez-le avant de l'ouvrir.");
+  const st = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Uint8Array(await new Response(st).arrayBuffer());
+}
+
+async function openData(buf, name) {
+  try {
+    let u8 = new Uint8Array(buf);
+    if (u8[0] === 0x1f && u8[1] === 0x8b) u8 = await gunzip(u8);   // .fit.gz, .tcx.gz
+    if (isFit(u8)) {
+      App.activities = fitToActivities(
+        fitRecords(u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.length)));
+    } else {
+      const txt = new TextDecoder('utf-8').decode(u8);
+      if (!/<\s*TrainingCenterDatabase/i.test(txt))
+        throw new Error(/<\s*gpx/i.test(txt)
+          ? "Ce fichier est un GPX. Le lecteur attend un FIT ou un TCX."
+          : "Format non reconnu : choisissez un fichier .FIT ou .TCX.");
+      App.activities = parseTCX(txt);
+    }
+    if (!App.activities.length) throw new Error("Aucune activité trouvée dans ce fichier.");
+    load(App.activities[0]);
+    document.title = (name || 'Lecteur') + ' — Lecteur FIT & TCX';
+  } catch (e) {
+    $('#lm-err').textContent = e.message || "Impossible de lire ce fichier.";
+  }
+}
+const openText = (text, name) =>
+  openData(new TextEncoder().encode(text).buffer, name);
+
+function openFile(file) {
+  if (!file) return;
+  $('#lm-err').textContent = '';
+  const fr = new FileReader();
+  fr.onerror = () => $('#lm-err').textContent = "Le fichier n'a pas pu être lu.";
+  fr.onload = () => openData(fr.result, file.name.replace(/\.[^.]+$/, ''));
+  fr.readAsArrayBuffer(file);
+}
+
+/* ---------------------- exports ---------------------- */
+function lapsCsv() {
+  const A = App.A;
+  const head = ['Tour', 'Type', 'Temps (s)', 'Temps', 'Distance (km)', 'Allure (/km)',
+                'Vitesse (km/h)', 'FC moy', 'FC max', 'Calories'];
+  const lines = [head.join(';')];
+  A.laps.forEach(l => {
+    lines.push([
+      l.num ?? (l.i + 1), l.type, nf(l.time, 1), fmtLapTime(l.time),
+      nf((l.dist || 0) / 1000, 3), fmtPace(l.pace),
+      l.time && l.dist ? nf(l.dist / l.time * 3.6, 2) : '',
+      l.avgHr ? nf(l.avgHr) : '', l.maxHr ? nf(l.maxHr) : '', l.cal ? nf(l.cal) : ''
+    ].join(';'));
+  });
+  return lines.join('\n');
+}
+function summaryText() {
+  const A = App.A;
+  return [
+    `${A.raw.sport} — ${isFinite(A.t0) ? fmtDate(A.t0) : ''}`,
+    `Distance : ${nf(A.distance / 1000, 2)} km`,
+    `Temps : ${fmtClock(A.totalTime)}`,
+    `Allure moyenne : ${fmtPace(A.avgSpeed ? 1000 / A.avgSpeed : NaN)} /km`,
+    A.avgHr ? `FC moyenne : ${nf(A.avgHr)} bpm (max ${nf(A.maxHr)})` : '',
+    A.avgCad ? `Cadence moyenne : ${nf(A.avgCad)} spm` : '',
+    A.gain ? `Dénivelé : +${nf(A.gain)} m / −${nf(A.loss)} m` : '',
+    `Tours : ${A.laps.length}`
+  ].filter(Boolean).join('\n');
+}
+function download(name, text, mime) {
+  const url = URL.createObjectURL(new Blob(['\uFEFF' + text], { type: mime }));
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ---------------------- écouteurs ---------------------- */
+$('#lm-btnPick').onclick = () => $('#lm-fileInput').click();
+$('#lm-btnOther').onclick = () => $('#lm-fileInput').click();
+$('#lm-fileInput').onchange = e => openFile(e.target.files[0]);
+$('#lm-btnBack').onclick = () => { $('#lm-app').hidden = true; $('#lm-start').hidden = false; };
+$$('#lm-tabs .lm-tab').forEach(b => b.onclick = () => go(b.dataset.tab));
+$('#lm-btnExpand').onclick = () => { App.expanded = !App.expanded; renderLaps(); };
+$$('#lm-axisSeg button').forEach(b => b.onclick = () => {
+  App.axis = b.dataset.axis;
+  $$('#lm-axisSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  App.cursor = null;
+  renderCharts();
+});
+$('#lm-btnCsv').onclick = () => download(
+  `tours-${new Date(App.A.t0).toISOString().slice(0, 10)}.csv`, lapsCsv(), 'text/csv;charset=utf-8');
+$('#lm-btnCopy').onclick = async (e) => {
+  try { await navigator.clipboard.writeText(summaryText()); e.target.textContent = 'Résumé copié'; }
+  catch { e.target.textContent = 'Copie impossible'; }
+  setTimeout(() => e.target.textContent = 'Copier le résumé', 1800);
+};
+
+const start = $('#lm-start');
+['dragenter', 'dragover'].forEach(ev => start.addEventListener(ev, e => {
+  e.preventDefault(); start.classList.add('lm-drag');
+}));
+['dragleave', 'drop'].forEach(ev => start.addEventListener(ev, e => {
+  e.preventDefault(); start.classList.remove('lm-drag');
+}));
+start.addEventListener('drop', e => openFile(e.dataTransfer.files[0]));
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+let rt;
+window.addEventListener('resize', () => {
+  clearTimeout(rt);
+  rt = setTimeout(() => App.charts.forEach(c => c.draw()), 120);
+});
+document.addEventListener('keydown', e => {
+  if ($('#lm-app').hidden) return;
+  const order = ['apercu', 'stats', 'laps', 'charts'];
+  const cur = order.findIndex(t => $('#lm-p-' + t).classList.contains('on'));
+  if (e.key === 'ArrowRight' && e.altKey) go(order[Math.min(order.length - 1, cur + 1)]);
+  if (e.key === 'ArrowLeft'  && e.altKey) go(order[Math.max(0, cur - 1)]);
+});
+
+
+
+/* ---- Intégration RedLab ---- */
+window.__lmResize = function(){
+  try{
+    if (MapView.map){ setTimeout(function(){ MapView.map.invalidateSize(); }, 60); }
+    App.charts.forEach(function(c){ c.draw(); });
+  }catch(e){}
+};
+
+})();
+</script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
