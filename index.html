@@ -1289,6 +1289,8 @@ body.rl-locked .app,body.rl-locked .mobile-header{display:none}
 .lm-head{padding:18px var(--pad) 0}
 .lm-head-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-bottom:10px}
 .lm-head h2{font-size:26px;font-weight:500;margin:0 0 2px;letter-spacing:-.2px}
+#lm-ovName{cursor:text;border-bottom:1px dashed transparent;outline:none;transition:border-color .15s}
+#lm-ovName:hover,#lm-ovName:focus{border-color:var(--muted)}
 .lm-head-sub{color:var(--blue);font-size:13.5px;margin-bottom:2px}
 
 .lm-kpis{padding:8px var(--pad) 0;display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
@@ -2078,7 +2080,7 @@ table.lm-laps tbody tr{cursor:pointer}
         <div>
           <div class="lm-head">
             <div class="lm-head-meta"><span id="lm-ovDate"></span></div>
-            <h2 id="lm-ovName">Activité</h2>
+            <h2 id="lm-ovName" contenteditable="true" spellcheck="false" title="Cliquer pour renommer">Activité</h2>
             <div class="lm-head-sub" id="lm-ovDevice"></div>
           </div>
           <div class="lm-kpis" id="lm-ovKpis"></div>
@@ -7776,14 +7778,18 @@ function setCursor(i) {
   MapView.cursor(i == null ? null : App.A.samples[i]);
 }
 
+function defaultActivityName(A) {
+  const hour = isFinite(A.t0) ? new Date(A.t0).getHours() : 12;
+  const moment = hour < 12 ? 'du matin' : hour < 18 ? "de l'après-midi" : 'du soir';
+  return `${A.raw.sport} ${moment}`;
+}
+
 /* ---------------------- Aperçu ---------------------- */
 function renderOverview() {
   const A = App.A, r = A.raw;
   $('#lm-sportTitle').textContent = r.sport;
   $('#lm-ovDate').textContent = isFinite(A.t0) ? fmtDate(A.t0) : '';
-  const hour = isFinite(A.t0) ? new Date(A.t0).getHours() : 12;
-  const moment = hour < 12 ? 'du matin' : hour < 18 ? "de l'après-midi" : 'du soir';
-  $('#lm-ovName').textContent = r.notes || `${r.sport} ${moment}`;
+  $('#lm-ovName').textContent = r.notes || defaultActivityName(A);
   const dev = [r.device, r.sub].filter(Boolean).join(' · ');
   $('#lm-ovDevice').textContent = dev;
   $('#lm-ovDevice').hidden = !dev;
@@ -8192,6 +8198,13 @@ $('#lm-fileInput').onchange = e => openFile(e.target.files[0]);
 $('#lm-btnBack').onclick = () => { $('#lm-app').hidden = true; $('#lm-start').hidden = false; };
 $$('#lm-tabs .lm-tab').forEach(b => b.onclick = () => go(b.dataset.tab));
 $('#lm-btnExpand').onclick = () => { App.expanded = !App.expanded; renderLaps(); };
+$('#lm-ovName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+$('#lm-ovName').addEventListener('blur', e => {
+  if (!App.A) return;
+  const val = e.target.textContent.replace(/\s+/g, ' ').trim();
+  App.A.raw.notes = val || null;
+  e.target.textContent = val || defaultActivityName(App.A);
+});
 $$('#lm-axisSeg button').forEach(b => b.onclick = () => {
   App.axis = b.dataset.axis;
   $$('#lm-axisSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
