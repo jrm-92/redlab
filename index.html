@@ -469,18 +469,42 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 @media(max-width:860px){.rec-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 @media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
-.an-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.an-wrap .tbl-wrap{border:none;border-radius:0}
-.an-name{font-size:14.5px;font-weight:800;color:var(--text)}
-.an-interval{font-size:12px;color:var(--muted2);margin-top:2px}
-.an-num{font-variant-numeric:tabular-nums;font-weight:800;color:var(--text);white-space:nowrap}
-.an-charts{display:flex;flex-wrap:wrap;gap:6px;max-width:260px}
-.an-chart-tag{font-size:11px;font-weight:700;color:var(--orange);background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.3);border-radius:20px;padding:3px 10px;white-space:nowrap}
-.an-none{color:var(--muted2);font-size:12.5px}
+/* ── Analyses : tableau de bord façon montre ── */
+.an-hero{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 12px 32px -18px rgba(0,0,0,.7)}
+.an-hd{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.an-hd-l{flex:1 1 200px;min-width:0}
+.an-name{font-size:21px;font-weight:900;color:var(--text);letter-spacing:-.3px;line-height:1.15}
+.an-interval{display:inline-block;margin-top:7px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--orange);background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.3);border-radius:20px;padding:3px 10px}
+.an-hd-r{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:auto}
 .an-date{font-size:12px;color:var(--muted2);white-space:nowrap}
-.an-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:4px 6px;white-space:nowrap;border-radius:6px;transition:all .15s}
-.an-del:hover{color:#F87171;background:rgba(248,113,113,.1)}
+.an-del{background:none;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:6px 12px;white-space:nowrap;border-radius:8px;transition:all .15s;font-family:var(--font)}
+.an-del:hover{color:#F87171;border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.1)}
+.an-kpis{display:grid;grid-template-columns:repeat(3,1fr)}
+.an-kpi{padding:20px 24px;border-right:1px solid var(--border);text-align:center}
+.an-kpi:last-child{border-right:none}
+.an-kpi-val{font-size:30px;font-weight:900;color:var(--text);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
+.an-kpi-lab{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted2);margin-top:7px}
+.an-metrics{border-top:1px solid var(--border)}
+.an-metric{padding:16px 24px 12px;border-bottom:1px solid var(--border)}
+.an-metric:last-child{border-bottom:none}
+.an-m-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.an-m-name{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;color:var(--text)}
+.an-m-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.an-m-stats{display:flex;gap:16px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.an-m-stats b{color:var(--text2);font-weight:800}
+.an-svg{display:block;width:100%;height:88px}
+.an-nochart{padding:18px 24px;font-size:13px;color:var(--muted2);text-align:center;border-top:1px solid var(--border)}
+.an-past-t{font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted2);margin:22px 0 10px 2px}
+.an-past{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) transparent}
+.an-past::-webkit-scrollbar{height:8px}
+.an-past::-webkit-scrollbar-thumb{background:rgba(255,107,26,.45);border-radius:8px}
+.an-chip{flex:0 0 auto;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 15px;cursor:pointer;font-family:var(--font);transition:all .15s;min-width:150px}
+.an-chip:hover{border-color:rgba(255,107,26,.45);background:var(--card2)}
+.an-chip.on{border-color:var(--orange);background:rgba(255,107,26,.1)}
+.an-chip-n{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+.an-chip-s{font-size:11.5px;color:var(--muted2);margin-top:3px;font-variant-numeric:tabular-nums}
 .an-empty{color:var(--muted2);font-size:13.5px;padding:20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px}
+@media(max-width:600px){.an-kpi{padding:15px 8px}.an-kpi-val{font-size:22px}.an-name{font-size:17px}.an-hd,.an-metric{padding-left:16px;padding-right:16px}.an-m-stats{gap:12px;font-size:11.5px}}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .rec-name{font-size:20px;font-weight:900;text-transform:uppercase;line-height:1}
 .rec-dist{font-size:12px;font-weight:600;color:var(--muted2);margin-top:3px}
@@ -3077,23 +3101,77 @@ function renderRecords(){
   el.innerHTML=`<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
   shown.forEach(r=>updRecord(r.id,true));
 }
+/* Formate une valeur de série selon son type (allure en m:ss, décimale, entier). */
+function anFmt(v,fmt){
+  if(v==null||!isFinite(v))return '—';
+  if(fmt==='pace')return fAll(v);
+  if(fmt==='dec')return v.toFixed(1);
+  return Math.round(v).toLocaleString('fr-FR');
+}
+/* Redessine une courbe stockée en SVG (aire dégradée + ligne), à partir des points échantillonnés. */
+let _anGid=0;
+function anChartSVG(c){
+  const pts=c.pts||[];
+  if(pts.length<2)return '';
+  const W=1000,H=88,P=6;
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs);
+  let lo=Math.min(...ys),hi=Math.max(...ys);
+  if(hi-lo<1e-6)hi=lo+1;
+  const sp=hi-lo;lo-=sp*0.15;hi+=sp*0.15;
+  const px=v=>((v-x0)/((x1-x0)||1))*W;
+  const py=v=>{const f=(v-lo)/(hi-lo);return P+(c.invert?f:1-f)*(H-2*P);};
+  const line=pts.map((p,i)=>(i?'L':'M')+px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1)).join(' ');
+  const gid='an-g'+(++_anGid);
+  const avg=ys.reduce((a,b)=>a+b,0)/ys.length;
+  const best=c.invert?Math.min(...ys):Math.max(...ys);
+  const bestLab=c.invert?'Meilleure':'Max';
+  return '<div class="an-metric">'
+    +'<div class="an-m-top">'
+      +'<div class="an-m-name"><span class="an-m-dot" style="background:'+c.color+'"></span>'+c.title+'</div>'
+      +'<div class="an-m-stats"><span>Moy <b>'+anFmt(avg,c.fmt)+'</b> '+c.unit+'</span>'
+      +'<span>'+bestLab+' <b>'+anFmt(best,c.fmt)+'</b> '+c.unit+'</span></div>'
+    +'</div>'
+    +'<svg class="an-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'
+      +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
+        +'<stop offset="0" stop-color="'+c.color+'" stop-opacity=".38"/>'
+        +'<stop offset="1" stop-color="'+c.color+'" stop-opacity=".02"/>'
+      +'</linearGradient></defs>'
+      +'<path d="'+line+' L'+W+' '+H+' L0 '+H+' Z" fill="url(#'+gid+')"/>'
+      +'<path d="'+line+'" fill="none" stroke="'+c.color+'" stroke-width="2.5" '
+      +'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+    +'</svg></div>';
+}
+function anSelect(id){window._anSel=id;renderDashAnalyses();}
 function renderDashAnalyses(){
   const el=document.getElementById('db-analyses');if(!el)return;
   const list=S.analyses||[];
   if(!list.length){el.innerHTML='<div class="an-empty">Aucune analyse enregistrée. Depuis l’onglet Montre, ouvre un fichier .FIT/.TCX, choisis un intervalle et clique sur « Ajouter au profil » pour l’épingler ici.</div>';return;}
-  const rows=list.map(a=>`
-    <tr>
-      <td><div class="an-name">${a.source||'Séance'}</div><div class="an-interval">${a.interval||''}</div></td>
-      <td class="an-num">${a.time||'—'}</td>
-      <td class="an-num">${a.distance||'—'}</td>
-      <td class="an-num">${a.pace||'—'}</td>
-      <td>${(a.charts&&a.charts.length)?'<div class="an-charts">'+a.charts.map(c=>'<span class="an-chart-tag">'+c+'</span>').join('')+'</div>':'<span class="an-none">—</span>'}</td>
-      <td class="an-date">${a.date?new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):''}</td>
-      <td><button type="button" class="an-del" onclick="deleteAnalysis(${a.id})">Supprimer</button></td>
-    </tr>`).join('');
-  el.innerHTML='<div class="an-wrap"><div class="tbl-wrap"><table><thead><tr>'
-    +'<th>Course</th><th>Temps</th><th>Distance</th><th>Allure</th><th>Graphiques</th><th>Date</th><th></th>'
-    +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  const cur=list.find(a=>a.id===window._anSel)||list[0];
+  const charts=(cur.charts||[]).filter(c=>c&&c.pts);
+  const hero='<div class="an-hero">'
+    +'<div class="an-hd">'
+      +'<div class="an-hd-l"><div class="an-name">'+(cur.source||'Séance')+'</div>'
+      +(cur.interval?'<div class="an-interval">'+cur.interval+'</div>':'')+'</div>'
+      +'<div class="an-hd-r">'
+        +'<span class="an-date">'+(cur.date?new Date(cur.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'')+'</span>'
+        +'<button type="button" class="an-del" onclick="deleteAnalysis('+cur.id+')">Supprimer</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="an-kpis">'
+      +'<div class="an-kpi"><div class="an-kpi-val">'+(cur.time||'—')+'</div><div class="an-kpi-lab">Temps</div></div>'
+      +'<div class="an-kpi"><div class="an-kpi-val">'+(cur.distance||'—')+'</div><div class="an-kpi-lab">Distance</div></div>'
+      +'<div class="an-kpi"><div class="an-kpi-val">'+(cur.pace||'—')+'</div><div class="an-kpi-lab">Allure</div></div>'
+    +'</div>'
+    +(charts.length?'<div class="an-metrics">'+charts.map(anChartSVG).join('')+'</div>'
+      :'<div class="an-nochart">Aucun graphique sélectionné pour cette analyse.</div>')
+    +'</div>';
+  const past=list.length>1?'<div class="an-past-t">Autres analyses</div><div class="an-past">'
+    +list.map(a=>'<button type="button" class="an-chip'+(a.id===cur.id?' on':'')+'" onclick="anSelect('+a.id+')">'
+      +'<div class="an-chip-n">'+(a.source||'Séance')+'</div>'
+      +'<div class="an-chip-s">'+[a.time,a.distance].filter(Boolean).join(' · ')+'</div></button>').join('')
+    +'</div>':'';
+  el.innerHTML=hero+past;
 }
 function updRecord(id,skipSave){
   const r=REC_DISTS.find(x=>x.id===id);if(!r)return;
@@ -3470,6 +3548,7 @@ function addAnalysisToAthlete(athleteId,entry){
   _saveAthletes(athletes);
   if(S.pseudo&&S.pseudo===athletes[idx].pseudo){
     S.analyses=athletes[idx].analyses;
+    window._anSel=entry.id;   // le panneau affiche l'analyse qu'on vient d'ajouter
     if(typeof renderDashAnalyses==='function')renderDashAnalyses();
   }
   return true;
@@ -3477,6 +3556,7 @@ function addAnalysisToAthlete(athleteId,entry){
 function deleteAnalysis(analysisId){
   if(!confirm('Supprimer cette analyse ?'))return;
   S.analyses=(S.analyses||[]).filter(a=>a.id!==analysisId);
+  if(window._anSel===analysisId)window._anSel=null;   // sinon le panneau resterait vide
   if(S.pseudo){
     const athletes=getAthletes();
     const idx=athletes.findIndex(a=>a.pseudo===S.pseudo);
@@ -7849,7 +7929,7 @@ const MapView = {
 const App = {
   activities: [], A: null, axis: 't', cursor: null, charts: [],
   axisValues: [], lapFilter: 'Tout', expanded: false, selLap: null, fcMax: null,
-  selectedCharts: new Set(), chartTitles: {},
+  selectedCharts: new Set(),
   fmtAxis(v) { return this.axis === 't' ? fmtClock(v) : nf(v / 1000, 2) + ' km'; }
 };
 
@@ -8142,7 +8222,6 @@ function updateChartsSaveBar() {
 function renderCharts() {
   const A = App.A;
   App.charts = [];
-  App.chartTitles = {};
   renderChartLapChips();
   const host = $('#lm-chartsHost'); host.innerHTML = '';
   const samples = App.selLap != null ? A.samples.filter(s => s.lap === App.selLap) : A.samples;
@@ -8204,7 +8283,6 @@ function renderCharts() {
   });
 
   defs.forEach(d => {
-    App.chartTitles[d.key] = d.title;
     const card = document.createElement('div');
     card.className = 'lm-card';
     card.innerHTML = `
@@ -8375,6 +8453,24 @@ function intervalSummary() {
     pace: fmtPace(A.avgSpeed ? 1000 / A.avgSpeed : NaN) + '/km'
   };
 }
+/* Échantillonne une série (valeurs + axe) pour la stocker : on garde au plus `n` points,
+   arrondis, pour rester léger en localStorage tout en gardant la forme de la courbe. */
+function sampleSeries(values, axis, n) {
+  const r = v => Math.round(v * 10) / 10;
+  const pairs = [];
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i];
+    if (v == null || !isFinite(v)) continue;
+    pairs.push([axis[i], v]);
+  }
+  if (pairs.length <= n) return pairs.map(p => [r(p[0]), r(p[1])]);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const idx = Math.round(i * (pairs.length - 1) / (n - 1));
+    out.push([r(pairs[idx][0]), r(pairs[idx][1])]);
+  }
+  return out;
+}
 function chartsSaveToAthlete(athleteId) {
   const sum = intervalSummary();
   const entry = {
@@ -8383,7 +8479,13 @@ function chartsSaveToAthlete(athleteId) {
     source: $('#lm-ovName') ? $('#lm-ovName').textContent.trim() : '',
     interval: chartIntervalLabel(),
     time: sum.time, distance: sum.distance, pace: sum.pace,
-    charts: Array.from(App.selectedCharts).map(k => App.chartTitles[k] || k)
+    axis: App.axis,
+    charts: App.charts.filter(ch => App.selectedCharts.has(ch.cfg.key)).map(ch => ({
+      key: ch.cfg.key, title: ch.cfg.title, color: ch.cfg.color,
+      unit: ch.cfg.unit || '', invert: !!ch.cfg.invert,
+      fmt: ch.cfg.key === 'pace' ? 'pace' : (ch.cfg.key === 'vo' ? 'dec' : 'int'),
+      pts: sampleSeries(ch.cfg.values, App.axisValues, 100)
+    })).filter(c => c.pts.length > 1)
   };
   const ok = (window.__rlCtx && window.__rlCtx.addAnalysis) ? window.__rlCtx.addAnalysis(athleteId, entry) : false;
   const btn = $('#lm-btnAddProfile');
