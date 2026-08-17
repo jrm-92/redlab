@@ -469,23 +469,18 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 @media(max-width:860px){.rec-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 @media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
-.an-grid{display:flex;flex-direction:column;gap:14px}
-.an-card{background:var(--card);border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:24px;padding:18px 22px;flex-wrap:wrap}
-.an-head{flex:1 1 200px;min-width:0}
-.an-title{font-size:16px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.an-sub{font-size:12px;color:var(--muted2);margin-top:3px}
-.an-stats{display:flex;gap:10px;flex:0 0 auto}
-.an-stat{text-align:center;background:var(--bg2);border-radius:8px;padding:9px 16px;min-width:64px}
-.an-stat-val{font-size:15px;font-weight:800;color:var(--text)}
-.an-stat-lab{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-top:2px}
-.an-charts{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 180px}
-.an-chart-tag{font-size:11px;font-weight:700;color:var(--orange);background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.3);border-radius:20px;padding:4px 11px;white-space:nowrap}
-.an-foot{display:flex;align-items:center;gap:16px;flex:0 0 auto;margin-left:auto}
-.an-date{font-size:11px;color:var(--muted2);white-space:nowrap}
-.an-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:2px 4px;white-space:nowrap}
-.an-del:hover{color:#F87171}
+.an-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.an-wrap .tbl-wrap{border:none;border-radius:0}
+.an-name{font-size:14.5px;font-weight:800;color:var(--text)}
+.an-interval{font-size:12px;color:var(--muted2);margin-top:2px}
+.an-num{font-variant-numeric:tabular-nums;font-weight:800;color:var(--text);white-space:nowrap}
+.an-charts{display:flex;flex-wrap:wrap;gap:6px;max-width:260px}
+.an-chart-tag{font-size:11px;font-weight:700;color:var(--orange);background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.3);border-radius:20px;padding:3px 10px;white-space:nowrap}
+.an-none{color:var(--muted2);font-size:12.5px}
+.an-date{font-size:12px;color:var(--muted2);white-space:nowrap}
+.an-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:4px 6px;white-space:nowrap;border-radius:6px;transition:all .15s}
+.an-del:hover{color:#F87171;background:rgba(248,113,113,.1)}
 .an-empty{color:var(--muted2);font-size:13.5px;padding:20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px}
-@media(max-width:640px){.an-card{gap:14px}.an-foot{margin-left:0;width:100%;justify-content:space-between}.an-stats{width:100%}.an-stat{flex:1}}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .rec-name{font-size:20px;font-weight:900;text-transform:uppercase;line-height:1}
 .rec-dist{font-size:12px;font-weight:600;color:var(--muted2);margin-top:3px}
@@ -3086,23 +3081,19 @@ function renderDashAnalyses(){
   const el=document.getElementById('db-analyses');if(!el)return;
   const list=S.analyses||[];
   if(!list.length){el.innerHTML='<div class="an-empty">Aucune analyse enregistrée. Depuis l’onglet Montre, ouvre un fichier .FIT/.TCX, choisis un intervalle et clique sur « Ajouter au profil » pour l’épingler ici.</div>';return;}
-  el.innerHTML='<div class="an-grid">'+list.map(a=>`
-    <div class="an-card">
-      <div class="an-head">
-        <div class="an-title">${a.source||'Séance'}</div>
-        <div class="an-sub">${a.interval||''}</div>
-      </div>
-      <div class="an-stats">
-        <div class="an-stat"><div class="an-stat-val">${a.time||'—'}</div><div class="an-stat-lab">Temps</div></div>
-        <div class="an-stat"><div class="an-stat-val">${a.distance||'—'}</div><div class="an-stat-lab">Distance</div></div>
-        <div class="an-stat"><div class="an-stat-val">${a.pace||'—'}</div><div class="an-stat-lab">Allure</div></div>
-      </div>
-      ${(a.charts&&a.charts.length)?'<div class="an-charts">'+a.charts.map(c=>'<span class="an-chart-tag">'+c+'</span>').join('')+'</div>':''}
-      <div class="an-foot">
-        <span class="an-date">${a.date?new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):''}</span>
-        <button type="button" class="an-del" onclick="deleteAnalysis(${a.id})">Supprimer</button>
-      </div>
-    </div>`).join('')+'</div>';
+  const rows=list.map(a=>`
+    <tr>
+      <td><div class="an-name">${a.source||'Séance'}</div><div class="an-interval">${a.interval||''}</div></td>
+      <td class="an-num">${a.time||'—'}</td>
+      <td class="an-num">${a.distance||'—'}</td>
+      <td class="an-num">${a.pace||'—'}</td>
+      <td>${(a.charts&&a.charts.length)?'<div class="an-charts">'+a.charts.map(c=>'<span class="an-chart-tag">'+c+'</span>').join('')+'</div>':'<span class="an-none">—</span>'}</td>
+      <td class="an-date">${a.date?new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):''}</td>
+      <td><button type="button" class="an-del" onclick="deleteAnalysis(${a.id})">Supprimer</button></td>
+    </tr>`).join('');
+  el.innerHTML='<div class="an-wrap"><div class="tbl-wrap"><table><thead><tr>'
+    +'<th>Course</th><th>Temps</th><th>Distance</th><th>Allure</th><th>Graphiques</th><th>Date</th><th></th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 function updRecord(id,skipSave){
   const r=REC_DISTS.find(x=>x.id===id);if(!r)return;
