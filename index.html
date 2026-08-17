@@ -6848,7 +6848,7 @@ async function cloudPush(manual){
   try{ await cloudPushSpaces(); }catch(e){}
 }
 // Envoi auto des données de chaque athlète (ayant un email) vers son espace client
-const ESPACE_URL='https://jrm-92.github.io/redlab/espace.html';
+const ESPACE_URL='https://coach.reding-running.fr/espace.html';
 // Upsert vers athlete_spaces via le client principal authentifié (jeton rafraîchi) :
 // coach_id = ID de la session courante = auth.uid(), donc la RLS « coach_id = auth.uid() » passe.
 async function _spacesUpsert(email,doc,pseudo){
