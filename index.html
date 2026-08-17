@@ -1904,7 +1904,7 @@ table.lm-laps tbody tr{cursor:pointer}
               <div class="db-section-ico">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <div class="db-section-title" id="db-pred-title">Plages de performance</div>
+              <div class="db-section-title" id="db-pred-title">Potentiel de performance</div>
               <div class="db-section-badge" id="db-pred-badge">Follador 2022</div>
             </div>
             <div id="db-cs"></div>
@@ -2814,7 +2814,7 @@ function bldZbar(slo,shi){
 function renderCSPredictions(){
   const box=document.getElementById('db-cs');
   const titleEl=document.getElementById('db-pred-title');
-  if(titleEl) titleEl.textContent='Plages de performance';
+  if(titleEl) titleEl.textContent='Potentiel de performance';
   box.innerHTML='<div id="pred-cards"></div>';
   renderPredCards();
 }
@@ -2836,7 +2836,7 @@ function buildRaces(){
     // Course à venir : caler la carte sur le chrono visé (objectif)
     if(goal.id===r.id && goal.t){ return Math.min(Math.max(Math.round(goal.t/(r.d/1000)),r.lo),r.hi); }
     let tSec;
-    // Calé sur les Plages de performance : médiane de perfRange (même modèle, mêmes coefficients)
+    // Calé sur le Potentiel de performance : médiane de perfRange (même modèle, mêmes coefficients)
     const pr=(typeof PRED_RC!=='undefined')?PRED_RC.find(x=>x.id===r.id):null;
     if(pr&&(csKmh||vma)){
       tSec=perfRange(pr,{vma:vma,csKmh:csKmh||null,dp:dp||0}).tMed;
@@ -4253,7 +4253,7 @@ function libExtrapolHTML(){
   const c5=card('5 km','#3B82F6',[
     '<b>Une course r\u00e9cente</b> convertie (Riegel, exposant 1,06) : entre distances proches, les \u00e9quivalences sont tr\u00e8s fiables. Ex : 10 km \u00f7 2,085 \u2248 5 km \u00b7 3 km \u00d7 1,72 \u2248 5 km.'
       +row(srcSel('5k',[[3000,'3 000 m'],[10000,'10 km']])+tIn('ext-t1-5k','5k')+'\u2192 '+out('ext-o1-5k')),
-    '<b>La VC \u00d7 100\u2013105 %</b> : le 5 km se court au-dessus de la VC en puisant dans le D\u2032 \u2014 d\u2019o\u00f9 le calcul t = (D \u2212 D\u2032) \u00f7 VC des plages de performance du Dashboard (Jones &amp; Vanhatalo, 2017). Fiable si les tests datent de moins de 6\u20138 semaines.',
+    '<b>La VC \u00d7 100\u2013105 %</b> : le 5 km se court au-dessus de la VC en puisant dans le D\u2032 \u2014 d\u2019o\u00f9 le calcul t = (D \u2212 D\u2032) \u00f7 VC du potentiel de performance du Dashboard (Jones &amp; Vanhatalo, 2017). Fiable si les tests datent de moins de 6\u20138 semaines.',
     '<b>S\u00e9ance repère</b> : 2 \u00d7 2000 m \u00e0 l\u2019allure cible (r\u00e9cup 3\u20134\u2019) pass\u00e9s confortablement en fin de pr\u00e9pa \u2192 l\u2019objectif est cr\u00e9dible.'
   ],'Rep\u00e8re : le 5 km se court \u00e0 \u2248 93\u201397 % de VMA (coureurs 15\u201325 min).<br><b>Strat\u00e9gie de course :</b> sur 32 records du monde du 5000 m, le 1er et le dernier km sont les plus rapides \u2014 tout le milieu se court \u00e0 allure r\u00e9guli\u00e8re. Ne pas c\u00e9der aux \u00e0-coups des km 2\u20134 (Tucker, Lambert &amp; Noakes, 2006).');
   const c10=card('10 km','#FF6B1A',[
@@ -4265,7 +4265,7 @@ function libExtrapolHTML(){
   const csm=card('Semi-marathon','#10B981',[
     '<b>Un 10 km r\u00e9cent \u00d7 \u2248 2,21</b> (Riegel) : encore bien calibr\u00e9 jusqu\u2019au semi \u2014 c\u2019est au-del\u00e0 que \u00e7a se g\u00e2te (Vickers &amp; Vertosick, 2016).'
       +row('<span style="font-size:13px;color:var(--muted2)">Temps 10 km</span>'+tIn('ext-t1-semi','semi')+'\u2192 '+out('ext-o1-semi')),
-    '<b>La VC \u00d7 92\u201396 %</b> (Follador et al., 2022) : gros volume hebdo \u2192 haut de fourchette ; volume modeste \u2192 bas. C\u2019est l\u2019approche des plages de performance du Dashboard.',
+    '<b>La VC \u00d7 92\u201396 %</b> (Follador et al., 2022) : gros volume hebdo \u2192 haut de fourchette ; volume modeste \u2192 bas. C\u2019est l\u2019approche du potentiel de performance du Dashboard.',
     '<b>Sortie longue sp\u00e9cifique</b> : 12\u201314 km \u00e0 l\u2019allure cible en fin de sortie longue, sans d\u00e9rive cardiaque (d\u00e9couplage FC/allure &lt; 5 %) \u2192 l\u2019objectif tient la route.'
   ],'Rep\u00e8re : le semi se court \u00e0 \u2248 84\u201388 % de VMA.<br><b>Strat\u00e9gie de course :</b> aux Mondiaux de semi (838 athl\u00e8tes analys\u00e9s), les meilleurs tiennent une allure constante du 5\u1d49 au 15\u1d49 km, et courir en groupe prot\u00e8ge de la baisse d\u2019allure \u2014 les l\u00e2ch\u00e9s ralentissent jusqu\u2019\u00e0 ~91 % de leur vitesse initiale (Hanley, 2015).');
   const cma=card('Marathon','#8B5CF6',[
@@ -4280,7 +4280,7 @@ function libExtrapolHTML(){
     +'Vickers A.J. &amp; Vertosick E.A. (2016). \u00ab An empirical study of race times in recreational endurance runners \u00bb, <i>BMC Sports Science, Medicine &amp; Rehabilitation</i><br>'
     +'Smyth B. &amp; Muniz-Pumares D. (2020). \u00ab Calculation of Critical Speed from Raw Training Data in Recreational Marathon Runners \u00bb, <i>Medicine &amp; Science in Sports &amp; Exercise</i><br>'
     +'Smyth B. et al. (2022). \u00ab Decoupling of Internal and External Workload During a Marathon \u00bb, <i>Sports Medicine</i><br>'
-    +'Follador L. et al. (2022) \u2014 fractions de VC tenables sur route (mod\u00e8le des plages de performance de l\u2019outil)<br>'
+    +'Follador L. et al. (2022) \u2014 fractions de VC tenables sur route (mod\u00e8le du potentiel de performance de l\u2019outil)<br>'
     +'Jones A.M. &amp; Vanhatalo A. (2017). \u00ab The \u2018Critical Power\u2019 Concept \u00bb, <i>Sports Medicine</i> \u2014 validit\u00e9 du mod\u00e8le CS/D\u2032 (efforts ~2\u201315 min)<br>'
     +'Tucker R., Lambert M.I. &amp; Noakes T.D. (2006). \u00ab An Analysis of Pacing Strategies During Men\u2019s World-Record Performances in Track Athletics \u00bb, <i>Int. J. Sports Physiology &amp; Performance</i><br>'
     +'Hanley B. (2015). \u00ab Pacing profiles and pack running at the IAAF World Half Marathon Championships \u00bb, <i>Journal of Sports Sciences</i><br>'
@@ -4392,7 +4392,7 @@ function renderLibrary(){
   renderLibCards();
 }
 
-/* ══ MODÈLE CS · D′ (plages de performance) ══ */
+/* ══ MODÈLE CS · D′ (potentiel de performance) ══ */
 /* Modèle 2 paramètres (Monod/Morton, Jones et al. 2010) : D = CS·t + D′  →  t = (D − D′)/CS
    Domaine sévère (5K/10K) : hyperbole pure, variation CS ±1% et D′ ±20%.
    Semi/Marathon : correction de durabilité (fraction de CS validée par la littérature),
