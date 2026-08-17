@@ -469,6 +469,17 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 @media(max-width:860px){.rec-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 @media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+.an-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.an-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.an-img{display:block;width:100%;height:120px;object-fit:cover;object-position:top;background:var(--bg2);cursor:pointer}
+.an-body{padding:12px 14px}
+.an-title{font-size:14px;font-weight:800;color:var(--text)}
+.an-sub{font-size:12px;color:var(--muted2);margin-top:3px}
+.an-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.an-date{font-size:11px;color:var(--muted2)}
+.an-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:2px 4px}
+.an-del:hover{color:#F87171}
+.an-empty{color:var(--muted2);font-size:13.5px;padding:20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
 .rec-name{font-size:20px;font-weight:900;text-transform:uppercase;line-height:1}
 .rec-dist{font-size:12px;font-weight:600;color:var(--muted2);margin-top:3px}
@@ -1289,6 +1300,8 @@ body.rl-locked .app,body.rl-locked .mobile-header{display:none}
 .lm-head{padding:18px var(--pad) 0}
 .lm-head-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-bottom:10px}
 .lm-head h2{font-size:26px;font-weight:500;margin:0 0 2px;letter-spacing:-.2px}
+#lm-ovName{cursor:text;border-bottom:1px dashed transparent;outline:none;transition:border-color .15s}
+#lm-ovName:hover,#lm-ovName:focus{border-color:var(--muted)}
 .lm-head-sub{color:var(--blue);font-size:13.5px;margin-bottom:2px}
 
 .lm-kpis{padding:8px var(--pad) 0;display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
@@ -1386,6 +1399,7 @@ table.lm-laps tbody tr{cursor:pointer}
 .lm-chart-holder{position:relative;height:190px;margin-top:6px;touch-action:pan-y}
 .lm-chart-holder canvas{width:100%;height:100%;display:block}
 .lm-chart-x{text-align:center;color:var(--muted);font-size:12px;margin-top:6px}
+.lm-chart-pick{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#3d9bfa}
 .lm-chart-key{display:flex;gap:16px;justify-content:center;margin-top:8px;color:#dfe3e6;font-size:12.5px}
 .lm-chart-key span{display:flex;align-items:center;gap:6px}
 .lm-key-dot{width:9px;height:9px;border-radius:50%}
@@ -1943,6 +1957,16 @@ table.lm-laps tbody tr{cursor:pointer}
             <div id="db-records"></div>
           </div>
 
+          <!-- Analyses (graphiques enregistrés depuis le lecteur FIT/TCX) -->
+          <div class="db-section" id="db-analyses-section">
+            <div class="db-section-hd">
+              <div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></div>
+              <div class="db-section-title">Analyses</div>
+              <div class="db-section-badge">Lecteur montre</div>
+            </div>
+            <div id="db-analyses"></div>
+          </div>
+
           <!-- Historique des courses -->
           <div class="db-section" id="db-history-section">
             <div class="db-section-hd">
@@ -2078,7 +2102,7 @@ table.lm-laps tbody tr{cursor:pointer}
         <div>
           <div class="lm-head">
             <div class="lm-head-meta"><span id="lm-ovDate"></span></div>
-            <h2 id="lm-ovName">Activité</h2>
+            <h2 id="lm-ovName" contenteditable="true" spellcheck="false" title="Cliquer pour renommer">Activité</h2>
             <div class="lm-head-sub" id="lm-ovDevice"></div>
           </div>
           <div class="lm-kpis" id="lm-ovKpis"></div>
@@ -2108,7 +2132,12 @@ table.lm-laps tbody tr{cursor:pointer}
         <button aria-pressed="true"  data-axis="t">Temps</button>
         <button aria-pressed="false" data-axis="d">Distance</button>
       </div>
+      <div class="lm-chips" id="lm-chartLapChips"></div>
       <div class="lm-charts-grid" id="lm-chartsHost"></div>
+      <div class="lm-actions" id="lm-chartsSaveBar" style="display:none;align-items:center">
+        <span id="lm-chartsSaveCount" style="font-size:13px;color:var(--muted);flex:1"></span>
+        <button class="lm-act" id="lm-btnAddProfile" style="flex:0 0 auto">Ajouter au profil</button>
+      </div>
     </section>
   </div>
 </div>
@@ -2175,7 +2204,7 @@ function go(id){
 }
 
 /* ══ STATE ══ */
-const S={mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null};
+const S={mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,analyses:[]};
 
 /* ══ MODE ══ */
 function setMode(m){
@@ -2530,7 +2559,7 @@ function loadLS(){
 function resetAll(){
   if(!confirm('Réinitialiser le profil en cours ? Les données non enregistrées du dashboard seront effacées (les athlètes sauvegardés sont conservés).'))return;
   try{localStorage.removeItem(LS_KEY);}catch(e){}
-  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,csPts:null,raceHistory:[]});
+  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,csPts:null,raceHistory:[],analyses:[]});
   tmiSec=null;
   raceRef={id:'',mm:'',ss:''};
   const ids=['pseudo-inp','vma-inp','fc-max','fc-rest'];
@@ -2568,6 +2597,7 @@ function renderDashboard(){
   renderGoalSection();
   renderDashPlan();
   renderRecords();
+  renderDashAnalyses();
   buildRaces();
   renderChart();
   renderRaceHistory();
@@ -3046,6 +3076,23 @@ function renderRecords(){
   el.innerHTML=`<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
   shown.forEach(r=>updRecord(r.id,true));
 }
+function renderDashAnalyses(){
+  const el=document.getElementById('db-analyses');if(!el)return;
+  const list=S.analyses||[];
+  if(!list.length){el.innerHTML='<div class="an-empty">Aucune analyse enregistrée. Depuis l’onglet Montre, ouvre un fichier .FIT/.TCX, choisis un intervalle et clique sur « Ajouter au profil » pour épingler un graphique ici.</div>';return;}
+  el.innerHTML='<div class="an-grid">'+list.map(a=>`
+    <div class="an-card">
+      <img class="an-img" src="${a.img}" alt="${(a.title||'Analyse').replace(/"/g,'&quot;')}" onclick="window.open(this.src,'_blank')">
+      <div class="an-body">
+        <div class="an-title">${a.title||'Analyse'}</div>
+        <div class="an-sub">${[a.interval,a.source].filter(Boolean).join(' · ')}</div>
+        <div class="an-foot">
+          <span class="an-date">${a.date?new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):''}</span>
+          <button type="button" class="an-del" onclick="deleteAnalysis(${a.id})">Supprimer</button>
+        </div>
+      </div>
+    </div>`).join('')+'</div>';
+}
 function updRecord(id,skipSave){
   const r=REC_DISTS.find(x=>x.id===id);if(!r)return;
   const hEl=document.getElementById('rec-hh-'+id);
@@ -3380,6 +3427,7 @@ function saveCurrentAthlete(){
     goal:S.goal||null,
     csPts:S.csPts||null,
     plan:S.plan||null,
+    analyses:S.analyses||[],
   };
   // Historique de progression
   let hist=(existing>=0 && Array.isArray(athletes[existing].history))?athletes[existing].history.slice():[];
@@ -3410,6 +3458,31 @@ function deleteAthlete(id){
   renderAthletes();
 }
 
+// Ajoute une analyse (graphique du lecteur FIT/TCX) au profil d'un athlète, sans toucher au profil actif sauf s'il s'agit du même.
+function addAnalysisToAthlete(athleteId,entry){
+  const athletes=getAthletes();
+  const idx=athletes.findIndex(a=>a.id===athleteId);
+  if(idx<0)return false;
+  if(!Array.isArray(athletes[idx].analyses))athletes[idx].analyses=[];
+  athletes[idx].analyses.unshift(entry);
+  _saveAthletes(athletes);
+  if(S.pseudo&&S.pseudo===athletes[idx].pseudo){
+    S.analyses=athletes[idx].analyses;
+    if(typeof renderDashAnalyses==='function')renderDashAnalyses();
+  }
+  return true;
+}
+function deleteAnalysis(analysisId){
+  if(!confirm('Supprimer cette analyse ?'))return;
+  S.analyses=(S.analyses||[]).filter(a=>a.id!==analysisId);
+  if(S.pseudo){
+    const athletes=getAthletes();
+    const idx=athletes.findIndex(a=>a.pseudo===S.pseudo);
+    if(idx>=0){athletes[idx].analyses=S.analyses;_saveAthletes(athletes);}
+  }
+  renderDashAnalyses();
+}
+
 function loadAthlete(id){
   const ath=getAthletes().find(a=>a.id===id);
   if(!ath) return;
@@ -3425,6 +3498,7 @@ function loadAthlete(id){
     goal:ath.goal||{id:'',t:null,date:''},
     csPts:ath.csPts||null,
     plan:ath.plan||null,
+    analyses:ath.analyses||[],
   });
   _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
   document.getElementById('pseudo-inp').value=ath.pseudo;
@@ -7022,6 +7096,12 @@ window.__rlCtx = {
     if (typeof S !== 'undefined' && S.fcMax) return S.fcMax;
     var el = document.getElementById('fc-max');
     return (el && +el.value) ? +el.value : null;
+  },
+  athletes: function(){
+    return (typeof getAthletes === 'function') ? getAthletes() : [];
+  },
+  addAnalysis: function(athleteId, entry){
+    return (typeof addAnalysisToAthlete === 'function') ? addAnalysisToAthlete(athleteId, entry) : false;
   }
 };
 </script>
@@ -7767,6 +7847,7 @@ const MapView = {
 const App = {
   activities: [], A: null, axis: 't', cursor: null, charts: [],
   axisValues: [], lapFilter: 'Tout', expanded: false, selLap: null, fcMax: null,
+  selectedCharts: new Set(),
   fmtAxis(v) { return this.axis === 't' ? fmtClock(v) : nf(v / 1000, 2) + ' km'; }
 };
 
@@ -7776,14 +7857,18 @@ function setCursor(i) {
   MapView.cursor(i == null ? null : App.A.samples[i]);
 }
 
+function defaultActivityName(A) {
+  const hour = isFinite(A.t0) ? new Date(A.t0).getHours() : 12;
+  const moment = hour < 12 ? 'du matin' : hour < 18 ? "de l'après-midi" : 'du soir';
+  return `${A.raw.sport} ${moment}`;
+}
+
 /* ---------------------- Aperçu ---------------------- */
 function renderOverview() {
   const A = App.A, r = A.raw;
   $('#lm-sportTitle').textContent = r.sport;
   $('#lm-ovDate').textContent = isFinite(A.t0) ? fmtDate(A.t0) : '';
-  const hour = isFinite(A.t0) ? new Date(A.t0).getHours() : 12;
-  const moment = hour < 12 ? 'du matin' : hour < 18 ? "de l'après-midi" : 'du soir';
-  $('#lm-ovName').textContent = r.notes || `${r.sport} ${moment}`;
+  $('#lm-ovName').textContent = r.notes || defaultActivityName(A);
   const dev = [r.device, r.sub].filter(Boolean).join(' · ');
   $('#lm-ovDevice').textContent = dev;
   $('#lm-ovDevice').hidden = !dev;
@@ -7995,63 +8080,125 @@ function paceStep(lo, hi) {
   const rough = (hi - lo) / 4;
   return [10, 15, 20, 30, 60, 100, 120, 180, 300, 600].find(s => s >= rough) || 900;
 }
+function statsFor(samples) {
+  const finite = a => a.filter(v => v != null && isFinite(v));
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const hrs = finite(samples.map(s => s.hr));
+  const cads = finite(samples.map(s => s.cad)).filter(v => v > 40);
+  const pws = finite(samples.map(s => s.pw));
+  const eles = finite(samples.map(s => s.ele));
+  const speeds = finite(samples.map(s => s.speed));
+  let gain = 0, loss = 0;
+  for (let i = 1; i < eles.length; i++) { const d = eles[i] - eles[i - 1]; if (d > 0) gain += d; else loss -= d; }
+  const t0 = samples.length ? samples[0].t : 0, t1 = samples.length ? samples[samples.length - 1].t : 0;
+  const d0 = samples.length ? samples[0].d : 0, d1 = samples.length ? samples[samples.length - 1].d : 0;
+  const dur = t1 - t0, dist = d1 - d0;
+  return {
+    avgSpeed: dur ? dist / dur : null,
+    bestSpeed: speeds.length ? Math.max(...speeds) : null,
+    avgHr: avg(hrs), maxHr: hrs.length ? Math.max(...hrs) : null,
+    avgCad: avg(cads), maxCad: cads.length ? Math.max(...cads) : null,
+    avgPw: avg(pws), maxPw: pws.length ? Math.max(...pws) : null,
+    avgVo: avg(finite(samples.map(s => s.vo))),
+    avgGct: avg(finite(samples.map(s => s.gct))),
+    avgVr: avg(finite(samples.map(s => s.vr))),
+    avgSl: avg(finite(samples.map(s => s.sl))),
+    gain, loss
+  };
+}
+
+function chartIntervalLabel() {
+  if (App.selLap == null) return 'Séance complète';
+  const l = App.A.laps.find(x => x.i === App.selLap);
+  return l ? `Tour ${l.num ?? (l.i + 1)} · ${l.type}` : 'Séance complète';
+}
+
+function renderChartLapChips() {
+  const A = App.A;
+  const host = $('#lm-chartLapChips');
+  if (!host) return;
+  if (A.laps.length < 2) { host.innerHTML = ''; return; }
+  const items = [{ i: null, label: 'Toute la séance' }]
+    .concat(A.laps.map(l => ({ i: l.i, label: `Tour ${l.num ?? (l.i + 1)} · ${l.type}` })));
+  host.innerHTML = items.map(it =>
+    `<button class="lm-chip" data-lap="${it.i === null ? '' : it.i}" aria-pressed="${App.selLap === it.i}">${it.label}</button>`).join('');
+  $$('#lm-chartLapChips .lm-chip').forEach(c => c.onclick = () => {
+    const v = c.dataset.lap;
+    App.selLap = v === '' ? null : +v;
+    MapView.highlightLap(App.selLap, A);
+    renderCharts();
+  });
+}
+
+function updateChartsSaveBar() {
+  const bar = $('#lm-chartsSaveBar'); if (!bar) return;
+  const n = App.selectedCharts.size;
+  bar.style.display = n ? 'flex' : 'none';
+  const cnt = $('#lm-chartsSaveCount');
+  if (cnt) cnt.textContent = n + ' graphique' + (n > 1 ? 's' : '') + ' sélectionné' + (n > 1 ? 's' : '') + ' — ' + chartIntervalLabel();
+}
+
 function renderCharts() {
   const A = App.A;
   App.charts = [];
+  renderChartLapChips();
   const host = $('#lm-chartsHost'); host.innerHTML = '';
-  App.axisValues = A.samples.map(s => App.axis === 't' ? s.t : s.d);
+  const samples = App.selLap != null ? A.samples.filter(s => s.lap === App.selLap) : A.samples;
+  const t0 = samples.length ? samples[0].t : 0, d0 = samples.length ? samples[0].d : 0;
+  App.axisValues = samples.map(s => (App.axis === 't' ? s.t - t0 : s.d - d0));
+  const st = statsFor(samples);
 
   const defs = [];
-  const paces = A.samples.map(s => s.pace).filter(v => v);
+  const paces = samples.map(s => s.pace).filter(v => v);
   if (paces.length) {
     const lo = Math.min(...paces), hi = Math.min(Math.max(...paces), Math.min(...paces) * 3.2 + 60);
     defs.push({
       key: 'pace', title: 'Allure', color: '#3d9bfa',
       fillFrom: 'rgba(61,155,250,.40)', fillTo: 'rgba(61,155,250,.10)',
-      values: A.samples.map(s => s.pace), invert: true, unit: '/km',
+      values: samples.map(s => s.pace), invert: true, unit: '/km',
       fmtY: fmtPace, step: paceStep(lo, hi), clampHigh: hi,
-      stats: [[fmtPace(A.avgSpeed ? 1000 / A.avgSpeed : NaN), '/km', 'Moyenne'],
-              [fmtPace(A.bestSpeed ? 1000 / A.bestSpeed : NaN), '/km', 'Meilleure']]
+      stats: [[fmtPace(st.avgSpeed ? 1000 / st.avgSpeed : NaN), '/km', 'Moyenne'],
+              [fmtPace(st.bestSpeed ? 1000 / st.bestSpeed : NaN), '/km', 'Meilleure']]
     });
   }
   if (A.hasHr) defs.push({
     key: 'hr', title: 'Fréquence cardiaque', color: '#ef3e36',
     fillFrom: 'rgba(239,62,54,.30)', fillTo: 'rgba(239,62,54,.92)',
-    values: A.samples.map(s => s.hr), unit: 'bpm', fmtY: v => nf(v),
-    stats: [[nf(A.avgHr), 'bpm', 'Moyenne'], [nf(A.maxHr), 'bpm', 'Maximum']]
+    values: samples.map(s => s.hr), unit: 'bpm', fmtY: v => nf(v),
+    stats: [[nf(st.avgHr), 'bpm', 'Moyenne'], [nf(st.maxHr), 'bpm', 'Maximum']]
   });
   if (A.hasEle) defs.push({
     key: 'ele', title: 'Altitude', color: '#8aa85a',
     fillFrom: 'rgba(138,168,90,.10)', fillTo: 'rgba(138,168,90,.55)',
-    values: A.samples.map(s => s.ele), unit: 'm', fmtY: v => nf(v),
-    stats: [[nf(A.gain), 'm', 'Dénivelé +'], [nf(A.loss), 'm', 'Dénivelé −']]
+    values: samples.map(s => s.ele), unit: 'm', fmtY: v => nf(v),
+    stats: [[nf(st.gain), 'm', 'Dénivelé +'], [nf(st.loss), 'm', 'Dénivelé −']]
   });
   if (A.hasCad) defs.push({
     key: 'cad', title: 'Cadence', color: '#a274e0',
     fillFrom: 'rgba(162,116,224,.10)', fillTo: 'rgba(162,116,224,.55)',
-    values: A.samples.map(s => s.cad != null && s.cad > 40 ? s.cad : null),
+    values: samples.map(s => s.cad != null && s.cad > 40 ? s.cad : null),
     unit: 'spm', fmtY: v => nf(v),
-    stats: [[nf(A.avgCad), 'spm', 'Moyenne'], [nf(A.maxCad), 'spm', 'Maximum']]
+    stats: [[nf(st.avgCad), 'spm', 'Moyenne'], [nf(st.maxCad), 'spm', 'Maximum']]
   });
-  if (A.hasDyn && A.samples.some(s => s.gct != null)) defs.push({
+  if (A.hasDyn && samples.some(s => s.gct != null)) defs.push({
     key: 'gct', title: 'Temps de contact au sol', color: '#2fb6a8',
     fillFrom: 'rgba(47,182,168,.10)', fillTo: 'rgba(47,182,168,.55)',
-    values: A.samples.map(s => s.gct), unit: 'ms', fmtY: v => nf(v),
-    stats: [[nf(A.avgGct), 'ms', 'Moyenne'], [nf(A.avgVr, 1), '%', 'Ratio vertical']]
+    values: samples.map(s => s.gct), unit: 'ms', fmtY: v => nf(v),
+    stats: [[nf(st.avgGct), 'ms', 'Moyenne'], [nf(st.avgVr, 1), '%', 'Ratio vertical']]
   });
-  if (A.hasDyn && A.samples.some(s => s.vo != null)) defs.push({
+  if (A.hasDyn && samples.some(s => s.vo != null)) defs.push({
     key: 'vo', title: 'Oscillation verticale', color: '#e07ea8',
     fillFrom: 'rgba(224,126,168,.10)', fillTo: 'rgba(224,126,168,.55)',
-    values: A.samples.map(s => s.vo != null ? s.vo / 10 : null), unit: 'cm',
+    values: samples.map(s => s.vo != null ? s.vo / 10 : null), unit: 'cm',
     fmtY: v => nf(v, 1),
-    stats: [[nf(A.avgVo / 10, 1), 'cm', 'Moyenne'],
-            [A.avgSl ? nf(A.avgSl, 2) : '--', 'm', 'Longueur de foulée']]
+    stats: [[nf(st.avgVo / 10, 1), 'cm', 'Moyenne'],
+            [st.avgSl ? nf(st.avgSl, 2) : '--', 'm', 'Longueur de foulée']]
   });
   if (A.hasPw) defs.push({
     key: 'pw', title: 'Puissance', color: '#f0a03c',
     fillFrom: 'rgba(240,160,60,.10)', fillTo: 'rgba(240,160,60,.55)',
-    values: A.samples.map(s => s.pw), unit: 'W', fmtY: v => nf(v),
-    stats: [[nf(A.avgPw), 'W', 'Moyenne'], [nf(A.maxPw), 'W', 'Maximum']]
+    values: samples.map(s => s.pw), unit: 'W', fmtY: v => nf(v),
+    stats: [[nf(st.avgPw), 'W', 'Moyenne'], [nf(st.maxPw), 'W', 'Maximum']]
   });
 
   defs.forEach(d => {
@@ -8059,7 +8206,11 @@ function renderCharts() {
     card.className = 'lm-card';
     card.innerHTML = `
       <div class="lm-card-head" role="button" tabindex="0" aria-expanded="true">
-        <h3>${d.title}</h3><span class="lm-caret">▼</span>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <input type="checkbox" class="lm-chart-pick" data-chart="${d.key}" onclick="event.stopPropagation()" ${App.selectedCharts.has(d.key) ? 'checked' : ''}>
+          <h3>${d.title}</h3>
+        </div>
+        <span class="lm-caret">▼</span>
       </div>
       <div class="lm-card-body">
         <div class="lm-card-stats">
@@ -8071,6 +8222,7 @@ function renderCharts() {
       </div>`;
     host.appendChild(card);
     const ch = new Chart(card.querySelector('.lm-chart-holder'), d);
+    ch.title = d.title; ch.key = d.key;
     App.charts.push(ch);
     const head = card.querySelector('.lm-card-head');
     const toggle = () => {
@@ -8080,10 +8232,16 @@ function renderCharts() {
     };
     head.onclick = toggle;
     head.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+    const cb = card.querySelector('.lm-chart-pick');
+    cb.onchange = () => {
+      if (cb.checked) App.selectedCharts.add(d.key); else App.selectedCharts.delete(d.key);
+      updateChartsSaveBar();
+    };
   });
 
   if (!defs.length) host.innerHTML = `<div class="lm-empty-tab">Ce fichier ne contient aucune donnée à tracer.</div>`;
   requestAnimationFrame(() => App.charts.forEach(c => c.draw()));
+  updateChartsSaveBar();
 }
 
 /* ---------------------- navigation ---------------------- */
@@ -8099,7 +8257,7 @@ function go(tab) {
 function load(rawAct) {
   App.A = buildActivity(rawAct);
   App.cursor = null; App.selLap = null; App.fcMax = (window.__rlCtx && window.__rlCtx.fcMax && window.__rlCtx.fcMax()) || null;
-  App.lapFilter = 'Tout';
+  App.lapFilter = 'Tout'; App.selectedCharts = new Set();
   renderOverview(); renderStats(); renderLaps(); renderCharts();
   $('#lm-start').hidden = true; $('#lm-app').hidden = false;
   go('apercu');
@@ -8185,6 +8343,48 @@ function download(name, text, mime) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/* ---------------------- ajout au profil d'un athlète ---------------------- */
+function chartsAddToProfileOpen() {
+  const ex = document.getElementById('lm-ath-modal'); if (ex) { ex.remove(); return; }
+  const list = (window.__rlCtx && window.__rlCtx.athletes) ? window.__rlCtx.athletes() : [];
+  const host = document.createElement('div'); host.id = 'lm-ath-modal'; host.className = 'pl-modal';
+  host.onclick = e => { if (e.target === host) host.remove(); };
+  const items = list.length ? list.map(a => {
+    const main = (a.mode === 'tests' && a.csKmh) ? ('VC ' + a.csKmh.toFixed(1)) : ('VMA ' + (a.vma ? a.vma.toFixed(1) : '—'));
+    return `<button type="button" class="ath-it" data-ath="${a.id}"><span class="ath-it-av">${String(a.pseudo).slice(0, 2).toUpperCase()}</span><span class="ath-it-tx"><b>${String(a.pseudo).replace(/</g, '&lt;')}</b><span>${main} km/h</span></span></button>`;
+  }).join('') : '<div style="font-size:13px;color:var(--muted);padding:8px 0;line-height:1.6">Aucun athlète enregistré dans RedLab.</div>';
+  host.innerHTML = `<div class="pl-modal-box" style="max-width:400px"><div class="pl-modal-top"><b>Ajouter au profil de…</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="document.getElementById('lm-ath-modal').remove()">×</button></div>`
+    + `<div style="max-height:60vh;overflow:auto">${items}</div></div>`;
+  document.body.appendChild(host);
+  $$('#lm-ath-modal [data-ath]').forEach(b => b.onclick = () => {
+    chartsSaveToAthlete(+b.dataset.ath);
+    host.remove();
+  });
+}
+function chartsSaveToAthlete(athleteId) {
+  const interval = chartIntervalLabel();
+  const source = $('#lm-ovName') ? $('#lm-ovName').textContent.trim() : '';
+  let n = 0;
+  App.charts.forEach(ch => {
+    if (!App.selectedCharts.has(ch.key)) return;
+    const entry = {
+      id: Date.now() + n,
+      date: new Date().toISOString(),
+      title: ch.title,
+      interval, source,
+      img: ch.cv.toDataURL('image/png')
+    };
+    if (window.__rlCtx && window.__rlCtx.addAnalysis) window.__rlCtx.addAnalysis(athleteId, entry);
+    n++;
+  });
+  const btn = $('#lm-btnAddProfile');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = n + ' graphique' + (n > 1 ? 's' : '') + ' ajouté' + (n > 1 ? 's' : '') + ' ✓';
+    setTimeout(() => { btn.textContent = orig; }, 2200);
+  }
+}
+
 /* ---------------------- écouteurs ---------------------- */
 $('#lm-btnPick').onclick = () => $('#lm-fileInput').click();
 $('#lm-btnOther').onclick = () => $('#lm-fileInput').click();
@@ -8192,6 +8392,14 @@ $('#lm-fileInput').onchange = e => openFile(e.target.files[0]);
 $('#lm-btnBack').onclick = () => { $('#lm-app').hidden = true; $('#lm-start').hidden = false; };
 $$('#lm-tabs .lm-tab').forEach(b => b.onclick = () => go(b.dataset.tab));
 $('#lm-btnExpand').onclick = () => { App.expanded = !App.expanded; renderLaps(); };
+$('#lm-btnAddProfile').onclick = () => chartsAddToProfileOpen();
+$('#lm-ovName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+$('#lm-ovName').addEventListener('blur', e => {
+  if (!App.A) return;
+  const val = e.target.textContent.replace(/\s+/g, ' ').trim();
+  App.A.raw.notes = val || null;
+  e.target.textContent = val || defaultActivityName(App.A);
+});
 $$('#lm-axisSeg button').forEach(b => b.onclick = () => {
   App.axis = b.dataset.axis;
   $$('#lm-axisSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
