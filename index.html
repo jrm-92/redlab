@@ -4885,7 +4885,7 @@ function renderGoalSection(){
 const GOAL_DIST={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
 const GOAL_LBL={'5k':'5 km','10k':'10 km','semi':'Semi-marathon','mara':'Marathon'};
 function goalEdit(){window._goalEdit=true;renderGoalSection();}
-function goalDone(){window._goalEdit=false;renderGoalSection();}
+function goalDone(){window._goalEdit=false;renderGoalSection();if(typeof buildRaces==='function')buildRaces();}
 function goalReadout(){
   const box=document.getElementById('goal-readout'); if(!box)return;
   const g=S.goal||{};
