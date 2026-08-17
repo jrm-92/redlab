@@ -954,7 +954,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .gr-right{text-align:right;margin-left:4px}
 .gr-time{font-size:30px;font-weight:900;color:#60A5FA;line-height:1;letter-spacing:-1px}
 .gr-lbl{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
-.gr-edit{width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:transparent;color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}.gr-edit:hover{border-color:var(--orange);color:var(--orange)}.gr-edit svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gr-edit{width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:transparent;color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;margin-left:auto}.gr-edit:hover{border-color:var(--orange);color:var(--orange)}.gr-edit svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gr-link{flex-basis:100%;margin-top:6px;padding-top:11px;border-top:1px solid rgba(59,130,246,0.2)}
 .gr-link a{display:inline-flex;align-items:center;gap:8px;color:#60A5FA;font-size:13.5px;font-weight:700;text-decoration:none}
 .gr-link a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -2662,8 +2662,8 @@ function renderProfile(){
 
   const _ini=(S.pseudo||'?').slice(0,2).toUpperCase();
   const b0=`
-    <div class="ph-block ph-full">
-      <div onclick="athSwitcherOpen()" title="Changer d’athlète" style="display:flex;align-items:center;gap:14px;cursor:pointer">
+    <div class="ph-block ph-full" style="display:flex;align-items:center;gap:14px">
+      <div onclick="athSwitcherOpen()" title="Changer d’athlète" style="display:flex;align-items:center;gap:14px;cursor:pointer;flex:1;min-width:0">
         <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--orange);flex-shrink:0">${_ini}</div>
         <div style="min-width:0">
           <div class="ph-b-lbl" style="display:inline-flex;align-items:center;gap:6px">Athlète <span style="font-size:9px;font-weight:800;color:var(--orange);border:1px solid rgba(255,107,26,0.4);border-radius:4px;padding:1px 5px;letter-spacing:.3px">CHANGER</span></div>
@@ -2671,17 +2671,14 @@ function renderProfile(){
           ${S.testDate?`<div style="font-size:12.5px;color:var(--muted2);margin-top:3px">Profil édité le ${S.testDate}</div>`:''}
         </div>
       </div>
-    </div>`;
-  const bActions=`
-    <div class="ph-block ph-full ph-actions" style="display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;padding-top:14px">
-      <button class="btn-save-athlete" id="btn-save-ath" onclick="saveCurrentAthlete()">
+      <button class="btn-save-athlete ph-actions" id="btn-save-ath" onclick="saveCurrentAthlete()" style="margin-left:auto;flex-shrink:0">
         <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       <span>Enregistrer</span>
       </button>
     </div>`;
   document.getElementById('db-profile').innerHTML=`
     <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
-      ${b0}${b2}${b3vma}${b3}${bActions}
+      ${b0}${b2}${b3vma}${b3}
     </div>
     ${warnHtml}`;
 }
@@ -4911,12 +4908,12 @@ function goalReadout(){
     +'<div class="gr-left">'
     +'<div class="gr-flag"><svg viewBox="0 0 24 24"><path d="M4 4v16"/><path d="M4 5h13l-2 4 2 4H4"/></svg></div>'
     +'<div class="gr-mid"><div class="gr-name">'+nm+'</div>'+(dateStr?'<div class="gr-date">'+dateStr+'</div>':'')+'</div>'
+    +'<button type="button" class="gr-edit" onclick="goalEdit()" title="Modifier"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
     +'</div>'
     +'<div class="gr-main"><div class="gr-lbl">Chrono visé</div><div class="gr-time">'+fHMS(g.t)+'</div>'
     +(pace?'<div class="gr-sub">'+pace+' · '+kmh+'</div>':'<div class="gr-sub">Choisis une distance pour l\u2019allure</div>')+'</div>'
     +'<div class="gr-zone-r">'
     +days
-    +'<button type="button" class="gr-edit" onclick="goalEdit()" title="Modifier"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
     +'</div>'
     +(g.url?(function(){var u=/^https?:\/\//i.test(g.url)?g.url:'https://'+g.url;var host=u.replace(/^https?:\/\//i,'').replace(/\/$/,'');return '<div class="gr-link"><a href="'+u.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'+host+'<svg viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>';})():'')
     +'</div>';
