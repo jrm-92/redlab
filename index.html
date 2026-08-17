@@ -470,12 +470,15 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 @media(max-width:480px){.rec-grid{grid-template-columns:1fr}}
 .rec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
 .an-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.an-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.an-img{display:block;width:100%;height:120px;object-fit:cover;object-position:top;background:var(--bg2);cursor:pointer}
-.an-body{padding:12px 14px}
-.an-title{font-size:14px;font-weight:800;color:var(--text)}
+.an-card{background:var(--card);border:1px solid var(--border);border-radius:14px}
+.an-body{padding:16px}
+.an-title{font-size:15px;font-weight:800;color:var(--text)}
 .an-sub{font-size:12px;color:var(--muted2);margin-top:3px}
-.an-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.an-stats{display:flex;gap:8px;margin-top:14px}
+.an-stat{flex:1;text-align:center;background:var(--bg2);border-radius:8px;padding:9px 4px}
+.an-stat-val{font-size:15px;font-weight:800;color:var(--text)}
+.an-stat-lab{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-top:2px}
+.an-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
 .an-date{font-size:11px;color:var(--muted2)}
 .an-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:2px 4px}
 .an-del:hover{color:#F87171}
@@ -1399,7 +1402,6 @@ table.lm-laps tbody tr{cursor:pointer}
 .lm-chart-holder{position:relative;height:190px;margin-top:6px;touch-action:pan-y}
 .lm-chart-holder canvas{width:100%;height:100%;display:block}
 .lm-chart-x{text-align:center;color:var(--muted);font-size:12px;margin-top:6px}
-.lm-chart-pick{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#3d9bfa}
 .lm-chart-key{display:flex;gap:16px;justify-content:center;margin-top:8px;color:#dfe3e6;font-size:12.5px}
 .lm-chart-key span{display:flex;align-items:center;gap:6px}
 .lm-key-dot{width:9px;height:9px;border-radius:50%}
@@ -2134,7 +2136,7 @@ table.lm-laps tbody tr{cursor:pointer}
       </div>
       <div class="lm-chips" id="lm-chartLapChips"></div>
       <div class="lm-charts-grid" id="lm-chartsHost"></div>
-      <div class="lm-actions" id="lm-chartsSaveBar" style="display:none;align-items:center">
+      <div class="lm-actions" id="lm-chartsSaveBar" style="align-items:center">
         <span id="lm-chartsSaveCount" style="font-size:13px;color:var(--muted);flex:1"></span>
         <button class="lm-act" id="lm-btnAddProfile" style="flex:0 0 auto">Ajouter au profil</button>
       </div>
@@ -3079,13 +3081,17 @@ function renderRecords(){
 function renderDashAnalyses(){
   const el=document.getElementById('db-analyses');if(!el)return;
   const list=S.analyses||[];
-  if(!list.length){el.innerHTML='<div class="an-empty">Aucune analyse enregistrée. Depuis l’onglet Montre, ouvre un fichier .FIT/.TCX, choisis un intervalle et clique sur « Ajouter au profil » pour épingler un graphique ici.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="an-empty">Aucune analyse enregistrée. Depuis l’onglet Montre, ouvre un fichier .FIT/.TCX, choisis un intervalle et clique sur « Ajouter au profil » pour l’épingler ici.</div>';return;}
   el.innerHTML='<div class="an-grid">'+list.map(a=>`
     <div class="an-card">
-      <img class="an-img" src="${a.img}" alt="${(a.title||'Analyse').replace(/"/g,'&quot;')}" onclick="window.open(this.src,'_blank')">
       <div class="an-body">
-        <div class="an-title">${a.title||'Analyse'}</div>
-        <div class="an-sub">${[a.interval,a.source].filter(Boolean).join(' · ')}</div>
+        <div class="an-title">${a.source||'Séance'}</div>
+        <div class="an-sub">${a.interval||''}</div>
+        <div class="an-stats">
+          <div class="an-stat"><div class="an-stat-val">${a.time||'—'}</div><div class="an-stat-lab">Temps</div></div>
+          <div class="an-stat"><div class="an-stat-val">${a.distance||'—'}</div><div class="an-stat-lab">Distance</div></div>
+          <div class="an-stat"><div class="an-stat-val">${a.pace||'—'}</div><div class="an-stat-lab">Allure</div></div>
+        </div>
         <div class="an-foot">
           <span class="an-date">${a.date?new Date(a.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):''}</span>
           <button type="button" class="an-del" onclick="deleteAnalysis(${a.id})">Supprimer</button>
@@ -7847,7 +7853,6 @@ const MapView = {
 const App = {
   activities: [], A: null, axis: 't', cursor: null, charts: [],
   axisValues: [], lapFilter: 'Tout', expanded: false, selLap: null, fcMax: null,
-  selectedCharts: new Set(),
   fmtAxis(v) { return this.axis === 't' ? fmtClock(v) : nf(v / 1000, 2) + ' km'; }
 };
 
@@ -8131,11 +8136,8 @@ function renderChartLapChips() {
 }
 
 function updateChartsSaveBar() {
-  const bar = $('#lm-chartsSaveBar'); if (!bar) return;
-  const n = App.selectedCharts.size;
-  bar.style.display = n ? 'flex' : 'none';
   const cnt = $('#lm-chartsSaveCount');
-  if (cnt) cnt.textContent = n + ' graphique' + (n > 1 ? 's' : '') + ' sélectionné' + (n > 1 ? 's' : '') + ' — ' + chartIntervalLabel();
+  if (cnt) cnt.textContent = 'Résumé de : ' + chartIntervalLabel();
 }
 
 function renderCharts() {
@@ -8206,11 +8208,7 @@ function renderCharts() {
     card.className = 'lm-card';
     card.innerHTML = `
       <div class="lm-card-head" role="button" tabindex="0" aria-expanded="true">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <input type="checkbox" class="lm-chart-pick" data-chart="${d.key}" onclick="event.stopPropagation()" ${App.selectedCharts.has(d.key) ? 'checked' : ''}>
-          <h3>${d.title}</h3>
-        </div>
-        <span class="lm-caret">▼</span>
+        <h3>${d.title}</h3><span class="lm-caret">▼</span>
       </div>
       <div class="lm-card-body">
         <div class="lm-card-stats">
@@ -8222,7 +8220,6 @@ function renderCharts() {
       </div>`;
     host.appendChild(card);
     const ch = new Chart(card.querySelector('.lm-chart-holder'), d);
-    ch.title = d.title; ch.key = d.key;
     App.charts.push(ch);
     const head = card.querySelector('.lm-card-head');
     const toggle = () => {
@@ -8232,11 +8229,6 @@ function renderCharts() {
     };
     head.onclick = toggle;
     head.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
-    const cb = card.querySelector('.lm-chart-pick');
-    cb.onchange = () => {
-      if (cb.checked) App.selectedCharts.add(d.key); else App.selectedCharts.delete(d.key);
-      updateChartsSaveBar();
-    };
   });
 
   if (!defs.length) host.innerHTML = `<div class="lm-empty-tab">Ce fichier ne contient aucune donnée à tracer.</div>`;
@@ -8257,7 +8249,7 @@ function go(tab) {
 function load(rawAct) {
   App.A = buildActivity(rawAct);
   App.cursor = null; App.selLap = null; App.fcMax = (window.__rlCtx && window.__rlCtx.fcMax && window.__rlCtx.fcMax()) || null;
-  App.lapFilter = 'Tout'; App.selectedCharts = new Set();
+  App.lapFilter = 'Tout';
   renderOverview(); renderStats(); renderLaps(); renderCharts();
   $('#lm-start').hidden = true; $('#lm-app').hidden = false;
   go('apercu');
@@ -8361,26 +8353,32 @@ function chartsAddToProfileOpen() {
     host.remove();
   });
 }
+function intervalSummary() {
+  const A = App.A;
+  if (App.selLap != null) {
+    const l = A.laps.find(x => x.i === App.selLap);
+    if (l) return { time: fmtClock(l.time), distance: nf((l.dist || 0) / 1000, 2) + ' km', pace: fmtPace(l.pace) + '/km' };
+  }
+  return {
+    time: fmtClock(A.totalTime),
+    distance: nf(A.distance / 1000, 2) + ' km',
+    pace: fmtPace(A.avgSpeed ? 1000 / A.avgSpeed : NaN) + '/km'
+  };
+}
 function chartsSaveToAthlete(athleteId) {
-  const interval = chartIntervalLabel();
-  const source = $('#lm-ovName') ? $('#lm-ovName').textContent.trim() : '';
-  let n = 0;
-  App.charts.forEach(ch => {
-    if (!App.selectedCharts.has(ch.key)) return;
-    const entry = {
-      id: Date.now() + n,
-      date: new Date().toISOString(),
-      title: ch.title,
-      interval, source,
-      img: ch.cv.toDataURL('image/png')
-    };
-    if (window.__rlCtx && window.__rlCtx.addAnalysis) window.__rlCtx.addAnalysis(athleteId, entry);
-    n++;
-  });
+  const sum = intervalSummary();
+  const entry = {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    source: $('#lm-ovName') ? $('#lm-ovName').textContent.trim() : '',
+    interval: chartIntervalLabel(),
+    time: sum.time, distance: sum.distance, pace: sum.pace
+  };
+  const ok = (window.__rlCtx && window.__rlCtx.addAnalysis) ? window.__rlCtx.addAnalysis(athleteId, entry) : false;
   const btn = $('#lm-btnAddProfile');
   if (btn) {
     const orig = btn.textContent;
-    btn.textContent = n + ' graphique' + (n > 1 ? 's' : '') + ' ajouté' + (n > 1 ? 's' : '') + ' ✓';
+    btn.textContent = ok ? 'Ajouté ✓' : 'Erreur';
     setTimeout(() => { btn.textContent = orig; }, 2200);
   }
 }
