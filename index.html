@@ -1152,6 +1152,8 @@ input[type=range]{touch-action:none}
 .ath-espace-pub:hover{background:rgba(52,211,153,0.2)}
 .ath-espace-pub:disabled{opacity:.6;cursor:default}
 /* Écran de connexion coach (porte d'entrée) */
+/* Masque l'outil tant que la session coach n'est pas confirmée : évite un flash de contenu avant l'affichage de la porte de connexion */
+body.rl-locked .app,body.rl-locked .mobile-header{display:none}
 #auth-gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
 #auth-gate::before{content:'';position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:520px;height:320px;background:radial-gradient(ellipse at center,rgba(255,107,26,0.16),transparent 70%);pointer-events:none}
 .ag-box{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 28px;box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
@@ -1526,7 +1528,7 @@ table.lm-laps tbody tr{cursor:pointer}
 }
 </style>
 </head>
-<body>
+<body class="rl-locked">
 
 <!-- MOBILE HEADER -->
 <header class="mobile-header">
@@ -6926,6 +6928,7 @@ function showAuthGate(){
   var e=document.getElementById('ag-email');if(e)e.focus();
 }
 function hideAuthGate(){var g=document.getElementById('auth-gate');if(g)g.remove();}
+function unlockApp(){document.body.classList.remove('rl-locked');}
 function agMsg(t,err){var m=document.getElementById('ag-msg');if(m){m.textContent=t||'';m.style.color=err?'#F87171':'#34D399';}}
 async function gateSignIn(){
   var em=(document.getElementById('ag-email')||{}).value||'',pw=(document.getElementById('ag-pass')||{}).value||'';
@@ -6934,7 +6937,7 @@ async function gateSignIn(){
   agMsg('Connexion…');
   var r=await _sb.auth.signInWithPassword({email:em.trim(),password:pw});
   if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
-  _cloudUser=r.data.user;cloudFabState();hideAuthGate();await cloudPull();
+  _cloudUser=r.data.user;cloudFabState();hideAuthGate();unlockApp();await cloudPull();
 }
 async function gateSignUp(){
   var em=(document.getElementById('ag-email')||{}).value||'',pw=(document.getElementById('ag-pass')||{}).value||'';
@@ -6943,7 +6946,7 @@ async function gateSignUp(){
   agMsg('Création du compte…');
   var r=await _sb.auth.signUp({email:em.trim(),password:pw});
   if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
-  if(r.data&&r.data.session){_cloudUser=r.data.user;cloudFabState();hideAuthGate();await cloudPush();}
+  if(r.data&&r.data.session){_cloudUser=r.data.user;cloudFabState();hideAuthGate();unlockApp();await cloudPush();}
   else agMsg('Compte créé. Confirme ton email si demandé, puis connecte-toi.');
 }
 async function cloudInit(){
@@ -6957,7 +6960,7 @@ async function cloudInit(){
     if(typeof window[fn]==='function'){var o=window[fn];window[fn]=function(){var res=o.apply(this,arguments);cloudPushDebounced();return res;};}
   });
   var s=await _sb.auth.getSession();
-  if(s.data&&s.data.session){_cloudUser=s.data.session.user;cloudFabState();await cloudPull();}
+  if(s.data&&s.data.session){_cloudUser=s.data.session.user;cloudFabState();unlockApp();await cloudPull();}
   else { cloudFabState(); showAuthGate(); }
 }
 
