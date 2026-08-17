@@ -949,6 +949,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .gr-flag svg{width:20px;height:20px;stroke:#60A5FA;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gr-mid{flex:0 1 auto;min-width:0}
 .gr-name{font-size:27px;font-weight:900;color:var(--text);letter-spacing:-.4px;line-height:1.05}
+.gr-date{font-size:13px;font-weight:600;color:var(--muted2);margin-top:4px}
 .gr-sub{font-size:13px;font-weight:600;color:var(--muted);margin-top:3px}
 .gr-right{text-align:right;margin-left:4px}
 .gr-time{font-size:30px;font-weight:900;color:#60A5FA;line-height:1;letter-spacing:-1px}
@@ -4897,21 +4898,23 @@ function goalReadout(){
   const pace=D?fAll(g.t/D*1000)+'/km':null;
   const kmh=D?(D/g.t*3.6).toFixed(1)+' km/h':null;
   const nm=g.name?g.name:(GOAL_LBL[g.id]||'Objectif');
-  let days='';
+  let days='',dateStr='';
   if(g.date){
     const dd=new Date(g.date+'T00:00:00'), now=new Date(); now.setHours(0,0,0,0);
     const n=Math.round((dd-now)/86400000);
-    if(n>0){const wk=Math.floor(n/7);days='<div class="gr-count" style="display:flex;flex-direction:column;align-items:center;gap:4px"><div class="gr-chip">J-'+n+'</div>'+(wk>0?'<div class="gr-weeks" style="font-size:12px;font-weight:700;color:var(--muted2)">'+wk+' semaine'+(wk>1?'s':'')+'</div>':'')+'</div>';}
+    if(n>0){const wk=Math.floor(n/7);days='<div class="gr-count"><div class="gr-chip">J-'+n+'</div>'+(wk>0?'<div class="gr-weeks">'+wk+' semaine'+(wk>1?'s':'')+'</div>':'')+'</div>';}
     else if(n===0)days='<div class="gr-count"><div class="gr-chip" style="background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.35);color:#34D399">Jour J</div></div>';
+    const ds=dd.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    dateStr=ds.charAt(0).toUpperCase()+ds.slice(1);
   }
-  box.innerHTML='<div class="goal-readout-card" style="justify-content:space-between">'
-    +'<div class="gr-left" style="display:flex;align-items:center;gap:16px;flex:1 1 0;min-width:180px">'
+  box.innerHTML='<div class="goal-readout-card">'
+    +'<div class="gr-left">'
     +'<div class="gr-flag"><svg viewBox="0 0 24 24"><path d="M4 4v16"/><path d="M4 5h13l-2 4 2 4H4"/></svg></div>'
-    +'<div class="gr-mid" style="min-width:0"><div class="gr-name">'+nm+'</div></div>'
+    +'<div class="gr-mid"><div class="gr-name">'+nm+'</div>'+(dateStr?'<div class="gr-date">'+dateStr+'</div>':'')+'</div>'
     +'</div>'
-    +'<div class="gr-main" style="text-align:center;flex:0 0 auto"><div class="gr-lbl">Chrono visé</div><div class="gr-time">'+fHMS(g.t)+'</div>'
+    +'<div class="gr-main"><div class="gr-lbl">Chrono visé</div><div class="gr-time">'+fHMS(g.t)+'</div>'
     +(pace?'<div class="gr-sub">'+pace+' · '+kmh+'</div>':'<div class="gr-sub">Choisis une distance pour l\u2019allure</div>')+'</div>'
-    +'<div class="gr-zone-r" style="display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:1 1 0;min-width:150px">'
+    +'<div class="gr-zone-r">'
     +days
     +'<button type="button" class="gr-edit" onclick="goalEdit()" title="Modifier"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
     +'</div>'
