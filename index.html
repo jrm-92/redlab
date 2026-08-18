@@ -4357,12 +4357,16 @@ function wktLabelReps(lbl){
   return m?+m[1]:1;
 }
 /* % de VMA → fenêtre de vitesse en mm/s (unité des cibles FIT).
-   Une valeur unique devient une fourchette de ±2 points, sinon la montre
-   réclamerait une allure au centième près. */
+   Une fourchette écrite par le coach est respectée telle quelle. Une valeur
+   unique s'ouvre de ±1,5 % de VITESSE, et non de ±2 points de VMA : en points
+   de VMA la fenêtre s'élargit à mesure que l'allure ralentit — 21 s au km en
+   endurance contre 9 s à VMA — et la montre ne cadre plus rien. */
 function wktSpeed(vma,pct){
   if(pct==null||!vma)return null;
-  const lo=Array.isArray(pct)?pct[0]:pct-2, hi=Array.isArray(pct)?pct[1]:pct+2;
-  return {lo:Math.round(vma*lo/100/3.6*1000),hi:Math.round(vma*hi/100/3.6*1000)};
+  const ms=p=>vma*p/100/3.6;
+  if(Array.isArray(pct))return {lo:Math.round(ms(pct[0])*1000),hi:Math.round(ms(pct[1])*1000)};
+  const v=ms(pct);
+  return {lo:Math.round(v*0.985*1000),hi:Math.round(v*1.015*1000)};
 }
 function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);}
 
