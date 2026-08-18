@@ -712,12 +712,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 }
 .db-section-ico svg{width:13px;height:13px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .db-section-title{font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1}
-.db-section-badge{
-  font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  padding:3px 9px;border-radius:20px;
-  background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.18);
-  color:var(--orange);
-}
 
 /* ══ TOOL LAYOUT / DASHBOARD GRID ══ */
 .tool-layout{padding:36px 0 80px}
@@ -1919,7 +1913,6 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
               <div class="db-section-title">Périodisation de la charge</div>
-              <div class="db-section-badge" id="db-plan-badge"></div>
             </div>
             <div class="card" style="padding:20px"><div id="db-plan"></div></div>
           </div>
@@ -1954,7 +1947,6 @@ table.lm-laps tbody tr{cursor:pointer}
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
               <div class="db-section-title" id="db-pred-title">Potentiel de performance</div>
-              <div class="db-section-badge" id="db-pred-badge">Follador 2022</div>
             </div>
             <div id="db-cs"></div>
               <div class="formula" id="pred-explain"></div>
@@ -1978,7 +1970,6 @@ table.lm-laps tbody tr{cursor:pointer}
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 22 12 19 17 22 15.79 13.88"/></svg>
               </div>
               <div class="db-section-title">Records personnels</div>
-              <div class="db-section-badge">Allure</div>
             </div>
             <button class="btn-road-apply" onclick="ffaOpen()" style="width:100%;margin-bottom:14px;padding:13px">
               <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -1992,7 +1983,6 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg></div>
               <div class="db-section-title">Historique des courses</div>
-              <div class="db-section-badge">Importé de la FFA</div>
             </div>
             <div class="card" style="padding:20px">
               <div id="hist-add-form" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.02)">
@@ -2024,7 +2014,6 @@ table.lm-laps tbody tr{cursor:pointer}
                 <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
               </div>
               <div class="db-section-title">Courbe de performance</div>
-              <div class="db-section-badge">Prédictions vs vos records</div>
             </div>
             <div class="card" style="padding:20px">
               <div id="perf-legend" class="perf-legend"></div>
@@ -2038,7 +2027,6 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg></div>
               <div class="db-section-title">Modele Vitesse Critique - calcul</div>
-              <div class="db-section-badge">CS . D'</div>
             </div>
             <div id="db-csmodel"></div>
           </div>
@@ -2048,7 +2036,6 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="5" width="3" height="13"/></svg></div>
               <div class="db-section-title">Analyses</div>
-              <div class="db-section-badge">Lecteur montre</div>
             </div>
             <div id="db-analyses"></div>
           </div>
@@ -4515,8 +4502,7 @@ function libExtrapolHTML(){
     +'</div></div>';
   return '<div class="db-section" style="margin-top:36px">'
     +'<div class="db-section-hd"><div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg></div>'
-    +'<div class="db-section-title">Extrapolation \u2014 potentiel de course</div>'
-    +'<div class="db-section-badge">Litt\u00e9rature scientifique</div></div>'
+    +'<div class="db-section-title">Extrapolation \u2014 potentiel de course</div></div>'
     +'<div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;padding:0 2px">Comment estimer le potentiel d\u2019un athl\u00e8te sur chaque distance, par ordre de fiabilit\u00e9. R\u00e8gle g\u00e9n\u00e9rale : <b style="color:var(--text2)">une course r\u00e9cente bat toujours un mod\u00e8le</b>, et tout mod\u00e8le suppose un entra\u00eenement sp\u00e9cifique \u00e0 la distance vis\u00e9e. Saisis un chrono ou une VC pour obtenir l\u2019estimation.</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px">'+c5+c10+csm+cma+'</div>'
     +srcs+'</div>';
