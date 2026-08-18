@@ -417,12 +417,19 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .plw-mk{margin-left:auto;font-size:12px}
   .plw-sess{display:flex;flex-direction:column;gap:3px;margin:5px 0;flex:1}
-  .plw-ch{display:flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:var(--text2);border-radius:5px;padding:2px 4px;line-height:1.25}
+  .plw-ch{display:flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:var(--text2);border-radius:5px;padding:2px 4px;line-height:1.25;cursor:grab;user-select:none;-webkit-user-select:none}
+  .plw-ch:active{cursor:grabbing}
+  .plw-ch--grab{outline:2px solid var(--orange);outline-offset:1px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
+  .plw-cp:hover{color:var(--orange)!important}
+  .plw-day--target{border-style:dashed;border-color:rgba(255,107,26,.45)}
+  .plw-day--over{outline:2px dashed var(--orange);outline-offset:-2px;background-image:linear-gradient(rgba(255,107,26,.10),rgba(255,107,26,.10))}
   .plw-ch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
   .plw-ch button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px}
   .plw-ch button:hover{color:#F87171}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:9.5px;font-weight:800;padding:3px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
+  .plc-grab{display:flex;align-items:center;gap:10px;margin:8px 0;padding:8px 12px;border-radius:9px;background:rgba(255,107,26,.10);border:1px solid rgba(255,107,26,.35);font-size:12.5px;font-weight:700;color:var(--orange)}
+  .plc-grab button{background:none;border:1px solid rgba(255,107,26,.45);color:var(--orange);border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:800;padding:3px 10px;cursor:pointer;margin-left:auto}
   .plw-kmf,.plw-dlf{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted2)}
   .plw-kmf input{width:58px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:7px;color:var(--text);font-family:var(--font);font-weight:800;font-size:12.5px;padding:4px 6px;text-align:center}
   .plw-dlf input{width:15px;height:15px;accent-color:var(--muted2);cursor:pointer}
@@ -6523,9 +6530,9 @@ function plPhaseAdj(key,delta){
 }
 function plPhaseAuto(){_plPhaseOverride=null;renderPlanif();}
 function plSliderFill(p){const sl=document.getElementById('pl-slider');if(!sl)return;const pc=(_plW-p.wmin)/Math.max(1,(p.wmax-p.wmin))*100;sl.style.background='linear-gradient(to right,'+p.col+' 0%,'+p.col+' '+pc+'%,rgba(255,255,255,0.08) '+pc+'%,rgba(255,255,255,0.08) 100%)';}
-function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plPicked=true;renderPlanif();}
+function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};plSave();renderPlanif();}
 function setPlProf(id){_plProf=id;_plPicked=true;renderPlanif();}
-function setPlW(v){_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=+v;_plPicked=true;plUpd();}
+function setPlW(v){_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=+v;plSave();plUpd();}
 function setPlCtx(c){_plCtx=c;_plPicked=true;renderPlanif();}
 function plQ(field,val){
   _plPicked=true;
@@ -6610,7 +6617,7 @@ function plRecoBox(p){
     +'<div style="font-size:11px;color:var(--muted2);max-width:200px;line-height:1.5">Repère indicatif \u2014 ajuste ensuite la prépa manuellement.</div>'
     +'</div>';
 }
-function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=plRecoWeeks(p);_plPicked=true;renderPlanif();}
+function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=plRecoWeeks(p);plSave();renderPlanif();}
 function plUpd(){
   const p=PLANIF.find(x=>x.id===_plD);if(!p)return;
   _plW=Math.min(Math.max(_plW,p.wmin),p.wmax);
@@ -6626,10 +6633,69 @@ function plUpd(){
   if(tk){Array.from(tk.querySelectorAll('button')).forEach(b=>{const on=+b.getAttribute('data-w')===_plW;b.style.color=on?p.col:'var(--muted2)';b.style.fontWeight=on?'900':'700';b.style.fontSize=on?'14px':'12px';});}
   plSyncCfg();
 }
+/* Marque une modification du plan et la sauvegarde immédiatement. */
+function plSave(){_plPicked=true;plSyncCfg();}
+
+/* ══ DÉPLACER / DUPLIQUER UNE SÉANCE DANS LE CALENDRIER ══
+   Deux gestes pour un même chemin de code : le glisser-déposer HTML5 pour la
+   souris, et « prendre puis poser » en deux appuis — le glisser-déposer HTML5
+   n'existant pas sur écran tactile. */
+let _plGrab=null;
+function plMoveSession(fromIso,fromIdx,toIso,copy){
+  const src=_plSessions[fromIso];
+  if(!src||!src[fromIdx]||!toIso)return;
+  if(fromIso===toIso&&!copy){_plGrab=null;plUpd();return;}
+  const it=src[fromIdx];
+  const moved=copy?{t:it.t,th:it.th}:src.splice(fromIdx,1)[0];
+  if(!copy&&!src.length)delete _plSessions[fromIso];
+  (_plSessions[toIso]=_plSessions[toIso]||[]).push(moved);
+  _plGrab=null; plSave(); plUpd();
+}
+function plDaySessCopy(iso,i){plMoveSession(iso,i,iso,true);}
+function plDragStart(ev,iso,i){
+  _plGrab={iso:iso,i:i};
+  try{ev.dataTransfer.effectAllowed='copyMove';ev.dataTransfer.setData('text/plain',iso+'|'+i);}catch(e){}
+}
+function plDragEnd(){
+  _plGrab=null;
+  document.querySelectorAll('.plw-day--over').forEach(function(d){d.classList.remove('plw-day--over');});
+}
+function plDragOver(ev,el){
+  if(!_plGrab)return;
+  ev.preventDefault();
+  try{ev.dataTransfer.dropEffect=(ev.altKey||ev.ctrlKey)?'copy':'move';}catch(e){}
+  el.classList.add('plw-day--over');
+}
+function plDragLeave(el){el.classList.remove('plw-day--over');}
+function plDrop(ev,iso,el){
+  ev.preventDefault(); el.classList.remove('plw-day--over');
+  if(!_plGrab)return;
+  plMoveSession(_plGrab.iso,_plGrab.i,iso,ev.altKey||ev.ctrlKey);
+}
+/* Appui sur la séance : on la prend, ou on la repose si c'était déjà elle. */
+function plGrabToggle(ev,iso,i){
+  if(ev&&ev.stopPropagation)ev.stopPropagation();
+  _plGrab=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===i)?null:{iso:iso,i:i};
+  plUpd();
+}
+function plDayTap(iso){
+  if(!_plGrab)return;
+  plMoveSession(_plGrab.iso,_plGrab.i,iso,false);
+}
+function plGrabCancel(){if(_plGrab){_plGrab=null;plUpd();}}
 function plSyncCfg(){
   if(!_plPicked)return;
   S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   if(typeof saveLS==='function')saveLS();
+  // Le plan doit aussi rejoindre la fiche de l'athlète : saveLS n'écrit que
+  // l'instantané du profil, et changer d'athlète sans passer par « Enregistrer »
+  // rechargerait l'ancien plan par-dessus les modifications.
+  if(S.pseudo&&typeof getAthletes==='function'&&typeof _saveAthletes==='function'){
+    try{
+      const _a=getAthletes(), _i=_a.findIndex(function(x){return x.pseudo===S.pseudo;});
+      if(_i>=0){_a[_i].plan=S.plan;_saveAthletes(_a);}
+    }catch(e){}
+  }
   if(typeof renderDashPlan==='function')renderDashPlan();
 }
 function plToDash(){
@@ -6682,8 +6748,22 @@ function plCalendarHTML(p,weeks){
       var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
       var mo=(dt&&(d===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
       var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px':(isInter?';outline:2px solid #FBBF24;outline-offset:-2px':'');
-      var sess=(_plSessions[iso]||[]).map(function(sx,si){var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';return '<div class="plw-ch" style="background:'+col+'20;border-left:3px solid '+col+'" title="'+String(sx.t).replace(/"/g,'&quot;')+'"><span>'+String(sx.t).replace(/</g,'&lt;')+'</span><button type="button" onclick="plDaySessDel(\''+iso+'\','+si+')">×</button></div>';}).join('');
-      days+='<div class="plw-day" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+(iso?'<button type="button" class="plw-add" onclick="plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
+      var sess=(_plSessions[iso]||[]).map(function(sx,si){
+        var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';
+        var esc=String(sx.t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+        var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
+        return '<div class="plw-ch'+held+'" draggable="true"'
+          +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
+          +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
+          +' style="background:'+col+'20;border-left:3px solid '+col+'"'
+          +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
+          +'<span>'+esc+'</span>'
+          +'<button type="button" class="plw-cp" title="Dupliquer" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
+          +'<button type="button" title="Retirer" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button></div>';
+      }).join('');
+      var drop=iso?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
+        +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
+      days+='<div class="plw-day'+(_plGrab&&iso?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+(iso?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
     }
     var meta='<div class="plw-meta">'
       +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+(wk.dates||'')+'</span></span>'
@@ -6701,12 +6781,14 @@ function plCalendarHTML(p,weeks){
     +(nSess?'<button type="button" class="plc-send" onclick="wktExportPlan()" title="Télécharger toutes les séances du calendrier au format montre">↓ Séances montre ('+nSess+')</button>':'')
     +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
     +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':'')+'</div></div>';
-  return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
+  var grabBar=_plGrab?('<div class="plc-grab">Séance prise — touche le jour où la déposer'
+    +' <button type="button" onclick="plGrabCancel()">annuler</button></div>'):'';
+  return head+grabBar+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
 }
 function plVolLive(n,val){var e=document.getElementById('plc-km-'+n);if(e){e.textContent=val+' km';e.style.color='var(--orange)';}}
-function plVolSet(n,val){_plVolOverride[n]=+val;_plPicked=true;plUpd();}
-function plRecToggle(n,cur){_plRecOverride[n]=!cur;_plPicked=true;plUpd();}
-function plVolReset(){_plVolOverride={};_plRecOverride={};_plPicked=true;plUpd();}
+function plVolSet(n,val){_plVolOverride[n]=+val;plSave();plUpd();}
+function plRecToggle(n,cur){_plRecOverride[n]=!cur;plSave();plUpd();}
+function plVolReset(){_plVolOverride={};_plRecOverride={};plSave();plUpd();}
 function planifSessionsToNolio(){
   var all=(typeof libExportData==='function')?libExportData():[];
   var byTitle={}; all.forEach(function(s){byTitle[s.title]=s;});
@@ -6762,6 +6844,7 @@ function plDates(){
   const e1=document.getElementById('pl-d1'),e2=document.getElementById('pl-d2'),e3=document.getElementById('pl-di');
   if(!e1||!e2)return;
   _plDate1=e1.value||null;_plDate2=e2.value||null;_plDi=(e3&&e3.value)||null;
+  plSave();
   const out=document.getElementById('pl-avail');
   if(!_plDate1||!_plDate2){if(out)out.textContent='';plUpd();return;}
   const d1=new Date(_plDate1+'T00:00:00'),d2=new Date(_plDate2+'T00:00:00');
