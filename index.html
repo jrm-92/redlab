@@ -1018,12 +1018,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .gr-dist{font-size:31px;font-weight:900;color:var(--text);line-height:1;letter-spacing:-1.2px;white-space:nowrap}
 .gr-dist span{font-size:19px;font-weight:700;color:var(--muted)}
 .gr-chip{display:inline-block;margin-top:12px;padding:6px 14px;border-radius:20px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.38);color:#60A5FA;font-size:13px;font-weight:900;letter-spacing:.5px;white-space:nowrap}
-.gr-prog{display:flex;align-items:center;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(59,130,246,0.18)}
-.gr-prog-lbl{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted2);white-space:nowrap}
-.gr-prog-lbl svg{width:14px;height:14px;stroke:var(--muted2);fill:none;stroke-width:1.9;stroke-linecap:round;flex-shrink:0;cursor:help}
-.gr-bar{flex:1 1 auto;height:8px;border-radius:5px;background:rgba(255,255,255,0.09);overflow:hidden;min-width:60px}
-.gr-bar-f{height:100%;border-radius:5px;background:#60A5FA}
-.gr-prog-pct{font-size:14.5px;font-weight:900;color:#60A5FA;white-space:nowrap}
 .gr-link{margin-top:14px;padding:13px 18px;border-radius:12px;background:rgba(255,255,255,0.022);border:1px solid rgba(59,130,246,0.18)}
 .gr-link a{display:flex;align-items:center;gap:10px;color:#60A5FA;font-size:14px;font-weight:700;text-decoration:none;min-width:0}
 .gr-link a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -1041,9 +1035,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .gr-sub-ico{gap:5px}.gr-sub-ico svg{width:13px;height:13px}
   .gr-pill{margin-top:10px;padding:4px 10px;font-size:11px}
   .gr-chip{margin-top:10px;padding:4px 10px;font-size:11px}
-  .gr-prog{gap:10px;margin-top:15px;padding-top:14px}
-  .gr-prog-lbl{font-size:9px;letter-spacing:.9px}
-  .gr-prog-pct{font-size:13px}
 }
 @media(max-width:430px){
   .gr-name{font-size:18px}
@@ -5037,13 +5028,6 @@ const GOAL_LBL={'5k':'5 km','10k':'10 km','semi':'Semi-marathon','mara':'Maratho
 const GOAL_PACE_LBL={'5k':'5 km','10k':'10 km','semi':'semi','mara':'marathon'};
 function goalEdit(){window._goalEdit=true;renderGoalSection();}
 function goalDone(){window._goalEdit=false;renderGoalSection();if(typeof buildRaces==='function')buildRaces();}
-/* Durée de préparation servant de référence : le plan configuré pour cette course,
-   sinon la durée conseillée pour la distance. */
-function goalPrepWeeks(id){
-  if(S.plan&&S.plan.D===id&&S.plan.W)return S.plan.W;
-  if(typeof PLANIF!=='undefined'){const p=PLANIF.find(x=>x.id===id);if(p)return p.wdef;}
-  return null;
-}
 function goalReadout(){
   const box=document.getElementById('goal-readout'); if(!box)return;
   const g=S.goal||{};
@@ -5055,7 +5039,6 @@ function goalReadout(){
 
   const icoCal='<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
   const icoRoad='<svg viewBox="0 0 24 24"><path d="M4 21 7 3M20 21 17 3M12 4v3M12 10.5v3M12 17v3"/></svg>';
-  const icoInfo='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><path d="M12 17v-6"/><path d="M12 7.4v.1"/></svg>';
 
   let dateStr='';
   if(g.date){
@@ -5070,22 +5053,13 @@ function goalReadout(){
     const dd=new Date(g.date+'T00:00:00'), now=new Date(); now.setHours(0,0,0,0);
     n=Math.round((dd-now)/86400000);
   }
-  const prepW=D?goalPrepWeeks(g.id):null;
-  let colTime='',progHtml='';
+  let colTime='';
   if(n!=null&&n>0){
     const wkLeft=Math.floor(n/7);
     const unit=wkLeft>0?(wkLeft+'|semaine'+(wkLeft>1?'s':'')):(n+'|jour'+(n>1?'s':''));
-    const doneFrac=prepW?Math.min(1,Math.max(0,(prepW-n/7)/prepW)):null;
     colTime='<div class="gr-col"><div class="gr-lbl">Temps restant</div>'
       +'<div class="gr-dist">'+unit.split('|')[0]+' <span>'+unit.split('|')[1]+'</span></div>'
       +'<div class="gr-chip">J-'+n+'</div></div>';
-    if(doneFrac!=null){
-      const pct=Math.round(doneFrac*100);
-      progHtml='<div class="gr-prog"><span class="gr-prog-lbl">Avancement '
-        +'<span title="Part du bloc de pr\u00e9paration d\u00e9j\u00e0 \u00e9coul\u00e9e, sur '+prepW+' semaines">'+icoInfo+'</span></span>'
-        +'<div class="gr-bar"><div class="gr-bar-f" style="width:'+pct+'%"></div></div>'
-        +'<span class="gr-prog-pct">'+pct+' %</span></div>';
-    }
   } else if(n===0){
     colTime='<div class="gr-col"><div class="gr-lbl">Temps restant</div>'
       +'<div class="gr-dist" style="color:#34D399">Jour J</div></div>';
@@ -5116,7 +5090,7 @@ function goalReadout(){
     +(dateStr?'<div class="gr-date">'+icoCal+'<span>'+dateStr+'</span></div>':'')+'</div>'
     +'<button type="button" class="gr-edit" onclick="goalEdit()" title="Modifier"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
     +'</div>'
-    +'<div class="gr-panel"><div class="gr-cols">'+colTime2+colDist+colTime+'</div>'+progHtml+'</div>'
+    +'<div class="gr-panel"><div class="gr-cols">'+colTime2+colDist+colTime+'</div></div>'
     +linkHtml
     +'</div>';
 }
