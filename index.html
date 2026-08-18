@@ -6917,7 +6917,7 @@ function copyEspaceLink(btn){
 function inviteAthlete(id,btn){
   var a=getAthletes().find(function(x){return x.id===id;});
   var email=(a&&a.email)||'';
-  var msg='Ton espace Reding Running 🏃\n'+ESPACE_URL+'\n\n'
+  var msg='Ton espace athlète\n'+ESPACE_URL+'\n\n'
     +'1) Ouvre ce lien\n'
     +'2) Connecte-toi avec ton email'+(email?(' : '+email):'')+' — tu reçois un lien par mail, aucun mot de passe\n'
     +'3) Ajoute la page à ton écran d’accueil : tu la retrouves en 1 clic et tes données y sont toujours à jour.';
