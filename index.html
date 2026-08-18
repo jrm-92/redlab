@@ -2603,6 +2603,13 @@ function loadLS(){
     if(i.fcRest){document.getElementById('fc-rest').value=i.fcRest;}
     if(i.fcMax&&i.fcRest){toggleOpt('fc-opt-body','fc-chev');}
     updPseudo();
+    // Les analyses font foi dans la fiche athlète : l'instantané du profil peut être
+    // plus ancien (il n'est réécrit qu'au prochain saveLS). On les relit donc de là,
+    // sinon une analyse ajoutée juste avant de quitter l'outil semblerait perdue.
+    if(S.pseudo){
+      const _ath=getAthletes().find(a=>a.pseudo===S.pseudo);
+      if(_ath&&Array.isArray(_ath.analyses))S.analyses=_ath.analyses;
+    }
     renderDashboard();
     go('dashboard');
   }catch(e){}
@@ -3599,6 +3606,7 @@ function addAnalysisToAthlete(athleteId,entry){
   if(S.pseudo&&S.pseudo===athletes[idx].pseudo){
     S.analyses=athletes[idx].analyses;
     window._anSel=entry.id;   // le panneau affiche l'analyse qu'on vient d'ajouter
+    saveLS();                 // garde l'instantané du profil en phase avec la fiche
     if(typeof renderDashAnalyses==='function')renderDashAnalyses();
   }
   return true;
@@ -3612,6 +3620,7 @@ function deleteAnalysis(analysisId){
     const idx=athletes.findIndex(a=>a.pseudo===S.pseudo);
     if(idx>=0){athletes[idx].analyses=S.analyses;_saveAthletes(athletes);}
   }
+  saveLS();   // garde l'instantané du profil en phase avec la fiche
   renderDashAnalyses();
 }
 
