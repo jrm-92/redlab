@@ -955,12 +955,11 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .vma-inp::-webkit-inner-spin-button,.vma-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;display:none}
 .vma-unit{font-size:13px;font-weight:700;color:var(--muted2);white-space:nowrap}
 .vma-pace{font-size:14px;font-weight:500;color:var(--muted);white-space:nowrap}
-/* Curseur VMA — le remplissage orange à gauche du bouton suit --p, mis à jour au glissement. */
-.vma-slide{width:100%;margin:12px 0 2px}
-input[type=range].vma-sl{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;cursor:pointer;border:none;padding:0;background:linear-gradient(90deg,var(--orange) var(--p,0%),rgba(255,255,255,0.09) var(--p,0%))}
-input[type=range].vma-sl::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;cursor:pointer;border:none;box-shadow:0 0 0 4px rgba(255,107,26,0.22),0 2px 9px rgba(0,0,0,0.5)}
-input[type=range].vma-sl::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;cursor:pointer;border:none;box-shadow:0 0 0 4px rgba(255,107,26,0.22),0 2px 9px rgba(0,0,0,0.5)}
-input[type=range].vma-sl:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
+/* Calculateur d'allure logé dans la carte athlète : la .sl-card s'aplatit pour
+   ne pas empiler une carte dans une carte. */
+.vma-calc-lbl{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin:18px 0 8px}
+.ph-block #db-slider .sl-card{background:transparent;border:none;border-radius:0;padding:0}
+.ph-block #db-slider .sl-hd{margin-bottom:14px}
 .vma-hint{display:flex;align-items:center;gap:12px;width:100%;margin-top:14px;padding:12px 14px;border:1px solid var(--border2);border-radius:12px;background:rgba(255,255,255,0.03);cursor:pointer;text-align:left;font-family:var(--font);transition:border-color .15s,background .15s}
 .vma-hint:hover{border-color:rgba(255,107,26,0.45);background:rgba(255,107,26,0.05)}
 .vma-hint-ico{width:30px;height:30px;flex-shrink:0;border-radius:50%;border:1.5px solid rgba(255,107,26,0.45);color:var(--orange);display:flex;align-items:center;justify-content:center}
@@ -1951,17 +1950,6 @@ table.lm-laps tbody tr{cursor:pointer}
             <div id="db-zones"></div>
           </div>
 
-          <!-- Calculateur VMA -->
-          <div class="db-section">
-            <div class="db-section-hd">
-              <div class="db-section-ico">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15.2" y2="13.8"/></svg>
-              </div>
-              <div class="db-section-title" id="db-slider-title">Calculateur d'allure</div>
-            </div>
-            <div id="db-slider"></div>
-          </div>
-
           <div class="db-section" id="db-cs-section">
             <div class="db-section-hd">
               <div class="db-section-ico">
@@ -2731,6 +2719,16 @@ function renderProfile(){
     <div class="ph-block ph-full">
       <div class="ph-b-lbl">${vcMode?'Vitesse Critique':'VMA'}</div>
       ${vcMode?`<div class="ph-b-val" style="color:var(--orange)">${b2val.toFixed(2)} <span style="font-size:14px;font-weight:500">km/h</span></div><div class="ph-b-sub">${fAll(3600/b2val)} /km</div>`:vmaEditHTML()}
+      <div class="vma-calc-lbl" id="db-slider-title">Calculateur d'allure</div>
+      <div id="db-slider"></div>
+      ${vcMode?'':`<button type="button" class="vma-hint" onclick="vmaHintGo()">
+        <span class="vma-hint-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><path d="M12 17v-6"/><path d="M12 7.4v.1"/></svg></span>
+        <span class="vma-hint-txt">
+          <span class="vma-hint-t">Ta VMA est un repère clé.</span>
+          <span class="vma-hint-d">Plus elle est précise, plus tes allures le seront.</span>
+        </span>
+        <svg class="vma-hint-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>`}
     </div>`;
 
   // Bloc 3 — D′ (réserve anaérobie) en mode Vitesse Critique
@@ -3026,10 +3024,6 @@ function vmaEditHTML(){
   const vNum=S.vma!=null?S.vma:0;
   const v=vNum.toFixed(1);
   const pace=vNum>0?fAll(3600/vNum)+' /km':'';
-  // Plage utile en course à pied, élargie si la VMA de l'athlète en sort :
-  // le bouton reste ainsi toujours à sa vraie position.
-  const slMin=Math.min(8,Math.floor(vNum||8)), slMax=Math.max(24,Math.ceil(vNum||24));
-  const pct=vNum>0?(vNum-slMin)/(slMax-slMin)*100:0;
   return `<div class="vma-edit">
     <button class="vma-adj" onclick="adjVMA(-0.1)" title="-0,1" aria-label="Diminuer">&minus;</button>
     <div class="vma-field">
@@ -3038,29 +3032,7 @@ function vmaEditHTML(){
     </div>
     <button class="vma-adj" onclick="adjVMA(0.1)" title="+0,1" aria-label="Augmenter">+</button>
     ${pace?`<span class="vma-pace" id="db-vma-pace">${pace}</span>`:''}
-  </div>
-  <div class="vma-slide">
-    <input type="range" class="vma-sl" id="db-vma-sl" min="${slMin}" max="${slMax}" step="0.1" value="${vNum||slMin}"
-      style="--p:${pct.toFixed(1)}%" oninput="vmaSlide(this.value)" onchange="applyVMA(this.value)" aria-label="VMA en km/h">
-  </div>
-  <button type="button" class="vma-hint" onclick="vmaHintGo()">
-    <span class="vma-hint-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><path d="M12 17v-6"/><path d="M12 7.4v.1"/></svg></span>
-    <span class="vma-hint-txt">
-      <span class="vma-hint-t">Ta VMA est un repère clé.</span>
-      <span class="vma-hint-d">Plus elle est précise, plus tes allures le seront.</span>
-    </span>
-    <svg class="vma-hint-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-  </button>`;
-}
-/* Glissement du curseur : on rafraîchit l'affichage sur place. Un renderDashboard()
-   à chaque pixel détruirait le curseur et couperait le geste — la VMA n'est donc
-   appliquée et sauvegardée qu'au relâchement, via applyVMA (onchange). */
-function vmaSlide(val){
-  const v=parseFloat(val); if(isNaN(v))return;
-  const sl=document.getElementById('db-vma-sl');
-  if(sl){const p=(v-sl.min)/((sl.max-sl.min)||1)*100;sl.style.setProperty('--p',p.toFixed(1)+'%');}
-  const inp=document.getElementById('db-vma-inp'); if(inp)inp.value=v.toFixed(1);
-  const pc=document.getElementById('db-vma-pace'); if(pc)pc.textContent=fAll(3600/v)+' /km';
+  </div>`;
 }
 /* Le bandeau renvoie là où la VMA se règle vraiment : saisie directe ou calcul depuis un chrono. */
 function vmaHintGo(){
@@ -5149,8 +5121,8 @@ function exportAthleteView(returnDoc){
   // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
   clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
-  // Curseur VMA et son bandeau : commandes d'édition du coach, hors sujet sur une fiche en lecture seule.
-  clone.querySelectorAll('.vma-slide,.vma-hint').forEach(el=>el.remove());
+  // Bandeau VMA : renvoie vers la saisie du coach, hors sujet sur une fiche en lecture seule.
+  clone.querySelectorAll('.vma-hint').forEach(el=>el.remove());
   clone.querySelectorAll('input,select,textarea').forEach(el=>{
     if(el.type==='range') return;
     el.setAttribute('disabled','');
