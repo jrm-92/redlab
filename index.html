@@ -1014,7 +1014,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .gr-sub{font-size:13.5px;font-weight:600;color:var(--muted);margin-top:9px}
 .gr-sub-ico{display:flex;align-items:center;gap:8px}
 .gr-sub-ico svg{width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.gr-pill{display:inline-block;margin-top:12px;padding:6px 14px;border-radius:20px;background:rgba(59,130,246,0.13);border:1px solid rgba(59,130,246,0.3);color:#60A5FA;font-size:13px;font-weight:700;white-space:nowrap}
 .gr-dist{font-size:31px;font-weight:900;color:var(--text);line-height:1;letter-spacing:-1.2px;white-space:nowrap}
 .gr-dist span{font-size:19px;font-weight:700;color:var(--muted)}
 .gr-chip{display:inline-block;margin-top:12px;padding:6px 14px;border-radius:20px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.38);color:#60A5FA;font-size:13px;font-weight:900;letter-spacing:.5px;white-space:nowrap}
@@ -1033,7 +1032,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .gr-dist span{font-size:13px}
   .gr-sub{font-size:11px;margin-top:7px}
   .gr-sub-ico{gap:5px}.gr-sub-ico svg{width:13px;height:13px}
-  .gr-pill{margin-top:10px;padding:4px 10px;font-size:11px}
   .gr-chip{margin-top:10px;padding:4px 10px;font-size:11px}
 }
 @media(max-width:430px){
@@ -1043,7 +1041,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .gr-time,.gr-dist{font-size:16px;letter-spacing:-.3px}
   .gr-dist span{font-size:11.5px}
   .gr-sub{font-size:10px}
-  .gr-pill,.gr-chip{padding:4px 8px;font-size:10px}
+  .gr-chip{padding:4px 8px;font-size:10px}
 }
 .goal-time input::-webkit-inner-spin-button,.goal-time input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 /* BIBLIOTHEQUE */
@@ -5025,7 +5023,6 @@ function renderGoalSection(){
 }
 const GOAL_DIST={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
 const GOAL_LBL={'5k':'5 km','10k':'10 km','semi':'Semi-marathon','mara':'Marathon'};
-const GOAL_PACE_LBL={'5k':'5 km','10k':'10 km','semi':'semi','mara':'marathon'};
 function goalEdit(){window._goalEdit=true;renderGoalSection();}
 function goalDone(){window._goalEdit=false;renderGoalSection();if(typeof buildRaces==='function')buildRaces();}
 function goalReadout(){
@@ -5067,7 +5064,7 @@ function goalReadout(){
 
   const colTime2='<div class="gr-col"><div class="gr-lbl">Chrono vis\u00e9</div>'
     +'<div class="gr-time">'+fHMS(g.t)+'</div>'
-    +(pace?'<div class="gr-sub">'+pace+' \u00b7 '+kmh+'</div><div class="gr-pill">Allure '+(GOAL_PACE_LBL[g.id]||'')+'</div>'
+    +(pace?'<div class="gr-sub">'+pace+' \u00b7 '+kmh+'</div>'
           :'<div class="gr-sub">Choisis une distance pour l\u2019allure</div>')
     +'</div>';
   const colDist=D?('<div class="gr-col"><div class="gr-lbl">Distance</div>'
