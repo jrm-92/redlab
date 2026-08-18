@@ -758,15 +758,18 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
     box-shadow:0 -8px 26px rgba(0,0,0,0.5);
   }
   .mh-menu::-webkit-scrollbar{display:none}
+  /* Estompe le bord du côté où il reste des onglets hors écran (classe posée par mhFade). */
+  .mh-menu.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent)}
+  .mh-menu.fade-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 30px);mask-image:linear-gradient(90deg,transparent,#000 30px)}
+  .mh-menu.fade-lr{-webkit-mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent)}
   .mh-btn{
-    flex:1 1 0;min-width:0;padding:6px 2px;border:none;
+    flex:0 0 auto;min-width:62px;padding:6px 10px;border:none;
     display:flex;flex-direction:column;align-items:center;gap:3px;
     background:transparent;color:var(--muted2);font-family:var(--font);
-    font-size:9.5px;font-weight:800;border-radius:12px;cursor:pointer;text-align:center;
+    font-size:10.5px;font-weight:800;border-radius:12px;cursor:pointer;text-align:center;
     white-space:nowrap;transition:all .15s;
   }
   .mh-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-  .mh-btn span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
   .mh-btn.active{background:var(--accent-soft);color:var(--accent)}
 
   .mh-ctx{flex:1;min-width:0;text-align:right;padding-left:10px}
@@ -2205,6 +2208,29 @@ function fAll(s){s=Math.round(s);const m=Math.floor(s/60),sc=s%60;return m+':'+S
 function fHMS(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;if(h>0)return h+"h"+String(m).padStart(2,'0')+"'"+String(sc).padStart(2,'0')+'"';return m+"'"+String(sc).padStart(2,'0')+'"';}
 
 /* ══ NAV ══ */
+/* Barre d'outils mobile : elle défile horizontalement. On estompe le bord du côté
+   où des onglets restent hors écran, et on ramène l'onglet actif au centre. */
+function mhFade(){
+  const m=document.querySelector('.mh-menu');if(!m)return;
+  const l=m.scrollLeft>4, r=m.scrollLeft+m.clientWidth<m.scrollWidth-4;
+  m.classList.remove('fade-l','fade-r','fade-lr');
+  if(l&&r)m.classList.add('fade-lr');else if(r)m.classList.add('fade-r');else if(l)m.classList.add('fade-l');
+}
+function mhCenterActive(smooth){
+  const m=document.querySelector('.mh-menu');if(!m)return;
+  const b=m.querySelector('.mh-btn.active');if(!b)return;
+  // scrollTo plutôt que scrollIntoView : évite de faire défiler la page derrière la barre fixe.
+  const max=m.scrollWidth-m.clientWidth;
+  const left=Math.max(0,Math.min(max,b.offsetLeft-(m.clientWidth-b.offsetWidth)/2));
+  m.scrollTo({left:left,behavior:smooth?'smooth':'auto'});
+  mhFade();
+}
+function mhNavInit(){
+  const m=document.querySelector('.mh-menu');if(!m)return;
+  m.addEventListener('scroll',mhFade,{passive:true});
+  window.addEventListener('resize',()=>{mhFade();});
+  mhCenterActive(false);
+}
 function go(id){
   if(id==='dashboard'&&!S.vma){id='input';}
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -2223,6 +2249,7 @@ function go(id){
   if(id==='knowledge') renderKnowledge();
   if(id==='watch'&&window.__lmResize)window.__lmResize();
   updMhCtx(id);
+  mhCenterActive(true);
   const sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -7190,6 +7217,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
   if(typeof cloudInit==='function')cloudInit();
   if(typeof csInit==='function')csInit();
+  if(typeof mhNavInit==='function')mhNavInit();
 });
 
 
