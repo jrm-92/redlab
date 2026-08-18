@@ -4302,8 +4302,13 @@ FitBuf.prototype.u8=function(v){this.b.push(v&0xFF);return this;};
 FitBuf.prototype.u16=function(v){this.b.push(v&0xFF,(v>>8)&0xFF);return this;};
 FitBuf.prototype.u32=function(v){this.b.push(v&0xFF,(v>>8)&0xFF,(v>>16)&0xFF,(v>>>24)&0xFF);return this;};
 FitBuf.prototype.str=function(s,size){
-  const e=new TextEncoder().encode(s||'');
-  for(let i=0;i<size;i++)this.b.push(i<size-1&&i<e.length?e[i]:0);
+  let e=new TextEncoder().encode(s||'');
+  if(e.length>size-1){                       // on recule jusqu'à une frontière de
+    let n=size-1;                            // caractère : couper au milieu d'un
+    while(n>0&&(e[n]&0xC0)===0x80)n--;       // accent produirait un octet invalide
+    e=e.slice(0,n);
+  }
+  for(let i=0;i<size;i++)this.b.push(i<e.length?e[i]:0);
   return this;
 };
 function fitDef(w,local,gnum,fields){
@@ -4460,6 +4465,93 @@ function wktToFit(s,vma){
   return out;
 }
 
+/* ══ ARCHIVE ZIP MINIMALE (méthode « stored ») ══
+   Un fichier FIT de séance pèse quelques centaines d'octets : compresser
+   n'apporterait rien, on se contente de les empaqueter pour que le coach
+   n'ait pas un téléchargement par séance. */
+let _crc32T=null;
+function crc32(bytes){
+  if(!_crc32T){
+    _crc32T=new Uint32Array(256);
+    for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);_crc32T[n]=c>>>0;}
+  }
+  let c=0xFFFFFFFF;
+  for(let i=0;i<bytes.length;i++)c=_crc32T[(c^bytes[i])&0xFF]^(c>>>8);
+  return (c^0xFFFFFFFF)>>>0;
+}
+function zipBuild(files){
+  const enc=new TextEncoder(), parts=[], cd=[];
+  const d=new Date();
+  const dosT=((d.getHours()&31)<<11)|((d.getMinutes()&63)<<5)|((d.getSeconds()/2)&31);
+  const dosD=(((d.getFullYear()-1980)&127)<<9)|(((d.getMonth()+1)&15)<<5)|(d.getDate()&31);
+  let off=0;
+  const w=(a,v,n)=>{for(let i=0;i<n;i++)a.push((v>>>(i*8))&0xFF);};
+  files.forEach(function(f){
+    const nm=enc.encode(f.name), c=crc32(f.data), local=[];
+    w(local,0x04034b50,4); w(local,20,2); w(local,0x0800,2); w(local,0,2);
+    w(local,dosT,2); w(local,dosD,2); w(local,c,4); w(local,f.data.length,4); w(local,f.data.length,4);
+    w(local,nm.length,2); w(local,0,2);
+    const head=Uint8Array.from(local);
+    parts.push(head,nm,f.data);
+    const ent=[];
+    w(ent,0x02014b50,4); w(ent,20,2); w(ent,20,2); w(ent,0x0800,2); w(ent,0,2);
+    w(ent,dosT,2); w(ent,dosD,2); w(ent,c,4); w(ent,f.data.length,4); w(ent,f.data.length,4);
+    w(ent,nm.length,2); w(ent,0,2); w(ent,0,2); w(ent,0,2); w(ent,0,2); w(ent,0,4); w(ent,off,4);
+    cd.push(Uint8Array.from(ent),nm);
+    off+=head.length+nm.length+f.data.length;
+  });
+  const cdSize=cd.reduce((a,x)=>a+x.length,0);
+  const end=[];
+  w(end,0x06054b50,4); w(end,0,2); w(end,0,2); w(end,files.length,2); w(end,files.length,2);
+  w(end,cdSize,4); w(end,off,4); w(end,0,2);
+  const all=parts.concat(cd,[Uint8Array.from(end)]);
+  const total=all.reduce((a,x)=>a+x.length,0);
+  const out=new Uint8Array(total);
+  let p=0; all.forEach(function(x){out.set(x,p);p+=x.length;});
+  return out;
+}
+
+/* ══ EXPORT DU PLAN VERS LA MONTRE ══ */
+/* VMA de référence : celle de l'athlète chargé d'abord — c'est pour lui qu'on
+   exporte — sinon le champ de la bibliothèque, qui sert aux essais. */
+function wktVma(){
+  if(S.vma&&S.vma>=6&&S.vma<=35)return {v:S.vma,who:S.pseudo||''};
+  const l=(typeof libVmaVal==='function')?libVmaVal():null;
+  return l?{v:l,who:''}:null;
+}
+function wktFindSession(title){
+  const all=LIB_SESSIONS.concat((typeof CUSTOM_SESSIONS!=='undefined'&&CUSTOM_SESSIONS)||[]);
+  return all.find(function(x){return x.title===title;})||null;
+}
+function wktDl(bytes,name,mime){
+  const url=URL.createObjectURL(new Blob([bytes],{type:mime||'application/octet-stream'}));
+  const a=document.createElement('a');
+  a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+/* Empaquette toutes les séances placées au calendrier, une par jour planifié,
+   préfixées de leur date pour que l'athlète sache laquelle faire quand. */
+function wktExportPlan(){
+  const vm=wktVma();
+  if(!vm){alert('Charge un athlète (ou renseigne une VMA dans la bibliothèque) : c’est elle qui cale les allures cibles.');return;}
+  const files=[], absents=[];
+  Object.keys(_plSessions).sort().forEach(function(iso){
+    (_plSessions[iso]||[]).forEach(function(sx,i){
+      const s=wktFindSession(sx.t);
+      if(!s){absents.push(sx.t);return;}
+      const jm=iso.slice(8,10)+'/'+iso.slice(5,7);
+      const dated=Object.assign({},s,{title:jm+' · '+s.title});
+      files.push({name:iso.slice(5).replace('-','')+(i?'-'+(i+1):'')+'-'+wktSlug(s.title)+'.fit',
+                  data:wktToFit(dated,vm.v)});
+    });
+  });
+  if(!files.length){alert('Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.');return;}
+  const who=vm.who?wktSlug(vm.who):'athlete';
+  wktDl(zipBuild(files),'redlab-'+who+'-seances.zip','application/zip');
+  if(absents.length)alert('Séances introuvables dans la bibliothèque, non exportées :\n· '+absents.join('\n· '));
+}
+
 function wktSlug(t){
   return String(t||'seance').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'seance';
@@ -4469,14 +4561,10 @@ function wktSlug(t){
 function wktExport(kind,idx){
   const s=(kind==='c')?CUSTOM_SESSIONS[idx]:LIB_SESSIONS[idx];
   if(!s)return;
-  const vma=libVmaVal();
-  if(!vma){alert('Renseigne une VMA en haut de la bibliothèque : c’est elle qui cale les allures cibles de la séance.');return;}
-  const bytes=wktToFit(s,vma);
-  const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
-  const a=document.createElement('a');
-  a.href=url; a.download=wktSlug(s.title)+'.fit';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  const vm=wktVma();
+  if(!vm){alert('Charge un athlète (ou renseigne une VMA en haut de la bibliothèque) : c’est elle qui cale les allures cibles de la séance.');return;}
+  const nom=(vm.who?wktSlug(vm.who)+'-':'')+wktSlug(s.title)+'.fit';
+  wktDl(wktToFit(s,vm.v),nom);
 }
 
 /* ══ SÉANCES PERSO — parseur de notation libre ══ */
@@ -6610,6 +6698,7 @@ function plCalendarHTML(p,weeks){
   var hasOv=(Object.keys(_plVolOverride).length||Object.keys(_plRecOverride).length);
   var nSess=Object.keys(_plSessions).reduce(function(a,k){return a+((_plSessions[k]&&_plSessions[k].length)||0);},0);
   var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +(nSess?'<button type="button" class="plc-send" onclick="wktExportPlan()" title="Télécharger toutes les séances du calendrier au format montre">↓ Séances montre ('+nSess+')</button>':'')
     +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
     +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':'')+'</div></div>';
   return head+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
