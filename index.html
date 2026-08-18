@@ -1054,6 +1054,10 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .lib-theme-hd::before{content:'';width:14px;height:3px;border-radius:2px;background:var(--thc,var(--orange))}
 .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
 .lib-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.lib-wkt-row{margin-top:12px}
+.lib-wkt{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;border:1px solid var(--border2);background:rgba(255,255,255,0.04);color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.lib-wkt:hover{border-color:var(--orange);color:var(--orange);background:rgba(255,107,26,0.08)}
+.lib-wkt svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .lib-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .lib-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:8px}
 .lib-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.2px;line-height:1.2}
@@ -4233,6 +4237,9 @@ function libCard(s,vma,opts){
   const od=libOrderOf(s);
   const phTxt=od?('Étape '+od.n+' · '+od.when):ph.short;
   const delBtn=opts.del?'<button class="lib-del" title="Supprimer" onclick="libDeleteSession(\''+s.id+'\')">✕</button>':'';
+  const _kind=opts.del?'c':'l', _idx=(opts.del?CUSTOM_SESSIONS:LIB_SESSIONS).indexOf(s);
+  const wktBtn='<button type="button" class="lib-wkt" onclick="wktExport(\''+_kind+'\','+_idx+')" title="Télécharger la séance au format montre (.fit)">'
+    +'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><polyline points="12 9.5 12 12 13.8 13.2"/><path d="M9 3h6M9 21h6"/></svg>Montre</button>';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
   const blocks=s.blocks.map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
@@ -4241,6 +4248,7 @@ function libCard(s,vma,opts){
     '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
+    '<div class="lib-wkt-row">'+wktBtn+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
     (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
@@ -4267,6 +4275,206 @@ function renderLibCards(){
   });
   box.innerHTML=html||'<div class="empty">Aucune séance.</div>';
 }
+/* ══ EXPORT D'UNE SÉANCE VERS LA MONTRE (fichier .FIT) ══
+   Le FIT est un format commun à Garmin, Coros, Polar et Suunto : un seul
+   encodeur sert toutes les marques. On n'écrit ici que le sous-ensemble
+   « séance » — file_id, workout, workout_step — nettement plus simple qu'une
+   activité : pas d'horodatage compressé, pas de champ développeur. */
+
+const FIT_BT={enum:0x00,u8:0x02,u16:0x84,u32:0x86,str:0x07};
+const FIT_INV={0x00:0xFF,0x02:0xFF,0x84:0xFFFF,0x86:0xFFFFFFFF};
+/* Table de CRC 16 bits propre au FIT (demi-octet par demi-octet). */
+const FIT_CRC_T=[0x0000,0xCC01,0xD801,0x1400,0xF001,0x3C00,0x2800,0xE401,
+                 0xA001,0x6C00,0x7800,0xB401,0x5000,0x9C01,0x8801,0x4400];
+function fitCrc(bytes){
+  let crc=0;
+  for(let i=0;i<bytes.length;i++){
+    const b=bytes[i];
+    let t=FIT_CRC_T[crc&0xF];
+    crc=((crc>>4)&0x0FFF)^t^FIT_CRC_T[b&0xF];
+    t=FIT_CRC_T[crc&0xF];
+    crc=((crc>>4)&0x0FFF)^t^FIT_CRC_T[(b>>4)&0xF];
+  }
+  return crc&0xFFFF;
+}
+function FitBuf(){this.b=[];}
+FitBuf.prototype.u8=function(v){this.b.push(v&0xFF);return this;};
+FitBuf.prototype.u16=function(v){this.b.push(v&0xFF,(v>>8)&0xFF);return this;};
+FitBuf.prototype.u32=function(v){this.b.push(v&0xFF,(v>>8)&0xFF,(v>>16)&0xFF,(v>>>24)&0xFF);return this;};
+FitBuf.prototype.str=function(s,size){
+  const e=new TextEncoder().encode(s||'');
+  for(let i=0;i<size;i++)this.b.push(i<size-1&&i<e.length?e[i]:0);
+  return this;
+};
+function fitDef(w,local,gnum,fields){
+  w.u8(0x40|local).u8(0).u8(0).u16(gnum).u8(fields.length);
+  fields.forEach(f=>{w.u8(f.n).u8(f.size).u8(f.bt);});
+}
+function fitRow(w,local,fields){
+  w.u8(local);
+  fields.forEach(f=>{
+    const v=(f.v==null)?(f.bt===FIT_BT.str?'':FIT_INV[f.bt]):f.v;
+    if(f.bt===FIT_BT.str)w.str(v,f.size);
+    else if(f.size===1)w.u8(v);
+    else if(f.size===2)w.u16(v);
+    else w.u32(v);
+  });
+}
+/* Époque FIT : 31/12/1989 00:00 UTC. */
+function fitNow(){return Math.max(0,Math.floor(Date.now()/1000)-631065600);}
+
+/* — Lecture des durées écrites à la main —
+   « 2’30 », « 3–4 min », « 45s », « 1 km »… On retient la correspondance qui
+   apparaît en PREMIER dans le texte : « 55s marche (2’15 après la série) »
+   parle bien d'une récup de 55 s, pas de 2’15. Une fourchette est ramenée à sa
+   borne basse. Un texte non convertible donne une étape libre (appui sur le
+   bouton tour) plutôt qu'une durée inventée. */
+function wktParseDur(txt){
+  if(!txt||txt==='—')return null;
+  const t=String(txt).toLowerCase().replace(/[’′]/g,"'").replace(/[–—]/g,'-');
+  if(/enchain|enchaîn|sans pause/.test(t))return null;   // pas d'étape du tout
+  const pats=[
+    [/(\d+)\s*-\s*\d+\s*km\b/,        m=>({dur:'distance',val:+m[1]*1000})],
+    [/(\d+(?:[.,]\d+)?)\s*km\b/,      m=>({dur:'distance',val:Math.round(parseFloat(m[1].replace(',','.'))*1000)})],
+    [/(\d+)\s*'\s*(\d{1,2})(?!\d)/,   m=>({dur:'time',val:+m[1]*60 + +m[2]})],
+    [/(\d+)\s*-\s*\d+\s*(?:'|min\b)/, m=>({dur:'time',val:+m[1]*60})],
+    [/(\d+)\s*(?:'|min\b)/,           m=>({dur:'time',val:+m[1]*60})],
+    [/(\d+)\s*s\b/,                   m=>({dur:'time',val:+m[1]})],
+    [/(\d+)\s*m\b/,                   m=>({dur:'distance',val:+m[1]})]
+  ];
+  let best=null;
+  pats.forEach(function(p){
+    const m=t.match(p[0]);
+    if(m&&(best===null||m.index<best.i))best={i:m.index,r:p[1](m)};
+  });
+  return best?best.r:{dur:'open'};
+}
+/* Certains blocs portent leur nombre de séries dans le libellé seulement
+   (« 3 × (1000-600-400) ») : on le récupère plutôt que de le perdre. */
+function wktLabelReps(lbl){
+  if(!lbl)return 1;
+  const m=String(lbl).replace(/[–—]/g,'-').match(/^\s*(\d+)(?:\s*(?:à|-)\s*\d+)?\s*[×x]\s*/i);
+  return m?+m[1]:1;
+}
+/* % de VMA → fenêtre de vitesse en mm/s (unité des cibles FIT).
+   Une valeur unique devient une fourchette de ±2 points, sinon la montre
+   réclamerait une allure au centième près. */
+function wktSpeed(vma,pct){
+  if(pct==null||!vma)return null;
+  const lo=Array.isArray(pct)?pct[0]:pct-2, hi=Array.isArray(pct)?pct[1]:pct+2;
+  return {lo:Math.round(vma*lo/100/3.6*1000),hi:Math.round(vma*hi/100/3.6*1000)};
+}
+function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);}
+
+/* Séance RedLab → liste d'étapes FIT, boucles imbriquées comprises. */
+function wktSteps(s,vma){
+  const st=[];
+  const add=o=>{st.push(o);return st.length-1;};
+  const warm=wktParseDur(s.warm);
+  if(warm)add({name:'Échauffement',dur:warm.dur,val:warm.val,int:'warmup'});
+
+  (s.blocks||[]).forEach(function(b){
+    const sets=Math.max(1,b.sets||wktLabelReps(b.label));
+    const reps=Math.max(1,b.r||1);
+    const setStart=st.length, repStart=st.length;
+
+    if(b.segs&&b.segs.length){
+      b.segs.forEach(function(sg){
+        add({name:wktName(sg.lbl||fDist(sg.d)),dur:'distance',val:sg.d,sp:wktSpeed(vma,sg.pct),int:'interval'});
+      });
+    } else {
+      let dur='open',val=null;
+      if(b.d){dur='distance';val=b.d;}
+      else if(b.sec){dur='time';val=b.sec;}
+      else if(b.m){dur='time';val=b.m*60;}
+      add({name:wktName(b.label||b.lbl||(b.d?fDist(b.d):'Effort')),dur:dur,val:val,
+           sp:wktSpeed(vma,b.pct),int:(b.m&&b.m>=20)?'active':'interval'});
+    }
+    const rc=wktParseDur(b.rec);
+    if(rc)add({name:'Récup',dur:rc.dur,val:rc.val,int:'recovery'});
+    if(reps>1)add({dur:'repeat',from:repStart,count:reps});
+
+    if(sets>1){
+      const rs=wktParseDur(b.recSet);
+      if(rs)add({name:'Récup série',dur:rs.dur,val:rs.val,int:'rest'});
+      add({dur:'repeat',from:setStart,count:sets});
+    }
+  });
+
+  const cool=wktParseDur(s.cool);
+  if(cool)add({name:'Retour au calme',dur:cool.dur,val:cool.val,int:'cooldown'});
+  return st;
+}
+
+const WKT_DUR={time:0,distance:1,open:5,repeat:6};
+const WKT_INT={active:0,rest:1,warmup:2,cooldown:3,recovery:4,interval:5,other:6};
+
+/* Encode la séance en fichier FIT (Uint8Array). */
+function wktToFit(s,vma){
+  const steps=wktSteps(s,vma);
+  const r=new FitBuf();
+
+  // file_id : type 5 = séance
+  fitDef(r,0,0,[{n:0,size:1,bt:FIT_BT.enum},{n:1,size:2,bt:FIT_BT.u16},{n:2,size:2,bt:FIT_BT.u16},
+                {n:3,size:4,bt:FIT_BT.u32},{n:4,size:4,bt:FIT_BT.u32}]);
+  fitRow(r,0,[{bt:FIT_BT.enum,size:1,v:5},{bt:FIT_BT.u16,size:2,v:255},{bt:FIT_BT.u16,size:2,v:0},
+              {bt:FIT_BT.u32,size:4,v:(Date.now()%4294967294)+1},{bt:FIT_BT.u32,size:4,v:fitNow()}]);
+
+  // workout : sport 1 = course à pied
+  fitDef(r,1,26,[{n:4,size:1,bt:FIT_BT.enum},{n:6,size:2,bt:FIT_BT.u16},{n:8,size:40,bt:FIT_BT.str}]);
+  fitRow(r,1,[{bt:FIT_BT.enum,size:1,v:1},{bt:FIT_BT.u16,size:2,v:steps.length},
+              {bt:FIT_BT.str,size:40,v:s.title||'Séance'}]);
+
+  // workout_step : une seule définition, les champs inutiles prennent la valeur « invalide »
+  fitDef(r,2,27,[{n:254,size:2,bt:FIT_BT.u16},{n:0,size:24,bt:FIT_BT.str},{n:1,size:1,bt:FIT_BT.enum},
+                 {n:2,size:4,bt:FIT_BT.u32},{n:3,size:1,bt:FIT_BT.enum},{n:4,size:4,bt:FIT_BT.u32},
+                 {n:5,size:4,bt:FIT_BT.u32},{n:6,size:4,bt:FIT_BT.u32},{n:7,size:1,bt:FIT_BT.enum}]);
+  steps.forEach(function(st,i){
+    let durT,durV,tgtT=null,tgtV=null,lo=null,hi=null,inten=null,nm=st.name||null;
+    if(st.dur==='repeat'){
+      durT=WKT_DUR.repeat; durV=st.from; tgtV=st.count; nm=null;
+    } else {
+      durT=WKT_DUR[st.dur];
+      durV=st.dur==='time'?st.val*1000:(st.dur==='distance'?st.val*100:null);
+      inten=WKT_INT[st.int];
+      if(st.sp){tgtT=0;tgtV=0;lo=st.sp.lo;hi=st.sp.hi;}   // 0 = vitesse, cible personnalisée
+      else tgtT=2;                                        // 2 = libre
+    }
+    fitRow(r,2,[{bt:FIT_BT.u16,size:2,v:i},{bt:FIT_BT.str,size:24,v:nm},{bt:FIT_BT.enum,size:1,v:durT},
+                {bt:FIT_BT.u32,size:4,v:durV},{bt:FIT_BT.enum,size:1,v:tgtT},{bt:FIT_BT.u32,size:4,v:tgtV},
+                {bt:FIT_BT.u32,size:4,v:lo},{bt:FIT_BT.u32,size:4,v:hi},{bt:FIT_BT.enum,size:1,v:inten}]);
+  });
+
+  const head=new FitBuf();
+  head.u8(14).u8(0x20).u16(2140).u32(r.b.length).u8(46).u8(70).u8(73).u8(84);
+  head.u16(fitCrc(head.b));
+  const all=head.b.concat(r.b);
+  const out=new Uint8Array(all.length+2);
+  out.set(all,0);
+  const c=fitCrc(all);
+  out[all.length]=c&0xFF; out[all.length+1]=(c>>8)&0xFF;
+  return out;
+}
+
+function wktSlug(t){
+  return String(t||'seance').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'seance';
+}
+/* Télécharge la séance au format montre. La VMA vient du champ de la
+   bibliothèque : sans elle, les allures cibles n'auraient aucun sens. */
+function wktExport(kind,idx){
+  const s=(kind==='c')?CUSTOM_SESSIONS[idx]:LIB_SESSIONS[idx];
+  if(!s)return;
+  const vma=libVmaVal();
+  if(!vma){alert('Renseigne une VMA en haut de la bibliothèque : c’est elle qui cale les allures cibles de la séance.');return;}
+  const bytes=wktToFit(s,vma);
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
+  const a=document.createElement('a');
+  a.href=url; a.download=wktSlug(s.title)+'.fit';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
 /* ══ SÉANCES PERSO — parseur de notation libre ══ */
 const CUSTOM_KEY='redlab_custom_sessions_v1';
 function loadCustomSessions(){try{return JSON.parse(localStorage.getItem(CUSTOM_KEY)||'[]');}catch(e){return[];}}
