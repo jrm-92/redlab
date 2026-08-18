@@ -1964,7 +1964,7 @@ table.lm-laps tbody tr{cursor:pointer}
           <div class="db-section" id="db-plan-section" style="display:none">
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-              <div class="db-section-title">Périodisation de la charge</div>
+              <div class="db-section-title">Calendrier de préparation</div>
             </div>
             <div class="card" style="padding:20px"><div id="db-plan"></div></div>
           </div>
@@ -6245,7 +6245,7 @@ function plBarHTML(p,ph){return ph.map(x=>'<div title="'+plPhLabel(x[0])+' · '+
 function plLoadHTML(p,wk,opts){
   opts=opts||{};
   const cid=opts.cid||'pl-vol-canvas';
-  const title=opts.noTitle?'':'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Périodisation de la charge</div>';
+  const title=opts.noTitle?'':'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Calendrier de préparation</div>';
   const legend=[['base','Base'],['dev','Développement'],['spe','Spécifique'],['aff','Affûtage']].map(l=>'<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted2)"><i style="width:10px;height:10px;border-radius:50%;background:'+PL_PHC[l[0]]+'"></i>'+l[1]+'</span>').join('');
   return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
     +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
