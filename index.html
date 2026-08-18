@@ -1007,12 +1007,13 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .gr-link a:hover{text-decoration:underline;text-underline-offset:3px}
 .gr-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .gr-left{display:flex;align-items:center;gap:16px;min-width:0;flex:1 1 auto}
-.gr-main{text-align:center;flex:1 1 auto}
-.gr-zone-r{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:1 1 auto}
+.gr-main{text-align:left;flex:1 1 auto}
+.gr-zone-r{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:0 0 auto}
+.gr-dist{font-size:46px;font-weight:900;color:#60A5FA;letter-spacing:-2.5px;line-height:1;white-space:nowrap}
 .gr-count{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
 .gr-weeks{font-size:12px;font-weight:700;color:var(--muted2);white-space:nowrap}
 .gr-chip{padding:7px 14px;border-radius:20px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.38);color:#60A5FA;font-size:14px;font-weight:900;letter-spacing:.5px;white-space:nowrap}
-@media(max-width:560px){.goal-readout-card{gap:12px}.gr-time{font-size:22px}.gr-name{font-size:20px}.gr-left,.gr-main,.gr-zone-r{flex:1 1 100%;justify-content:center;text-align:center}.gr-left{justify-content:flex-start;gap:10px}.gr-chip{padding:5px 10px;font-size:12px}.gr-weeks{font-size:10.5px}}
+@media(max-width:560px){.goal-readout-card{gap:12px}.gr-time{font-size:22px}.gr-name{font-size:20px}.gr-left{flex:1 1 100%;justify-content:flex-start;gap:10px}.gr-main{flex:1 1 auto;text-align:left}.gr-zone-r{flex:0 0 auto;justify-content:flex-end}.gr-dist{font-size:34px;letter-spacing:-1.5px}.gr-chip{padding:5px 10px;font-size:12px}.gr-weeks{font-size:10.5px}}
 @media(max-width:400px){.gr-name{font-size:17px}.gr-chip{padding:4px 8px;font-size:11px}.gr-weeks{font-size:10px}}
 .goal-time input::-webkit-inner-spin-button,.goal-time input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 /* BIBLIOTHEQUE */
@@ -4994,6 +4995,7 @@ function renderGoalSection(){
 }
 const GOAL_DIST={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
 const GOAL_LBL={'5k':'5 km','10k':'10 km','semi':'Semi-marathon','mara':'Marathon'};
+const GOAL_SHORT={'5k':'5K','10k':'10K','semi':'21K','mara':'42K'};
 function goalEdit(){window._goalEdit=true;renderGoalSection();}
 function goalDone(){window._goalEdit=false;renderGoalSection();if(typeof buildRaces==='function')buildRaces();}
 function goalReadout(){
@@ -5022,7 +5024,7 @@ function goalReadout(){
     +'</div>'
     +'<div class="gr-main"><div class="gr-lbl">Chrono visé</div><div class="gr-time">'+fHMS(g.t)+'</div>'
     +(pace?'<div class="gr-sub">'+pace+' · '+kmh+'</div>':'<div class="gr-sub">Choisis une distance pour l\u2019allure</div>')+'</div>'
-    +'<div class="gr-zone-r"></div>'
+    +'<div class="gr-zone-r">'+(GOAL_SHORT[g.id]?'<div class="gr-dist">'+GOAL_SHORT[g.id]+'</div>':'')+'</div>'
     +(g.url?(function(){var u=/^https?:\/\//i.test(g.url)?g.url:'https://'+g.url;var host=u.replace(/^https?:\/\//i,'').replace(/\/$/,'');return '<div class="gr-link"><a href="'+u.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'+host+'<svg viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>';})():'')
     +'</div>';
 }
