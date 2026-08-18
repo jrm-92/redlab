@@ -500,7 +500,6 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .an-past::-webkit-scrollbar-thumb{background:rgba(255,107,26,.45);border-radius:8px}
 .an-chip{flex:0 0 auto;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 15px;cursor:pointer;font-family:var(--font);transition:all .15s;min-width:150px}
 .an-chip:hover{border-color:rgba(255,107,26,.45);background:var(--card2)}
-.an-chip.on{border-color:var(--orange);background:rgba(255,107,26,.1)}
 .an-chip-n{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
 .an-chip-s{font-size:11.5px;color:var(--muted2);margin-top:3px;font-variant-numeric:tabular-nums}
 .an-empty{color:var(--muted2);font-size:13.5px;padding:20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px}
@@ -3145,7 +3144,16 @@ function anChartSVG(c){
 function anSelect(id){window._anSel=id;renderDashAnalyses();}
 function renderDashAnalyses(){
   const el=document.getElementById('db-analyses');if(!el)return;
-  const list=S.analyses||[];
+  // Nettoie au passage les doublons hérités d'avant la déduplication à l'ajout.
+  const list=dedupeAnalyses(S.analyses);
+  if(list.length!==(S.analyses||[]).length){
+    S.analyses=list;
+    if(S.pseudo){
+      const athletes=getAthletes();
+      const i=athletes.findIndex(a=>a.pseudo===S.pseudo);
+      if(i>=0){athletes[i].analyses=list;_saveAthletes(athletes);}
+    }
+  }
   if(!list.length){el.innerHTML='<div class="an-empty">Aucune analyse enregistrée. Depuis l’onglet Montre, ouvre un fichier .FIT/.TCX, choisis un intervalle et clique sur « Ajouter au profil » pour l’épingler ici.</div>';return;}
   const cur=list.find(a=>a.id===window._anSel)||list[0];
   const charts=(cur.charts||[]).filter(c=>c&&c.pts);
@@ -3166,10 +3174,12 @@ function renderDashAnalyses(){
     +(charts.length?'<div class="an-metrics">'+charts.map(anChartSVG).join('')+'</div>'
       :'<div class="an-nochart">Aucun graphique sélectionné pour cette analyse.</div>')
     +'</div>';
-  const past=list.length>1?'<div class="an-past-t">Autres analyses</div><div class="an-past">'
-    +list.map(a=>'<button type="button" class="an-chip'+(a.id===cur.id?' on':'')+'" onclick="anSelect('+a.id+')">'
+  // « Autres analyses » ne liste que les autres : celle du panneau n'y figure pas.
+  const others=list.filter(a=>a.id!==cur.id);
+  const past=others.length?'<div class="an-past-t">Autres analyses</div><div class="an-past">'
+    +others.map(a=>'<button type="button" class="an-chip" onclick="anSelect('+a.id+')">'
       +'<div class="an-chip-n">'+(a.source||'Séance')+'</div>'
-      +'<div class="an-chip-s">'+[a.time,a.distance].filter(Boolean).join(' · ')+'</div></button>').join('')
+      +'<div class="an-chip-s">'+[a.interval,a.time].filter(Boolean).join(' · ')+'</div></button>').join('')
     +'</div>':'';
   el.innerHTML=hero+past;
 }
@@ -3538,6 +3548,18 @@ function deleteAthlete(id){
   renderAthletes();
 }
 
+/* Une seule analyse par couple séance + intervalle : re-sauvegarder le même remplace
+   l'ancienne au lieu d'empiler un doublon. La liste étant du plus récent au plus ancien,
+   garder la première occurrence garde la plus récente. */
+function dedupeAnalyses(list){
+  const seen=new Set(),out=[];
+  (list||[]).forEach(a=>{
+    const k=(a.source||'')+'|'+(a.interval||'');
+    if(seen.has(k))return;
+    seen.add(k);out.push(a);
+  });
+  return out;
+}
 // Ajoute une analyse (graphique du lecteur FIT/TCX) au profil d'un athlète, sans toucher au profil actif sauf s'il s'agit du même.
 function addAnalysisToAthlete(athleteId,entry){
   const athletes=getAthletes();
@@ -3545,6 +3567,7 @@ function addAnalysisToAthlete(athleteId,entry){
   if(idx<0)return false;
   if(!Array.isArray(athletes[idx].analyses))athletes[idx].analyses=[];
   athletes[idx].analyses.unshift(entry);
+  athletes[idx].analyses=dedupeAnalyses(athletes[idx].analyses);
   _saveAthletes(athletes);
   if(S.pseudo&&S.pseudo===athletes[idx].pseudo){
     S.analyses=athletes[idx].analyses;
