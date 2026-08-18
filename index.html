@@ -498,10 +498,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .an-past{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) transparent}
 .an-past::-webkit-scrollbar{height:8px}
 .an-past::-webkit-scrollbar-thumb{background:rgba(255,107,26,.45);border-radius:8px}
-.an-chip{flex:0 0 auto;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 15px;cursor:pointer;font-family:var(--font);transition:all .15s;min-width:150px}
+.an-chip{position:relative;flex:0 0 auto;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 38px 11px 15px;cursor:pointer;font-family:var(--font);transition:all .15s;min-width:150px}
 .an-chip:hover{border-color:rgba(255,107,26,.45);background:var(--card2)}
+.an-chip:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
 .an-chip-n{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
 .an-chip-s{font-size:11.5px;color:var(--muted2);margin-top:3px;font-variant-numeric:tabular-nums}
+.an-chip-x{position:absolute;top:6px;right:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:6px;color:var(--muted2);font-family:var(--font);font-size:17px;line-height:1;cursor:pointer;padding:0;transition:all .15s}
+.an-chip-x:hover{color:#F87171;background:rgba(248,113,113,.12)}
 .an-empty{color:var(--muted2);font-size:13.5px;padding:20px;text-align:center;background:var(--card);border:1px dashed var(--border);border-radius:14px}
 @media(max-width:600px){.an-kpi{padding:15px 8px}.an-kpi-val{font-size:22px}.an-name{font-size:17px}.an-hd,.an-metric{padding-left:16px;padding-right:16px}.an-m-stats{gap:12px;font-size:11.5px}}
 .rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
@@ -3211,9 +3214,14 @@ function renderDashAnalyses(){
   // « Autres analyses » ne liste que les autres : celle du panneau n'y figure pas.
   const others=list.filter(a=>a.id!==cur.id);
   const past=others.length?'<div class="an-past-t">Autres analyses</div><div class="an-past">'
-    +others.map(a=>'<button type="button" class="an-chip" onclick="anSelect('+a.id+')">'
+    +others.map(a=>'<div class="an-chip" role="button" tabindex="0" onclick="anSelect('+a.id+')"'
+      +' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();anSelect('+a.id+')}">'
       +'<div class="an-chip-n">'+(a.source||'Séance')+'</div>'
-      +'<div class="an-chip-s">'+[a.interval,a.time].filter(Boolean).join(' · ')+'</div></button>').join('')
+      +'<div class="an-chip-s">'+[a.interval,a.time].filter(Boolean).join(' · ')+'</div>'
+      // stopPropagation : sans ça, le clic sur × sélectionnerait aussi l'analyse.
+      +'<button type="button" class="an-chip-x" title="Supprimer cette analyse"'
+      +' onclick="event.stopPropagation();deleteAnalysis('+a.id+')">&times;</button>'
+      +'</div>').join('')
     +'</div>':'';
   el.innerHTML=hero+past;
 }
