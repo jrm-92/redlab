@@ -474,7 +474,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
 .an-hd{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .an-hd-l{flex:1 1 200px;min-width:0}
 .an-name{font-size:21px;font-weight:900;color:var(--text);letter-spacing:-.3px;line-height:1.15}
-.an-interval{display:inline-block;margin-top:7px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--orange);background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.3);border-radius:20px;padding:3px 10px}
+.an-interval{font-size:12.5px;color:var(--muted2);margin-top:5px}
 .an-hd-r{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:auto}
 .an-date{font-size:12px;color:var(--muted2);white-space:nowrap}
 .an-del{background:none;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;font-size:12px;font-weight:700;padding:6px 12px;white-space:nowrap;border-radius:8px;transition:all .15s;font-family:var(--font)}
@@ -2506,9 +2506,7 @@ function renderPredCards(){
   const el=document.getElementById('pred-cards');
   if(!el) return;
   const vma=S.vma;
-  const badgeEl=document.getElementById('db-pred-badge');
-  if(!vma){el.innerHTML='';if(badgeEl)badgeEl.textContent='';return;}
-  if(badgeEl) badgeEl.textContent=S.csKmh?'Modèle CS · D′':'Fourchette VMA';
+  if(!vma){el.innerHTML='';return;}
   const expl=document.getElementById('pred-explain');
   if(expl){
     expl.innerHTML=S.csKmh
@@ -3950,8 +3948,6 @@ function renderDashPlan(){
   _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;_plRatio=save.ratio;_plBaseW=save.baseW;_plVolOverride=save.volOv;_plRecOverride=save.recOv;_plSessions=save.sess;
   box.innerHTML=html;
   plDrawVol(p,weeks,'db-vol-canvas');
-  const bd=document.getElementById('db-plan-badge');
-  if(bd){bd.textContent=wEff+' sem';}
   sec.style.display='block';
 }
 
