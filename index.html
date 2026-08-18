@@ -2019,6 +2019,7 @@ table.lm-laps tbody tr{cursor:pointer}
               <div id="perf-legend" class="perf-legend"></div>
               <div style="position:relative;height:340px"><canvas id="perf-chart"></canvas></div>
               <div id="perf-empty" style="display:none;text-align:center;color:var(--muted2);font-size:13px;padding:10px 0 0;line-height:1.5">Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.</div>
+              <div id="perf-note" style="text-align:center;color:var(--muted2);font-size:12px;padding:12px 0 0;line-height:1.5"></div>
             </div>
           </div>
 
@@ -3265,14 +3266,38 @@ function recSeconds(id){
   return T>=30?T:null;
 }
 const PERF_WINDOW_DAYS=183; // ~6 mois
+/* Horodatage limite : seules les performances postérieures alimentent la courbe. */
+function perfCutoffTs(){return Date.now()-PERF_WINDOW_DAYS*864e5;}
+/* Date d'un record (AAAA-MM-JJ) → horodatage, ou null si absente ou invalide. */
+function recDateTs(rec){
+  if(!rec||!rec.date)return null;
+  const t=Date.parse(rec.date+'T12:00:00');
+  return isFinite(t)?t:null;
+}
+/* Un record saisi ne compte que s'il est daté ET de moins de PERF_WINDOW_DAYS.
+   Sans date on ne peut pas prouver qu'il est récent : il est donc écarté. */
+function recIsRecent(rec){const t=recDateTs(rec);return t!=null&&t>=perfCutoffTs();}
 function chartSeconds(id){
-  const rh=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id);
-  if(rh.length){
-    const valid=rh.filter(r=>r.sec>=30);
-    if(!valid.length)return null;
-    return Math.min.apply(null,valid.map(r=>r.sec));
-  }
-  return recSeconds(id);
+  const cut=perfCutoffTs();
+  // Historique de courses : on ne garde que les résultats dans la fenêtre.
+  const valid=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id&&r.ts>=cut&&r.sec>=30);
+  if(valid.length)return Math.min.apply(null,valid.map(r=>r.sec));
+  // Sinon, le record saisi à la main — s'il est daté de moins de six mois.
+  return recIsRecent((S.records||{})[id])?recSeconds(id):null;
+}
+/* Nombre de distances dont la performance existe mais a été écartée (trop
+   ancienne ou sans date), pour l'expliquer sous le graphique. */
+function perfStaleCount(){
+  const cut=perfCutoffTs();
+  let n=0;
+  CHART_DISTS.forEach(r=>{
+    if(chartSeconds(r.id)!=null)return;
+    const oldRace=(S.raceHistory||[]).some(x=>x&&x.dist===r.id&&x.sec>=30&&(x.ts==null||x.ts<cut));
+    const rec=(S.records||{})[r.id];
+    const oldRec=!!rec&&((+rec.hh||0)*3600+(+rec.mm||0)*60+(+rec.ss||0))>=30;
+    if(oldRace||oldRec)n++;
+  });
+  return n;
 }
 function renderChart(){
   const cv=document.getElementById('perf-chart');
@@ -3286,13 +3311,21 @@ function renderChart(){
   const paceLo=CD.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
   const recPace=CD.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
   const hasRec=recPace.some(v=>v!=null);
+  const stale=perfStaleCount();
   const emptyEl=document.getElementById('perf-empty');
   if(emptyEl){
     emptyEl.style.display=hasRec?'none':'block';
     const hasHist=(S.raceHistory||[]).some(r=>r&&r.ts!=null);
-    emptyEl.textContent=hasHist
-      ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
-      : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.";
+    emptyEl.textContent=stale
+      ? "Aucun résultat de moins de 6 mois : la courbe n'affiche que les performances récentes. Renseigne la date d'un record pour le réintégrer."
+      : (hasHist
+        ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
+        : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.");
+  }
+  const noteEl=document.getElementById('perf-note');
+  if(noteEl){
+    noteEl.textContent='Seuls les résultats de moins de 6 mois alimentent la courbe.'
+      +(stale?' · '+stale+' distance'+(stale>1?'s écartées':' écartée')+' (résultat trop ancien ou sans date).':'');
   }
   const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
   const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
@@ -3301,7 +3334,7 @@ function renderChart(){
     {label:'Prédiction (rapide)',data:paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,0.13)',borderWidth:2.5,pointRadius:0,tension:0.3,fill:'+1'},
     {label:'Prédiction (lente)', data:paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
     // Records — réel mesuré : gros points JAUNES cerclés, aucune ligne
-    {label:'Vos records',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
+    {label:'Records < 6 mois',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
   ]};
   const opts={
     responsive:true,maintainAspectRatio:false,
@@ -3329,7 +3362,7 @@ function buildPerfLegend(){
   const defs=[
     {i:0,c:'#FF6B1A',dash:false,dot:false,t:'Prédiction rapide'},
     {i:1,c:'#38BDF8',dash:true, dot:false,t:'Prédiction lente'},
-    {i:2,c:'#FACC15',dash:false,dot:true, t:'Vos records'},
+    {i:2,c:'#FACC15',dash:false,dot:true, t:'Records < 6 mois'},
   ];
   box.innerHTML=defs.map(d=>{
     const vis=perfChart.isDatasetVisible(d.i);
@@ -4005,7 +4038,7 @@ function _buildPDF(d){
   const CD=(typeof CHART_DISTS!=='undefined')?CHART_DISTS:[{id:'1500',nm:'1 500 m',d:1500,vmaLo:1.00,vmaHi:1.05},{id:'3000',nm:'3 000 m',d:3000,vmaLo:0.95,vmaHi:1.00},{id:'5k',nm:'5 km',d:5000,vmaLo:0.90,vmaHi:0.95},{id:'10k',nm:'10 km',d:10000,vmaLo:0.85,vmaHi:0.90},{id:'semi',nm:'Semi',d:21097.5,vmaLo:0.80,vmaHi:0.85},{id:'mara',nm:'Marathon',d:42195,vmaLo:0.75,vmaHi:0.80}];
   const cvMs=d.vma/3.6;
   const cHi=CD.map(r=>1000/(r.vmaHi*cvMs)), cLo=CD.map(r=>1000/(r.vmaLo*cvMs));
-  const cRec=CD.map(r=>{const v=(d.records||{})[r.id];if(!v)return null;const T=(+v.hh||0)*3600+(+v.mm||0)*60+(+v.ss||0);return T>=30?T/r.d*1000:null;});
+  const cRec=CD.map(r=>{const v=(d.records||{})[r.id];if(!v||!recIsRecent(v))return null;const T=(+v.hh||0)*3600+(+v.mm||0)*60+(+v.ss||0);return T>=30?T/r.d*1000:null;});
   const cHasRec=cRec.some(x=>x!=null);
   const cAll=cHi.concat(cLo).concat(cRec.filter(x=>x!=null));
   let cpn=Math.min.apply(null,cAll), cpx=Math.max.apply(null,cAll);
@@ -4020,7 +4053,7 @@ function _buildPDF(d){
   let cRecEls='';
   if(cHasRec){const rp=[];cRec.forEach((p,i)=>{if(p!=null)rp.push(CX(i).toFixed(1)+','+CY(p).toFixed(1));});
     cRecEls='<polyline points="'+rp.join(' ')+'" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linejoin="round"/>'+cRec.map((p,i)=>p!=null?'<circle cx="'+CX(i).toFixed(1)+'" cy="'+CY(p).toFixed(1)+'" r="5" fill="#F59E0B" stroke="#ffffff" stroke-width="2"/>':'').join('');}
-  const cleg='<g font-size="10.5" font-weight="700" fill="#475569"><line x1="150" y1="24" x2="172" y2="24" stroke="#FF6B1A" stroke-width="3"/><text x="178" y="27.5">Prédiction rapide</text><line x1="316" y1="24" x2="338" y2="24" stroke="#38BDF8" stroke-width="3" stroke-dasharray="5 4"/><text x="344" y="27.5">Prédiction lente</text><circle cx="487" cy="24" r="4.5" fill="#F59E0B" stroke="#ffffff" stroke-width="1.5"/><text x="498" y="27.5">'+(cHasRec?'Vos records':'Records (à saisir)')+'</text></g>';
+  const cleg='<g font-size="10.5" font-weight="700" fill="#475569"><line x1="150" y1="24" x2="172" y2="24" stroke="#FF6B1A" stroke-width="3"/><text x="178" y="27.5">Prédiction rapide</text><line x1="316" y1="24" x2="338" y2="24" stroke="#38BDF8" stroke-width="3" stroke-dasharray="5 4"/><text x="344" y="27.5">Prédiction lente</text><circle cx="487" cy="24" r="4.5" fill="#F59E0B" stroke="#ffffff" stroke-width="1.5"/><text x="498" y="27.5">'+(cHasRec?'Records < 6 mois':'Aucun record < 6 mois')+'</text></g>';
   const cyax='<text x="16" y="'+(cPT+cah/2).toFixed(0)+'" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="700" transform="rotate(-90 16 '+(cPT+cah/2).toFixed(0)+')">Allure (min/km) · plus haut = plus rapide</text>';
   const curveSvg='<svg viewBox="0 0 '+CW+' '+CH+'" width="100%" style="display:block"><rect x="0.5" y="0.5" width="'+(CW-1)+'" height="'+(CH-1)+'" rx="14" fill="#ffffff" stroke="#eef1f5"/>'+cgrid+cylab+cyax+'<path d="'+cband+'" fill="rgba(15,23,42,0.045)"/><polyline points="'+pLo.join(' ')+'" fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="6 5"/><polyline points="'+pHi.join(' ')+'" fill="none" stroke="#FF6B1A" stroke-width="2.5"/>'+cRecEls+cxlab+cleg+'</svg>';
   const curveHint='';
@@ -5238,7 +5271,8 @@ function exportAthleteView(returnDoc){
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
     csRender.toString(), csSet.toString(), csInit.toString(),
-    recSeconds.toString(), chartSeconds.toString(),
+    perfCutoffTs.toString(), recDateTs.toString(), recIsRecent.toString(),
+    recSeconds.toString(), chartSeconds.toString(), perfStaleCount.toString(),
     renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
     'var PL_PHC='+JSON.stringify(PL_PHC)+';',
