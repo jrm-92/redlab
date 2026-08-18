@@ -428,6 +428,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-ch button:hover{color:#F87171}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:9.5px;font-weight:800;padding:3px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
+  .plw-ch--ro{cursor:default}
+  .db-plan-cal{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
   .plc-grab{display:flex;align-items:center;gap:10px;margin:8px 0;padding:8px 12px;border-radius:9px;background:rgba(255,107,26,.10);border:1px solid rgba(255,107,26,.35);font-size:12.5px;font-weight:700;color:var(--orange)}
   .plc-grab button{background:none;border:1px solid rgba(255,107,26,.45);color:var(--orange);border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:800;padding:3px 10px;cursor:pointer;margin-left:auto}
   .plw-kmf,.plw-dlf{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted2)}
@@ -4044,11 +4046,18 @@ function renderDashPlan(){
   _plDate2=g.date;_plDi=null;_plW=wEff;
   const weeks=plWeeks(p,wEff), ph=plPhases(p,wEff);
   const html=plLoadHTML(p,weeks,{noTitle:true,cid:'db-vol-canvas'});
+  // Calendrier en lecture seule, construit ici et pas plus bas : la
+  // restauration des globales du plan vide _plSessions, et le calendrier
+  // s'afficherait alors sans aucune séance.
+  // plCalendarHTML exige une date de début, que le tableau de bord ne
+  // manipule pas — on la déduit de la première semaine calculée.
+  _plDate1=(weeks[0]&&weeks[0].d0)?[weeks[0].d0.getFullYear(),String(weeks[0].d0.getMonth()+1).padStart(2,'0'),String(weeks[0].d0.getDate()).padStart(2,'0')].join('-'):null;
+  const cal=plCalendarHTML(p,weeks,{ro:true});
   const _unit=plUnit();
   window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
   // restauration
   _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;_plRatio=save.ratio;_plBaseW=save.baseW;_plVolOverride=save.volOv;_plRecOverride=save.recOv;_plSessions=save.sess;
-  box.innerHTML=html;
+  box.innerHTML=html+'<div class="db-plan-cal">'+cal+'</div>';
   plDrawVol(p,weeks,'db-vol-canvas');
   sec.style.display='block';
 }
@@ -6751,7 +6760,12 @@ function plReasonHTML(p,weeks){
     ?'<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--border);font-size:13.5px;font-weight:800;color:'+p.col+'">'+r.t+'</div>'
     :'<div style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.55;margin-bottom:5px"><span style="color:'+(r.ok?'#34D399':'#FBBF24')+';font-weight:900;flex-shrink:0">'+(r.ok?'✓':'⚠')+'</span><span>'+r.t+'</span></div>').join('');
 }
-function plCalendarHTML(p,weeks){
+/* opts.ro : calendrier en lecture seule, pour le tableau de bord. Le tableau
+   de bord restaure les variables globales du plan juste après l'affichage —
+   une commande d'édition y modifierait un état déjà remplacé. L'édition reste
+   donc dans l'onglet Plan. */
+function plCalendarHTML(p,weeks,opts){
+  var RO=!!(opts&&opts.ro);
   if(!_plDate1) return '<div style="font-size:13px;color:var(--muted);padding:6px 0">Renseigne une date de début (ci-dessus) pour afficher le calendrier de la prépa.</div>';
   var pha=function(h,a){h=(h||'#94A3B8').replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';};
   var leg=['base','dev','spe','aff'].map(function(k){return '<span class="plc-lg"><span style="background:'+PL_PHC[k]+'"></span>'+PL_PHL[k]+'</span>';}).join('');
@@ -6778,6 +6792,7 @@ function plCalendarHTML(p,weeks){
         var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';
         var esc=String(sx.t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
         var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
+        if(RO)return '<div class="plw-ch plw-ch--ro" style="background:'+col+'20;border-left:3px solid '+col+'" title="'+esc+'"><span>'+esc+'</span></div>';
         return '<div class="plw-ch'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
           +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
@@ -6787,15 +6802,17 @@ function plCalendarHTML(p,weeks){
           +'<button type="button" class="plw-cp" title="Dupliquer" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
           +'<button type="button" title="Retirer" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button></div>';
       }).join('');
-      var drop=iso?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
+      var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
-      days+='<div class="plw-day'+(_plGrab&&iso?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+(iso?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
+      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
     }
     var meta='<div class="plw-meta">'
       +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+(wk.dates||'')+'</span></span>'
       +'<span class="plc-ph" style="color:'+c+'">'+plPhLabel(wk.ph)+'</span>'
-      +'<label class="plw-kmf">Charge <input type="number" min="0" step="1" value="'+wk.km+'" onchange="plVolSet('+wk.n+',this.value)"> km</label>'
-      +(wk.ph!=='aff'?'<label class="plw-dlf"><input type="checkbox" '+(wk.rec?'checked':'')+' onchange="plRecToggle('+wk.n+','+(wk.rec?1:0)+')"> Décharge</label>':'')
+      +(RO?'<span class="plw-kmf">Charge <b style="color:var(--text2)">'+wk.km+'</b> km</span>'
+          :'<label class="plw-kmf">Charge <input type="number" min="0" step="1" value="'+wk.km+'" onchange="plVolSet('+wk.n+',this.value)"> km</label>')
+      +(wk.ph!=='aff'?(RO?(wk.rec?'<span class="plw-dlf">Décharge</span>':'')
+          :'<label class="plw-dlf"><input type="checkbox" '+(wk.rec?'checked':'')+' onchange="plRecToggle('+wk.n+','+(wk.rec?1:0)+')"> Décharge</label>'):'')
       +(manual?'<span class="plw-man">manuel</span>':'')
       +'</div>';
     return '<div class="plw-week" style="border-left:4px solid '+c+'">'+meta
@@ -6803,13 +6820,15 @@ function plCalendarHTML(p,weeks){
   }).join('');
   var hasOv=(Object.keys(_plVolOverride).length||Object.keys(_plRecOverride).length);
   var nSess=Object.keys(_plSessions).reduce(function(a,k){return a+((_plSessions[k]&&_plSessions[k].length)||0);},0);
-  var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'
+  var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+(RO?'':''
     +(nSess?'<button type="button" class="plc-send" onclick="wktExportPlan()" title="Télécharger toutes les séances du calendrier au format montre">↓ Séances montre ('+nSess+')</button>':'')
     +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
-    +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':'')+'</div></div>';
-  var grabBar=_plGrab?('<div class="plc-grab">Séance prise — touche le jour où la déposer'
+    +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':''))+'</div></div>';
+  var grabBar=(_plGrab&&!RO)?('<div class="plc-grab">Séance prise — touche le jour où la déposer'
     +' <button type="button" onclick="plGrabCancel()">annuler</button></div>'):'';
-  return head+grabBar+'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>'+hdr+'<div class="plw-cal">'+rows+'</div>';
+  var hint=RO?'<div class="plc-hint">Vue du plan enregistré. Les modifications se font dans l\u2019onglet <b>Plan</b>.</div>'
+    :'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>';
+  return head+grabBar+hint+hdr+'<div class="plw-cal">'+rows+'</div>';
 }
 function plVolLive(n,val){var e=document.getElementById('plc-km-'+n);if(e){e.textContent=val+' km';e.style.color='var(--orange)';}}
 function plVolSet(n,val){_plVolOverride[n]=+val;plSave();plUpd();}
