@@ -120,6 +120,8 @@ a{color:var(--accent)}
 .linkbtn:hover{border-color:var(--accent);color:var(--accent)}
 .foot{text-align:center;color:var(--muted2);font-size:12px;padding:34px 16px;line-height:1.8}
 .foot b{color:var(--accent)}
+.foot a{color:var(--muted);text-decoration:none;border-bottom:1px solid transparent}
+.foot a:hover{color:var(--accent);border-bottom-color:currentColor}
 .hidden{display:none!important}
 .spin{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
 @media(max-width:640px){.hero-out{margin-left:0;text-align:left;width:100%}.rr .a{font-size:32px}.rr .b{font-size:15px;letter-spacing:5px}.brand .slg{display:none}}
@@ -158,6 +160,7 @@ a{color:var(--accent)}
       <span id="who" style="font-size:13px;color:var(--muted)"></span>
       <span class="sp"></span>
       <button class="linkbtn" onclick="location.reload()">↻ Actualiser</button>
+      <button class="linkbtn" onclick="telechargerMesDonnees()" title="Télécharger toutes tes données (RGPD, droit à la portabilité)">⤓ Mes données</button>
       <button class="linkbtn" onclick="signOut()">Se déconnecter</button>
     </div>
     <div class="savetip" id="savetip">
@@ -174,7 +177,12 @@ a{color:var(--accent)}
   </div>
 </div>
 
-<div class="foot">Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.</div>
+<div class="foot">
+  Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.<br>
+  <a href="https://reding-running.fr/politique-confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a>
+  · <a href="https://reding-running.fr/mentions-legales.html" target="_blank" rel="noopener">Mentions légales</a>
+  · <a href="mailto:contact@reding-running.fr?subject=Mes%20donn%C3%A9es%20personnelles">Exercer mes droits</a>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -225,6 +233,32 @@ async function sendLink(){
   setMsg('Lien envoyé ✓ Ouvre ton email et clique sur le lien pour accéder à ton espace. (Pense à vérifier les spams.)','ok');
 }
 async function signOut(){ if(_sb)await _sb.auth.signOut(); location.href=location.href.split('#')[0].split('?')[0]; }
+
+/* ── Expiration après inactivité ────────────────────────────────────────
+   Supabase sait faire expirer une session inactive, mais uniquement à
+   partir du plan Pro. Le projet est en plan gratuit : la session d'un
+   athlète ne s'éteint donc jamais côté serveur.
+   On applique la règle ici. C'est un garde-fou côté navigateur, pas un
+   verrou : il protège du scénario réel — téléphone perdu, revendu, prêté,
+   quelqu'un rouvre la page — sans prétendre arrêter un attaquant capable
+   d'extraire le jeton du stockage local. Ce jour-là, ce sera le bon
+   moment de passer au plan Pro. */
+var INACTIVITE_MAX=30*24*3600*1000;   // 30 jours
+var CLE_VUE='rl_derniere_visite';
+function sessionTropAncienne(){
+  try{
+    var t=parseInt(localStorage.getItem(CLE_VUE)||'0',10);
+    return t>0 && (Date.now()-t)>INACTIVITE_MAX;
+  }catch(e){ return false; }
+}
+function marquerVisite(){ try{ localStorage.setItem(CLE_VUE,String(Date.now())); }catch(e){} }
+async function expirerPourInactivite(){
+  try{ localStorage.removeItem(CLE_VUE); }catch(e){}
+  if(_sb){ try{ await _sb.auth.signOut(); }catch(e){} }
+  var m=document.getElementById('msg');
+  if(m){ m.textContent='Ta session a expiré après 30 jours sans visite. Redemande un lien de connexion ci-dessous.'; m.style.color='var(--muted)'; }
+  show('login');
+}
 function hideSaveTip(){ var e=document.getElementById('savetip'); if(e)e.style.display='none'; try{ localStorage.setItem('rl_savetip_hidden','1'); }catch(_){ } }
 
 // ── Rendu de la fiche ──
@@ -308,6 +342,33 @@ function kpi(l,v,s){return '<div class="kpi"><div class="l">'+esc(l)+'</div><div
 
 function show(id){['login','loading','fiche'].forEach(function(x){document.getElementById(x).classList.toggle('hidden',x!==id);});}
 
+// ── Portabilité (RGPD art. 20) : l'athlète récupère ses données lui-même ──
+// On garde la ligne reçue de Supabase pour pouvoir la rendre sans la redemander.
+var _maFiche=null, _monEmail='';
+function telechargerMesDonnees(){
+  if(!_maFiche){ alert("Tes données ne sont pas encore chargées. Actualise la page, puis réessaie."); return; }
+  var paquet={
+    aPropos:"Export de tes données personnelles — espace athlète Reding Running",
+    exporteLe:new Date().toISOString(),
+    email:_monEmail,
+    pseudo:_maFiche.pseudo||'',
+    ficheMiseAJourLe:_maFiche.updatedAt||null,
+    profil:_maFiche.profil||null
+  };
+  if(!paquet.profil){
+    // Fiche publiée avant l'ajout de la charge utile structurée : on le dit,
+    // plutôt que de livrer un fichier vide sans explication.
+    paquet.note="Le détail structuré (repères, records, plan, analyses) n'est pas encore joint à ta fiche. "
+      +"Demande à ton coach de republier ton espace, puis relance cet export. "
+      +"En attendant, tu peux demander l'ensemble de tes données à contact@reding-running.fr.";
+  }
+  var nom='mes-donnees-reding-running-'+new Date().toISOString().slice(0,10)+'.json';
+  var b=new Blob([JSON.stringify(paquet,null,2)],{type:'application/json'});
+  var u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=nom; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(u); },2000);
+}
+
 // ── Init : session présente ? → fiche, sinon → login ──
 async function boot(){
   if(!_sb){show('login');return;}
@@ -315,10 +376,14 @@ async function boot(){
   var s=await _sb.auth.getSession();
   var sess=s&&s.data&&s.data.session;
   if(!sess){ show('login'); return; }
+  // Session valide côté serveur, mais dormante depuis trop longtemps.
+  if(sessionTropAncienne()){ await expirerPourInactivite(); return; }
+  marquerVisite();
   var email=sess.user.email;
   var q=await _sb.from('athlete_spaces').select('data').ilike('email',email).maybeSingle();
   if(q.error){ document.getElementById('content').innerHTML='<div class="spin">Erreur de lecture : '+esc(q.error.message)+'</div>'; show('fiche'); return; }
   var row=q.data?q.data.data:null;
+  _maFiche=row; _monEmail=email;
   document.getElementById('who').textContent='Connecté : '+email;
   if(row&&row.html){
     // Fiche complète (dashboard épuré) rendue telle quelle dans un cadre isolé

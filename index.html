@@ -61,6 +61,9 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .side-reset:hover{color:#F87171}
 .side-reset svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .side-version{margin-top:8px;font-size:10.5px;color:var(--muted2);opacity:.6;letter-spacing:1px;padding-left:4px}
+.side-legal{margin-top:10px;padding-left:4px;font-size:10.5px;line-height:1.7;color:var(--muted2)}
+.side-legal a{color:var(--muted2);text-decoration:none;border-bottom:1px solid transparent}
+.side-legal a:hover{color:var(--orange);border-bottom-color:currentColor}
 .side-cloud{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;color:var(--muted2);font-family:var(--font);font-size:12px;font-weight:700;padding:8px 4px;border-radius:8px;transition:color .15s;margin-bottom:2px}
 .side-cloud:hover{color:var(--orange)}
 .side-cloud svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
@@ -1720,6 +1723,10 @@ table.lm-laps tbody tr{cursor:pointer}
         Réinitialiser le profil
       </button>
       <div class="side-version">RedLab · Reding Running · build 2026-08-17 16:06</div>
+      <div class="side-legal">
+        <a href="https://reding-running.fr/politique-confidentialite.html" target="_blank" rel="noopener">Confidentialité</a>
+        · <a href="https://reding-running.fr/mentions-legales.html" target="_blank" rel="noopener">Mentions légales</a>
+      </div>
     </div>
   </aside>
 
@@ -3673,10 +3680,101 @@ function saveCurrentAthlete(){
   }
 }
 
-function deleteAthlete(id){
-  if(!confirm('Supprimer cet athlète ?')) return;
-  _saveAthletes(getAthletes().filter(a=>a.id!==id));
+/* Nom de dossier/fichier tiré du pseudo : sert à retrouver les documents
+   déposés dans le bucket « fiches » pour cet athlète. */
+function _ficheSlug(pseudo){
+  return String(pseudo||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')   // accents
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'athlete';
+}
+
+/* Efface tout ce qui existe hors du navigateur pour cet athlète :
+   sa fiche publiée (athlete_spaces) et ses documents (bucket fiches).
+   Renvoie {ok:true} ou {ok:false,msg:'…'} — jamais une exception, pour que
+   l'appelant puisse décider quoi faire d'un échec plutôt que de le subir. */
+async function _purgeAthleteCloud(ath){
+  if(typeof _sb==='undefined'||!_sb) return {ok:false,msg:'client cloud indisponible'};
+  if(typeof _cloudUser==='undefined'||!_cloudUser) return {ok:false,msg:'non connecté au cloud'};
+  var email=(ath.email||'').trim().toLowerCase();
+  try{
+    // Jeton frais : un access_token expiré partirait en anonyme et la RLS
+    // « coach_id = auth.uid() » rejetterait la suppression sans le dire clairement.
+    try{ await _sb.auth.refreshSession(); }catch(e){}
+    if(email.indexOf('@')>0){
+      var d=await _sb.from('athlete_spaces').delete().eq('email',email);
+      if(d.error) return {ok:false,msg:d.error.message};
+    }
+    // Documents éventuels : on liste le dossier du coach et on retire ceux
+    // qui portent le nom de l'athlète. Best-effort — un bucket vide ou une
+    // erreur de listage ne doit pas bloquer la suppression de la fiche.
+    try{
+      var slug=_ficheSlug(ath.pseudo), folder=_cloudUser.id;
+      var lst=await _sb.storage.from('fiches').list(folder);
+      var cibles=(((lst&&lst.data)||[])
+        .filter(function(x){ return x.name===slug+'.html'||x.name.indexOf(slug+'-')===0; })
+        .map(function(x){ return folder+'/'+x.name; }));
+      if(cibles.length) await _sb.storage.from('fiches').remove(cibles);
+    }catch(e){}
+    return {ok:true};
+  }catch(e){ return {ok:false,msg:e.message||String(e)}; }
+}
+
+/* Suppression locale seule — le geste de repli quand le nettoyage cloud échoue. */
+function _deleteAthleteLocal(id){
+  _saveAthletes(getAthletes().filter(function(a){return a.id!==id;}));
   renderAthletes();
+}
+
+/* Suppression complète d'un athlète (droit à l'effacement, RGPD art. 17).
+   L'ancienne version ne vidait que le localStorage : la fiche publiée et les
+   documents restaient en ligne indéfiniment, et l'athlète gardait accès à son
+   espace. On efface désormais dans l'ordre inverse de la publication — le
+   distant d'abord, le local ensuite — pour ne jamais perdre la trace de ce
+   qu'il reste à nettoyer si une étape échoue. */
+function deleteAthlete(id){
+  var ath=getAthletes().find(function(a){return a.id===id;});
+  if(!ath) return;
+  var aEspace=!!(ath.email&&ath.email.indexOf('@')>0);
+  var relie=(typeof _cloudUser!=='undefined')&&!!_cloudUser;
+  var lignes=['<li>son profil dans cet outil (repères, records, historique, plan, analyses)</li>'];
+  if(aEspace) lignes.push('<li>sa fiche publiée et son accès à l\'espace athlète (<b>'+String(ath.email).replace(/</g,'&lt;')+'</b>)</li>');
+  // Sans connexion au cloud, rien ne sera retiré du bucket : ne l'annonçons pas.
+  if(relie) lignes.push('<li>les documents déposés à son nom</li>');
+
+  var host=document.createElement('div'); host.className='pl-modal';
+  host.onclick=function(e){ if(e.target===host)host.remove(); };
+  host.innerHTML='<div class="pl-modal-box" style="max-width:470px">'
+    +'<div class="pl-modal-top"><b>Supprimer '+String(ath.pseudo||'cet athlète').replace(/</g,'&lt;')+' ?</b>'
+    +'<span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="this.closest(\'.pl-modal\').remove()">×</button></div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.65">Seront effacés :<ul style="margin:8px 0 0 18px;padding:0">'+lignes.join('')+'</ul>'
+    +'<div style="margin-top:12px;color:var(--muted2);font-size:12px">Cette action est définitive. Les factures déjà émises ne sont pas concernées : la loi impose de les conserver.</div></div>'
+    +'<div id="del-msg" style="display:none;margin-top:12px;font-size:12.5px;line-height:1.55"></div>'
+    +'<div style="display:flex;gap:10px;margin-top:14px">'
+    +'<button class="lc-cancel" onclick="this.closest(\'.pl-modal\').remove()">Annuler</button>'
+    +'<button class="lc-save" id="del-go" style="background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.45);color:#F87171">Supprimer définitivement</button>'
+    +'</div></div>';
+  document.body.appendChild(host);
+
+  document.getElementById('del-go').onclick=async function(){
+    var btn=this, msg=document.getElementById('del-msg');
+    btn.disabled=true; btn.textContent='Suppression…';
+    var res={ok:true};
+    var connecte=(typeof _cloudUser!=='undefined')&&!!_cloudUser;
+    if(aEspace||connecte) res=await _purgeAthleteCloud(ath);
+    if(!res.ok){
+      // On ne supprime PAS en silence : effacer le local en laissant la fiche
+      // en ligne, c'est exactement le défaut qu'on corrige. Le choix revient au coach.
+      btn.style.display='none';
+      msg.style.display='block'; msg.style.color='#F87171';
+      msg.innerHTML='Le nettoyage en ligne a échoué : '+String(res.msg).replace(/</g,'&lt;')
+        +'<br><br><span style="color:var(--muted2)">Sa fiche reste donc accessible depuis son espace. Reconnecte-toi au cloud (☁) puis réessaie — ou supprime seulement l\'entrée locale, en sachant qu\'il faudra nettoyer la fiche à la main.</span>'
+        +'<div style="margin-top:12px"><button class="lc-cancel" id="del-local">Supprimer uniquement en local</button></div>';
+      document.getElementById('del-local').onclick=function(){ _deleteAthleteLocal(id); host.remove(); };
+      return;
+    }
+    _deleteAthleteLocal(id);
+    host.remove();
+  };
 }
 
 /* Une seule analyse par couple séance + intervalle : re-sauvegarder le même remplace
@@ -7372,7 +7470,23 @@ async function cloudPush(manual){
 const ESPACE_URL='https://coach.reding-running.fr/espace.html';
 // Upsert vers athlete_spaces via le client principal authentifié (jeton rafraîchi) :
 // coach_id = ID de la session courante = auth.uid(), donc la RLS « coach_id = auth.uid() » passe.
-async function _spacesUpsert(email,doc,pseudo){
+/* Données de l'athlète dans un format lisible par une machine, jointes à la
+   fiche publiée. Sans elles, l'espace athlète ne peut offrir qu'une page HTML —
+   or la portabilité (RGPD art. 20) suppose un format structuré et réutilisable.
+   Rien de nouveau n'est exposé : ces valeurs sont déjà dans la fiche, en HTML. */
+function _profilPourEspace(ath){
+  if(!ath) return null;
+  return {
+    pseudo:ath.pseudo||'', email:ath.email||'', enregistreLe:ath.savedAt||'',
+    mode:ath.mode||'vma', vma:ath.vma||null, csKmh:ath.csKmh||null, dp:ath.dp||null,
+    fcMax:ath.fcMax||null, fcRest:ath.fcRest||null, fcReserve:ath.fcReserve||null,
+    dateDuTest:ath.testDate||'',
+    records:ath.records||{}, historiqueCourses:ath.raceHistory||[],
+    objectif:ath.goal||null, plan:ath.plan||null,
+    progression:ath.history||[], analyses:ath.analyses||[]
+  };
+}
+async function _spacesUpsert(email,doc,pseudo,profil){
   if(!_sb)return {error:{message:'client indisponible'}};
   var sess=(await _sb.auth.getSession()).data.session;
   // On rafraîchit TOUJOURS le jeton : un access_token expiré ferait partir la requête en
@@ -7385,7 +7499,7 @@ async function _spacesUpsert(email,doc,pseudo){
   // par supabase-js : la requête partait en anonyme → auth.uid() vide → RLS « new row violates ».
   return await _sb.from('athlete_spaces').upsert(
     [{email:String(email).trim().toLowerCase(),coach_id:sess.user.id,
-      data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc},
+      data:{pseudo:pseudo||'',updatedAt:new Date().toISOString(),html:doc,profil:profil||null},
       updated_at:new Date().toISOString()}],
     {onConflict:'email'});
 }
@@ -7398,7 +7512,7 @@ async function cloudPushSpaces(){
   try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
   var doc; try{ doc=exportAthleteView(true); }catch(e){ return; }
   if(!doc)return;
-  try{ await _spacesUpsert(cur.email,doc,S.pseudo); }catch(e){}
+  try{ await _spacesUpsert(cur.email,doc,S.pseudo,_profilPourEspace(cur)); }catch(e){}
 }
 function setAthleteEmail(id,val){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
@@ -7442,7 +7556,7 @@ async function publishAthlete(id,btn){
   if(!doc){ return fail('fiche vide (VMA/VC manquante pour cet athlète ?)'); }
   try{ saveLS(); }catch(e){}
   var r;
-  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo); }
+  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo,_profilPourEspace(ath)); }
   catch(e){ return fail(e.message); }
   if(r&&r.error){ return fail(r.error.message); }
   if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
@@ -7538,6 +7652,7 @@ async function gateSignIn(){
   agMsg('Connexion…');
   var r=await _sb.auth.signInWithPassword({email:em.trim(),password:pw});
   if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
+  _coachMarquerVisite();
   _cloudUser=r.data.user;cloudFabState();hideAuthGate();unlockApp();await cloudPull();
 }
 async function gateSignUp(){
@@ -7550,6 +7665,20 @@ async function gateSignUp(){
   if(r.data&&r.data.session){_cloudUser=r.data.user;cloudFabState();hideAuthGate();unlockApp();await cloudPush();}
   else agMsg('Compte créé. Confirme ton email si demandé, puis connecte-toi.');
 }
+/* ── Expiration après inactivité ────────────────────────────────────────
+   Le réglage serveur de Supabase (Authentication → Sessions) est réservé au
+   plan Pro ; le projet est en plan gratuit, donc une session de coach reste
+   valide indéfiniment. On applique la règle ici. C'est un garde-fou côté
+   navigateur — il couvre l'ordinateur oublié ou revendu, pas un attaquant
+   capable de lire le stockage local. */
+var COACH_INACTIVITE_MAX=30*24*3600*1000;   // 30 jours
+var COACH_CLE_VUE='rl_coach_derniere_visite';
+function _coachSessionTropAncienne(){
+  try{ var t=parseInt(localStorage.getItem(COACH_CLE_VUE)||'0',10);
+    return t>0 && (Date.now()-t)>COACH_INACTIVITE_MAX; }catch(e){ return false; }
+}
+function _coachMarquerVisite(){ try{ localStorage.setItem(COACH_CLE_VUE,String(Date.now())); }catch(e){} }
+
 async function cloudInit(){
   if(!window.supabase||!window.supabase.createClient){showAuthGate();return;}
   // storageKey distinct : évite que la session de l'espace athlète (même origine GitHub)
@@ -7561,7 +7690,16 @@ async function cloudInit(){
     if(typeof window[fn]==='function'){var o=window[fn];window[fn]=function(){var res=o.apply(this,arguments);cloudPushDebounced();return res;};}
   });
   var s=await _sb.auth.getSession();
-  if(s.data&&s.data.session){_cloudUser=s.data.session.user;cloudFabState();unlockApp();await cloudPull();}
+  if(s.data&&s.data.session&&_coachSessionTropAncienne()){
+    // Session encore valide côté serveur, mais dormante depuis trop longtemps.
+    try{ localStorage.removeItem(COACH_CLE_VUE); }catch(e){}
+    try{ await _sb.auth.signOut(); }catch(e){}
+    _cloudUser=null; cloudFabState(); showAuthGate();
+    var _m=document.getElementById('ag-msg');
+    if(_m)_m.textContent='Session expirée après 30 jours sans usage — reconnecte-toi.';
+    return;
+  }
+  if(s.data&&s.data.session){_coachMarquerVisite();_cloudUser=s.data.session.user;cloudFabState();unlockApp();await cloudPull();}
   else { cloudFabState(); showAuthGate(); }
 }
 
