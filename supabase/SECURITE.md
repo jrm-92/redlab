@@ -62,9 +62,16 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 - **Information** — liens vers la politique de confidentialité et les mentions
   légales dans la barre latérale de RedLab et le pied de l'espace athlète.
 
+## Registre des traitements
+
+`docs/registre-des-traitements.md` — document interne, non publié, à présenter
+à la CNIL sur demande. Il est obligatoire ici : la dispense de l'article 30.5
+ne joue pas, le suivi n'étant pas occasionnel et portant sur des données de
+santé.
+
 ## Reste à traiter
 
 - SIRET, adresse et médiateur de la consommation dans les pages légales
   (dépôt `reding-coaching`, branche `claude/rgpd-pages-legales`).
-- Registre des traitements.
 - 2FA sur les comptes Supabase et GitHub.
+- Les points ouverts listés en fin de registre.
