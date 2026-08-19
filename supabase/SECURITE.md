@@ -47,9 +47,24 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 - **2FA** à activer sur le compte Supabase **et** sur le compte GitHub — c'est
   GitHub qui publie `coach.reding-running.fr`.
 
+## Droits des personnes — ce que l'outil sait faire
+
+- **Effacement (art. 17)** — `deleteAthlete()` supprime la ligne `athlete_spaces`
+  et les documents du bucket avant de vider le `localStorage`. La policy
+  `as_delete` limite la portée aux fiches du coach connecté : le filtre par
+  email de la requête est doublé côté serveur par `coach_id = auth.uid()`.
+  Si le nettoyage distant échoue, rien n'est supprimé en silence — le coach voit
+  l'erreur et choisit.
+- **Portabilité (art. 20)** — la fiche publiée embarque une charge utile
+  structurée (`data.profil`) ; l'espace athlète propose « ⤓ Mes données », qui
+  télécharge un JSON lisible. Les fiches publiées avant cet ajout n'ont pas la
+  charge utile : l'export le signale et invite à republier.
+- **Information** — liens vers la politique de confidentialité et les mentions
+  légales dans la barre latérale de RedLab et le pied de l'espace athlète.
+
 ## Reste à traiter
 
-- Suppression d'un athlète : `deleteAthlete()` ne vide que le `localStorage`,
-  sans toucher `athlete_spaces` ni le bucket `fiches`.
-- Export de ses données par l'athlète (portabilité, art. 20).
-- Mentions RGPD absentes de RedLab et de l'espace athlète.
+- SIRET, adresse et médiateur de la consommation dans les pages légales
+  (dépôt `reding-coaching`, branche `claude/rgpd-pages-legales`).
+- Registre des traitements.
+- 2FA sur les comptes Supabase et GitHub.
