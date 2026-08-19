@@ -126,7 +126,7 @@ d'exercice des droits, à l'adresse ci-dessus.
 
 | Prestataire | Rôle | Hors UE | Contrat de sous-traitance (art. 28) |
 |---|---|---|---|
-| **Supabase** | Base de données, stockage des documents | Non — Europe de l'Ouest | *à vérifier / accepter* |
+| **Supabase** | Base de données de l'espace athlète | Non — Europe de l'Ouest | *à vérifier / accepter* |
 | **GitHub, Inc.** | Hébergement des pages (site, RedLab, espace athlète) | Oui — États-Unis | *à vérifier* |
 | **Stripe** | Encaissement | *à vérifier* | *à vérifier* |
 | **Web3Forms** | Acheminement des formulaires | *à vérifier* | *à vérifier* |
@@ -150,8 +150,6 @@ qu'y écrire une supposition.
 - Cloisonnement en base par *row-level security*, active sur toutes les tables :
   chaque athlète ne lit que sa fiche, le coach ne lit que les siennes. La règle
   est appliquée par le serveur, jamais par la page.
-- Documents dans un espace de stockage privé, accessibles uniquement par lien
-  signé à durée limitée (7 jours).
 - Aucune clé secrète dans le code publié : seule la clé publiable, dont les
   droits sont bornés par la RLS, figure dans les pages.
 - Aucun cookie, aucun traceur, aucune mesure d'audience.
@@ -163,8 +161,8 @@ qu'y écrire une supposition.
 **Organisationnelles**
 
 - Une seule personne accède aux données.
-- Suppression d'un athlète en un geste, qui efface la fiche publiée et les
-  documents avant les données locales, et signale tout échec au lieu de le taire.
+- Suppression d'un athlète en un geste, qui efface la fiche publiée avant les
+  données locales, et signale tout échec au lieu de le taire.
 - Export de ses données par l'athlète, depuis son espace.
 - Registre tenu à jour à chaque évolution de l'outil.
 
