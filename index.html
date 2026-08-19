@@ -855,6 +855,17 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .ath-grid>.ath-card{flex:0 0 300px;scroll-snap-align:start}
 @media(max-width:640px){.ath-grid>.ath-card{flex-basis:82vw}}
 .ath-carousel{position:relative}
+/* Carrousel générique : même habillage que les cartes Athlètes, appliqué
+   aux grilles du dashboard (Temps de passage, Potentiel, Records). */
+.crsl{position:relative}
+.crsl>.crsl-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:opacity .15s,background .15s,border-color .15s}
+.crsl>.crsl-arrow:hover{background:var(--card2);border-color:var(--accent);color:var(--accent)}
+.crsl>.crsl-arrow.left{left:-16px}
+.crsl>.crsl-arrow.right{right:-16px}
+.crsl>.crsl-arrow[disabled]{opacity:0;pointer-events:none}
+/* Le tactile a le défilement natif : les flèches n'y ont pas leur place. */
+@media(max-width:860px){.crsl>.crsl-arrow{display:none}}
+.crsl .dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
 .ath-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:opacity .15s,background .15s,border-color .15s}
 .ath-arrow:hover{background:var(--card2);border-color:var(--accent);color:var(--accent)}
 .ath-arrow.left{left:-18px}
@@ -2082,7 +2093,7 @@ table.lm-laps tbody tr{cursor:pointer}
               <div class="db-section-ico">
                 <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
               </div>
-              <div class="db-section-title">Courbe de performance</div>
+              <div class="db-section-title">Prédictions vs vos records</div>
             </div>
             <div class="card" style="padding:20px">
               <div id="perf-legend" class="perf-legend"></div>
@@ -2615,6 +2626,7 @@ function renderPredCards(){
     </div>`;
   }).join('');
   el.innerHTML=`<div class="pred-grid">${cards}</div>`;
+  crslInit(el.querySelector('.pred-grid'));
 }
 
 /* ══ LOCAL STORAGE ══ */
@@ -3023,6 +3035,7 @@ function buildRaces(){
       <div class="rc-splits" id="rspl-${r.id}"></div>
     </div>`}).join('');
   RACES.forEach(r=>{const el=document.getElementById('cs-'+r.id);if(el&&typeof csSet==='function')csSet(el,+el.dataset.val);else updR(r.id,defPace(r));});
+  crslInit(g);
 }
 function adjR(id,d){const el=document.getElementById('cs-'+id);if(!el)return;csSet(el,(+el.dataset.val)+d);}
 function updR(id,val){
@@ -3199,6 +3212,7 @@ function renderRecords(){
     +'</div>'):'';
   const empty=shown.length?'':'<div class="rec-out-empty" style="padding:20px;text-align:center">Aucun record. Importe une fiche FFA (les records s\u2019extraient de l\u2019historique) ou ajoute une distance manuellement.</div>';
   el.innerHTML=`<div class="rec-grid">${cards}</div>${empty}${addBtn}<div class="formula" style="margin-top:14px">${formula}</div>`;
+  crslInit(el.querySelector('.rec-grid'));
   shown.forEach(r=>updRecord(r.id,true));
 }
 /* Formate une valeur de série selon son type (allure en m:ss, décimale, entier). */
@@ -3343,39 +3357,20 @@ function recSeconds(id){
   const T=(+r.hh||0)*3600+(+r.mm||0)*60+(+r.ss||0);
   return T>=30?T:null;
 }
-const PERF_WINDOW_DAYS=183; // ~6 mois
-/* Horodatage limite : seules les performances postérieures alimentent la courbe. */
-function perfCutoffTs(){return Date.now()-PERF_WINDOW_DAYS*864e5;}
 /* Date d'un record (AAAA-MM-JJ) → horodatage, ou null si absente ou invalide. */
 function recDateTs(rec){
   if(!rec||!rec.date)return null;
   const t=Date.parse(rec.date+'T12:00:00');
   return isFinite(t)?t:null;
 }
-/* Un record saisi ne compte que s'il est daté ET de moins de PERF_WINDOW_DAYS.
-   Sans date on ne peut pas prouver qu'il est récent : il est donc écarté. */
-function recIsRecent(rec){const t=recDateTs(rec);return t!=null&&t>=perfCutoffTs();}
+/* Meilleure performance connue sur une distance, sans condition d'ancienneté.
+   La fenêtre de six mois écartait des records qui restent la meilleure — et
+   souvent la seule — mesure dont on dispose : un marathon couru l'an dernier
+   disparaissait de la courbe alors qu'il en est le point le plus solide. */
 function chartSeconds(id){
-  const cut=perfCutoffTs();
-  // Historique de courses : on ne garde que les résultats dans la fenêtre.
-  const valid=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id&&r.ts>=cut&&r.sec>=30);
+  const valid=(S.raceHistory||[]).filter(r=>r&&r.dist===id&&r.sec>=30);
   if(valid.length)return Math.min.apply(null,valid.map(r=>r.sec));
-  // Sinon, le record saisi à la main — s'il est daté de moins de six mois.
-  return recIsRecent((S.records||{})[id])?recSeconds(id):null;
-}
-/* Nombre de distances dont la performance existe mais a été écartée (trop
-   ancienne ou sans date), pour l'expliquer sous le graphique. */
-function perfStaleCount(){
-  const cut=perfCutoffTs();
-  let n=0;
-  CHART_DISTS.forEach(r=>{
-    if(chartSeconds(r.id)!=null)return;
-    const oldRace=(S.raceHistory||[]).some(x=>x&&x.dist===r.id&&x.sec>=30&&(x.ts==null||x.ts<cut));
-    const rec=(S.records||{})[r.id];
-    const oldRec=!!rec&&((+rec.hh||0)*3600+(+rec.mm||0)*60+(+rec.ss||0))>=30;
-    if(oldRace||oldRec)n++;
-  });
-  return n;
+  return recSeconds(id);
 }
 function renderChart(){
   const cv=document.getElementById('perf-chart');
@@ -3389,21 +3384,19 @@ function renderChart(){
   const paceLo=CD.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
   const recPace=CD.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
   const hasRec=recPace.some(v=>v!=null);
-  const stale=perfStaleCount();
   const emptyEl=document.getElementById('perf-empty');
   if(emptyEl){
     emptyEl.style.display=hasRec?'none':'block';
     const hasHist=(S.raceHistory||[]).some(r=>r&&r.ts!=null);
-    emptyEl.textContent=stale
-      ? "Aucun résultat de moins de 6 mois : la courbe n'affiche que les performances récentes. Renseigne la date d'un record pour le réintégrer."
-      : (hasHist
-        ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
-        : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.");
+    emptyEl.textContent=hasHist
+      ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
+      : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.";
   }
   const noteEl=document.getElementById('perf-note');
   if(noteEl){
-    noteEl.textContent='Seuls les résultats de moins de 6 mois alimentent la courbe.'
-      +(stale?' · '+stale+' distance'+(stale>1?'s écartées':' écartée')+' (résultat trop ancien ou sans date).':'');
+    noteEl.textContent=hasRec
+      ? 'Seules les distances renseignées apparaissent. La meilleure performance connue est retenue, quelle que soit sa date.'
+      : '';
   }
   const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
   const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
@@ -3412,7 +3405,7 @@ function renderChart(){
     {label:'Prédiction (rapide)',data:paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,0.13)',borderWidth:2.5,pointRadius:0,tension:0.3,fill:'+1'},
     {label:'Prédiction (lente)', data:paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
     // Records — réel mesuré : gros points JAUNES cerclés, aucune ligne
-    {label:'Records < 6 mois',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
+    {label:'Vos records',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
   ]};
   const opts={
     responsive:true,maintainAspectRatio:false,
@@ -3440,7 +3433,7 @@ function buildPerfLegend(){
   const defs=[
     {i:0,c:'#FF6B1A',dash:false,dot:false,t:'Prédiction rapide'},
     {i:1,c:'#38BDF8',dash:true, dot:false,t:'Prédiction lente'},
-    {i:2,c:'#FACC15',dash:false,dot:true, t:'Records < 6 mois'},
+    {i:2,c:'#FACC15',dash:false,dot:true, t:'Vos records'},
   ];
   box.innerHTML=defs.map(d=>{
     const vis=perfChart.isDatasetVisible(d.i);
@@ -3976,6 +3969,41 @@ function renderAthletes(){
   athCarouselInit(wrap.querySelector('.ath-carousel'));
 }
 // Carrousel : flèches (clic) + glisser à la souris. Le tactile utilise le défilement natif.
+/* Habille une grille défilante de deux flèches et du glisser-souris.
+   Idempotent : rappelée après un re-rendu, elle ne double pas les flèches.
+   Le tactile n'est pas touché — le défilement natif fait déjà le travail. */
+function crslInit(grid){
+  if(!grid||grid.dataset.crsl==='1')return;
+  var cont=grid.parentElement;
+  if(!cont||!cont.classList.contains('crsl')){
+    cont=document.createElement('div'); cont.className='crsl';
+    grid.parentNode.insertBefore(cont,grid); cont.appendChild(grid);
+    var mk=function(cl,txt,lbl){var b=document.createElement('button');b.type='button';
+      b.className='crsl-arrow '+cl;b.textContent=txt;b.setAttribute('aria-label',lbl);b.tabIndex=-1;return b;};
+    cont.insertBefore(mk('left','\u2039','Précédent'),grid);
+    cont.appendChild(mk('right','\u203a','Suivant'));
+  }
+  grid.dataset.crsl='1';
+  var L=cont.querySelector('.crsl-arrow.left'), R=cont.querySelector('.crsl-arrow.right');
+  function step(){ var c=grid.firstElementChild; return (c?c.getBoundingClientRect().width:260)+14; }
+  function upd(){ var max=grid.scrollWidth-grid.clientWidth-1;
+    if(L)L.disabled=grid.scrollLeft<=2; if(R)R.disabled=grid.scrollLeft>=max; }
+  if(L)L.onclick=function(){ grid.scrollBy({left:-step(),behavior:'smooth'}); };
+  if(R)R.onclick=function(){ grid.scrollBy({left:step(),behavior:'smooth'}); };
+  grid.addEventListener('scroll',upd);
+  var down=false,sx=0,sl=0;
+  grid.addEventListener('pointerdown',function(e){
+    if(e.pointerType!=='mouse')return;
+    if(e.target.closest('input,button,a,select,textarea'))return;
+    down=true;sx=e.clientX;sl=grid.scrollLeft;grid.classList.add('dragging');
+    try{grid.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  grid.addEventListener('pointermove',function(e){ if(down)grid.scrollLeft=sl-(e.clientX-sx); });
+  function end(){ down=false;grid.classList.remove('dragging'); }
+  grid.addEventListener('pointerup',end);
+  grid.addEventListener('pointercancel',end);
+  setTimeout(upd,60); upd();
+}
 function athCarouselInit(cont){
   if(!cont)return;
   var g=cont.querySelector('.ath-grid'); if(!g)return;
@@ -5578,7 +5606,9 @@ function exportAthleteView(returnDoc){
 
   // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
-  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
+  // Les flèches de carrousel sont de la navigation, pas une commande coach :
+  // elles restent, au même titre que les + / − des curseurs.
+  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
   clone.querySelectorAll('input,select,textarea').forEach(el=>{
     if(el.type==='range') return;
     el.setAttribute('disabled','');
@@ -5615,14 +5645,13 @@ function exportAthleteView(returnDoc){
     'var DIST_M='+JSON.stringify(DIST_M)+';',
     'var HIST_COL='+JSON.stringify(HIST_COL)+';',
     'var HIST_LBL='+JSON.stringify(HIST_LBL)+';',
-    'var PERF_WINDOW_DAYS='+PERF_WINDOW_DAYS+';',
     'var perfChart=null;var histChart=null;',
     'function saveLS(){}','function delManualRace(){}',
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
-    csRender.toString(), csSet.toString(), csInit.toString(),
-    perfCutoffTs.toString(), recDateTs.toString(), recIsRecent.toString(),
-    recSeconds.toString(), chartSeconds.toString(), perfStaleCount.toString(),
+    csRender.toString(), csSet.toString(), csInit.toString(), crslInit.toString(),
+    recDateTs.toString(),
+    recSeconds.toString(), chartSeconds.toString(),
     renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
     'var PL_PHC='+JSON.stringify(PL_PHC)+';',
@@ -5631,7 +5660,11 @@ function exportAthleteView(returnDoc){
     csmToggle.toString(), csmSim.toString(), simUnit.toString(),
     drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
     'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
-    'document.addEventListener("DOMContentLoaded",function(){try{csInit();}catch(e){}document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("cs-vsl");if(v)csSet(v,+v.dataset.val);RACES.forEach(function(r){var s=document.getElementById("cs-"+r.id);if(s)csSet(s,+s.dataset.val);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
+    'document.addEventListener("DOMContentLoaded",function(){try{csInit();}catch(e){}'
+    // Les flèches des carrousels sont clonées avec le DOM, mais leurs gestionnaires
+    // ne le sont pas : on remet le drapeau à zéro et on recâble dans la fiche.
+    +'try{document.querySelectorAll(".race-grid,.pred-grid,.rec-grid,.ath-grid").forEach(function(g){g.dataset.crsl="";crslInit(g);});}catch(e){}'
+    +'document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("cs-vsl");if(v)csSet(v,+v.dataset.val);RACES.forEach(function(r){var s=document.getElementById("cs-"+r.id);if(s)csSet(s,+s.dataset.val);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
     'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},250);});'
   ].join('\n');
 
