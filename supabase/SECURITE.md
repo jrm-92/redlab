@@ -33,7 +33,7 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 | RLS active sur les 5 tables | ✅ |
 | `with_check` des `INSERT` cadrés sur `auth.uid()` | ✅ |
 | Isolation athlète : `lower(email) = lower(auth.jwt() ->> 'email')` | ✅ |
-| Bucket `fiches` privé (`public = false`) | ✅ — et inutilisé : `shareFicheCloud()` est défini mais n'est appelé nulle part, donc rien n'y est jamais déposé |
+| Bucket `fiches` | supprimé — il n'a jamais rien contenu |
 | Aucune clé secrète ni `service_role` côté client | ✅ |
 | Webhook Stripe : signature HMAC vérifiée, anti-rejeu, zéro donnée bancaire | ✅ |
 | Security Advisor | aucune erreur |
@@ -54,8 +54,7 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 ## Droits des personnes — ce que l'outil sait faire
 
 - **Effacement (art. 17)** — `deleteAthlete()` supprime la ligne `athlete_spaces`
-  avant de vider le `localStorage` (le bucket `fiches` est balayé au passage,
-  par précaution : rien n'y écrit aujourd'hui). La policy
+  avant de vider le `localStorage`. La policy
   `as_delete` limite la portée aux fiches du coach connecté : le filtre par
   email de la requête est doublé côté serveur par `coach_id = auth.uid()`.
   Si le nettoyage distant échoue, rien n'est supprimé en silence — le coach voit
@@ -84,10 +83,6 @@ santé.
 - SIRET, adresse et médiateur de la consommation dans les pages légales
   (dépôt `reding-coaching`, branche `claude/rgpd-pages-legales`).
 - Les points ouverts listés en fin de registre.
-- `shareFicheCloud()` et le bucket `fiches` : du code mort qui contient un
-  chemin d'envoi vers le stockage. C'est exactement le motif qui avait produit
-  `get_athlete_space_by_token`. À supprimer, ou à rebrancher si le partage de
-  fiche doit revenir.
 
 ## Journal
 
@@ -95,3 +90,4 @@ santé.
 |---|---|
 | 19 août 2026 | Audit. `securite-lot1.sql` exécuté : fonction orpheline supprimée, billetterie réservée à `service_role`, `search_path` figé, policies `DELETE` créées. 2FA GitHub activée. |
 | 19 août 2026 | Table `meal_plans` supprimée (`securite-lot2.sql`) : l'outil de suivi des repas qu'elle servait est abandonné. Elle était vide, et ses trois policies ouvertes à `anon` avaient déjà été retirées. |
+| 19 août 2026 | `shareFicheCloud()` et `ficheLinkModal()` retirés d'`index.html`, bucket `fiches` supprimé. Le partage de fiche par lien signé n'était relié à aucun bouton : du code mort portant un chemin d'envoi vers le stockage. |

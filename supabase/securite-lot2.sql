@@ -23,3 +23,17 @@ select c.relname as table_name, c.relrowsecurity as rls_active
   from pg_class c join pg_namespace n on n.oid = c.relnamespace
  where n.nspname = 'public' and c.relkind = 'r'
  order by c.relname;
+
+
+-- ═══════════════════════════════════════════════════════════════════════
+--  Bucket « fiches » — à supprimer depuis le tableau de bord
+--
+--  Il servait au partage d'une fiche par lien signé, fonction retirée
+--  d'index.html : shareFicheCloud() n'était appelée par aucun bouton, donc
+--  rien n'y a jamais été déposé. Du code mort portant un chemin d'envoi vers
+--  le stockage — le motif exact qui avait laissé get_athlete_space_by_token
+--  en base.
+--
+--  Storage → fiches → ⚙ → Delete bucket.
+--  (Vérifie d'abord qu'il est vide : Storage → fiches doit ne rien lister.)
+-- ═══════════════════════════════════════════════════════════════════════

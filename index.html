@@ -3680,16 +3680,7 @@ function saveCurrentAthlete(){
   }
 }
 
-/* Nom de dossier/fichier tiré du pseudo : sert à retrouver les documents
-   déposés dans le bucket « fiches » pour cet athlète. */
-function _ficheSlug(pseudo){
-  return String(pseudo||'')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')   // accents
-    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'athlete';
-}
-
-/* Efface tout ce qui existe hors du navigateur pour cet athlète :
-   sa fiche publiée (athlete_spaces) et ses documents (bucket fiches).
+/* Efface la fiche publiée de cet athlète (athlete_spaces).
    Renvoie {ok:true} ou {ok:false,msg:'…'} — jamais une exception, pour que
    l'appelant puisse décider quoi faire d'un échec plutôt que de le subir. */
 async function _purgeAthleteCloud(ath){
@@ -3704,17 +3695,6 @@ async function _purgeAthleteCloud(ath){
       var d=await _sb.from('athlete_spaces').delete().eq('email',email);
       if(d.error) return {ok:false,msg:d.error.message};
     }
-    // Documents éventuels : on liste le dossier du coach et on retire ceux
-    // qui portent le nom de l'athlète. Best-effort — un bucket vide ou une
-    // erreur de listage ne doit pas bloquer la suppression de la fiche.
-    try{
-      var slug=_ficheSlug(ath.pseudo), folder=_cloudUser.id;
-      var lst=await _sb.storage.from('fiches').list(folder);
-      var cibles=(((lst&&lst.data)||[])
-        .filter(function(x){ return x.name===slug+'.html'||x.name.indexOf(slug+'-')===0; })
-        .map(function(x){ return folder+'/'+x.name; }));
-      if(cibles.length) await _sb.storage.from('fiches').remove(cibles);
-    }catch(e){}
     return {ok:true};
   }catch(e){ return {ok:false,msg:e.message||String(e)}; }
 }
@@ -3735,11 +3715,8 @@ function deleteAthlete(id){
   var ath=getAthletes().find(function(a){return a.id===id;});
   if(!ath) return;
   var aEspace=!!(ath.email&&ath.email.indexOf('@')>0);
-  var relie=(typeof _cloudUser!=='undefined')&&!!_cloudUser;
   var lignes=['<li>son profil dans cet outil (repères, records, historique, plan, analyses)</li>'];
   if(aEspace) lignes.push('<li>sa fiche publiée et son accès à l\'espace athlète (<b>'+String(ath.email).replace(/</g,'&lt;')+'</b>)</li>');
-  // Sans connexion au cloud, rien ne sera retiré du bucket : ne l'annonçons pas.
-  if(relie) lignes.push('<li>les documents déposés à son nom</li>');
 
   var host=document.createElement('div'); host.className='pl-modal';
   host.onclick=function(e){ if(e.target===host)host.remove(); };
@@ -7575,56 +7552,6 @@ async function cloudPull(){
   if(rem.CUSTOM)localStorage.setItem(CUSTOM_KEY,rem.CUSTOM);else localStorage.removeItem(CUSTOM_KEY);
   location.reload();
 }
-async function shareFicheCloud(doc, slug){
-  try{
-    // supabase-js ne rattache pas toujours le jeton aux requêtes Storage quand la
-    // session a été restaurée ; on force un client avec le Bearer courant.
-    var sess=(await _sb.auth.getSession()).data.session;
-    if(!sess){ try{ sess=(await _sb.auth.refreshSession()).data.session; }catch(e){} }
-    var role='?';
-    if(sess&&sess.access_token){ try{ role=JSON.parse(atob(sess.access_token.split('.')[1])).role; }catch(e){} }
-    var cli=_sb;
-    if(sess&&sess.access_token){ try{ cli=window.supabase.createClient(SUPA_URL,SUPA_KEY,{global:{headers:{Authorization:'Bearer '+sess.access_token}}}); }catch(e){ cli=_sb; } }
-    // Sur un upsert, Supabase conserve l'ancien mimetype (celui du 1er envoi, souvent
-    // text/plain) et sert alors le code source au lieu de la page. On écrit donc un
-    // fichier NEUF à chaque partage (vraie création INSERT → le bon type text/html est
-    // enregistré), et on supprime au passage les anciennes versions de l'athlète.
-    var folder=_cloudUser.id;
-    try{
-      var lst=await cli.storage.from('fiches').list(folder);
-      var olds=((lst&&lst.data)||[]).filter(function(f){return f.name===slug+'.html'||f.name.indexOf(slug+'-')===0;}).map(function(f){return folder+'/'+f.name;});
-      if(olds.length) await cli.storage.from('fiches').remove(olds);
-    }catch(e){}
-    var path=folder+'/'+slug+'-'+Date.now().toString(36)+'.html';
-    var up=await cli.storage.from('fiches').upload(path, doc, {contentType:'text/html', upsert:false});
-    if(up.error){ ficheLinkModal(null, up.error.message+' — [session:'+(sess?'oui':'non')+' · rôle:'+role+']'); return; }
-    // Bucket privé : lien SIGNÉ à durée limitée (pas d'URL publique permanente).
-    var EXPIRE=7*24*3600; // 7 jours
-    var sg=await cli.storage.from('fiches').createSignedUrl(path, EXPIRE);
-    if(sg.error||!sg.data||!sg.data.signedUrl){ ficheLinkModal(null, (sg.error&&sg.error.message)||'lien signé indisponible'); return; }
-    var link=sg.data.signedUrl;
-    try{ await navigator.clipboard.writeText(link); }catch(e){}
-    ficheLinkModal(link, null, EXPIRE);
-  }catch(e){ ficheLinkModal(null, e.message); }
-}
-function ficheLinkModal(link, err, expireSec){
-  var host=document.createElement('div'); host.className='pl-modal';
-  host.onclick=function(e){ if(e.target===host)host.remove(); };
-  var expTxt='';
-  if(expireSec){
-    var _d=new Date(Date.now()+expireSec*1000), _j=Math.round(expireSec/86400);
-    expTxt='<div style="font-size:12px;color:var(--muted2);margin-top:10px;line-height:1.5">⏳ Ce lien <b>expire le '+_d.toLocaleDateString('fr-FR')+'</b> (durée '+_j+' jours). Passé ce délai, re-partage la fiche pour un nouveau lien. L’espace athlète, lui, reste accessible en permanence.</div>';
-  }
-  var body=err
-    ? '<div style="color:#F87171;font-size:13px;line-height:1.65">Échec de l’envoi : '+String(err).replace(/</g,'&lt;')+'<br><br>Vérifie que le bucket <b>fiches</b> existe et que la règle d’écriture est en place (voir les étapes).</div>'
-    : '<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.55">Fiche en ligne ✓ — <b style="color:#34D399">lien copié</b> dans le presse-papiers. Envoie-le à ton athlète :</div>'
-      +'<input type="text" readonly value="'+String(link).replace(/"/g,'&quot;')+'" onclick="this.select()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:12.5px;padding:9px 11px;outline:none">'
-      +expTxt
-      +'<div style="display:flex;gap:10px;margin-top:12px"><a class="lc-save" style="text-decoration:none;text-align:center;line-height:1.4" href="'+String(link).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">Ouvrir la fiche</a><button class="lc-cancel" onclick="this.closest(\'.pl-modal\').remove()">Fermer</button></div>';
-  host.innerHTML='<div class="pl-modal-box" style="max-width:460px"><div class="pl-modal-top"><b>Partager la fiche</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="this.closest(\'.pl-modal\').remove()">×</button></div>'+body+'</div>';
-  document.body.appendChild(host);
-}
-
 /* ══ PORTE DE CONNEXION (accès à l'outil réservé au coach connecté) ══ */
 function showAuthGate(){
   if(document.getElementById('auth-gate'))return;
