@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0F1729">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230F1729'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%23FF6B1A'/%3E%3C/svg%3E">
+<title>Connexion Polar — Reding Running</title>
+<style>
+:root{--bg:#0F1729;--card:#212E4A;--border:rgba(255,255,255,.09);
+      --text:#F1F5F9;--muted:#94A3B8;--orange:#FF6B1A;--ok:#34D399;--ko:#F87171}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:var(--bg);color:var(--text);
+     font-family:'Manrope','Segoe UI',system-ui,-apple-system,sans-serif;
+     display:flex;align-items:center;justify-content:center;padding:24px;line-height:1.55}
+.box{max-width:460px;width:100%;background:var(--card);border:1px solid var(--border);
+     border-radius:18px;padding:32px 28px;text-align:center}
+.pic{width:64px;height:64px;border-radius:50%;margin:0 auto 20px;display:flex;
+     align-items:center;justify-content:center;font-size:30px;font-weight:900}
+h1{font-size:22px;font-weight:900;letter-spacing:-.4px;margin-bottom:10px}
+p{font-size:14.5px;color:var(--muted)}
+.detail{margin-top:16px;padding:11px 13px;border-radius:9px;background:rgba(255,255,255,.04);
+        font-size:12.5px;color:var(--muted);word-break:break-word;text-align:left}
+.sign{margin-top:24px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);font-weight:800}
+</style>
+</head>
+<body>
+<div class="box" id="box"></div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var etat = q.get('etat') || 'erreur';
+  var detail = q.get('detail') || '';
+  var qui = etat === 'ok' ? (q.get('detail') || '') : '';
+
+  var vues = {
+    ok: {
+      c:'var(--ok)', ic:'✓', t:'C’est connecté',
+      p: (qui ? qui + ', ton' : 'Ton') + ' compte Polar est maintenant relié à RedLab. '
+         + 'Tes séances remonteront automatiquement à ton coach après chaque synchronisation '
+         + 'de ta montre avec Polar Flow. Tu peux fermer cette page.'
+    },
+    refus: {
+      c:'var(--muted)', ic:'—', t:'Autorisation refusée',
+      p:'Rien n’a été partagé. Si c’était une fausse manœuvre, redemande le lien à ton coach.'
+    },
+    erreur: {
+      c:'var(--ko)', ic:'!', t:'La connexion n’a pas abouti',
+      p:'Rien n’a été enregistré. Préviens ton coach en lui transmettant le message ci-dessous, '
+        + 'et retente avec un lien neuf.'
+    }
+  };
+  var v = vues[etat] || vues.erreur;
+  var esc = function(s){ return String(s).replace(/[<>&"]/g, function(c){
+    return ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]; }); };
+
+  document.getElementById('box').innerHTML =
+      '<div class="pic" style="background:color-mix(in srgb,' + v.c + ' 16%,transparent);'
+    + 'border:1px solid color-mix(in srgb,' + v.c + ' 40%,transparent);color:' + v.c + '">' + v.ic + '</div>'
+    + '<h1>' + v.t + '</h1><p>' + v.p + '</p>'
+    + ((etat !== 'ok' && detail) ? '<div class="detail">' + esc(detail) + '</div>' : '')
+    + '<div class="sign">Reding Running</div>';
+})();
+</script>
+</body>
+</html>

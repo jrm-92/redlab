@@ -1,0 +1,102 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  RedLab × Polar AccessLink — retour d'autorisation
+//
+//  Polar renvoie ici l'athlète après qu'il a accepté. On échange le code
+//  contre un jeton, on enregistre l'utilisateur auprès d'AccessLink, puis on
+//  range le lien. Cette fonction existe parce que RedLab est une page
+//  statique : le Client Secret ne peut pas y figurer, tout le monde le
+//  lirait. L'échange doit donc se faire côté serveur.
+// ══════════════════════════════════════════════════════════════════════════
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Adresses AccessLink. Regroupées ici pour être vérifiables d'un coup d'œil
+// contre la documentation Polar en cas de changement.
+const TOKEN_URL = 'https://polarremote.com/v2/oauth2/token';
+const USERS_URL = 'https://www.polaraccesslink.com/v3/users';
+
+// Où l'athlète atterrit une fois l'opération finie.
+const RETOUR = 'https://coach.reding-running.fr/polar.html';
+
+const CLIENT_ID     = Deno.env.get('POLAR_CLIENT_ID')!;
+const CLIENT_SECRET = Deno.env.get('POLAR_CLIENT_SECRET')!;
+const SUPA_URL      = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_KEY   = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+/** Renvoie l'athlète vers une page lisible plutôt que du JSON brut. */
+function retour(etat: string, detail = ''): Response {
+  const u = new URL(RETOUR);
+  u.searchParams.set('etat', etat);
+  if (detail) u.searchParams.set('detail', detail.slice(0, 200));
+  return new Response(null, { status: 302, headers: { Location: u.toString() } });
+}
+
+Deno.serve(async (req) => {
+  const url = new URL(req.url);
+
+  // Polar signale un refus par ?error= plutôt que par un code d'erreur HTTP.
+  const refus = url.searchParams.get('error');
+  if (refus) return retour('refus', refus);
+
+  const code  = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  if (!code || !state) return retour('erreur', 'code ou state manquant');
+
+  const sb = createClient(SUPA_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+  // 1. À qui appartient cette autorisation ? Le state est à usage unique :
+  //    on le consomme immédiatement pour qu'il ne puisse pas être rejoué.
+  const { data: pending } = await sb
+    .from('polar_pending').select('coach_id, athlete_key').eq('state', state).maybeSingle();
+  if (!pending) return retour('erreur', 'demande inconnue ou déjà utilisée');
+  await sb.from('polar_pending').delete().eq('state', state);
+
+  // 2. Le code contre un jeton. Polar attend l'authentification du client en
+  //    Basic, pas dans le corps de la requête.
+  const basic = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
+  const tokRes = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${basic}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+    },
+    body: new URLSearchParams({ grant_type: 'authorization_code', code }),
+  });
+  if (!tokRes.ok) return retour('erreur', `jeton refusé (${tokRes.status}) ${await tokRes.text()}`);
+  const tok = await tokRes.json();
+  const accessToken: string = tok.access_token;
+  const polarUserId: number = Number(tok.x_user_id);
+  if (!accessToken || !polarUserId) return retour('erreur', 'réponse jeton inattendue');
+
+  // 3. Déclarer l'utilisateur à AccessLink. Sans cette étape, les appels de
+  //    données répondent 403. Le member-id est NOTRE identifiant de l'athlète.
+  const memberId = `${pending.coach_id}:${pending.athlete_key}`;
+  const regRes = await fetch(USERS_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ 'member-id': memberId }),
+  });
+  // 409 = déjà enregistré : c'est le cas d'une reconnexion, pas une erreur.
+  if (!regRes.ok && regRes.status !== 409) {
+    return retour('erreur', `enregistrement refusé (${regRes.status}) ${await regRes.text()}`);
+  }
+
+  // 4. Ranger. Le jeton part dans sa table à part, hors de portée du navigateur.
+  const lien = { coach_id: pending.coach_id, athlete_key: pending.athlete_key,
+                 polar_user_id: polarUserId, member_id: memberId, linked_at: new Date().toISOString() };
+  const e1 = await sb.from('polar_links').upsert(lien, { onConflict: 'coach_id,athlete_key' });
+  if (e1.error) return retour('erreur', e1.error.message);
+
+  const e2 = await sb.from('polar_tokens').upsert(
+    { coach_id: pending.coach_id, athlete_key: pending.athlete_key,
+      access_token: accessToken, updated_at: new Date().toISOString() },
+    { onConflict: 'coach_id,athlete_key' });
+  if (e2.error) return retour('erreur', e2.error.message);
+
+  return retour('ok', pending.athlete_key);
+});
