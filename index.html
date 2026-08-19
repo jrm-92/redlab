@@ -1270,6 +1270,8 @@ input[type=range]{touch-action:none}
 .ath-espace-row input:focus{border-color:var(--accent)}
 .ath-espace-copy{flex-shrink:0;background:var(--accent-soft);border:1px solid rgba(255,107,26,0.4);border-radius:8px;color:var(--accent);font-family:var(--font);font-size:12px;font-weight:800;padding:0 12px;cursor:pointer}
 .ath-espace-copy:hover{background:rgba(255,107,26,0.18)}
+.ath-polar{width:100%;margin-top:8px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:700;padding:8px 12px;cursor:pointer;transition:color .15s,border-color .15s}
+.ath-polar:hover{color:var(--accent);border-color:rgba(255,107,26,.45)}
 .ath-espace-pub{width:100%;margin-top:7px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;color:var(--success-300);font-family:var(--font);font-size:12.5px;font-weight:800;padding:8px;cursor:pointer;transition:background .15s}
 .ath-espace-pub:hover{background:rgba(52,211,153,0.2)}
 .ath-espace-pub:disabled{opacity:.6;cursor:default}
@@ -3673,9 +3675,15 @@ function saveCurrentAthlete(){
   }
 }
 
-/* Efface la fiche publiée de cet athlète (athlete_spaces).
-   Renvoie {ok:true} ou {ok:false,msg:'…'} — jamais une exception, pour que
-   l'appelant puisse décider quoi faire d'un échec plutôt que de le subir. */
+/* Identifiant d'un athlète côté Polar. On prend l'id numérique de la fiche,
+   qui ne change jamais — le pseudo, lui, peut être corrigé, et le lien serait
+   alors orphelin sans que personne ne s'en aperçoive. */
+function athleteKey(ath){ return String(ath&&ath.id!=null?ath.id:''); }
+
+/* Efface tout ce qui existe hors du navigateur pour cet athlète : sa fiche
+   publiée (athlete_spaces) et, s'il y en a un, son lien Polar et son jeton
+   d'accès. Renvoie {ok:true} ou {ok:false,msg:'…'} — jamais une exception,
+   pour que l'appelant puisse décider quoi faire d'un échec plutôt que de le subir. */
 async function _purgeAthleteCloud(ath){
   if(typeof _sb==='undefined'||!_sb) return {ok:false,msg:'client cloud indisponible'};
   if(typeof _cloudUser==='undefined'||!_cloudUser) return {ok:false,msg:'non connecté au cloud'};
@@ -3687,6 +3695,20 @@ async function _purgeAthleteCloud(ath){
     if(email.indexOf('@')>0){
       var d=await _sb.from('athlete_spaces').delete().eq('email',email);
       if(d.error) return {ok:false,msg:d.error.message};
+    }
+    // Polar : le jeton d'accès d'abord, c'est lui qui ouvre les données de
+    // l'athlète chez un tiers. La policy « coach supprime ses jetons » autorise
+    // le DELETE sans autoriser la lecture — on efface sans jamais voir.
+    // Tant que le schéma Polar n'est pas déployé, ces tables n'existent pas et
+    // PostgREST répond 404 : on ne bloque pas la suppression pour autant.
+    var ak=athleteKey(ath);
+    var uid=_cloudUser.id;
+    for(var i=0;i<2;i++){
+      var tbl=i===0?'polar_tokens':'polar_links';
+      var r=await _sb.from(tbl).delete().eq('coach_id',uid).eq('athlete_key',ak);
+      if(r.error && !/does not exist|not find the table|schema cache/i.test(r.error.message||'')){
+        return {ok:false,msg:tbl+' : '+r.error.message};
+      }
     }
     return {ok:true};
   }catch(e){ return {ok:false,msg:e.message||String(e)}; }
@@ -3953,6 +3975,7 @@ function renderAthletes(){
           <button class="ath-espace-copy" onclick="inviteAthlete(${a.id},this)" title="Copier l'invitation à envoyer (lien + email + mode d'emploi)">Inviter</button>
         </div>
         <button class="ath-espace-pub" onclick="publishAthlete(${a.id},this)" title="Envoyer/mettre à jour la fiche complète dans l'espace de l'athlète">↑ Publier l'espace</button>
+        <button class="ath-polar" onclick="polarConnect(${a.id},this)" title="Copier le lien d'autorisation Polar à envoyer à l'athlète">${a.polar?'⌚ Polar relié ✓':'⌚ Connecter sa montre Polar'}</button>
       </div>
       <div class="ath-actions">
         <button class="btn-load" onclick="loadAthlete(${a.id})">
@@ -7545,6 +7568,79 @@ function inviteAthlete(id,btn){
   try{ navigator.clipboard.writeText(msg); }catch(e){}
   if(btn){var o=btn.textContent; btn.textContent='Copié ✓'; setTimeout(function(){btn.textContent=o;},1600);}
 }
+/* ══ POLAR ACCESSLINK — lancement de l'autorisation ══
+   Le client_id n'est pas un secret : il apparaît de toute façon dans l'URL
+   d'autorisation, sous les yeux de l'athlète. Le Client SECRET, lui, ne doit
+   jamais figurer ici — cette page est publique. Il vit dans les secrets
+   Supabase, et seul polar-callback y touche.
+
+   À RENSEIGNER une fois, avec le Client ID obtenu sur admin.polaraccesslink.com.
+   Tant que la constante est vide, le bouton le dit au lieu d'échouer. */
+const POLAR_CLIENT_ID='';
+const POLAR_AUTH_URL='https://flow.polar.com/oauth2/authorization';
+function polarRedirectUri(){ return SUPA_URL+'/functions/v1/polar-callback'; }
+
+/* C'est l'ATHLÈTE qui doit autoriser, avec son propre compte Polar — pas le
+   coach. Le bouton ne redirige donc pas : il prépare le lien et le copie, à
+   charge pour le coach de l'envoyer. */
+async function polarConnect(id,btn){
+  if(!POLAR_CLIENT_ID){
+    alert("Le Client ID Polar n'est pas encore renseigné dans RedLab.\n\n"
+      +"Ouvre index.html, cherche POLAR_CLIENT_ID et colle la valeur obtenue sur "
+      +"admin.polaraccesslink.com. Le Client SECRET, lui, ne se met pas ici : "
+      +"il reste dans les secrets Supabase.");
+    return;
+  }
+  if(typeof _cloudUser==='undefined'||!_cloudUser){
+    alert('Connecte-toi au cloud (☁, en bas de la barre latérale) avant de préparer un lien Polar.');
+    return;
+  }
+  var a=getAthletes().find(function(x){return x.id===id;});
+  if(!a) return;
+  var o=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Préparation…'; }
+  function fail(m){ if(btn){btn.disabled=false;btn.textContent=o;} alert('Lien Polar impossible : '+m); }
+
+  try{
+    // Jeton frais, sinon la requête part en anonyme et la RLS
+    // « auth.uid() = coach_id » la rejette.
+    var sess=(await _sb.auth.getSession()).data.session;
+    try{ var rr=await _sb.auth.refreshSession(); if(rr&&rr.data&&rr.data.session) sess=rr.data.session; }catch(e){}
+    if(!sess) return fail('session expirée — reconnecte-toi.');
+
+    // « state » aléatoire : c'est lui qui, au retour de Polar, dira à quel
+    // athlète rattacher le compte. Rien d'identifiant ne circule dans l'URL.
+    var buf=new Uint8Array(24); crypto.getRandomValues(buf);
+    var state=Array.from(buf).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+
+    var ins=await _sb.from('polar_pending').insert({
+      state:state, coach_id:sess.user.id, athlete_key:athleteKey(a)
+    });
+    if(ins.error){
+      var m=ins.error.message||'';
+      if(/does not exist|not find the table|schema cache/i.test(m)){
+        return fail("la table polar_pending n'existe pas encore. Exécute schema.sql dans Supabase.");
+      }
+      return fail(m);
+    }
+
+    var url=POLAR_AUTH_URL
+      +'?response_type=code'
+      +'&client_id='+encodeURIComponent(POLAR_CLIENT_ID)
+      +'&redirect_uri='+encodeURIComponent(polarRedirectUri())
+      +'&state='+state;
+
+    var msg='Connecte ta montre Polar à ton suivi :\n\n'
+      +'1) Ouvre ce lien et connecte-toi avec ton compte Polar Flow :\n'+url+'\n\n'
+      +'2) Accepte le partage de tes séances.\n\n'
+      +'Ce lien est personnel et ne fonctionne qu\'une fois.';
+    try{ await navigator.clipboard.writeText(msg); }catch(e){}
+
+    if(btn){ btn.disabled=false; btn.textContent='Lien copié ✓';
+      setTimeout(function(){ btn.textContent=o; },2200); }
+  }catch(e){ fail(e.message||String(e)); }
+}
+
 // Publie la fiche COMPLÈTE (dashboard épuré) d'un athlète vers son espace, sans quitter la page.
 async function publishAthlete(id,btn){
   var o=btn?btn.textContent:'';

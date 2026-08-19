@@ -69,10 +69,10 @@ d'exercice des droits, à l'adresse ci-dessus.
 | **Finalité** | Construire, ajuster et suivre un plan d'entraînement individualisé |
 | **Base légale** | Exécution du contrat (art. 6.1.b) — et, pour les données de santé, **consentement explicite** (art. 9.2.a) |
 | **Personnes concernées** | Clients en suivi à distance ou en coaching terrain |
-| **Catégories de données** | Identité et coordonnées ; VMA, chronos, records, objectifs, plan ; séances réalisées (allures, distances, durées, fréquence cardiaque, dénivelé, tracé GPS) issues des fichiers `.fit` / `.tcx` ; ressentis et échanges ; **données de santé** : blessures, douleurs, contre-indications signalées |
-| **Destinataires** | Le responsable du traitement ; Supabase (hébergement) ; Nolio (plateforme d'entraînement) ; WhatsApp / Meta (échanges) |
+| **Catégories de données** | Identité et coordonnées ; VMA, chronos, records, objectifs, plan ; séances réalisées (allures, distances, durées, fréquence cardiaque, dénivelé, tracé GPS) issues des fichiers `.fit` / `.tcx` **ou du compte Polar Flow lorsque l'athlète l'a relié** ; jeton d'accès Polar ; ressentis et échanges ; **données de santé** : blessures, douleurs, contre-indications signalées |
+| **Destinataires** | Le responsable du traitement ; Supabase (hébergement) ; Nolio (plateforme d'entraînement) ; WhatsApp / Meta (échanges) ; Polar Electro (source des séances, si connexion autorisée) |
 | **Transferts hors UE** | Supabase : **non** — hébergement en Europe de l'Ouest. WhatsApp / Meta et Nolio : *à vérifier* |
-| **Durée de conservation** | Pendant toute la durée du suivi, puis 3 ans à compter du dernier contact. **Données de santé** : supprimées à la fin du suivi, ou avant sur demande |
+| **Durée de conservation** | Pendant toute la durée du suivi, puis 3 ans à compter du dernier contact. **Données de santé** : supprimées à la fin du suivi, ou avant sur demande. **Jeton Polar** : tant que la connexion est active ; supprimé à sa révocation ou avec le profil |
 | **Sécurité** | Voir § 4 |
 
 ### T3 — Espace athlète
@@ -132,6 +132,7 @@ d'exercice des droits, à l'adresse ci-dessus.
 | **Web3Forms** | Acheminement des formulaires | *à vérifier* | *à vérifier* |
 | **Meta (WhatsApp)** | Échanges avec les clients | *à vérifier* | Sans objet — usage grand public |
 | **Nolio** | Plateforme d'entraînement | *à vérifier* | *à vérifier* |
+| **Polar Electro** | Source des séances, sur autorisation de l'athlète | *à vérifier* | *à vérifier* |
 
 Les mentions *à vérifier* ne sont pas des oublis : ce sont des points ouverts à
 instruire, et à remplacer par une réponse datée. Ne rien y écrire vaut mieux
@@ -157,6 +158,10 @@ qu'y écrire une supposition.
   l'outil et de l'espace athlète (le réglage serveur équivalent relève d'un plan
   d'hébergement supérieur).
 - Fichiers de montre (`.fit`, `.tcx`) lus dans le navigateur, jamais téléversés.
+- Connexion Polar : autorisation donnée par l'athlète lui-même, en lecture seule,
+  révocable à tout moment. Le jeton d'accès est rangé dans une table dont aucune
+  politique n'autorise la lecture — seul le serveur y accède, jamais une page web.
+  La suppression d'un athlète emporte son lien et son jeton.
 
 **Organisationnelles**
 
@@ -187,6 +192,7 @@ En cas de violation — accès non autorisé, perte, divulgation :
 |---|---|
 | 19 août 2026 | Création du registre, à l'issue de l'audit RGPD et sécurité |
 | 19 août 2026 | Durcissement de la base appliqué ; double authentification active sur Supabase et GitHub ; expiration de session après 30 jours d'inactivité |
+| 19 août 2026 | Connexion Polar AccessLink : Polar Electro ajouté aux destinataires (T2), jeton d'accès déclaré, durée de conservation précisée |
 
 ---
 
@@ -195,5 +201,5 @@ En cas de violation — accès non autorisé, perte, divulgation :
 - [ ] SIRET et adresse du siège
 - [ ] Adhésion à un médiateur de la consommation (art. L612-1 code de la consommation)
 - [ ] Contrats de sous-traitance : Supabase, Stripe, Web3Forms, Nolio
-- [ ] Localisation des données chez Stripe, Web3Forms et Nolio
+- [ ] Localisation des données chez Stripe, Web3Forms, Nolio et Polar
 - [ ] Mise en place effective des suppressions à échéance (T1, T2)
