@@ -233,6 +233,32 @@ async function sendLink(){
   setMsg('Lien envoyé ✓ Ouvre ton email et clique sur le lien pour accéder à ton espace. (Pense à vérifier les spams.)','ok');
 }
 async function signOut(){ if(_sb)await _sb.auth.signOut(); location.href=location.href.split('#')[0].split('?')[0]; }
+
+/* ── Expiration après inactivité ────────────────────────────────────────
+   Supabase sait faire expirer une session inactive, mais uniquement à
+   partir du plan Pro. Le projet est en plan gratuit : la session d'un
+   athlète ne s'éteint donc jamais côté serveur.
+   On applique la règle ici. C'est un garde-fou côté navigateur, pas un
+   verrou : il protège du scénario réel — téléphone perdu, revendu, prêté,
+   quelqu'un rouvre la page — sans prétendre arrêter un attaquant capable
+   d'extraire le jeton du stockage local. Ce jour-là, ce sera le bon
+   moment de passer au plan Pro. */
+var INACTIVITE_MAX=30*24*3600*1000;   // 30 jours
+var CLE_VUE='rl_derniere_visite';
+function sessionTropAncienne(){
+  try{
+    var t=parseInt(localStorage.getItem(CLE_VUE)||'0',10);
+    return t>0 && (Date.now()-t)>INACTIVITE_MAX;
+  }catch(e){ return false; }
+}
+function marquerVisite(){ try{ localStorage.setItem(CLE_VUE,String(Date.now())); }catch(e){} }
+async function expirerPourInactivite(){
+  try{ localStorage.removeItem(CLE_VUE); }catch(e){}
+  if(_sb){ try{ await _sb.auth.signOut(); }catch(e){} }
+  var m=document.getElementById('msg');
+  if(m){ m.textContent='Ta session a expiré après 30 jours sans visite. Redemande un lien de connexion ci-dessous.'; m.style.color='var(--muted)'; }
+  show('login');
+}
 function hideSaveTip(){ var e=document.getElementById('savetip'); if(e)e.style.display='none'; try{ localStorage.setItem('rl_savetip_hidden','1'); }catch(_){ } }
 
 // ── Rendu de la fiche ──
@@ -350,6 +376,9 @@ async function boot(){
   var s=await _sb.auth.getSession();
   var sess=s&&s.data&&s.data.session;
   if(!sess){ show('login'); return; }
+  // Session valide côté serveur, mais dormante depuis trop longtemps.
+  if(sessionTropAncienne()){ await expirerPourInactivite(); return; }
+  marquerVisite();
   var email=sess.user.email;
   var q=await _sb.from('athlete_spaces').select('data').ilike('email',email).maybeSingle();
   if(q.error){ document.getElementById('content').innerHTML='<div class="spin">Erreur de lecture : '+esc(q.error.message)+'</div>'; show('fiche'); return; }

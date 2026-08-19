@@ -155,6 +155,9 @@ qu'y écrire une supposition.
 - Aucune clé secrète dans le code publié : seule la clé publiable, dont les
   droits sont bornés par la RLS, figure dans les pages.
 - Aucun cookie, aucun traceur, aucune mesure d'audience.
+- Expiration de session après 30 jours d'inactivité, appliquée à l'ouverture de
+  l'outil et de l'espace athlète (le réglage serveur équivalent relève d'un plan
+  d'hébergement supérieur).
 - Fichiers de montre (`.fit`, `.tcx`) lus dans le navigateur, jamais téléversés.
 
 **Organisationnelles**
@@ -185,6 +188,7 @@ En cas de violation — accès non autorisé, perte, divulgation :
 | Date | Modification |
 |---|---|
 | 19 août 2026 | Création du registre, à l'issue de l'audit RGPD et sécurité |
+| 19 août 2026 | Durcissement de la base appliqué ; double authentification active sur Supabase et GitHub ; expiration de session après 30 jours d'inactivité |
 
 ---
 
@@ -194,5 +198,4 @@ En cas de violation — accès non autorisé, perte, divulgation :
 - [ ] Adhésion à un médiateur de la consommation (art. L612-1 code de la consommation)
 - [ ] Contrats de sous-traitance : Supabase, Stripe, Web3Forms, Nolio
 - [ ] Localisation des données chez Stripe, Web3Forms et Nolio
-- [ ] Double authentification sur les comptes Supabase et GitHub
 - [ ] Mise en place effective des suppressions à échéance (T1, T2)

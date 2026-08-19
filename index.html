@@ -7652,6 +7652,7 @@ async function gateSignIn(){
   agMsg('Connexion…');
   var r=await _sb.auth.signInWithPassword({email:em.trim(),password:pw});
   if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
+  _coachMarquerVisite();
   _cloudUser=r.data.user;cloudFabState();hideAuthGate();unlockApp();await cloudPull();
 }
 async function gateSignUp(){
@@ -7664,6 +7665,20 @@ async function gateSignUp(){
   if(r.data&&r.data.session){_cloudUser=r.data.user;cloudFabState();hideAuthGate();unlockApp();await cloudPush();}
   else agMsg('Compte créé. Confirme ton email si demandé, puis connecte-toi.');
 }
+/* ── Expiration après inactivité ────────────────────────────────────────
+   Le réglage serveur de Supabase (Authentication → Sessions) est réservé au
+   plan Pro ; le projet est en plan gratuit, donc une session de coach reste
+   valide indéfiniment. On applique la règle ici. C'est un garde-fou côté
+   navigateur — il couvre l'ordinateur oublié ou revendu, pas un attaquant
+   capable de lire le stockage local. */
+var COACH_INACTIVITE_MAX=30*24*3600*1000;   // 30 jours
+var COACH_CLE_VUE='rl_coach_derniere_visite';
+function _coachSessionTropAncienne(){
+  try{ var t=parseInt(localStorage.getItem(COACH_CLE_VUE)||'0',10);
+    return t>0 && (Date.now()-t)>COACH_INACTIVITE_MAX; }catch(e){ return false; }
+}
+function _coachMarquerVisite(){ try{ localStorage.setItem(COACH_CLE_VUE,String(Date.now())); }catch(e){} }
+
 async function cloudInit(){
   if(!window.supabase||!window.supabase.createClient){showAuthGate();return;}
   // storageKey distinct : évite que la session de l'espace athlète (même origine GitHub)
@@ -7675,7 +7690,16 @@ async function cloudInit(){
     if(typeof window[fn]==='function'){var o=window[fn];window[fn]=function(){var res=o.apply(this,arguments);cloudPushDebounced();return res;};}
   });
   var s=await _sb.auth.getSession();
-  if(s.data&&s.data.session){_cloudUser=s.data.session.user;cloudFabState();unlockApp();await cloudPull();}
+  if(s.data&&s.data.session&&_coachSessionTropAncienne()){
+    // Session encore valide côté serveur, mais dormante depuis trop longtemps.
+    try{ localStorage.removeItem(COACH_CLE_VUE); }catch(e){}
+    try{ await _sb.auth.signOut(); }catch(e){}
+    _cloudUser=null; cloudFabState(); showAuthGate();
+    var _m=document.getElementById('ag-msg');
+    if(_m)_m.textContent='Session expirée après 30 jours sans usage — reconnecte-toi.';
+    return;
+  }
+  if(s.data&&s.data.session){_coachMarquerVisite();_cloudUser=s.data.session.user;cloudFabState();unlockApp();await cloudPull();}
   else { cloudFabState(); showAuthGate(); }
 }
 

@@ -43,9 +43,15 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 
 ## Réglages du tableau de bord (hors SQL)
 
-- **Authentication → Sessions** : expiration après **30 jours d'inactivité**.
-- **2FA** à activer sur le compte Supabase **et** sur le compte GitHub — c'est
-  GitHub qui publie `coach.reding-running.fr`.
+- **2FA** — active sur le compte Supabase et sur le compte GitHub. ✅
+- **Authentication → Sessions** — `Time-box user sessions` et `Inactivity
+  timeout` sont **réservés au plan Pro**, et le projet est en plan gratuit : une
+  session reste donc valide indéfiniment côté serveur. La règle des 30 jours est
+  appliquée côté application, dans `espace.html` et `index.html` (voir plus bas).
+  Le jour d'un passage au plan Pro, remettre le réglage serveur : il couvre aussi
+  ce que le garde-fou navigateur ne peut pas couvrir.
+- **Refresh Tokens** — « Detect and revoke potentially compromised refresh
+  tokens » est actif. ✅
 
 ## Droits des personnes — ce que l'outil sait faire
 
@@ -61,6 +67,11 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
   charge utile : l'export le signale et invite à republier.
 - **Information** — liens vers la politique de confidentialité et les mentions
   légales dans la barre latérale de RedLab et le pied de l'espace athlète.
+- **Expiration après inactivité (30 jours)** — appliquée à l'ouverture, côté
+  athlète (`rl_derniere_visite`) comme côté coach (`rl_coach_derniere_visite`).
+  Garde-fou navigateur : il couvre le scénario réel — téléphone ou ordinateur
+  perdu, revendu, prêté — sans prétendre arrêter quelqu'un capable de lire le
+  stockage local.
 
 ## Registre des traitements
 
@@ -73,5 +84,10 @@ santé.
 
 - SIRET, adresse et médiateur de la consommation dans les pages légales
   (dépôt `reding-coaching`, branche `claude/rgpd-pages-legales`).
-- 2FA sur les comptes Supabase et GitHub.
 - Les points ouverts listés en fin de registre.
+
+## Journal
+
+| Date | Fait |
+|---|---|
+| 19 août 2026 | Audit. `securite-lot1.sql` exécuté : fonction orpheline supprimée, `meal_plans` fermée à `anon`, billetterie réservée à `service_role`, `search_path` figé, policies `DELETE` créées. 2FA GitHub activée. |
