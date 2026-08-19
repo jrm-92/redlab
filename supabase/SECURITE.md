@@ -6,7 +6,8 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 
 | Fichier | Rôle | Statut |
 |---|---|---|
-| `securite-lot1.sql` | Ferme les accès anonymes, rend l'effacement possible | à exécuter dans SQL Editor |
+| `securite-lot1.sql` | Ferme les accès anonymes, rend l'effacement possible | exécuté le 19/08/2026 |
+| `securite-lot2.sql` | Supprime la table `meal_plans`, devenue sans objet | à exécuter dans SQL Editor |
 | `securite-lot1-optionnel.sql` | Supprime la colonne morte `access_token` | après le lot 1, au choix |
 | `schema.sql` | Tables Polar | **non déployé** — l'intégration Polar n'est pas active |
 
@@ -17,15 +18,12 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
    côté code (commit `9d1fc7c`) sans être retirée de la base. Elle contournait la
    RLS et renvoyait la fiche complète d'un athlète à qui possédait la clé
    publiable — laquelle est dans le HTML public. Supprimée.
-2. **`meal_plans`** — `INSERT` / `SELECT` / `UPDATE` ouverts à `anon` avec
-   `qual = true`. Table vide, mais l'écriture libre permettait de saturer la base
-   du projet (plan gratuit) et d'emporter l'espace athlète. Policies retirées.
-3. **Fonctions de billetterie** (`incr_/decr_inscrits_*`) — appelables par `anon`
+2. **Fonctions de billetterie** (`incr_/decr_inscrits_*`) — appelables par `anon`
    via `/rest/v1/rpc/`, de quoi afficher toutes les sessions comme complètes ou
    remettre les compteurs à zéro. `EXECUTE` réservé à `service_role`, qui est le
    seul rôle dont le webhook Stripe a besoin.
-4. **`search_path`** figé sur ces mêmes fonctions.
-5. **Policies `DELETE`** ajoutées sur `redlab_state` et `athlete_spaces` : aucune
+3. **`search_path`** figé sur ces mêmes fonctions.
+4. **Policies `DELETE`** ajoutées sur `redlab_state` et `athlete_spaces` : aucune
    n'existait, l'effacement RGPD (art. 17) était techniquement impossible.
 
 ## État vérifié le 19 août 2026
@@ -90,4 +88,5 @@ santé.
 
 | Date | Fait |
 |---|---|
-| 19 août 2026 | Audit. `securite-lot1.sql` exécuté : fonction orpheline supprimée, `meal_plans` fermée à `anon`, billetterie réservée à `service_role`, `search_path` figé, policies `DELETE` créées. 2FA GitHub activée. |
+| 19 août 2026 | Audit. `securite-lot1.sql` exécuté : fonction orpheline supprimée, billetterie réservée à `service_role`, `search_path` figé, policies `DELETE` créées. 2FA GitHub activée. |
+| 19 août 2026 | Table `meal_plans` supprimée (`securite-lot2.sql`) : l'outil de suivi des repas qu'elle servait est abandonné. Elle était vide, et ses trois policies ouvertes à `anon` avaient déjà été retirées. |

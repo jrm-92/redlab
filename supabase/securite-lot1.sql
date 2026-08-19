@@ -38,21 +38,9 @@ end $$;
 
 
 -- ───────────────────────────────────────────────────────────────────────
--- 2) meal_plans : plus aucun accès anonyme
---
---    Les trois policies accordaient INSERT / SELECT / UPDATE au rôle
---    « anon » avec qual = true : n'importe qui pouvait lire la table et,
---    surtout, y écrire sans limite — de quoi saturer la base du projet
---    (plan gratuit) et emporter l'espace athlète avec elle.
---
---    Table vide au moment de l'audit : rien n'est perdu.
---    Elle reste en place avec RLS active et zéro policy = accès réservé
---    à la clé service. On rouvrira proprement (lié à auth.uid()) le jour
---    où le suivi des déjeuners sera réellement utilisé.
+-- 2) (bloc retiré) — la table meal_plans a été supprimée depuis, l'outil
+--    de suivi des repas ayant été abandonné. Voir securite-lot2.sql.
 -- ───────────────────────────────────────────────────────────────────────
-drop policy if exists meal_plans_anon_insert on public.meal_plans;
-drop policy if exists meal_plans_anon_select on public.meal_plans;
-drop policy if exists meal_plans_anon_update on public.meal_plans;
 
 
 -- ───────────────────────────────────────────────────────────────────────
@@ -111,7 +99,6 @@ create policy as_delete on public.athlete_spaces
 
 -- ───────────────────────────────────────────────────────────────────────
 -- VÉRIFICATION — à lancer après coup, doit confirmer :
---   · plus aucune ligne meal_plans / anon
 --   · une ligne DELETE pour redlab_state et pour athlete_spaces
 --   · anon_peut = false sur les 4 fonctions de billetterie
 --   · get_athlete_space_by_token absente
