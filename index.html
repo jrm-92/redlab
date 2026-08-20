@@ -7574,9 +7574,10 @@ function inviteAthlete(id,btn){
    jamais figurer ici — cette page est publique. Il vit dans les secrets
    Supabase, et seul polar-callback y touche.
 
-   À RENSEIGNER une fois, avec le Client ID obtenu sur admin.polaraccesslink.com.
-   Tant que la constante est vide, le bouton le dit au lieu d'échouer. */
-const POLAR_CLIENT_ID='';
+   Le Client ID vient de admin.polaraccesslink.com. Il doit rester identique à
+   celui déclaré dans les secrets Supabase : le navigateur s'en sert pour bâtir
+   l'URL d'autorisation, la fonction pour échanger le code. */
+const POLAR_CLIENT_ID='787347d9-3e39-495c-9ea0-c96dc276c86b';
 const POLAR_AUTH_URL='https://flow.polar.com/oauth2/authorization';
 function polarRedirectUri(){ return SUPA_URL+'/functions/v1/polar-callback'; }
 
@@ -7585,10 +7586,7 @@ function polarRedirectUri(){ return SUPA_URL+'/functions/v1/polar-callback'; }
    charge pour le coach de l'envoyer. */
 async function polarConnect(id,btn){
   if(!POLAR_CLIENT_ID){
-    alert("Le Client ID Polar n'est pas encore renseigné dans RedLab.\n\n"
-      +"Ouvre index.html, cherche POLAR_CLIENT_ID et colle la valeur obtenue sur "
-      +"admin.polaraccesslink.com. Le Client SECRET, lui, ne se met pas ici : "
-      +"il reste dans les secrets Supabase.");
+    alert("Le Client ID Polar n'est pas renseigné dans index.html (constante POLAR_CLIENT_ID).");
     return;
   }
   if(typeof _cloudUser==='undefined'||!_cloudUser){
