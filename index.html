@@ -901,19 +901,25 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .ath-metric{background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.18);border-radius:8px;padding:6px 12px}
 .ath-metric-lbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:2px}
 .ath-metric-val{font-size:16px;font-weight:900;color:var(--orange);line-height:1}
-.ath-actions{display:flex;gap:8px}
+/* Les deux boutons tiennent côte à côte tant qu'ils peuvent, et passent l'un
+   sous l'autre plutôt que de casser leur libellé en deux lignes. */
+.ath-actions{display:flex;gap:8px;flex-wrap:wrap}
 .btn-load{
   flex:1;padding:9px 14px;border-radius:8px;
   background:rgba(255,107,26,0.1);border:1px solid rgba(255,107,26,0.3);
   color:var(--orange);font-family:var(--font);font-size:13px;font-weight:700;
   cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;
+  white-space:nowrap;min-width:150px;
 }
 .btn-load:hover{background:rgba(255,107,26,0.2);border-color:var(--orange)}
 .btn-load svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Une corbeille seule laisse deviner ; le mot ne laisse pas de doute sur ce
+   qu'on s'apprête à faire. */
 .btn-del{
-  width:36px;height:36px;border-radius:8px;
+  height:36px;padding:0 14px;border-radius:8px;gap:7px;
   border:1px solid rgba(248,113,113,0.2);background:transparent;
   color:#F87171;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--font);font-size:13px;font-weight:700;white-space:nowrap;
   transition:all .18s;
 }
 .btn-del:hover{border-color:#F87171;background:rgba(248,113,113,0.1)}
@@ -3641,7 +3647,7 @@ function athSaveCurrent(btn){
   if(btn){ var sp=btn.querySelector('span'); if(sp)sp.textContent='Enregistré ✓'; setTimeout(function(){ renderAthletes(); }, 1200); }
   else renderAthletes();
 }
-function saveCurrentAthlete(){
+function saveCurrentAthlete(silencieux){
   if(!S.vma||!S.pseudo){return;}
   const athletes=getAthletes();
   const existing=athletes.findIndex(a=>a.pseudo===S.pseudo);
@@ -3675,8 +3681,9 @@ function saveCurrentAthlete(){
   ath.history=hist;
   if(existing>=0){athletes[existing]=ath;}else{athletes.unshift(ath);}
   _saveAthletes(athletes);
-  // Feedback visuel
-  const btn=document.getElementById('btn-save-ath');
+  // Feedback visuel — sauté en enregistrement automatique : un bouton qui
+  // clignote à chaque frappe est plus agaçant qu'informatif.
+  const btn=silencieux?null:document.getElementById('btn-save-ath');
   if(btn){
     const orig=btn.innerHTML;
     btn.innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg><span>Sauvegardé !</span>';
@@ -3736,6 +3743,23 @@ function _deleteAthleteLocal(id){
    espace. On efface désormais dans l'ordre inverse de la publication — le
    distant d'abord, le local ensuite — pour ne jamais perdre la trace de ce
    qu'il reste à nettoyer si une étape échoue. */
+/* Enregistrement automatique de l'athlète chargé.
+   Deux garde-fous délibérés :
+   — il MET À JOUR, il ne crée jamais. Sans quoi tâtonner sur un pseudo et une
+     VMA pour voir ce que ça donne peuplerait la liste d'athlètes fantômes ;
+   — il est différé : on enregistre quand la frappe s'arrête, pas pendant.
+   L'enregistrement déclenche _saveAthletes, donc la synchro cloud, donc la
+   republication de la fiche — dans cet ordre, avec des données à jour. */
+var _athSaveTimer=null;
+function athAutoSave(){
+  if(typeof S==='undefined'||!S.pseudo)return;
+  if(!S.vma&&!S.csKmh)return;
+  var existe=getAthletes().some(function(a){return a.pseudo===S.pseudo;});
+  if(!existe)return;
+  try{ saveCurrentAthlete(true); }catch(e){}
+}
+function athAutoSaveDebounced(){ clearTimeout(_athSaveTimer); _athSaveTimer=setTimeout(athAutoSave,1200); }
+
 function deleteAthlete(id){
   var ath=getAthletes().find(function(a){return a.id===id;});
   if(!ath) return;
@@ -3942,11 +3966,17 @@ function renderAthletes(){
     <div class="input-hero" style="margin-bottom:18px">
       <img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running" style="max-width:130px;height:auto;display:block;margin-bottom:12px">
       <div class="input-hero-title">Athlètes enregistrés</div>
-      <div class="input-hero-sub">Retrouvez et chargez les profils de vos athlètes. Le bouton ci-dessous enregistre le profil actuellement ouvert.</div>
-      <button class="btn-save-athlete" onclick="athSaveCurrent(this)" style="margin-top:14px">
-        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        <span>Enregistrer le profil ouvert</span>
-      </button>
+      <div class="input-hero-sub">Retrouvez et chargez les profils de vos athlètes. Le profil ouvert s'enregistre tout seul, et son espace se republie dans la foulée ; les boutons ci-dessous servent à forcer.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <button class="btn-save-athlete" onclick="athSaveCurrent(this)" style="margin:0">
+          <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>Enregistrer le profil ouvert</span>
+        </button>
+        <button class="btn-save-athlete" onclick="publishAllSpaces(this)" style="margin:0" title="Régénère et renvoie la fiche de chaque athlète ayant un email — utile après une évolution de l'outil">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>↑ Republier tous les espaces</span>
+        </button>
+      </div>
     </div>`;
   if(!athletes.length){
     wrap.innerHTML=hd+`
@@ -3992,8 +4022,9 @@ function renderAthletes(){
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           Charger le profil
         </button>
-        <button class="btn-del" onclick="deleteAthlete(${a.id})" title="Supprimer">
+        <button class="btn-del" onclick="deleteAthlete(${a.id})" title="Supprimer définitivement cet athlète">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Supprimer
         </button>
       </div>
     </div>`;
@@ -7687,14 +7718,17 @@ async function polarConnect(id,btn){
 }
 
 // Publie la fiche COMPLÈTE (dashboard épuré) d'un athlète vers son espace, sans quitter la page.
+/* Publie la fiche d'un athlète. Renvoie {ok:…, msg:…} pour que la publication
+   en série puisse compter les réussites au lieu d'enchaîner les alertes ;
+   l'alerte n'apparaît que si un bouton est passé, donc sur un clic direct. */
 async function publishAthlete(id,btn){
   var o=btn?btn.textContent:'';
   function restore(){ if(btn){btn.disabled=false;btn.textContent=o||'↑ Publier l\'espace';} }
-  function fail(m){ restore(); alert('Publication échouée : '+m); }
-  if(typeof _cloudUser==='undefined'||!_cloudUser){alert('Connecte-toi au cloud (☁, en bas de la barre latérale) pour publier l\'espace.');return;}
+  function fail(m){ restore(); if(btn)alert('Publication échouée : '+m); return {ok:false,msg:m}; }
+  if(typeof _cloudUser==='undefined'||!_cloudUser){return fail('non connecté au cloud (☁, en bas de la barre latérale)');}
   var ath=getAthletes().find(function(x){return x.id===id;});
-  if(!ath)return;
-  if(!ath.email||ath.email.indexOf('@')<0){alert('Renseigne d\'abord l\'email de l\'athlète (champ juste au-dessus).');return;}
+  if(!ath)return {ok:false,msg:'athlète introuvable'};
+  if(!ath.email||ath.email.indexOf('@')<0){return fail('email manquant');}
   if(btn){btn.disabled=true;btn.textContent='Publication…';}
   // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
   try{
@@ -7711,6 +7745,34 @@ async function publishAthlete(id,btn){
   catch(e){ return fail(e.message); }
   if(r&&r.error){ return fail(r.error.message); }
   if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
+  return {ok:true,ko:Math.round(doc.length/1024)};
+}
+
+/* Republie tous les athlètes qui ont un email. Utile après une évolution de
+   l'outil : les fiches sont figées au moment de leur publication, une refonte
+   du dashboard ne les atteint pas toute seule.
+   Publier charge chaque athlète dans S : on remet l'athlète courant en place
+   à la fin, sinon le coach se retrouve sur le profil du dernier de la liste. */
+async function publishAllSpaces(btn){
+  if(typeof _cloudUser==='undefined'||!_cloudUser){alert('Connecte-toi au cloud (☁, en bas de la barre latérale) pour publier.');return;}
+  var list=getAthletes().filter(function(a){return a.email&&a.email.indexOf('@')>0;});
+  if(!list.length){alert("Aucun athlète n'a d'email renseigné : il n'y a rien à publier.");return;}
+  var courant=(getAthletes().find(function(a){return a.pseudo===S.pseudo;})||{}).id||null;
+  var o=btn?btn.textContent:'', ok=0, echecs=[];
+  if(btn)btn.disabled=true;
+  for(var i=0;i<list.length;i++){
+    if(btn)btn.textContent='Publication… '+(i+1)+'/'+list.length;
+    var r=null;
+    try{ r=await publishAthlete(list[i].id); }catch(e){ r={ok:false,msg:e.message||String(e)}; }
+    if(r&&r.ok)ok++; else echecs.push(list[i].pseudo+' ('+((r&&r.msg)||'erreur')+')');
+  }
+  // Remise en place du profil sur lequel le coach travaillait.
+  try{ if(courant!=null&&typeof loadAthlete==='function')loadAthlete(courant); }catch(e){}
+  try{ renderAthletes(); }catch(e){}
+  if(btn){ btn.disabled=false;
+    btn.textContent=echecs.length?('Publié '+ok+'/'+list.length):('Tout publié ✓ ('+ok+')');
+    setTimeout(function(){btn.textContent=o||'↑ Republier tous les espaces';},3200); }
+  if(echecs.length)alert('Publication partielle — '+ok+' réussi'+(ok>1?'s':'')+', '+echecs.length+' en échec :\n\n• '+echecs.join('\n• '));
 }
 async function cloudPull(){
   if(!_cloudUser)return;
@@ -7852,6 +7914,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(typeof cloudInit==='function')cloudInit();
   if(typeof csInit==='function')csInit();
   if(typeof mhNavInit==='function')mhNavInit();
+  // Enregistrement automatique : branché sur saveLS, appelé à chaque
+  // modification du profil de travail. Hors de cloudInit à dessein — il doit
+  // fonctionner même sans connexion au cloud, en local.
+  try{
+    if(typeof saveLS==='function'&&!window.__athAutoHooked){
+      window.__athAutoHooked=true;
+      var _sl=saveLS;
+      window.saveLS=function(){ var r=_sl.apply(this,arguments); athAutoSaveDebounced(); return r; };
+    }
+  }catch(e){}
 });
 
 
