@@ -4164,7 +4164,7 @@ function renderDashPlan(){
   const days=Math.round((race-today)/864e5);
   if(days<7){sec.style.display='none';return;}
   let wkAvail=Math.round(days/7);
-  const w=Math.min(Math.max(wkAvail,p.wmin),p.wmax);
+  const w=Math.max(1,wkAvail);
   // sauvegarde état planif
   const save={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,d1:_plDate1,d2:_plDate2,di:_plDi,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   const cfg=(S.plan&&S.plan.D===p.id)?S.plan:null;
@@ -4176,7 +4176,7 @@ function renderDashPlan(){
   _plVolOverride=cfg?(cfg.volOv||{}):{};
   _plRecOverride=cfg?(cfg.recOv||{}):{};
   _plSessions=cfg?(cfg.sess||{}):{};
-  const wEff=(cfg&&cfg.W!=null)?Math.min(Math.max(cfg.W,p.wmin),p.wmax):w;
+  const wEff=(cfg&&cfg.W!=null)?Math.max(1,cfg.W):w;
   _plD=p.id;_plCtx=cfg?cfg.ctx:'new';_plVol=cfg?cfg.vol:null;_plProf=cfg?cfg.prof:'rout';
   _plDate1=null;
   _plDate2=g.date;_plDi=null;_plW=wEff;
@@ -6796,7 +6796,7 @@ function plRecoBox(p){
 function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=plRecoWeeks(p);plSave();renderPlanif();}
 function plUpd(){
   const p=PLANIF.find(x=>x.id===_plD);if(!p)return;
-  _plW=Math.min(Math.max(_plW,p.wmin),p.wmax);
+  _plW=Math.max(1,_plW);
   const ph=plPhases(p,_plW),weeks=plWeeks(p,_plW);
   const set=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html;};
   const wl=document.getElementById('pl-weeks');if(wl)wl.textContent=_plW+' semaines';
@@ -7036,14 +7036,17 @@ function plAvailInfo(){
   if(!_plDate1||!_plDate2)return null;
   const p=PLANIF.find(x=>x.id===_plD); if(!p)return null;
   const d1=new Date(_plDate1+'T00:00:00'),d2=new Date(_plDate2+'T00:00:00');
-  const days=Math.round((d2-d1)/864e5);
-  if(days<=0)return {msg:'La course doit être après le début !',col:'#F87171',applied:null};
-  const wkn=Math.round(days/7);
-  let applied=wkn,msg='→ '+wkn+' sem entre début et course',col='#34D399';
-  if(wkn<p.wmin){applied=p.wmin;msg+=' — trop court pour un '+p.lbl+', calé à '+p.wmin+' sem';col='#F87171';}
-  else if(wkn>p.wmax){applied=p.wmax;msg+=' — un '+p.lbl+' se prépare en '+p.wmax+' sem au plus';col='#FBBF24';}
-  else msg+=' — plan calé sur '+wkn+' sem';
-  return {msg:msg,col:col,applied:applied,wkn:wkn};
+  if(d2<=d1)return {msg:'La course doit être après le début !',col:'#F87171',applied:null};
+  // Le calendrier raisonne en semaines du lundi au dimanche : on compte de
+  // lundi à lundi, bornes comprises. La semaine 1 contient donc toujours la
+  // date de début saisie, quel que soit le jour de la semaine choisi.
+  const mon=function(d){const x=new Date(d.getTime());x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x;};
+  const wkn=Math.max(1,Math.round((mon(d2)-mon(d1))/(7*864e5))+1);
+  // La durée conseillée reste un conseil : on la signale, on ne l'impose pas.
+  let msg='→ plan sur '+wkn+' sem',col='#34D399';
+  if(wkn<p.wmin){msg+=' — court pour un '+p.lbl+' ('+p.wmin+' à '+p.wmax+' sem conseillées)';col='#FBBF24';}
+  else if(wkn>p.wmax){msg+=' — long pour un '+p.lbl+' ('+p.wmin+' à '+p.wmax+' sem conseillées)';col='#FBBF24';}
+  return {msg:msg,col:col,applied:wkn,wkn:wkn};
 }
 /* Affiche ce message. Appelé à la saisie ET à chaque re-rendu : sans quoi
    l'explication de l'écrêtage disparaît au premier rafraîchissement, et l'écart
@@ -7393,7 +7396,7 @@ function renderPlanif(){
   else if(!_plPicked&&S.goal&&S.goal.id&&PLANIF.some(x=>x.id===S.goal.id))_plD=S.goal.id;
   const p=PLANIF.find(x=>x.id===_plD)||PLANIF[1];
   if(_plPhaseOverride){_plW=Math.max(1,_plPhaseOverride.base+_plPhaseOverride.dev+_plPhaseOverride.spe+_plPhaseOverride.aff);}
-  else{if(_plW==null)_plW=plRecoWeeks(p);_plW=Math.min(Math.max(_plW,p.wmin),p.wmax);}
+  else{if(_plW==null)_plW=plRecoWeeks(p);_plW=Math.max(1,_plW);}
   const weeks=plWeeks(p,_plW),ph=plPhases(p,_plW);
   const chips=PLANIF.map(x=>'<button class="lib-chip'+(x.id===_plD?' active':'')+'" onclick="setPlD(\''+x.id+'\')" style="'+(x.id===_plD?'background:'+x.col+';border-color:'+x.col+';color:#fff':'')+'">'+x.lbl+'</button>').join('');
   const profs=PL_PROFILES.map(pr=>'<button class="lib-chip'+(pr.id===_plProf?' active':'')+'" onclick="setPlProf(\''+pr.id+'\')" title="'+pr.desc.replace(/"/g,'')+'">'+pr.ico+' '+pr.lbl+'</button>').join('');
