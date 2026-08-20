@@ -357,6 +357,15 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lib-create-btn{margin-left:auto;padding:9px 15px;border:1px solid rgba(255,107,26,0.4);background:rgba(255,107,26,0.1);color:var(--orange);font-family:var(--font);font-weight:800;font-size:13px;border-radius:9px;cursor:pointer;white-space:nowrap}
   .lib-create-btn:hover{background:rgba(255,107,26,0.18)}
   .lib-create-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:2px 0 22px}
+  /* Éditeur de blocs : une ligne par bloc, qui se replie plutôt que de déborder */
+  .lb-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px;margin-bottom:6px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
+  .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
+  .lb-del{width:28px;height:28px;flex-shrink:0;border-radius:7px;border:1px solid rgba(248,113,113,.25);background:transparent;color:#F87171;cursor:pointer;font-size:14px;line-height:1}
+  .lb-del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
+  .lb-add{margin-top:4px;padding:7px 13px;border:1px dashed var(--border2);background:transparent;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer}
+  .lb-add:hover{border-color:var(--orange);color:var(--orange)}
+  .lib-edit{border-color:rgba(255,107,26,.35)!important;color:var(--orange)!important}
+  .lib-edit:hover{background:rgba(255,107,26,.12)!important}
   .lc-head{font-size:16px;font-weight:900;color:var(--text);margin-bottom:14px}
   .lc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .lc-field{margin-bottom:12px;display:flex;flex-direction:column}
@@ -4449,6 +4458,9 @@ function libCard(s,vma,opts){
   const _kind=opts.del?'c':'l', _idx=(opts.del?CUSTOM_SESSIONS:LIB_SESSIONS).indexOf(s);
   const wktBtn='<button type="button" class="lib-wkt" onclick="wktExport(\''+_kind+'\','+_idx+')" title="Télécharger la séance au format montre (.fit)">'
     +'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><polyline points="12 9.5 12 12 13.8 13.2"/><path d="M9 3h6M9 21h6"/></svg>Montre</button>';
+  const editBtn='<button type="button" class="lib-wkt lib-edit" onclick="libEditOpen(\''+_kind+'\','+_idx+')" title="'
+    +(_kind==='c'?'Modifier cette séance':'Modifier et enregistrer une copie dans ta banque')+'">'
+    +'<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Modifier</button>';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
   const blocks=s.blocks.map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
@@ -4457,7 +4469,7 @@ function libCard(s,vma,opts){
     '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
-    '<div class="lib-wkt-row">'+wktBtn+'</div>'+
+    '<div class="lib-wkt-row">'+wktBtn+editBtn+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
     (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
@@ -4833,26 +4845,32 @@ function libBlockSegs(b,vma){
 }
 function toggleLibCreate(){
   const box=document.getElementById('lib-create'); if(!box)return;
-  if(box.style.display==='none'||!box.style.display){ box.innerHTML=libCreateFormHTML(); box.style.display='block'; libPreview(); }
-  else { box.style.display='none'; box.innerHTML=''; }
+  if(box.style.display==='none'||!box.style.display){ _libEdit=null; box.innerHTML=libCreateFormHTML(); box.style.display='block'; libPreview(); }
+  else { _libEdit=null; box.style.display='none'; box.innerHTML=''; }
 }
 function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
-function libCreateFormHTML(){
-  const themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'">'+t.lbl+'</option>';}).join('');
-  return '<div class="lc-head">Nouvelle séance</div>'
+function libCreateFormHTML(pre){
+  pre=pre||{};
+  const esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
+  const themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'"'+(t.id===pre.theme?' selected':'')+'>'+t.lbl+'</option>';}).join('');
+  return '<div class="lc-head">'+(pre.title?('Modifier « '+String(pre.title).replace(/</g,'&lt;')+' »'):'Nouvelle séance')+'</div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Titre</label><input id="lc-title" placeholder="10 × 1000 m pyramidal" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(pre.title)+'" placeholder="10 × 1000 m pyramidal" oninput="libPreview()"></div>'
       +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
     +'</div>'
-    +'<div class="lc-field"><label>Contenu <span class="lc-hint">notation libre</span></label><textarea id="lc-raw" rows="3" placeholder="10x1000 : série 1 800as10 200as5 · série 2 700as10 300as5 · série 3 600as10 400as5 · R3&#39;" oninput="libPreview()"></textarea></div>'
+    +'<div class="lc-field"><label>Contenu <span class="lc-hint">notation libre</span></label>'
+      +'<textarea id="lc-raw" rows="3" placeholder="10x1000 : série 1 800as10 200as5 · série 2 700as10 300as5 · série 3 600as10 400as5 · R3&#39;" oninput="libPreview()">'
+      +String(pre.raw==null?'':pre.raw).replace(/</g,'&lt;')+'</textarea></div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" placeholder="20 min + gammes" oninput="libPreview()"></div>'
-      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" placeholder="10 min footing" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(pre.warm==='—'?'':pre.warm)+'" placeholder="20 min + gammes" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(pre.cool==='—'?'':pre.cool)+'" placeholder="10 min footing" oninput="libPreview()"></div>'
     +'</div>'
-    +'<div class="lc-field"><label>Description <span class="lc-hint">option</span></label><input id="lc-desc" placeholder="Objectif de la séance…" oninput="libPreview()"></div>'
+    +'<div class="lc-field"><label>Description <span class="lc-hint">option</span></label><input id="lc-desc" value="'+esc(pre.desc)+'" placeholder="Objectif de la séance…" oninput="libPreview()"></div>'
     +'<div class="lc-legend">Allures reconnues : <b>AS3 AS5 AS10 AS21</b> (allures 3/5/10/21 km) · <b>AM</b> (marathon) · <b>EF</b> · <b>Seuil</b> · <b>VMA</b> · <b>VMA+</b> · ou un <b>%</b> direct. Distances en m (ou km). Récup : <b>R3&#39;</b> ou <b>R90"</b>. Plusieurs variantes ? Sépare-les par <b>série 1 / série 2…</b></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
-    +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">Enregistrer la séance</button><button class="lc-cancel" onclick="toggleLibCreate()">Annuler</button></div>';
+    +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
+      +((_libEdit&&_libEdit.src==='c')?'Enregistrer les modifications':(pre.raw!=null?'↓ Enregistrer dans ma banque':'Enregistrer la séance'))
+      +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>';
 }
 function libBuildFromForm(){
   const raw=lcVal('lc-raw').trim(); const p=parseWorkout(raw);
@@ -4860,20 +4878,169 @@ function libBuildFromForm(){
   const s={id:'c'+Date.now(),custom:true,theme:lcVal('lc-theme')||'vo2',title:(lcVal('lc-title').trim()||'Séance perso'),tag:tag,desc:lcVal('lc-desc').trim(),warm:lcVal('lc-warm').trim()||'—',cool:lcVal('lc-cool').trim()||'—',raw:raw,blocks:p.blocks};
   return {s:s,warnings:p.warnings,ok:p.blocks.length>0};
 }
+/* Même contrat que libBuildFromForm, mais depuis l'éditeur de blocs. */
+function libBuildFromEditor(){
+  const blocks=(_libEdit&&_libEdit.blocks||[]).filter(function(b){
+    return (b.d>0||b.m>0||b.sec>0) && (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0);
+  });
+  const s={
+    id:(_libEdit&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
+    custom:true,
+    theme:lcVal('lc-theme')||'vo2',
+    title:(lcVal('lc-title').trim()||'Séance perso'),
+    tag:lcVal('lc-tag').trim(),
+    desc:lcVal('lc-desc').trim(),
+    warm:lcVal('lc-warm').trim()||'—',
+    cool:lcVal('lc-cool').trim()||'—',
+    blocks:JSON.parse(JSON.stringify(blocks))
+  };
+  const warnings=[];
+  if(blocks.length<(_libEdit&&_libEdit.blocks||[]).length)
+    warnings.push('bloc incomplet ignoré (valeur ou % manquant)');
+  return {s:s,warnings:warnings,ok:blocks.length>0};
+}
+/* Le formulaire actif décide de la fonction de construction. */
+function libBuildActive(){
+  return document.getElementById('lb-rows')?libBuildFromEditor():libBuildFromForm();
+}
 function libPreview(){
   const box=document.getElementById('lc-preview'); if(!box)return;
-  const b=libBuildFromForm(); const vma=libVmaVal(); let html='';
+  const b=libBuildActive(); const vma=libVmaVal(); let html='';
   if(b.warnings.length) html+='<div class="lc-warn">⚠ '+b.warnings.join(' · ')+'</div>';
   html+=b.ok?('<div class="lc-preview-lbl">Aperçu</div><div class="lib-grid">'+libCard(b.s,vma)+'</div>'):'<div class="lc-empty">Saisis le contenu de la séance pour voir l’aperçu.</div>';
   box.innerHTML=html;
 }
 function libSaveSession(){
-  const b=libBuildFromForm();
-  if(!b.ok){ alert('Impossible de lire la séance. Vérifie la notation, ex : 10x1000 800as10 200as5 R3\''); return; }
-  CUSTOM_SESSIONS.push(b.s); saveCustomSessions();
+  const b=libBuildActive();
+  if(!b.ok){
+    alert(document.getElementById('lb-rows')
+      ? "La séance n'a aucun bloc exploitable. Chaque bloc a besoin d'une valeur et d'un % de VMA."
+      : "Impossible de lire la séance. Vérifie la notation, ex : 10x1000 800as10 200as5 R3'");
+    return;
+  }
+  // Modification d'une séance perso : on remplace à sa place, pour ne pas la
+  // voir sauter en fin de liste à chaque retouche.
+  const i=(_libEdit&&_libEdit.src==='c'&&_libEdit.id)
+    ? CUSTOM_SESSIONS.findIndex(function(x){return x.id===_libEdit.id;}) : -1;
+  if(i>=0)CUSTOM_SESSIONS[i]=b.s; else CUSTOM_SESSIONS.push(b.s);
+  saveCustomSessions();
+  _libEdit=null;
   const box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
   libTheme=b.s.theme; renderLibrary();
 }
+/* ══ ÉDITION D'UNE SÉANCE ══
+   Deux formats coexistent dans l'outil, et aucun ne sait exprimer l'autre :
+   — les séances de la bibliothèque ont des blocs structurés {r, d|m|sec, pct,
+     rec}, où pct peut être une fourchette [95,100] ;
+   — les séances écrites en notation libre ont un champ « raw » et des blocs
+     à segments, que le parseur produit à partir de distances uniquement.
+   Convertir les premières en notation libre perdrait les durées et les
+   fourchettes. Chaque séance s'édite donc avec l'outil qui correspond à sa
+   forme : le formulaire de notation libre si elle a un « raw », l'éditeur de
+   blocs sinon. Dans les deux cas, l'enregistrement va dans la banque perso —
+   la bibliothèque de référence, elle, n'est pas modifiable. */
+var _libEdit=null;   // {src:'l'|'c', id, blocks:[…]} pendant l'édition
+
+function libFindSession(kind,idx){
+  var arr=(kind==='c')?CUSTOM_SESSIONS:LIB_SESSIONS;
+  return arr[idx]||null;
+}
+function libEditOpen(kind,idx){
+  var s=libFindSession(kind,idx); if(!s)return;
+  var box=document.getElementById('lib-create'); if(!box)return;
+  // Copie profonde : tant que le coach n'a pas enregistré, l'original ne bouge pas.
+  var copie=JSON.parse(JSON.stringify(s));
+  _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[]};
+  box.innerHTML=copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie);
+  box.style.display='block';
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+  libPreview();
+}
+function libEditCancel(){
+  _libEdit=null;
+  var box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
+}
+
+/* Une ligne de bloc : répétitions × valeur (m, km ou min) à un pourcentage de
+   VMA — un seul, ou une fourchette — avec sa récupération. */
+function libBlocRow(b,i){
+  var IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none';
+  var unite=b.m?'min':(b.sec?'sec':(b.d>=1000?'km':'m'));
+  var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
+  var p0=Array.isArray(b.pct)?b.pct[0]:(b.pct||70), p1=Array.isArray(b.pct)?b.pct[1]:'';
+  var o=function(v,t){return '<option value="'+v+'"'+(unite===v?' selected':'')+'>'+t+'</option>';};
+  return '<div class="lb-row" data-i="'+i+'">'
+    +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
+    +'<span class="lb-x">×</span>'
+    +'<input type="number" min="0" step="any" value="'+val+'" oninput="libBlocSet('+i+',\'val\',this.value)" title="valeur" style="'+IS+';width:74px;text-align:center">'
+    +'<select onchange="libBlocSet('+i+',\'unite\',this.value)" title="unité" style="'+IS+';width:72px">'+o('m','m')+o('km','km')+o('min','min')+o('sec','sec')+'</select>'
+    +'<span class="lb-at">à</span>'
+    +'<input type="number" min="30" max="130" step="1" value="'+p0+'" oninput="libBlocSet('+i+',\'p0\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
+    +'<span class="lb-at">–</span>'
+    +'<input type="number" min="30" max="130" step="1" value="'+p1+'" placeholder="max" oninput="libBlocSet('+i+',\'p1\',this.value)" title="% VMA haut (facultatif)" style="'+IS+';width:66px;text-align:center">'
+    +'<span class="lb-at">% VMA</span>'
+    +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:130px">'
+    +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+    +'</div>';
+}
+function libEditFormHTML(s){
+  var themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'"'+(t.id===s.theme?' selected':'')+'>'+t.lbl+'</option>';}).join('');
+  var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
+  var rows=(_libEdit.blocks||[]).map(libBlocRow).join('');
+  return '<div class="lc-head">Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »</div>'
+    +'<div class="lc-grid">'
+      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
+    +'</div>'
+    +'<div class="lc-field"><label>Contenu de la séance</label><div id="lb-rows">'+rows+'</div>'
+      +'<button type="button" class="lb-add" onclick="libBlocAdd()">+ Ajouter un bloc</button></div>'
+    +'<div class="lc-grid">'
+      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" oninput="libPreview()"></div>'
+    +'</div>'
+    +'<div class="lc-field"><label>Description</label><input id="lc-desc" value="'+esc(s.desc)+'" oninput="libPreview()"></div>'
+    +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
+    +'<div id="lc-preview" class="lc-preview"></div>'
+    +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
+      +(_libEdit.src==='c'?'Enregistrer les modifications':'↓ Enregistrer dans ma banque')
+      +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
+    +(_libEdit.src==='l'?'<div class="lc-legend">La bibliothèque de référence n’est pas modifiable : l’enregistrement crée une copie dans tes séances perso, l’originale reste intacte.</div>':'');
+}
+function libBlocSet(i,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
+  if(champ==='r'){ b.r=Math.max(1,Math.round(+v||1)); }
+  else if(champ==='rec'){ b.rec=v; }
+  else if(champ==='val'||champ==='unite'){
+    var row=document.querySelector('.lb-row[data-i="'+i+'"]');
+    var val=+((row&&row.querySelectorAll('input')[1].value)||0);
+    var u=(row&&row.querySelector('select').value)||'m';
+    delete b.d; delete b.m; delete b.sec;
+    if(u==='km')b.d=Math.round(val*1000); else if(u==='m')b.d=Math.round(val);
+    else if(u==='min')b.m=val; else b.sec=Math.round(val);
+  }
+  else if(champ==='p0'||champ==='p1'){
+    var row2=document.querySelector('.lb-row[data-i="'+i+'"]');
+    var ins=row2?row2.querySelectorAll('input'):[];
+    var a=+((ins[2]&&ins[2].value)||0), z=(ins[3]&&ins[3].value!=='')?+ins[3].value:null;
+    b.pct=(z!=null&&z>a)?[a,z]:a;
+  }
+  libPreview();
+}
+function libBlocAdd(){
+  if(!_libEdit)return;
+  _libEdit.blocks.push({r:1,d:1000,pct:90,rec:''});
+  var box=document.getElementById('lb-rows');
+  if(box)box.innerHTML=_libEdit.blocks.map(libBlocRow).join('');
+  libPreview();
+}
+function libBlocDel(i){
+  if(!_libEdit)return;
+  _libEdit.blocks.splice(i,1);
+  var box=document.getElementById('lb-rows');
+  if(box)box.innerHTML=_libEdit.blocks.map(libBlocRow).join('');
+  libPreview();
+}
+
 function libDeleteSession(id){
   if(!confirm('Supprimer cette séance ?'))return;
   CUSTOM_SESSIONS=CUSTOM_SESSIONS.filter(function(s){return s.id!==id;}); saveCustomSessions(); renderLibCards();
