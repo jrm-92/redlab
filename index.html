@@ -4922,13 +4922,16 @@ function libSaveSession(){
   }
   // Modification d'une séance perso : on remplace à sa place, pour ne pas la
   // voir sauter en fin de liste à chaque retouche.
-  const i=(_libEdit&&_libEdit.src==='c'&&_libEdit.id)
-    ? CUSTOM_SESSIONS.findIndex(function(x){return x.id===_libEdit.id;}) : -1;
+  const majId=(_libEdit&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:null;
+  b.s.title=libTitreUnique(b.s.title,majId);
+  const i=majId?CUSTOM_SESSIONS.findIndex(function(x){return x.id===majId;}):-1;
   if(i>=0)CUSTOM_SESSIONS[i]=b.s; else CUSTOM_SESSIONS.push(b.s);
   saveCustomSessions();
+  const apres=_libEdit&&_libEdit.apres, enFenetre=!!(document.getElementById('lib-edit-modal'));
   _libEdit=null;
-  const box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
-  libTheme=b.s.theme; renderLibrary();
+  libEditCancel();
+  if(apres){ apres(b.s); return; }   // le plan se recharge lui-même
+  if(!enFenetre){ libTheme=b.s.theme; renderLibrary(); }
 }
 /* ══ ÉDITION D'UNE SÉANCE ══
    Deux formats coexistent dans l'outil, et aucun ne sait exprimer l'autre :
@@ -4941,24 +4944,59 @@ function libSaveSession(){
    forme : le formulaire de notation libre si elle a un « raw », l'éditeur de
    blocs sinon. Dans les deux cas, l'enregistrement va dans la banque perso —
    la bibliothèque de référence, elle, n'est pas modifiable. */
-var _libEdit=null;   // {src:'l'|'c', id, blocks:[…]} pendant l'édition
+var _libEdit=null;   // {src:'l'|'c', id, blocks:[…], apres, hote} pendant l'édition
+
+/* Le calendrier référence ses séances par leur titre, et l'export montre les
+   résout de la même façon. Deux séances homonymes en rendraient une
+   inatteignable — silencieusement. On garantit donc l'unicité à
+   l'enregistrement, en excluant la séance elle-même quand on la modifie. */
+function libTitreUnique(t,selfId){
+  t=(t||'').trim()||'Séance perso';
+  var pris=LIB_SESSIONS.map(function(s){return s.title;})
+    .concat(CUSTOM_SESSIONS.filter(function(s){return s.id!==selfId;}).map(function(s){return s.title;}));
+  if(pris.indexOf(t)<0)return t;
+  var base=t.replace(/\s\(\d+\)$/,''), n=2;
+  while(pris.indexOf(base+' ('+n+')')>=0)n++;
+  return base+' ('+n+')';
+}
+/* Retrouve une séance par son titre, bibliothèque puis banque perso. */
+function libParTitre(t){
+  var i=CUSTOM_SESSIONS.findIndex(function(s){return s.title===t;});
+  if(i>=0)return {kind:'c',idx:i,s:CUSTOM_SESSIONS[i]};
+  i=LIB_SESSIONS.findIndex(function(s){return s.title===t;});
+  if(i>=0)return {kind:'l',idx:i,s:LIB_SESSIONS[i]};
+  return null;
+}
 
 function libFindSession(kind,idx){
   var arr=(kind==='c')?CUSTOM_SESSIONS:LIB_SESSIONS;
   return arr[idx]||null;
 }
-function libEditOpen(kind,idx){
+function libEditOpen(kind,idx,opts){
   var s=libFindSession(kind,idx); if(!s)return;
-  var box=document.getElementById('lib-create'); if(!box)return;
+  opts=opts||{};
   // Copie profonde : tant que le coach n'a pas enregistré, l'original ne bouge pas.
   var copie=JSON.parse(JSON.stringify(s));
-  _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[]};
-  box.innerHTML=copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie);
-  box.style.display='block';
-  box.scrollIntoView({behavior:'smooth',block:'center'});
+  if(opts.titre)copie.title=opts.titre;
+  _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[],
+            apres:opts.apres||null,hote:opts.modal?'lib-edit-modal':'lib-create'};
+  var html=copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie);
+  if(opts.modal){
+    // Depuis le plan : l'éditeur vit dans une fenêtre, l'onglet Bibliothèque
+    // n'étant pas à l'écran.
+    var host=document.createElement('div'); host.id='lib-edit-modal'; host.className='pl-modal';
+    host.onclick=function(e){ if(e.target===host)libEditCancel(); };
+    host.innerHTML='<div class="pl-modal-box" style="max-width:760px">'+html+'</div>';
+    document.body.appendChild(host);
+  } else {
+    var box=document.getElementById('lib-create'); if(!box)return;
+    box.innerHTML=html; box.style.display='block';
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+  }
   libPreview();
 }
 function libEditCancel(){
+  var m=document.getElementById('lib-edit-modal'); if(m)m.remove();
   _libEdit=null;
   var box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
 }
@@ -7028,6 +7066,27 @@ function plMoveSession(fromIso,fromIdx,toIso,copy){
   _plGrab=null; plSave(); plUpd();
 }
 function plDaySessCopy(iso,i){plMoveSession(iso,i,iso,true);}
+
+/* Adapter une séance depuis le calendrier.
+   Le plan référence ses séances par leur titre : une modification ne peut donc
+   pas rester locale à un jour, elle produit une séance à part entière. On la
+   range dans la banque perso — la bibliothèque de référence reste intacte — et
+   on remplace la pastille par la nouvelle. Le suffixe « (adapté) » est proposé
+   d'emblée : le coach le voit, et le corrige s'il préfère un autre nom. */
+function plEditSession(iso,i){
+  var it=(_plSessions[iso]||[])[i]; if(!it)return;
+  var trouve=libParTitre(it.t);
+  if(!trouve){ alert('Séance introuvable dans la bibliothèque : « '+it.t+' ».'); return; }
+  var titre=(trouve.kind==='l')?libTitreUnique(trouve.s.title+' (adapté)'):trouve.s.title;
+  libEditOpen(trouve.kind,trouve.idx,{
+    modal:true, titre:titre,
+    apres:function(nouvelle){
+      var lst=_plSessions[iso]; if(!lst||!lst[i])return;
+      lst[i]={t:nouvelle.title,th:nouvelle.theme};
+      plSave(); plUpd();
+    }
+  });
+}
 function plDragStart(ev,iso,i){
   _plGrab={iso:iso,i:i};
   try{ev.dataTransfer.effectAllowed='copyMove';ev.dataTransfer.setData('text/plain',iso+'|'+i);}catch(e){}
@@ -7140,6 +7199,7 @@ function plCalendarHTML(p,weeks,opts){
           +' style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
           +'<span>'+esc+'</span>'
+          +'<button type="button" class="plw-cp" title="Adapter cette séance" onclick="event.stopPropagation();plEditSession(\''+iso+'\','+si+')">✎</button>'
           +'<button type="button" class="plw-cp" title="Dupliquer" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
           +'<button type="button" title="Retirer" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button></div>';
       }).join('');
