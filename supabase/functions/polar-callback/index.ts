@@ -23,7 +23,10 @@ const CLIENT_SECRET = Deno.env.get('POLAR_CLIENT_SECRET')!;
 const SUPA_URL      = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY   = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-/** Renvoie l'athlète vers une page lisible plutôt que du JSON brut. */
+/** Renvoie l'athlète vers une page lisible plutôt que du JSON brut.
+ *  Le détail est court et destiné à l'athlète : la réponse brute de Polar ou
+ *  de PostgreSQL ne lui apprend rien et l'inquiète pour rien. Le diagnostic
+ *  complet part dans les journaux de la fonction, où le coach peut le lire. */
 function retour(etat: string, detail = ''): Response {
   const u = new URL(RETOUR);
   u.searchParams.set('etat', etat);
@@ -63,11 +66,17 @@ Deno.serve(async (req) => {
     },
     body: new URLSearchParams({ grant_type: 'authorization_code', code }),
   });
-  if (!tokRes.ok) return retour('erreur', `jeton refusé (${tokRes.status}) ${await tokRes.text()}`);
+  if (!tokRes.ok) {
+    console.error('polar token', tokRes.status, await tokRes.text());
+    return retour('erreur', "Polar a refusé l'autorisation. Redemande un lien à ton coach.");
+  }
   const tok = await tokRes.json();
   const accessToken: string = tok.access_token;
   const polarUserId: number = Number(tok.x_user_id);
-  if (!accessToken || !polarUserId) return retour('erreur', 'réponse jeton inattendue');
+  if (!accessToken || !polarUserId) {
+    console.error('polar token: réponse inattendue', JSON.stringify(tok));
+    return retour('erreur', "Réponse inattendue de Polar. Préviens ton coach.");
+  }
 
   // 3. Déclarer l'utilisateur à AccessLink. Sans cette étape, les appels de
   //    données répondent 403. Le member-id est NOTRE identifiant de l'athlète.
@@ -83,20 +92,21 @@ Deno.serve(async (req) => {
   });
   // 409 = déjà enregistré : c'est le cas d'une reconnexion, pas une erreur.
   if (!regRes.ok && regRes.status !== 409) {
-    return retour('erreur', `enregistrement refusé (${regRes.status}) ${await regRes.text()}`);
+    console.error('polar users', regRes.status, await regRes.text());
+    return retour('erreur', "Polar n'a pas accepté l'enregistrement. Préviens ton coach.");
   }
 
   // 4. Ranger. Le jeton part dans sa table à part, hors de portée du navigateur.
   const lien = { coach_id: pending.coach_id, athlete_key: pending.athlete_key,
                  polar_user_id: polarUserId, member_id: memberId, linked_at: new Date().toISOString() };
   const e1 = await sb.from('polar_links').upsert(lien, { onConflict: 'coach_id,athlete_key' });
-  if (e1.error) return retour('erreur', e1.error.message);
+  if (e1.error) { console.error('polar_links', e1.error); return retour('erreur', 'Enregistrement du lien impossible. Préviens ton coach.'); }
 
   const e2 = await sb.from('polar_tokens').upsert(
     { coach_id: pending.coach_id, athlete_key: pending.athlete_key,
       access_token: accessToken, updated_at: new Date().toISOString() },
     { onConflict: 'coach_id,athlete_key' });
-  if (e2.error) return retour('erreur', e2.error.message);
+  if (e2.error) { console.error('polar_tokens', e2.error); return retour('erreur', 'Enregistrement du lien impossible. Préviens ton coach.'); }
 
-  return retour('ok', pending.athlete_key);
+  return retour('ok');
 });

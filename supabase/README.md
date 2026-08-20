@@ -57,9 +57,24 @@ L'adresse obtenue doit correspondre exactement à celle déclarée chez Polar :
 https://<ref-du-projet>.supabase.co/functions/v1/polar-callback
 ```
 
-### 4. Le déclenchement, côté RedLab
+### 4. La policy d'effacement
 
-Le `client_id` n'est pas un secret : RedLab peut construire l'URL d'autorisation
+Exécuter `securite-lot3.sql`. Il ouvre le `DELETE` sur `polar_tokens` — et lui
+seul, la lecture restant fermée. Sans lui, supprimer un athlète depuis RedLab
+laisserait son jeton d'accès en base : un identifiant vivant vers ses données
+chez un tiers, survivant à son effacement.
+
+### 5. Le déclenchement, côté RedLab — **fait**
+
+`polarConnect()` dans `index.html` prépare le lien et le copie. C'est l'athlète
+qui autorise, avec son propre compte Polar : le bouton ne redirige donc pas le
+coach, il lui donne un lien à envoyer.
+
+**Une valeur reste à renseigner** : la constante `POLAR_CLIENT_ID` en tête du
+bloc Polar dans `index.html`. Tant qu'elle est vide, le bouton l'explique au
+lieu d'échouer. Le Client **Secret** ne va pas là — cette page est publique.
+
+Le `client_id` n'est pas un secret : RedLab construit l'URL d'autorisation
 lui-même. Avant de rediriger, il insère une ligne dans `polar_pending` avec un
 `state` aléatoire — c'est lui qui, au retour, dira à quel athlète rattacher le
 compte, sans que cette information circule dans l'URL.
