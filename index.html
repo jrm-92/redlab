@@ -4164,7 +4164,7 @@ function renderDashPlan(){
   const days=Math.round((race-today)/864e5);
   if(days<7){sec.style.display='none';return;}
   let wkAvail=Math.round(days/7);
-  const w=Math.min(Math.max(wkAvail,p.wmin),p.wmax);
+  const w=Math.max(1,wkAvail);
   // sauvegarde état planif
   const save={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,d1:_plDate1,d2:_plDate2,di:_plDi,prof:_plProf,ph:_plPhaseOverride,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   const cfg=(S.plan&&S.plan.D===p.id)?S.plan:null;
@@ -4176,7 +4176,7 @@ function renderDashPlan(){
   _plVolOverride=cfg?(cfg.volOv||{}):{};
   _plRecOverride=cfg?(cfg.recOv||{}):{};
   _plSessions=cfg?(cfg.sess||{}):{};
-  const wEff=(cfg&&cfg.W!=null)?Math.min(Math.max(cfg.W,p.wmin),p.wmax):w;
+  const wEff=(cfg&&cfg.W!=null)?Math.max(1,cfg.W):w;
   _plD=p.id;_plCtx=cfg?cfg.ctx:'new';_plVol=cfg?cfg.vol:null;_plProf=cfg?cfg.prof:'rout';
   _plDate1=null;
   _plDate2=g.date;_plDi=null;_plW=wEff;
@@ -6796,7 +6796,7 @@ function plRecoBox(p){
 function plAutoWeeks(){const p=PLANIF.find(x=>x.id===_plD);_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=plRecoWeeks(p);plSave();renderPlanif();}
 function plUpd(){
   const p=PLANIF.find(x=>x.id===_plD);if(!p)return;
-  _plW=Math.min(Math.max(_plW,p.wmin),p.wmax);
+  _plW=Math.max(1,_plW);
   const ph=plPhases(p,_plW),weeks=plWeeks(p,_plW);
   const set=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html;};
   const wl=document.getElementById('pl-weeks');if(wl)wl.textContent=_plW+' semaines';
@@ -7029,23 +7029,57 @@ function plCohHTML(p,weeks,wk){
     +'<div style="font-size:18px;font-weight:900;color:'+col+'">'+c.pct+' %</div></div>'
     +'<div style="display:flex;flex-direction:column;gap:4px">'+c.items.map(it=>'<div style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.5"><span style="flex-shrink:0;font-weight:900;color:'+(it.s==='ok'?'#34D399':(it.s==='warn'?'#FBBF24':'#F87171'))+'">'+(it.s==='ok'?'✓':'⚠')+'</span><span>'+it.t+'</span></div>').join('')+'</div>';
 }
+/* Ce que disent les deux dates saisies : combien de semaines elles couvrent, et
+   ce que le plan en retient. Chaque discipline a une durée maximale (12 sem pour
+   un 10 km, 14 pour un semi) : au-delà, le plan est écrêté. */
+function plAvailInfo(){
+  if(!_plDate1||!_plDate2)return null;
+  const p=PLANIF.find(x=>x.id===_plD); if(!p)return null;
+  const d1=new Date(_plDate1+'T00:00:00'),d2=new Date(_plDate2+'T00:00:00');
+  if(d2<=d1)return {msg:'La course doit être après le début !',col:'#F87171',applied:null};
+  // Le calendrier raisonne en semaines du lundi au dimanche : on compte de
+  // lundi à lundi, bornes comprises. La semaine 1 contient donc toujours la
+  // date de début saisie, quel que soit le jour de la semaine choisi.
+  const mon=function(d){const x=new Date(d.getTime());x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x;};
+  const wkn=Math.max(1,Math.round((mon(d2)-mon(d1))/(7*864e5))+1);
+  // La durée conseillée reste un conseil : on la signale, on ne l'impose pas.
+  let msg='→ plan sur '+wkn+' sem',col='#34D399';
+  if(wkn<p.wmin){msg+=' — court pour un '+p.lbl+' ('+p.wmin+' à '+p.wmax+' sem conseillées)';col='#FBBF24';}
+  else if(wkn>p.wmax){msg+=' — long pour un '+p.lbl+' ('+p.wmin+' à '+p.wmax+' sem conseillées)';col='#FBBF24';}
+  return {msg:msg,col:col,applied:wkn,wkn:wkn};
+}
+/* Affiche ce message. Appelé à la saisie ET à chaque re-rendu : sans quoi
+   l'explication de l'écrêtage disparaît au premier rafraîchissement, et l'écart
+   entre la date saisie et le début réel du calendrier devient incompréhensible. */
+function plAvailRender(){
+  const out=document.getElementById('pl-avail'); if(!out)return null;
+  const inf=plAvailInfo();
+  if(!inf){out.textContent='';return null;}
+  let txt=inf.msg;
+  // Le calendrier se cale sur la course et remonte semaine par semaine. Si le
+  // plan est plus court que l'intervalle saisi — écrêtage, ou date de début qui
+  // n'est pas un lundi — il ne démarre pas le jour indiqué. Autant le dire.
+  if(inf.applied!=null&&_plW&&_plDate2){
+    const mon=function(d){const x=new Date(d.getTime());x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x;};
+    const st=new Date(mon(new Date(_plDate2+'T00:00:00')).getTime()-(_plW-1)*7*864e5);
+    const iso=[st.getFullYear(),String(st.getMonth()+1).padStart(2,'0'),String(st.getDate()).padStart(2,'0')].join('-');
+    if(iso!==_plDate1) txt+=' · le plan démarre le <b style="color:var(--text2)">'
+      +String(st.getDate()).padStart(2,'0')+'/'+String(st.getMonth()+1).padStart(2,'0')+'</b>';
+  }
+  out.innerHTML=txt; out.style.color=inf.col;
+  return inf;
+}
 function plDates(){
   const e1=document.getElementById('pl-d1'),e2=document.getElementById('pl-d2'),e3=document.getElementById('pl-di');
   if(!e1||!e2)return;
   _plDate1=e1.value||null;_plDate2=e2.value||null;_plDi=(e3&&e3.value)||null;
   plSave();
-  const out=document.getElementById('pl-avail');
-  if(!_plDate1||!_plDate2){if(out)out.textContent='';plUpd();return;}
-  const d1=new Date(_plDate1+'T00:00:00'),d2=new Date(_plDate2+'T00:00:00');
-  const days=Math.round((d2-d1)/864e5);
-  if(days<=0){if(out){out.textContent='La course doit être après le début !';out.style.color='#F87171';}return;}
-  const wkn=Math.round(days/7),p=PLANIF.find(x=>x.id===_plD);if(!p)return;
-  let msg='→ '+wkn+' sem disponible'+(wkn>1?'s':''),col='var(--text2)',applied=wkn;
-  if(wkn<p.wmin){applied=p.wmin;msg+=' — trop court, calé à '+p.wmin+' sem';col='#F87171';}
-  else if(wkn>p.wmax){applied=p.wmax;msg+=' — calé au max ('+p.wmax+' sem)';col='#FBBF24';}
-  else{msg+=' — plan calé sur '+wkn+' sem';col='#34D399';}
-  _plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=applied;const sl=document.getElementById('pl-slider');if(sl)sl.value=applied;
-  plUpd();if(out){out.innerHTML=msg;out.style.color=col;}
+  const inf=plAvailInfo();
+  if(!inf){const out=document.getElementById('pl-avail');if(out)out.textContent='';plUpd();return;}
+  if(inf.applied==null){plAvailRender();return;}
+  _plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=inf.applied;
+  const sl=document.getElementById('pl-slider');if(sl)sl.value=inf.applied;
+  plUpd();plAvailRender();
 }
 const PL_DJOURS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 function plMkDay(spec){const p=spec.split('|');const s=p[0];const rest=/^Repos/i.test(s);return {s:s,c:p[1]||(rest?'#475569':'#60A5FA'),rest:rest};}
@@ -7362,7 +7396,7 @@ function renderPlanif(){
   else if(!_plPicked&&S.goal&&S.goal.id&&PLANIF.some(x=>x.id===S.goal.id))_plD=S.goal.id;
   const p=PLANIF.find(x=>x.id===_plD)||PLANIF[1];
   if(_plPhaseOverride){_plW=Math.max(1,_plPhaseOverride.base+_plPhaseOverride.dev+_plPhaseOverride.spe+_plPhaseOverride.aff);}
-  else{if(_plW==null)_plW=plRecoWeeks(p);_plW=Math.min(Math.max(_plW,p.wmin),p.wmax);}
+  else{if(_plW==null)_plW=plRecoWeeks(p);_plW=Math.max(1,_plW);}
   const weeks=plWeeks(p,_plW),ph=plPhases(p,_plW);
   const chips=PLANIF.map(x=>'<button class="lib-chip'+(x.id===_plD?' active':'')+'" onclick="setPlD(\''+x.id+'\')" style="'+(x.id===_plD?'background:'+x.col+';border-color:'+x.col+';color:#fff':'')+'">'+x.lbl+'</button>').join('');
   const profs=PL_PROFILES.map(pr=>'<button class="lib-chip'+(pr.id===_plProf?' active':'')+'" onclick="setPlProf(\''+pr.id+'\')" title="'+pr.desc.replace(/"/g,'')+'">'+pr.ico+' '+pr.lbl+'</button>').join('');
@@ -7420,7 +7454,7 @@ function renderPlanif(){
   plUpd();
   plDrawRadar(p);
   plTimeVerdict();plVolVerdict();
-  if(_plDate1&&_plDate2){var _av=document.getElementById('pl-avail');if(_av){var _sp=Math.round((new Date(_plDate2+'T00:00:00')-new Date(_plDate1+'T00:00:00'))/(7*864e5));_av.textContent='→ '+_sp+' sem entre début et course';_av.style.color='var(--muted2)';}}
+  plAvailRender();
 }
 function plQField(l,c){return '<div><div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px">'+l+'</div>'+c+'</div>';}
 
