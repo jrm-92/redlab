@@ -4240,7 +4240,9 @@ function renderDashPlan(){
 
 /* ══ BIBLIOTHÈQUE DE SÉANCES ══ */
 const LIB_THEMES=[
-  {id:'entretien',lbl:'Entretien condition physique',col:'#94A3B8'},
+  // L'identifiant reste 'entretien' : c'est la clé des séances et des plans
+  // déjà enregistrés. Seul le libellé affiché change.
+  {id:'entretien',lbl:'Base aérobie',col:'#94A3B8'},
   {id:'vo2',lbl:'VO2max',col:'#F87171'},
   {id:'seuil',lbl:'Seuil',col:'#FB923C'},
   {id:'5k',lbl:'Spé 5K',col:'#3B82F6'},
