@@ -406,21 +406,31 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plc-dl{margin-top:6px;width:100%;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--font);font-size:10.5px;font-weight:800;padding:4px 6px;border-radius:7px;cursor:pointer;letter-spacing:.2px}
   .plc-dl:hover{border-color:var(--orange);color:var(--orange)}
   .plc-dl.on{background:rgba(148,163,184,.18);border-color:var(--muted2);color:var(--text2)}
-  .plw-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 0 5px}
+  /* Les sept colonnes ne se compriment plus indéfiniment : sous une certaine
+     largeur, c'est le calendrier entier qui défile — en-tête et semaines
+     ensemble, pour qu'un jour reste sous son nom. */
+  .plw-scroll{overflow-x:auto;overflow-y:hidden}
+  .plw-inner{min-width:max(100%,1000px)}
+  .plw-dow{display:grid;grid-template-columns:repeat(7,minmax(132px,1fr));gap:5px;margin:8px 0 5px;padding:0 13px 0 16px}
   .plw-dow span{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);text-align:center}
   .plw-cal{display:flex;flex-direction:column;gap:8px}
   .plw-week{border:1px solid var(--border);border-radius:11px;padding:10px 12px}
-  .plw-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;font-size:12px}
+  /* Quand la semaine défile, son en-tête reste collé au bord gauche :
+     le numéro, la phase et la charge doivent rester lisibles où qu'on en soit. */
+  .plw-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;font-size:12px;position:sticky;left:0;width:fit-content;
+    /* Borné à la largeur de l'écran, sinon « fit-content » l'étale au-delà du
+       bord et la charge de la semaine devient inatteignable sur mobile. */
+    max-width:min(100%,calc(100vw - 96px))}
   .plw-s b{font-size:14px;color:var(--text)}
   .plw-km{font-weight:800;color:var(--text2)}
-  .plw-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:9px}
-  .plw-day{position:relative;min-height:104px;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;padding:5px 5px 6px}
+  .plw-days{display:grid;grid-template-columns:repeat(7,minmax(132px,1fr));gap:5px;margin-top:9px}
+  .plw-day{position:relative;min-height:126px;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;padding:6px 7px 7px}
   .plw-dtop{display:flex;align-items:center;gap:4px;min-height:16px;position:relative}
-  .plw-dn{font-size:13px;font-weight:800;color:var(--text2)}
+  .plw-dn{font-size:14px;font-weight:800;color:var(--text2)}
   .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .plw-mk{margin-left:auto;font-size:12px}
   .plw-sess{display:flex;flex-direction:column;gap:3px;margin:5px 0;flex:1}
-  .plw-ch{display:flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:var(--text2);border-radius:5px;padding:2px 4px;line-height:1.25;cursor:grab;user-select:none;-webkit-user-select:none}
+  .plw-ch{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--text2);border-radius:5px;padding:3px 5px;line-height:1.3;cursor:grab;user-select:none;-webkit-user-select:none}
   .plw-ch:active{cursor:grabbing}
   .plw-ch--grab{outline:2px solid var(--orange);outline-offset:1px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
   .plw-cp:hover{color:var(--orange)!important}
@@ -429,7 +439,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-ch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
   .plw-ch button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px}
   .plw-ch button:hover{color:#F87171}
-  .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:9.5px;font-weight:800;padding:3px 2px;cursor:pointer;width:100%}
+  .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
   .db-plan-cal{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
@@ -6959,7 +6969,10 @@ function plCalendarHTML(p,weeks,opts){
     +' <button type="button" onclick="plGrabCancel()">annuler</button></div>'):'';
   var hint=RO?'<div class="plc-hint">Vue du plan enregistré. Les modifications se font dans l\u2019onglet <b>Plan</b>.</div>'
     :'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>';
-  return head+grabBar+hint+hdr+'<div class="plw-cal">'+rows+'</div>';
+  return head+grabBar+hint
+    +'<div class="hscroll plw-scroll"><div class="plw-inner">'
+    +hdr+'<div class="plw-cal">'+rows+'</div>'
+    +'</div></div>';
 }
 function plVolLive(n,val){var e=document.getElementById('plc-km-'+n);if(e){e.textContent=val+' km';e.style.color='var(--orange)';}}
 function plVolSet(n,val){_plVolOverride[n]=+val;plSave();plUpd();}
