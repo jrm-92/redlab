@@ -36,9 +36,12 @@ p{font-size:14.5px;color:var(--muted)}
   var vues = {
     ok: {
       c:'var(--ok)', ic:'✓', t:'C’est connecté',
+      // Ne rien promettre sur le délai : c'est le coach qui va chercher les
+      // séances, l'athlète ne saurait pas dire quand. Ce qui est vrai et
+      // utile, c'est ce qu'il doit faire de son côté — synchroniser.
       p: (qui ? qui + ', ton' : 'Ton') + ' compte Polar est maintenant relié à RedLab. '
-         + 'Tes séances remonteront automatiquement à ton coach après chaque synchronisation '
-         + 'de ta montre avec Polar Flow. Tu peux fermer cette page.'
+         + 'Tes séances seront transmises à ton coach à chaque fois que tu synchronises '
+         + 'ta montre avec Polar Flow. Tu n’as rien d’autre à faire — tu peux fermer cette page.'
     },
     refus: {
       c:'var(--muted)', ic:'—', t:'Autorisation refusée',
