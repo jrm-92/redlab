@@ -61,3 +61,48 @@ create policy "coach supprime ses liens" on public.polar_links
 
 -- Ménage des demandes jamais abouties (l'athlète a fermé l'onglet).
 create index if not exists polar_pending_created_idx on public.polar_pending(created_at);
+
+-- ══════════════════════════════════════════════════════════════════════════
+--  Séances réalisées, remontées depuis la montre.
+--
+--  AccessLink livre les séances par « transactions » qui détruisent ce
+--  qu'elles délivrent : une fois la transaction validée, les séances ne sont
+--  plus jamais reproposées. On écrit donc ici AVANT de valider. La clé
+--  primaire porte l'identifiant Polar : si une transaction est rejouée après
+--  un incident, la même séance retombe sur la même ligne au lieu de créer un
+--  doublon.
+-- ══════════════════════════════════════════════════════════════════════════
+create table if not exists public.polar_exercises (
+  coach_id    uuid not null references auth.users(id) on delete cascade,
+  athlete_key text not null,
+  polar_id    text not null,
+  start_time  timestamptz,
+  duration_s  integer,
+  distance_m  numeric,
+  hr_avg      integer,
+  hr_max      integer,
+  sport       text,
+  calories    integer,
+  -- La réponse brute de Polar. Les champs ci-dessus servent l'affichage ;
+  -- celui-ci garde ce qu'on n'a pas su lire, car la séance ne sera jamais
+  -- reproposée par AccessLink.
+  detail      jsonb,
+  imported_at timestamptz not null default now(),
+  primary key (coach_id, athlete_key, polar_id)
+);
+
+create index if not exists polar_exercises_athlete_idx
+  on public.polar_exercises(coach_id, athlete_key, start_time desc);
+
+alter table public.polar_exercises enable row level security;
+
+-- Lecture et suppression par le coach concerné. Pas d'insert ni d'update :
+-- ces lignes viennent de Polar via la fonction polar-pull, jamais du
+-- navigateur — rien ne doit pouvoir fabriquer une séance réalisée.
+drop policy if exists "coach voit les seances de ses athletes" on public.polar_exercises;
+create policy "coach voit les seances de ses athletes" on public.polar_exercises
+  for select to authenticated using (auth.uid() = coach_id);
+
+drop policy if exists "coach supprime les seances de ses athletes" on public.polar_exercises;
+create policy "coach supprime les seances de ses athletes" on public.polar_exercises
+  for delete to authenticated using (auth.uid() = coach_id);

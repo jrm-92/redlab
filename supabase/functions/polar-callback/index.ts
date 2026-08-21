@@ -56,7 +56,14 @@ Deno.serve(async (req) => {
 
   // 2. Le code contre un jeton. Polar attend l'authentification du client en
   //    Basic, pas dans le corps de la requête.
+  //
+  //    Le redirect_uri est obligatoire ici (RFC 6749 §4.1.3) dès lors qu'il
+  //    figurait dans la demande d'autorisation — c'est notre cas. Son absence
+  //    fait répondre « invalid_grant », ce qui ressemble à s'y méprendre à un
+  //    code périmé ou à un secret erroné. Il doit être identique au caractère
+  //    près à celui déclaré chez Polar.
   const basic = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
+  const REDIRECT_URI = `${SUPA_URL}/functions/v1/polar-callback`;
   const tokRes = await fetch(TOKEN_URL, {
     method: 'POST',
     headers: {
@@ -64,10 +71,18 @@ Deno.serve(async (req) => {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Accept': 'application/json',
     },
-    body: new URLSearchParams({ grant_type: 'authorization_code', code }),
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: REDIRECT_URI,
+    }),
   });
   if (!tokRes.ok) {
-    console.error('polar token', tokRes.status, await tokRes.text());
+    const corps = await tokRes.text();
+    // Tout le diagnostic va dans les journaux : c'est là que le coach le lira.
+    console.error('polar token — statut', tokRes.status,
+                  '| redirect_uri envoyé:', REDIRECT_URI,
+                  '| réponse:', corps);
     return retour('erreur', "Polar a refusé l'autorisation. Redemande un lien à ton coach.");
   }
   const tok = await tokRes.json();

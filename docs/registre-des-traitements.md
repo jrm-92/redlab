@@ -72,7 +72,8 @@ d'exercice des droits, à l'adresse ci-dessus.
 | **Catégories de données** | Identité et coordonnées ; VMA, chronos, records, objectifs, plan ; séances réalisées (allures, distances, durées, fréquence cardiaque, dénivelé, tracé GPS) issues des fichiers `.fit` / `.tcx` **ou du compte Polar Flow lorsque l'athlète l'a relié** ; jeton d'accès Polar ; ressentis et échanges ; **données de santé** : blessures, douleurs, contre-indications signalées |
 | **Destinataires** | Le responsable du traitement ; Supabase (hébergement) ; Nolio (plateforme d'entraînement) ; WhatsApp / Meta (échanges) ; Polar Electro (source des séances, si connexion autorisée) |
 | **Transferts hors UE** | Supabase : **non** — hébergement en Europe de l'Ouest. WhatsApp / Meta et Nolio : *à vérifier* |
-| **Durée de conservation** | Pendant toute la durée du suivi, puis 3 ans à compter du dernier contact. **Données de santé** : supprimées à la fin du suivi, ou avant sur demande. **Jeton Polar** : tant que la connexion est active ; supprimé à sa révocation ou avec le profil |
+| **Durée de conservation** | Pendant toute la durée du suivi, puis 3 ans à compter du dernier contact. **Données de santé** : supprimées à la fin du suivi, ou avant sur demande. **Jeton Polar** et **séances remontées de la montre** : tant que la connexion est active ; supprimés à sa révocation ou avec le profil |
+| **Lieu de stockage des séances Polar** | Table `polar_exercises` chez Supabase (Europe de l'Ouest). Accessible au seul responsable du traitement, par ligne, via RLS. Écriture réservée à la fonction serveur `polar-pull` : le navigateur ne peut pas fabriquer une séance |
 | **Sécurité** | Voir § 4 |
 
 ### T3 — Espace athlète
@@ -193,6 +194,7 @@ En cas de violation — accès non autorisé, perte, divulgation :
 | 19 août 2026 | Création du registre, à l'issue de l'audit RGPD et sécurité |
 | 19 août 2026 | Durcissement de la base appliqué ; double authentification active sur Supabase et GitHub ; expiration de session après 30 jours d'inactivité |
 | 19 août 2026 | Connexion Polar AccessLink : Polar Electro ajouté aux destinataires (T2), jeton d'accès déclaré, durée de conservation précisée |
+| 21 août 2026 | Import effectif des séances Polar : table `polar_exercises` (durée, distance, fréquence cardiaque, calories, réponse brute). Lecture et suppression réservées au coach par RLS, aucune écriture depuis le navigateur ; effacement avec le profil de l'athlète |
 
 ---
 

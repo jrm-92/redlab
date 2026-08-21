@@ -751,6 +751,11 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 }
 .db-section-ico svg{width:13px;height:13px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .db-section-title{font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex:1}
+/* Bascule Prévu / Réalisé — deux états d'une même section, pas deux sections. */
+.db-vue{display:flex;gap:2px;flex-shrink:0;padding:2px;border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,.02)}
+.db-vue-b{border:none;background:transparent;border-radius:7px;color:var(--muted);font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;cursor:pointer;transition:background .15s,color .15s}
+.db-vue-b:hover{color:var(--text2)}
+.db-vue-b.active{background:var(--orange);color:#fff}
 
 /* ══ TOOL LAYOUT / DASHBOARD GRID ══ */
 .tool-layout{padding:36px 0 80px}
@@ -1128,7 +1133,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .lib-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .lib-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:8px}
 .lib-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.2px;line-height:1.2}
-.lib-tag{font-size:11.5px;font-weight:800;color:var(--orange);text-align:right;white-space:nowrap;flex-shrink:0;background:rgba(255,107,26,0.1);padding:4px 10px;border-radius:20px}
 .lib-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px}
 .lib-steps{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px}
 .lib-step{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:baseline}
@@ -2031,8 +2035,12 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
               <div class="db-section-title">Calendrier de préparation</div>
+              <div class="db-vue" id="db-vue" style="display:none">
+                <button type="button" class="db-vue-b active" data-vue="prevu" onclick="dbSetVue('prevu')">Prévu</button>
+                <button type="button" class="db-vue-b" data-vue="realise" onclick="dbSetVue('realise')">Réalisé</button>
+              </div>
             </div>
-            <div class="card" style="padding:20px"><div id="db-plan"></div></div>
+            <div class="card" style="padding:20px"><div id="db-plan"></div><div id="db-realise" style="display:none"></div></div>
           </div>
 
 
@@ -3390,14 +3398,36 @@ function recDateTs(rec){
   const t=Date.parse(rec.date+'T12:00:00');
   return isFinite(t)?t:null;
 }
-/* Meilleure performance connue sur une distance, sans condition d'ancienneté.
-   La fenêtre de six mois écartait des records qui restent la meilleure — et
-   souvent la seule — mesure dont on dispose : un marathon couru l'an dernier
-   disparaissait de la courbe alors qu'il en est le point le plus solide. */
+/* La courbe compare des prédictions calculées sur la VMA du jour à des
+   performances réelles. Un chrono d'il y a deux ans ne dit plus rien de la
+   forme actuelle : confronté aux bandes d'aujourd'hui, il donne une lecture
+   flatteuse ou sévère selon le sens de la progression. Seuls les six derniers
+   mois alimentent donc la courbe. */
+const PERF_WINDOW_DAYS=183; // ~6 mois
+function perfCutoffTs(){return Date.now()-PERF_WINDOW_DAYS*864e5;}
+/* Un record saisi ne compte que s'il est daté ET dans la fenêtre. Sans date,
+   impossible de prouver qu'il est récent : il est écarté, et le message sous
+   le graphique explique comment le réintégrer. */
+function recIsRecent(rec){const t=recDateTs(rec);return t!=null&&t>=perfCutoffTs();}
 function chartSeconds(id){
-  const valid=(S.raceHistory||[]).filter(r=>r&&r.dist===id&&r.sec>=30);
+  const cut=perfCutoffTs();
+  const valid=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id&&r.ts>=cut&&r.sec>=30);
   if(valid.length)return Math.min.apply(null,valid.map(r=>r.sec));
-  return recSeconds(id);
+  return recIsRecent((S.records||{})[id])?recSeconds(id):null;
+}
+/* Distances dont la performance existe mais a été écartée — trop ancienne ou
+   sans date. Sans ce décompte, une distance disparaîtrait sans explication. */
+function perfStaleCount(){
+  const cut=perfCutoffTs();
+  let n=0;
+  CHART_DISTS.forEach(r=>{
+    if(chartSeconds(r.id)!=null)return;
+    const oldRace=(S.raceHistory||[]).some(x=>x&&x.dist===r.id&&x.sec>=30&&(x.ts==null||x.ts<cut));
+    const rec=(S.records||{})[r.id];
+    const oldRec=!!rec&&((+rec.hh||0)*3600+(+rec.mm||0)*60+(+rec.ss||0))>=30;
+    if(oldRace||oldRec)n++;
+  });
+  return n;
 }
 function renderChart(){
   const cv=document.getElementById('perf-chart');
@@ -3411,19 +3441,21 @@ function renderChart(){
   const paceLo=CD.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
   const recPace=CD.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
   const hasRec=recPace.some(v=>v!=null);
+  const stale=perfStaleCount();
   const emptyEl=document.getElementById('perf-empty');
   if(emptyEl){
     emptyEl.style.display=hasRec?'none':'block';
     const hasHist=(S.raceHistory||[]).some(r=>r&&r.ts!=null);
-    emptyEl.textContent=hasHist
-      ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
-      : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.";
+    emptyEl.textContent=stale
+      ? "Aucun résultat de moins de 6 mois : la courbe n'affiche que les performances récentes. Renseigne la date d'un record pour le réintégrer."
+      : (hasHist
+        ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
+        : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.");
   }
   const noteEl=document.getElementById('perf-note');
   if(noteEl){
-    noteEl.textContent=hasRec
-      ? 'Seules les distances renseignées apparaissent. La meilleure performance connue est retenue, quelle que soit sa date.'
-      : '';
+    noteEl.textContent='Seuls les résultats de moins de 6 mois alimentent la courbe.'
+      +(stale?' · '+stale+' distance'+(stale>1?'s écartées':' écartée')+' (résultat trop ancien ou sans date).':'');
   }
   const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
   const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
@@ -3432,7 +3464,7 @@ function renderChart(){
     {label:'Prédiction (rapide)',data:paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,0.13)',borderWidth:2.5,pointRadius:0,tension:0.3,fill:'+1'},
     {label:'Prédiction (lente)', data:paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
     // Records — réel mesuré : gros points JAUNES cerclés, aucune ligne
-    {label:'Vos records',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
+    {label:'Records < 6 mois',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
   ]};
   const opts={
     responsive:true,maintainAspectRatio:false,
@@ -3460,7 +3492,7 @@ function buildPerfLegend(){
   const defs=[
     {i:0,c:'#FF6B1A',dash:false,dot:false,t:'Prédiction rapide'},
     {i:1,c:'#38BDF8',dash:true, dot:false,t:'Prédiction lente'},
-    {i:2,c:'#FACC15',dash:false,dot:true, t:'Vos records'},
+    {i:2,c:'#FACC15',dash:false,dot:true, t:'Records < 6 mois'},
   ];
   box.innerHTML=defs.map(d=>{
     const vis=perfChart.isDatasetVisible(d.i);
@@ -3727,10 +3759,14 @@ async function _purgeAthleteCloud(ath){
     // le DELETE sans autoriser la lecture — on efface sans jamais voir.
     // Tant que le schéma Polar n'est pas déployé, ces tables n'existent pas et
     // PostgREST répond 404 : on ne bloque pas la suppression pour autant.
+    // Les séances réalisées partent avec le reste : ce sont des données de
+    // santé (fréquence cardiaque), elles n'ont aucune raison de survivre à
+    // l'athlète qu'elles décrivent.
     var ak=athleteKey(ath);
     var uid=_cloudUser.id;
-    for(var i=0;i<2;i++){
-      var tbl=i===0?'polar_tokens':'polar_links';
+    var TABLES=['polar_tokens','polar_links','polar_exercises'];
+    for(var i=0;i<TABLES.length;i++){
+      var tbl=TABLES[i];
       var r=await _sb.from(tbl).delete().eq('coach_id',uid).eq('athlete_key',ak);
       if(r.error && !/does not exist|not find the table|schema cache/i.test(r.error.message||'')){
         return {ok:false,msg:tbl+' : '+r.error.message};
@@ -3775,6 +3811,10 @@ function deleteAthlete(id){
   var aEspace=!!(ath.email&&ath.email.indexOf('@')>0);
   var lignes=['<li>son profil dans cet outil (repères, records, historique, plan, analyses)</li>'];
   if(aEspace) lignes.push('<li>sa fiche publiée et son accès à l\'espace athlète (<b>'+String(ath.email).replace(/</g,'&lt;')+'</b>)</li>');
+  // La montre remonte de la fréquence cardiaque : le dire, plutôt que de
+  // laisser croire que seul le profil disparaît.
+  if(typeof polarEstLie==='function'&&polarEstLie(ath))
+    lignes.push('<li>le lien avec sa montre Polar et les séances déjà remontées (durées, distances, fréquence cardiaque)</li>');
 
   var host=document.createElement('div'); host.className='pl-modal';
   host.onclick=function(e){ if(e.target===host)host.remove(); };
@@ -4025,7 +4065,7 @@ function renderAthletes(){
           <button class="ath-espace-copy" onclick="inviteAthlete(${a.id},this)" title="Copier l'invitation à envoyer (lien + email + mode d'emploi)">Inviter</button>
         </div>
         <button class="ath-espace-pub" onclick="publishAthlete(${a.id},this)" title="Envoyer/mettre à jour la fiche complète dans l'espace de l'athlète">↑ Publier l'espace</button>
-        <button class="ath-polar" onclick="polarConnect(${a.id},this)" title="Copier le lien d'autorisation Polar à envoyer à l'athlète">${a.polar?'⌚ Polar relié ✓':'⌚ Connecter sa montre Polar'}</button>
+        <button class="ath-polar" onclick="polarConnect(${a.id},this)" title="${polarEstLie(a)?'Montre déjà reliée — recliquer prépare un nouveau lien (utile si l\'athlète a révoqué l\'accès)':'Copier le lien d\'autorisation Polar à envoyer à l\'athlète'}">${polarEstLie(a)?'⌚ Polar relié ✓':'⌚ Connecter sa montre Polar'}</button>
       </div>
       <div class="ath-actions">
         <button class="btn-load" onclick="loadAthlete(${a.id})">
@@ -4042,6 +4082,41 @@ function renderAthletes(){
   wrap.innerHTML=hd+`<div class="ath-carousel"><button class="ath-arrow left" aria-label="Précédent" tabindex="-1">‹</button><div class="ath-grid">${cards}</div><button class="ath-arrow right" aria-label="Suivant" tabindex="-1">›</button></div>`;
   athCarouselInit(wrap.querySelector('.ath-carousel'));
   if(typeof plPubBilanRender==='function')plPubBilanRender();
+  polarRefreshLinks();
+}
+
+/* ══ ÉTAT DES LIENS POLAR ══
+   Le lien vit dans Supabase (table polar_links), pas dans l'athlète local :
+   c'est polar-callback, côté serveur, qui l'écrit quand l'athlète accepte.
+   Le navigateur du coach n'en sait donc rien tant qu'il n'a pas demandé.
+   On garde la liste des clés reliées en mémoire pour que le rendu, lui,
+   reste synchrone. */
+var _polarLies=null;      // Set des athlete_key reliés — null = pas encore lu
+var _polarLu=0;           // horodatage de la dernière lecture
+var _polarEnCours=false;
+var POLAR_LIENS_TTL=60000;
+function polarEstLie(a){ return !!_polarLies && _polarLies.has(athleteKey(a)); }
+/* Relit la table. renderAthletes appelle cette fonction à chaque rendu, et le
+   rendu qui suit la lecture la rappellerait : sans garde, la boucle est
+   infinie. D'où le TTL — assez court pour qu'un athlète qui vient d'accepter
+   apparaisse quand le coach revient sur l'onglet, assez long pour ne pas
+   interroger la base à chaque coup de flèche du carrousel. */
+async function polarRefreshLinks(force){
+  if(_polarEnCours) return;
+  if(!force && _polarLies && (Date.now()-_polarLu)<POLAR_LIENS_TTL) return;
+  if(typeof _sb==='undefined' || !_sb || typeof _cloudUser==='undefined' || !_cloudUser) return;
+  _polarEnCours=true;
+  try{
+    var r=await _sb.from('polar_links').select('athlete_key').eq('coach_id',_cloudUser.id);
+    if(r.error) return;                       // table absente ou hors ligne : le bouton garde son libellé neutre
+    _polarLu=Date.now();
+    var avant=_polarLies?Array.from(_polarLies).sort().join('|'):null;
+    _polarLies=new Set((r.data||[]).map(function(x){return String(x.athlete_key);}));
+    var apres=Array.from(_polarLies).sort().join('|');
+    if(avant!==apres && document.getElementById('p-athletes') &&
+       document.getElementById('p-athletes').classList.contains('active')) renderAthletes();
+  }catch(e){ /* le libellé neutre reste juste : on ne sait pas, on n'affirme rien */ }
+  finally{ _polarEnCours=false; }
 }
 // Carrousel : flèches (clic) + glisser à la souris. Le tactile utilise le défilement natif.
 /* Habille une grille défilante de deux flèches et du glisser-souris.
@@ -4232,12 +4307,247 @@ function renderDashPlan(){
   _plDate1=(weeks[0]&&weeks[0].d0)?[weeks[0].d0.getFullYear(),String(weeks[0].d0.getMonth()+1).padStart(2,'0'),String(weeks[0].d0.getDate()).padStart(2,'0')].join('-'):null;
   const cal=plCalendarHTML(p,weeks,{ro:true});
   const _unit=plUnit();
-  window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
+  window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null),dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
   // restauration
   _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;_plRatio=save.ratio;_plBaseW=save.baseW;_plVolOverride=save.volOv;_plRecOverride=save.recOv;_plSessions=save.sess;
   box.innerHTML=html+'<div class="db-plan-cal">'+cal+'</div>';
   plDrawVol(p,weeks,'db-vol-canvas');
   sec.style.display='block';
+  var bascule=document.getElementById('db-vue');
+  if(bascule) bascule.style.display='';
+  dbSetVue(_dbVue);
+}
+
+/* ══ SÉANCES RÉALISÉES · remontées de la montre ══
+   Le calendrier de préparation a deux lectures : ce qui était prévu, et ce
+   qui a réellement été couru. La bascule en haut de section passe de l'une à
+   l'autre ; le plan reste la référence, les séances viennent s'y confronter.
+
+   Rien ici n'alimente la courbe de performance : ce sont des entraînements,
+   pas des chronos de compétition. Les records restent saisis à la main. */
+var _dbVue='prevu';
+var _dbSeances=null;      // séances lues pour _dbSeancesCle — null = pas encore lu
+var _dbSeancesCle=null;
+/* Le résultat de la dernière récupération. Il vit hors du DOM parce que la
+   récupération réussie relit la base et redessine tout le bloc : un message
+   écrit directement dans la page disparaîtrait à l'instant où il devient
+   intéressant. */
+var _dbPullMsg=null;
+
+/* Le tableau de bord travaille sur S, qui n'a pas d'identifiant : l'athlète
+   ouvert se retrouve par son pseudo, comme le fait déjà l'enregistrement. */
+function dbAthCourant(){
+  if(!S.pseudo) return null;
+  return getAthletes().find(function(a){return a.pseudo===S.pseudo;})||null;
+}
+
+function dbSetVue(v){
+  _dbVue=(v==='realise')?'realise':'prevu';
+  var t=document.getElementById('db-vue');
+  if(t) Array.prototype.forEach.call(t.querySelectorAll('.db-vue-b'),function(b){
+    b.classList.toggle('active', b.getAttribute('data-vue')===_dbVue);
+  });
+  var pl=document.getElementById('db-plan'), re=document.getElementById('db-realise');
+  if(pl) pl.style.display=(_dbVue==='prevu')?'':'none';
+  if(re) re.style.display=(_dbVue==='realise')?'':'none';
+  if(_dbVue==='realise') dbRenderRealise();
+}
+
+function dbNote(txt,col){
+  return '<div style="padding:22px 18px;text-align:center;font-size:13px;line-height:1.7;color:'+(col||'var(--muted)')+'">'+txt+'</div>';
+}
+
+/* Lit les séances déjà rangées en base. Ne va PAS interroger Polar : c'est le
+   bouton qui le fait, pour que l'ouverture de l'onglet reste instantanée et
+   qu'aucune transaction ne s'ouvre sans que le coach l'ait demandé. */
+async function dbRenderRealise(force){
+  var box=document.getElementById('db-realise'); if(!box) return;
+  var ath=dbAthCourant();
+  if(!ath){ box.innerHTML=dbNote("Charge un profil d'athlète pour voir ses séances réalisées."); return; }
+  var cle=athleteKey(ath);
+  if(_dbSeancesCle!==cle){ _dbSeances=null; _dbSeancesCle=cle; _dbPullMsg=null; }
+  if(typeof _sb==='undefined'||!_sb||typeof _cloudUser==='undefined'||!_cloudUser){
+    box.innerHTML=dbNote('Connecte-toi au cloud (☁, en bas de la barre latérale) pour lire les séances remontées de la montre.');
+    return;
+  }
+  if(_dbSeances===null||force){
+    box.innerHTML=dbNote('Lecture des séances…');
+    try{
+      var r=await _sb.from('polar_exercises')
+        .select('polar_id,start_time,duration_s,distance_m,hr_avg,hr_max,sport,calories')
+        .eq('coach_id',_cloudUser.id).eq('athlete_key',cle)
+        .order('start_time',{ascending:false}).limit(400);
+      if(r.error){
+        var m=r.error.message||'';
+        box.innerHTML=dbNote(/does not exist|not find the table|schema cache/i.test(m)
+          ? "La table <code>polar_exercises</code> n'existe pas encore. Exécute <code>supabase/schema.sql</code> dans Supabase."
+          : 'Lecture impossible : '+m,'#FBBF24');
+        return;
+      }
+      _dbSeances=r.data||[];
+    }catch(e){ box.innerHTML=dbNote('Lecture impossible : '+(e.message||e),'#FBBF24'); return; }
+  }
+  box.innerHTML=dbRealiseHTML(_dbSeances,ath);
+}
+
+/* Va chercher chez Polar ce qui est nouveau, puis relit la base. */
+async function polarPullNow(btn){
+  var ath=dbAthCourant(); if(!ath) return;
+  function dis(txt,col){
+    _dbPullMsg={txt:txt,col:col||'var(--muted)'};
+    var etat=document.getElementById('db-pull-etat');   // relu à chaque fois : le bloc a pu être redessiné
+    if(etat){ etat.textContent=txt; etat.style.color=_dbPullMsg.col; }
+  }
+  var o=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Récupération…'; }
+  function fini(){ if(btn){ btn.disabled=false; btn.textContent=o; } }
+  try{
+    // Jeton frais : la fonction identifie le coach par ce jeton, et c'est lui
+    // seul qui délimite les athlètes qu'elle acceptera de traiter.
+    var sess=(await _sb.auth.getSession()).data.session;
+    try{ var rr=await _sb.auth.refreshSession(); if(rr&&rr.data&&rr.data.session) sess=rr.data.session; }catch(e){}
+    if(!sess){ fini(); return dis('Session expirée — reconnecte-toi.','#F87171'); }
+
+    var res=await fetch(SUPA_URL+'/functions/v1/polar-pull',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+sess.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({athlete_key:athleteKey(ath)})
+    });
+    if(!res.ok){
+      fini();
+      return dis(res.status===404
+        ? "La fonction polar-pull n'est pas encore déployée."
+        : 'Polar a répondu '+res.status+'.','#F87171');
+    }
+    var out=await res.json();
+    var mien=(out.athletes||[]).filter(function(x){return x.cle===athleteKey(ath);})[0];
+    fini();
+    if(!mien) return dis("Cet athlète n'a pas de montre reliée.",'#FBBF24');
+    if(mien.motif) return dis(mien.motif,'#FBBF24');
+    if(!mien.importees) return dis('Rien de nouveau chez Polar.','var(--muted)');
+    dis(mien.importees+' séance'+(mien.importees>1?'s':'')+' récupérée'+(mien.importees>1?'s':'')+'.','#34D399');
+    dbRenderRealise(true);
+  }catch(e){ fini(); dis('Échec : '+(e.message||e),'#F87171'); }
+}
+
+/* ── Mise en forme ── */
+function dbSeanceDate(iso){ var t=Date.parse(iso); return isFinite(t)?new Date(t):null; }
+/* Lundi de la semaine d'une date, au format ISO — la même convention que le
+   calendrier du plan, sinon les séances tombent dans la mauvaise semaine. */
+function dbLundiIso(d){
+  var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  x.setDate(x.getDate()-((x.getDay()+6)%7));
+  return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-');
+}
+
+function dbRealiseHTML(rows,ath){
+  var lie=(typeof polarEstLie==='function')&&polarEstLie(ath);
+  var barre='<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'
+    +'<button type="button" class="lib-create-btn" onclick="polarPullNow(this)" style="margin:0">↻ Récupérer les nouvelles séances</button>'
+    +'<span id="db-pull-etat" style="font-size:12.5px;font-weight:700;color:'+(_dbPullMsg?_dbPullMsg.col:'var(--muted)')+'">'
+    +(_dbPullMsg?String(_dbPullMsg.txt).replace(/</g,'&lt;'):'')+'</span></div>';
+
+  if(!rows.length){
+    return barre+dbNote(lie
+      ? "Aucune séance remontée pour l'instant. Polar ne livre une séance qu'après la synchronisation de la montre avec Polar Flow."
+      : "La montre de cet athlète n'est pas reliée. Va dans l'onglet <b>Athlètes</b> et clique sur <b>⌚ Connecter sa montre Polar</b> pour lui envoyer le lien d'autorisation.");
+  }
+
+  // ── Totaux ──
+  // L'allure moyenne ne se calcule que sur ce qui a été couru. Une séance de
+  // renforcement apporte du temps sans distance : la compter reviendrait à
+  // annoncer une allure plus lente que celle réellement tenue.
+  var nb=rows.length, secTot=0, mTot=0, secCourus=0;
+  rows.forEach(function(r){
+    var sec=+r.duration_s||0, m=+r.distance_m||0;
+    secTot+=sec; mTot+=m;
+    if(m>=400){ secCourus+=sec; }
+  });
+  var tuile=function(lbl,val,col){
+    return '<div style="flex:1;min-width:110px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border)">'
+      +'<div style="font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px">'+lbl+'</div>'
+      +'<div style="font-size:17px;font-weight:800;color:'+(col||'var(--text)')+'">'+val+'</div></div>';
+  };
+  var totaux='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">'
+    +tuile('Séances',nb)
+    +tuile('Distance',(mTot/1000).toFixed(1)+' km')
+    +tuile('Temps',fHMS(secTot))
+    +((mTot>1000&&secCourus>0)?tuile('Allure moyenne',fAll(secCourus/(mTot/1000))+'/km','var(--orange)'):'')
+    +'</div>';
+
+  return barre+totaux+dbSemainesHTML(rows)+dbListeHTML(rows);
+}
+
+/* Prévu contre réalisé, semaine par semaine. Le plan raisonne en km, sauf en
+   trail où il raisonne en heures : on compare alors des heures, pas des
+   kilomètres, sous peine de confronter deux grandeurs sans rapport. */
+function dbSemainesHTML(rows){
+  var d=window._dashVolData;
+  if(!d||!d.weeks||!d.weeks.length) return '';
+  var enKm=(d.unit==='km');
+  var parSem={};
+  rows.forEach(function(r){
+    var dt=dbSeanceDate(r.start_time); if(!dt) return;
+    var k=dbLundiIso(dt);
+    if(!parSem[k]) parSem[k]={val:0,n:0};
+    parSem[k].val+=enKm?((+r.distance_m||0)/1000):((+r.duration_s||0)/3600);
+    parSem[k].n++;
+  });
+  var sem=d.weeks.filter(function(w){return w.iso;});
+  if(!sem.length) return '';
+  var unite=enKm?'km':'h';
+  var lignes=sem.map(function(w){
+    var f=parSem[w.iso];
+    var fait=f?f.val:0;
+    var prevu=+w.km||0;
+    var ecart=prevu>0?Math.round((fait-prevu)/prevu*100):null;
+    var col=f?(ecart==null?'var(--text2)':(Math.abs(ecart)<=10?'#34D399':(Math.abs(ecart)<=25?'#FBBF24':'#F87171'))):'var(--muted2)';
+    var pct=prevu>0?Math.min(100,Math.round(fait/prevu*100)):0;
+    return '<tr>'
+      +'<td style="padding:7px 10px;font-size:12.5px;font-weight:700;color:var(--text2);white-space:nowrap">S'+w.n+' <span style="color:var(--muted2);font-weight:600">'+(w.dt||'')+'</span></td>'
+      +'<td style="padding:7px 10px;font-size:12.5px;color:var(--muted);text-align:right;white-space:nowrap">'+prevu+' '+unite+'</td>'
+      +'<td style="padding:7px 10px;font-size:12.5px;font-weight:800;color:'+col+';text-align:right;white-space:nowrap">'+(f?fait.toFixed(1)+' '+unite:'—')+'</td>'
+      +'<td style="padding:7px 10px;font-size:12px;color:'+col+';text-align:right;white-space:nowrap">'+(f&&ecart!=null?(ecart>0?'+':'')+ecart+' %':'')+'</td>'
+      +'<td style="padding:7px 10px;width:38%;min-width:80px"><div style="height:7px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:4px"></div></div></td>'
+      +'<td style="padding:7px 10px;font-size:11.5px;color:var(--muted2);text-align:right;white-space:nowrap">'+(f?f.n+' séance'+(f.n>1?'s':''):'')+'</td>'
+      +'</tr>';
+  }).join('');
+  return '<div style="margin-bottom:20px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Prévu contre réalisé</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:520px">'
+    +'<thead><tr>'
+    +['Semaine','Prévu','Réalisé','Écart','',''].map(function(h){return '<th style="padding:6px 10px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:'+(h==='Semaine'||h===''?'left':'right')+';border-bottom:1px solid var(--border)">'+h+'</th>';}).join('')
+    +'</tr></thead><tbody>'+lignes+'</tbody></table></div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Un tiret = aucune séance remontée cette semaine ; Polar ne livre que ce que la montre a synchronisé. Le comparatif porte sur '+(enKm?'la distance':'le temps')+', donc une séance sans distance (renfo, natation) compte dans le nombre de séances mais pas dans le volume.</div>'
+    +'</div>';
+}
+
+function dbListeHTML(rows){
+  var lignes=rows.map(function(r){
+    var dt=dbSeanceDate(r.start_time);
+    var jour=dt?dt.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}):'date inconnue';
+    var heure=dt?dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+    var km=(+r.distance_m||0)/1000;
+    var sec=+r.duration_s||0;
+    // L'allure ne veut rien dire sur quelques dizaines de mètres, ni sur une
+    // séance sans distance (renfo, natation) : on ne l'affiche pas.
+    var all=(km>=0.4&&sec>0)?fAll(sec/km)+'/km':null;
+    var pctFc=(r.hr_avg&&S.fcMax)?Math.round(r.hr_avg/S.fcMax*100):null;
+    var chip=function(txt,col){ return '<span style="font-size:12px;font-weight:700;color:'+(col||'var(--text2)')+';white-space:nowrap">'+txt+'</span>'; };
+    var faits=[];
+    if(sec) faits.push(chip(fHMS(sec)));
+    if(km>=0.05) faits.push(chip(km.toFixed(2)+' km'));
+    if(all) faits.push(chip(all,'var(--orange)'));
+    if(r.hr_avg) faits.push(chip('♥ '+r.hr_avg+(r.hr_max?' / '+r.hr_max:'')+' bpm'+(pctFc?' · '+pctFc+' % FCmax':''),'#F87171'));
+    if(r.calories) faits.push(chip(r.calories+' kcal','var(--muted2)'));
+    var sport=r.sport?String(r.sport).replace(/_/g,' ').toLowerCase():'séance';
+    return '<div style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px">'
+      +'<div style="min-width:150px"><div style="font-size:13px;font-weight:800;color:var(--text)">'+jour+(heure?' <span style="font-weight:600;color:var(--muted2)">'+heure+'</span>':'')+'</div>'
+      +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-top:2px">'+sport+'</div></div>'
+      +'<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;flex:1">'+faits.join('')+'</div>'
+      +'</div>';
+  }).join('');
+  return '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Séances remontées</div>'+lignes+'</div>';
 }
 
 /* ══ BIBLIOTHÈQUE DE SÉANCES ══ */
@@ -4455,9 +4765,9 @@ function libBlock(b,vma,lbl){
 function libCard(s,vma,opts){
   opts=opts||{};
   const t=LIB_THEMES.find(x=>x.id===s.theme)||LIB_THEMES[1];
-  const ph=LIB_PHASES.find(p=>p.id===libPhaseOf(s))||LIB_PHASES[1];
-  const od=libOrderOf(s);
-  const phTxt=od?('Étape '+od.n+' · '+od.when):ph.short;
+  /* La durée-intensité et l'étape de prépa ne s'affichent plus sur la carte :
+     l'information reste dans s.tag et LIB_ORDER, qui pilotent toujours le tri
+     et l'export, mais elle encombrait le bandeau. */
   const delBtn=opts.del?'<button class="lib-del" title="Supprimer" onclick="libDeleteSession(\''+s.id+'\')">✕</button>':'';
   const _kind=opts.del?'c':'l', _idx=(opts.del?CUSTOM_SESSIONS:LIB_SESSIONS).indexOf(s);
   const wktBtn='<button type="button" class="lib-wkt" onclick="wktExport(\''+_kind+'\','+_idx+')" title="Télécharger la séance au format montre (.fit)">'
@@ -4470,7 +4780,7 @@ function libCard(s,vma,opts){
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
   const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
   return '<div class="lib-card" style="border-top:3px solid '+t.col+';position:relative">'+delBtn+
-    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
+    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
     '<div class="lib-wkt-row">'+wktBtn+editBtn+'</div>'+
@@ -5235,7 +5545,7 @@ function renderLibrary(){
   const wrap=document.getElementById('library-wrap');if(!wrap)return;
   const chips=[['all','Toutes']].concat(LIB_THEMES.map(t=>[t.id,t.lbl])).map(c=>'<button class="lib-chip'+(libTheme===c[0]?' active':'')+'" onclick="setLibTheme(\''+c[0]+'\')">'+c[1]+'</button>').join('');
   wrap.innerHTML=
-    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique et <b>ordonnées dans la prépa</b> : commence par l\u2019Étape 1 de chaque bloc, termine par la dernière grosse spé (J-10 à J-14) puis l\u2019affûtage. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
+    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique et <b>ordonnées dans la prépa</b> : dans chaque bloc, la première carte ouvre le cycle, la dernière grosse spé se place à J-10 / J-14, puis vient l\u2019affûtage. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
     toolAthleteBar()+
     '<div class="lib-toolbar">'+
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
@@ -5882,6 +6192,10 @@ function exportAthleteView(returnDoc){
   // Les flèches de carrousel sont de la navigation, pas une commande coach :
   // elles restent, au même titre que les + / − des curseurs.
   clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
+  // La bascule Prévu / Réalisé est un outil de coach : elle lit Supabase avec
+  // la session du coach, que la fiche n'a pas. On l'enlève entière, sans quoi
+  // il resterait un cadre vide une fois ses boutons retirés.
+  clone.querySelectorAll('#db-vue,#db-realise').forEach(el=>el.remove());
   clone.querySelectorAll('input,select,textarea').forEach(el=>{
     if(el.type==='range') return;
     el.setAttribute('disabled','');
@@ -5923,8 +6237,9 @@ function exportAthleteView(returnDoc){
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
     csRender.toString(), csSet.toString(), csInit.toString(), crslInit.toString(),
-    recDateTs.toString(),
-    recSeconds.toString(), chartSeconds.toString(),
+    'var PERF_WINDOW_DAYS='+PERF_WINDOW_DAYS+';',
+    perfCutoffTs.toString(), recDateTs.toString(), recIsRecent.toString(),
+    recSeconds.toString(), chartSeconds.toString(), perfStaleCount.toString(),
     renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
     'var PL_PHC='+JSON.stringify(PL_PHC)+';',
