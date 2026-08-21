@@ -4048,7 +4048,7 @@ function renderAthletes(){
           <button class="ath-espace-copy" onclick="inviteAthlete(${a.id},this)" title="Copier l'invitation à envoyer (lien + email + mode d'emploi)">Inviter</button>
         </div>
         <button class="ath-espace-pub" onclick="publishAthlete(${a.id},this)" title="Envoyer/mettre à jour la fiche complète dans l'espace de l'athlète">↑ Publier l'espace</button>
-        <button class="ath-polar" onclick="polarConnect(${a.id},this)" title="Copier le lien d'autorisation Polar à envoyer à l'athlète">${a.polar?'⌚ Polar relié ✓':'⌚ Connecter sa montre Polar'}</button>
+        <button class="ath-polar" onclick="polarConnect(${a.id},this)" title="${polarEstLie(a)?'Montre déjà reliée — recliquer prépare un nouveau lien (utile si l\'athlète a révoqué l\'accès)':'Copier le lien d\'autorisation Polar à envoyer à l\'athlète'}">${polarEstLie(a)?'⌚ Polar relié ✓':'⌚ Connecter sa montre Polar'}</button>
       </div>
       <div class="ath-actions">
         <button class="btn-load" onclick="loadAthlete(${a.id})">
@@ -4065,6 +4065,41 @@ function renderAthletes(){
   wrap.innerHTML=hd+`<div class="ath-carousel"><button class="ath-arrow left" aria-label="Précédent" tabindex="-1">‹</button><div class="ath-grid">${cards}</div><button class="ath-arrow right" aria-label="Suivant" tabindex="-1">›</button></div>`;
   athCarouselInit(wrap.querySelector('.ath-carousel'));
   if(typeof plPubBilanRender==='function')plPubBilanRender();
+  polarRefreshLinks();
+}
+
+/* ══ ÉTAT DES LIENS POLAR ══
+   Le lien vit dans Supabase (table polar_links), pas dans l'athlète local :
+   c'est polar-callback, côté serveur, qui l'écrit quand l'athlète accepte.
+   Le navigateur du coach n'en sait donc rien tant qu'il n'a pas demandé.
+   On garde la liste des clés reliées en mémoire pour que le rendu, lui,
+   reste synchrone. */
+var _polarLies=null;      // Set des athlete_key reliés — null = pas encore lu
+var _polarLu=0;           // horodatage de la dernière lecture
+var _polarEnCours=false;
+var POLAR_LIENS_TTL=60000;
+function polarEstLie(a){ return !!_polarLies && _polarLies.has(athleteKey(a)); }
+/* Relit la table. renderAthletes appelle cette fonction à chaque rendu, et le
+   rendu qui suit la lecture la rappellerait : sans garde, la boucle est
+   infinie. D'où le TTL — assez court pour qu'un athlète qui vient d'accepter
+   apparaisse quand le coach revient sur l'onglet, assez long pour ne pas
+   interroger la base à chaque coup de flèche du carrousel. */
+async function polarRefreshLinks(force){
+  if(_polarEnCours) return;
+  if(!force && _polarLies && (Date.now()-_polarLu)<POLAR_LIENS_TTL) return;
+  if(typeof _sb==='undefined' || !_sb || typeof _cloudUser==='undefined' || !_cloudUser) return;
+  _polarEnCours=true;
+  try{
+    var r=await _sb.from('polar_links').select('athlete_key').eq('coach_id',_cloudUser.id);
+    if(r.error) return;                       // table absente ou hors ligne : le bouton garde son libellé neutre
+    _polarLu=Date.now();
+    var avant=_polarLies?Array.from(_polarLies).sort().join('|'):null;
+    _polarLies=new Set((r.data||[]).map(function(x){return String(x.athlete_key);}));
+    var apres=Array.from(_polarLies).sort().join('|');
+    if(avant!==apres && document.getElementById('p-athletes') &&
+       document.getElementById('p-athletes').classList.contains('active')) renderAthletes();
+  }catch(e){ /* le libellé neutre reste juste : on ne sait pas, on n'affirme rien */ }
+  finally{ _polarEnCours=false; }
 }
 // Carrousel : flèches (clic) + glisser à la souris. Le tactile utilise le défilement natif.
 /* Habille une grille défilante de deux flèches et du glisser-souris.
