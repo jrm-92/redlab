@@ -1128,7 +1128,6 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 .lib-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .lib-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:8px}
 .lib-title{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.2px;line-height:1.2}
-.lib-tag{font-size:11.5px;font-weight:800;color:var(--orange);text-align:right;white-space:nowrap;flex-shrink:0;background:rgba(255,107,26,0.1);padding:4px 10px;border-radius:20px}
 .lib-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px}
 .lib-steps{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px}
 .lib-step{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:baseline}
@@ -4479,9 +4478,9 @@ function libBlock(b,vma,lbl){
 function libCard(s,vma,opts){
   opts=opts||{};
   const t=LIB_THEMES.find(x=>x.id===s.theme)||LIB_THEMES[1];
-  const ph=LIB_PHASES.find(p=>p.id===libPhaseOf(s))||LIB_PHASES[1];
-  const od=libOrderOf(s);
-  const phTxt=od?('Étape '+od.n+' · '+od.when):ph.short;
+  /* La durée-intensité et l'étape de prépa ne s'affichent plus sur la carte :
+     l'information reste dans s.tag et LIB_ORDER, qui pilotent toujours le tri
+     et l'export, mais elle encombrait le bandeau. */
   const delBtn=opts.del?'<button class="lib-del" title="Supprimer" onclick="libDeleteSession(\''+s.id+'\')">✕</button>':'';
   const _kind=opts.del?'c':'l', _idx=(opts.del?CUSTOM_SESSIONS:LIB_SESSIONS).indexOf(s);
   const wktBtn='<button type="button" class="lib-wkt" onclick="wktExport(\''+_kind+'\','+_idx+')" title="Télécharger la séance au format montre (.fit)">'
@@ -4494,7 +4493,7 @@ function libCard(s,vma,opts){
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
   const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
   return '<div class="lib-card" style="border-top:3px solid '+t.col+';position:relative">'+delBtn+
-    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div><div style="text-align:right;flex-shrink:0"><div class="lib-tag">'+s.tag+'</div><div style="margin-top:6px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:'+ph.col+'">'+phTxt+'</div></div></div>'+
+    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
     '<div class="lib-wkt-row">'+wktBtn+editBtn+'</div>'+
@@ -5259,7 +5258,7 @@ function renderLibrary(){
   const wrap=document.getElementById('library-wrap');if(!wrap)return;
   const chips=[['all','Toutes']].concat(LIB_THEMES.map(t=>[t.id,t.lbl])).map(c=>'<button class="lib-chip'+(libTheme===c[0]?' active':'')+'" onclick="setLibTheme(\''+c[0]+'\')">'+c[1]+'</button>').join('');
   wrap.innerHTML=
-    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique et <b>ordonnées dans la prépa</b> : commence par l\u2019Étape 1 de chaque bloc, termine par la dernière grosse spé (J-10 à J-14) puis l\u2019affûtage. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
+    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Bibliothèque de séances</div><div class="input-hero-sub">Des séances clés en main classées par thématique et <b>ordonnées dans la prépa</b> : dans chaque bloc, la première carte ouvre le cycle, la dernière grosse spé se place à J-10 / J-14, puis vient l\u2019affûtage. Renseigne une VMA pour afficher les allures et temps cibles.</div></div>'+
     toolAthleteBar()+
     '<div class="lib-toolbar">'+
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
