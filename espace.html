@@ -132,23 +132,34 @@ a{color:var(--accent)}
    en bas, à portée de pouce, et un écran par question — qu'est-ce que je
    fais aujourd'hui, à quelle allure, où j'en suis.
    ══════════════════════════════════════════════════════════════════════ */
-.app{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+.app{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
 .screen{display:none;animation:sc .18s ease-out}
 .screen.on{display:block}
 @keyframes sc{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.screen{animation:none}}
 
 /* Barre d'onglets : fixée en bas, cinq destinations, jamais plus. */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:4px;
   background:rgba(15,23,41,.94);backdrop-filter:blur(14px);
-  border-top:1px solid var(--border2);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
-.tab{flex:1;background:none;border:0;color:var(--muted2);font-family:var(--font);
-  display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;
-  cursor:pointer;border-radius:12px;transition:color .15s,background .15s}
-.tab svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.tab span{font-size:10px;font-weight:800;letter-spacing:.2px}
-.tab.on{color:var(--accent);background:var(--accent-soft)}
+  border-top:1px solid var(--border2);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+/* Les onglets se touchaient : un pouce un peu à côté tombait sur le voisin.
+   Un écart de 4 px crée une zone morte entre deux cibles, et la hauteur passe
+   de 47 à 54 px — au-dessus des 44 px recommandés, pas juste dessus. */
+.tab{flex:1;min-width:0;background:none;border:0;color:var(--muted2);font-family:var(--font);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  min-height:54px;padding:7px 2px;
+  cursor:pointer;border-radius:13px;transition:color .15s,background .15s;
+  -webkit-tap-highlight-color:rgba(255,107,26,.18)}
+.tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* 10 px se lisait mal — on consulte cette page dehors, parfois en plein soleil. */
+.tab span{font-size:11px;font-weight:800;letter-spacing:.2px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.tab.on{color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(255,107,26,.3)}
 .tab:not(.on):hover{color:var(--text2)}
+.tab:active{background:rgba(255,255,255,.06)}
+@media(max-width:340px){
+  .tab span{font-size:10px}
+  .tab svg{width:20px;height:20px}
+}
 
 /* En-tête compact : qui je suis, mon repère principal. */
 .appbar{display:flex;align-items:center;gap:12px;padding:16px 0 14px;border-bottom:1px solid var(--border);margin-bottom:18px}
@@ -267,6 +278,17 @@ a{color:var(--accent)}
 .cvscroll::-webkit-scrollbar-thumb{background:rgba(255,107,26,.5);border-radius:4px}
 .cvscroll{scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) rgba(255,255,255,.05)}
 @media(max-width:640px){.cvh{height:230px}}
+/* Courses groupées par année */
+.yr{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.yr-hd{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;list-style:none;user-select:none}
+.yr-hd::-webkit-details-marker{display:none}
+.yr-ch{color:var(--muted2);transition:transform .2s;flex-shrink:0}
+.yr[open] .yr-ch{transform:rotate(90deg)}
+.yr-n{font-size:15px;font-weight:900;color:var(--text)}
+.yr-c{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--muted2)}
+.yr-bd{padding:0 10px 10px}
+.yr-bd .rec{margin-bottom:6px}
+.yr-bd .rec:last-child{margin-bottom:0}
 </style>
 </head><body>
 
@@ -919,18 +941,44 @@ function ecranRecords(d){
       +'<div class="cvscroll"><div class="cvh" style="min-width:'+large+'"><canvas id="cv-hist"></canvas></div></div></div>';
   }
 
-  var passees=hist.filter(function(x){return x&&x.sec>=30;})
-                  .sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,25);
-  if(passees.length){
-    h+='<div class="h2">Tes courses</div>';
-    h+=passees.map(function(x){
+  // Les courses par année, la plus récente dépliée. Vingt lignes d'affilée ne
+  // se parcourent pas ; regroupées, on retrouve une saison d'un coup d'œil.
+  // <details> plutôt qu'un accordéon maison : le pliage tient sans JavaScript.
+  var passees=hist.filter(function(x){return x&&x.sec>=30&&x.ts;})
+                  .sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  var sansDate=hist.filter(function(x){return x&&x.sec>=30&&!x.ts;});
+  if(passees.length||sansDate.length){
+    var ligne=function(x){
       var dt=x.ts?new Date(x.ts):null;
       var dm=DIST_M[x.dist]||null;
       return '<div class="rec"><span class="d">'+esc(x.label||NOMS_COURSE[x.dist]||'Course')+'</span>'
         +'<span class="t">'+fHMS(x.sec)+'</span>'
         +'<span class="p">'+(dm?fAll(x.sec/dm*1000)+'/km':'')
-        +(dt?'<br>'+dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'')+'</span></div>';
+        +(dt?'<br>'+dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'')+'</span></div>';
+    };
+    var annees=[], parAn={};
+    passees.forEach(function(x){
+      var a=new Date(x.ts).getFullYear();
+      if(!parAn[a]){ parAn[a]=[]; annees.push(a); }
+      parAn[a].push(x);
+    });
+    h+='<div class="h2">Tes courses</div>';
+    h+=annees.map(function(a,i){
+      var l=parAn[a];
+      return '<details class="yr"'+(i===0?' open':'')+'>'
+        +'<summary class="yr-hd">'
+        +'<svg class="yr-ch" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'
+        +'<span class="yr-n">'+a+'</span>'
+        +'<span class="yr-c">'+l.length+' course'+(l.length>1?'s':'')+'</span>'
+        +'</summary><div class="yr-bd">'+l.map(ligne).join('')+'</div></details>';
     }).join('');
+    if(sansDate.length){
+      h+='<details class="yr"><summary class="yr-hd">'
+        +'<svg class="yr-ch" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'
+        +'<span class="yr-n">Sans date</span>'
+        +'<span class="yr-c">'+sansDate.length+' course'+(sansDate.length>1?'s':'')+'</span>'
+        +'</summary><div class="yr-bd">'+sansDate.map(ligne).join('')+'</div></details>';
+    }
   }
   return h;
 }
