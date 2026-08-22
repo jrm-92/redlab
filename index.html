@@ -8385,6 +8385,52 @@ const ESPACE_URL='https://coach.reding-running.fr/espace.html';
    fiche publiée. Sans elles, l'espace athlète ne peut offrir qu'une page HTML —
    or la portabilité (RGPD art. 20) suppose un format structuré et réutilisable.
    Rien de nouveau n'est exposé : ces valeurs sont déjà dans la fiche, en HTML. */
+
+/* ══ LES GRAPHIQUES DE L'ESPACE ATHLÈTE ══
+   Mêmes séries que celles du tableau de bord, calculées ici avec les mêmes
+   fonctions. Les recopier là-bas les ferait diverger tôt ou tard : la fenêtre
+   de six mois, les bandes de prédiction et le tri de l'historique n'ont
+   qu'une seule définition, et elle est ici.
+
+   Ces fonctions lisent S. On ne produit donc les séries que si S porte bien
+   l'athlète qu'on publie — sinon l'athlète recevrait les courbes d'un autre,
+   exactement le travers qui guettait déjà le plan. */
+function _graphesPourEspace(ath){
+  if(!ath||!S.pseudo||ath.pseudo!==S.pseudo) return null;
+  var g={};
+
+  // Prédictions contre records — les bandes, et les points réellement courus.
+  if(S.vma){
+    var vmaMs=S.vma/3.6;
+    var retenues=CHART_DISTS.filter(function(r){return chartSeconds(r.id)!=null;});
+    var CD=retenues.length?retenues:CHART_DISTS;
+    g.predictions={
+      labels:CD.map(function(r){return r.nm;}),
+      paceHi:CD.map(function(r){return Math.round(1000/(r.vmaHi*vmaMs));}),
+      paceLo:CD.map(function(r){return Math.round(1000/(r.vmaLo*vmaMs));}),
+      recPace:CD.map(function(r){var T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;}),
+      recSec:CD.map(function(r){return chartSeconds(r.id);}),
+      ecartees:(typeof perfStaleCount==='function')?perfStaleCount():0
+    };
+  }
+
+  // Historique des courses, une série par distance.
+  var list=(ath.raceHistory||[]).filter(function(r){return r&&r.ts!=null&&r.sec>=30;});
+  if(list.length){
+    var par={};
+    list.forEach(function(r){ (par[r.dist]=par[r.dist]||[]).push(r); });
+    var ordre=['1500','3000','5k','10k','semi','mara'];
+    g.historique=ordre.filter(function(k){return par[k];}).map(function(k){
+      return {lbl:HIST_LBL[k], col:HIST_COL[k],
+        points:par[k].slice().sort(function(a,b){return a.ts-b.ts;}).map(function(r){
+          return {ts:r.ts, sec:r.sec, pace:Math.round(r.sec/((DIST_M[r.dist]||1)/1000)),
+                  label:r.label||'', loc:r.loc||''};
+        })};
+    });
+  }
+  return g;
+}
+
 function _profilPourEspace(ath){
   if(!ath) return null;
   return {
@@ -8397,6 +8443,7 @@ function _profilPourEspace(ath){
     // Le plan développé — semaines et séances avec leurs allures — calculé
     // par renderDashPlan. L'espace athlète ne sait pas le recalculer.
     planDetail:(window._espacePlan||null),
+    graphes:_graphesPourEspace(ath),
     versionEspace:2,
     progression:ath.history||[], analyses:ath.analyses||[]
   };
