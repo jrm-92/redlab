@@ -950,7 +950,16 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
 }
 .btn-save-athlete:hover{background:rgba(255,107,26,0.18);border-color:var(--orange)}
 .btn-save-athlete svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-@media(max-width:860px){.btn-save-athlete span{display:none}}
+.ath-barre{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+@media(max-width:860px){.ath-barre{padding:0 16px}}
+/* Le libellé restait masqué sous 860 px — une habitude de l'époque où il
+   n'y avait qu'un seul bouton. Depuis qu'ils sont deux, ça laissait deux
+   pastilles à peu près identiques et « Republier tous les espaces »
+   devenait introuvable sur téléphone. Sur petit écran ils prennent donc
+   toute la largeur, l'un sous l'autre, libellé compris. */
+@media(max-width:860px){
+  .btn-save-athlete{width:100%;justify-content:center;padding:12px 16px;font-size:13.5px}
+}
 
 /* ══ LARGE SCREENS ══ */
 @media(min-width:1400px){
@@ -4016,7 +4025,11 @@ function renderAthletes(){
       <img src="https://reding-running.fr/logo_running_orange.png" alt="Reding Running" style="max-width:130px;height:auto;display:block;margin-bottom:12px">
       <div class="input-hero-title">Athlètes enregistrés</div>
       <div class="input-hero-sub">Retrouvez et chargez les profils de vos athlètes. Le profil ouvert s'enregistre tout seul, et son espace se republie dans la foulée ; les boutons ci-dessous servent à forcer.</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+    </div>
+    <!-- Les actions vivent HORS du bandeau : sur mobile, .input-hero est
+         masqué au profit de l'en-tête compact, et les boutons partaient avec
+         lui — « Republier tous les espaces » était introuvable sur téléphone. -->
+    <div class="ath-barre">
         <button class="btn-save-athlete" onclick="athSaveCurrent(this)" style="margin:0">
           <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           <span>Enregistrer le profil ouvert</span>
@@ -4026,8 +4039,7 @@ function renderAthletes(){
           <span>↑ Republier tous les espaces</span>
         </button>
       </div>
-      <div id="ath-pub-bilan"></div>
-    </div>`;
+    <div id="ath-pub-bilan"></div>`;
   if(!athletes.length){
     wrap.innerHTML=hd+`
       <div class="ath-empty">
@@ -8373,6 +8385,52 @@ const ESPACE_URL='https://coach.reding-running.fr/espace.html';
    fiche publiée. Sans elles, l'espace athlète ne peut offrir qu'une page HTML —
    or la portabilité (RGPD art. 20) suppose un format structuré et réutilisable.
    Rien de nouveau n'est exposé : ces valeurs sont déjà dans la fiche, en HTML. */
+
+/* ══ LES GRAPHIQUES DE L'ESPACE ATHLÈTE ══
+   Mêmes séries que celles du tableau de bord, calculées ici avec les mêmes
+   fonctions. Les recopier là-bas les ferait diverger tôt ou tard : la fenêtre
+   de six mois, les bandes de prédiction et le tri de l'historique n'ont
+   qu'une seule définition, et elle est ici.
+
+   Ces fonctions lisent S. On ne produit donc les séries que si S porte bien
+   l'athlète qu'on publie — sinon l'athlète recevrait les courbes d'un autre,
+   exactement le travers qui guettait déjà le plan. */
+function _graphesPourEspace(ath){
+  if(!ath||!S.pseudo||ath.pseudo!==S.pseudo) return null;
+  var g={};
+
+  // Prédictions contre records — les bandes, et les points réellement courus.
+  if(S.vma){
+    var vmaMs=S.vma/3.6;
+    var retenues=CHART_DISTS.filter(function(r){return chartSeconds(r.id)!=null;});
+    var CD=retenues.length?retenues:CHART_DISTS;
+    g.predictions={
+      labels:CD.map(function(r){return r.nm;}),
+      paceHi:CD.map(function(r){return Math.round(1000/(r.vmaHi*vmaMs));}),
+      paceLo:CD.map(function(r){return Math.round(1000/(r.vmaLo*vmaMs));}),
+      recPace:CD.map(function(r){var T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;}),
+      recSec:CD.map(function(r){return chartSeconds(r.id);}),
+      ecartees:(typeof perfStaleCount==='function')?perfStaleCount():0
+    };
+  }
+
+  // Historique des courses, une série par distance.
+  var list=(ath.raceHistory||[]).filter(function(r){return r&&r.ts!=null&&r.sec>=30;});
+  if(list.length){
+    var par={};
+    list.forEach(function(r){ (par[r.dist]=par[r.dist]||[]).push(r); });
+    var ordre=['1500','3000','5k','10k','semi','mara'];
+    g.historique=ordre.filter(function(k){return par[k];}).map(function(k){
+      return {lbl:HIST_LBL[k], col:HIST_COL[k],
+        points:par[k].slice().sort(function(a,b){return a.ts-b.ts;}).map(function(r){
+          return {ts:r.ts, sec:r.sec, pace:Math.round(r.sec/((DIST_M[r.dist]||1)/1000)),
+                  label:r.label||'', loc:r.loc||''};
+        })};
+    });
+  }
+  return g;
+}
+
 function _profilPourEspace(ath){
   if(!ath) return null;
   return {
@@ -8385,6 +8443,7 @@ function _profilPourEspace(ath){
     // Le plan développé — semaines et séances avec leurs allures — calculé
     // par renderDashPlan. L'espace athlète ne sait pas le recalculer.
     planDetail:(window._espacePlan||null),
+    graphes:_graphesPourEspace(ath),
     versionEspace:2,
     progression:ath.history||[], analyses:ath.analyses||[]
   };

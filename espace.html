@@ -257,6 +257,12 @@ a{color:var(--accent)}
   padding:9px 11px;border-radius:8px;cursor:pointer}
 .menu-pop button:hover{background:rgba(255,255,255,.06);color:var(--text)}
 .savetip{margin:22px 0 0}
+/* Graphiques */
+.cvbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 12px 10px}
+.cvbox .cvt{font-size:12.5px;color:var(--muted);line-height:1.6;padding:0 4px 10px}
+.cvh{position:relative;height:260px}
+.cvscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:640px){.cvh{height:230px}}
 </style>
 </head><body>
 
@@ -346,6 +352,7 @@ a{color:var(--accent)}
   · <a href="mailto:contact@reding-running.fr?subject=Mes%20donn%C3%A9es%20personnelles">Exercer mes droits</a>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── Config (clé publiable, sans danger à exposer) ──
@@ -521,6 +528,7 @@ function go(sc){
     b.classList.toggle('on',b.getAttribute('data-sc')===sc);
   });
   window.scrollTo({top:0,behavior:'instant'});
+  try{ dessinerEcran(sc); }catch(e){}
 }
 
 /* ── Repères communs ── */
@@ -556,6 +564,102 @@ function objectifDe(d){
   var m=DIST_M[g.id]||null;
   return {nom:g.name||NOMS_COURSE[g.id]||'Course', id:g.id, t:g.t||null, date:g.date||'',
           m:m, allure:(g.t&&m)?fAll(g.t/m*1000):null, jm:joursAvant(g.date)};
+}
+
+
+/* ══ GRAPHIQUES ══
+   Les séries arrivent toutes calculées de RedLab. On ne fait ici que les
+   dessiner : c'est le seul moyen que l'athlète et son coach regardent
+   exactement la même chose. */
+var _cv={};                                  // les instances, pour les détruire avant de redessiner
+function _neuf(id){
+  var cv=document.getElementById(id); if(!cv||typeof Chart==='undefined')return null;
+  if(_cv[id]){ try{_cv[id].destroy();}catch(e){} _cv[id]=null; }
+  return cv;
+}
+var AXE={color:'#94A3B8',font:{family:'Manrope',size:11}};
+var GRILLE={color:'rgba(255,255,255,.06)'};
+
+/* Volume par semaine, couleur de la phase. Une semaine allégée est plus
+   pâle : c'est une consigne, pas un accident de parcours. */
+function dessinerVolume(sem,unite){
+  var cv=_neuf('cv-vol'); if(!cv||!sem||!sem.length)return;
+  var pale=function(hex,a){ hex=hex.replace('#','');
+    return 'rgba('+parseInt(hex.slice(0,2),16)+','+parseInt(hex.slice(2,4),16)+','+parseInt(hex.slice(4,6),16)+','+a+')'; };
+  var couleurs=sem.map(function(w){ return w.rec?pale(w.col,0.42):w.col; });
+  _cv['cv-vol']=new Chart(cv,{type:'bar',
+    data:{labels:sem.map(function(w){return 'S'+w.n;}),
+          datasets:[{data:sem.map(function(w){return w.km;}),backgroundColor:couleurs,
+                     borderWidth:0,borderRadius:5,maxBarThickness:34}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{
+          title:function(it){var w=sem[it[0].dataIndex];return 'Semaine '+w.n+(w.dt?' · '+w.dt:'');},
+          label:function(c){var w=sem[c.dataIndex];
+            return w.km+' '+(unite||'')+(w.rec?' · semaine allégée':'')+(w.race?' · course':'')+(w.inter?' · course prépa':'')
+              +' — '+w.phLbl;}}}},
+      scales:{y:{title:{display:true,text:unite?('Volume ('+unite+'/sem)'):'Volume',color:'#94A3B8',font:{size:11}},
+                 ticks:AXE,grid:GRILLE,beginAtZero:true},
+              x:{ticks:AXE,grid:{display:false}}}}});
+}
+
+/* Prédictions contre records : deux bandes d'allure, et les points réels. */
+function dessinerPredictions(g){
+  var cv=_neuf('cv-pred'); if(!cv||!g||!g.labels||!g.labels.length)return;
+  var fmt=function(sec){sec=Math.round(sec);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');};
+  _cv['cv-pred']=new Chart(cv,{type:'line',
+    data:{labels:g.labels,datasets:[
+      {label:'Prédiction rapide',data:g.paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,.13)',
+       borderWidth:2.5,pointRadius:0,tension:.3,fill:'+1'},
+      {label:'Prédiction lente',data:g.paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',
+       borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.3,fill:false},
+      {label:'Tes records',data:g.recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',
+       borderWidth:2,showLine:false,pointRadius:6,pointHoverRadius:8,spanGaps:true}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#CBD5E1',usePointStyle:true,boxWidth:9,font:{family:'Manrope',size:11.5,weight:'700'}}},
+        tooltip:{callbacks:{label:function(c){
+          if(c.parsed.y==null)return null;
+          return c.dataset.label+' : '+fmt(c.parsed.y)+'/km';}}}},
+      scales:{y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:11}},
+                 ticks:Object.assign({callback:function(v){return fmt(v);}},AXE),grid:GRILLE},
+              x:{ticks:AXE,grid:GRILLE}}}});
+}
+
+/* Historique des courses : une allure, une date, une série par distance. */
+function dessinerHistorique(series){
+  var cv=_neuf('cv-hist'); if(!cv||!series||!series.length)return;
+  var fmt=function(sec){sec=Math.round(sec);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');};
+  _cv['cv-hist']=new Chart(cv,{type:'scatter',
+    data:{datasets:series.map(function(s){
+      return {label:s.lbl,borderColor:s.col,backgroundColor:s.col,showLine:true,tension:0,
+              borderWidth:2,pointRadius:4.5,pointHoverRadius:6.5,
+              data:s.points.map(function(p){return {x:p.ts,y:p.pace,_p:p};})};
+    })},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#CBD5E1',usePointStyle:true,boxWidth:9,font:{family:'Manrope',size:11.5,weight:'700'}}},
+        tooltip:{callbacks:{label:function(c){
+          var p=c.raw._p;
+          var d=new Date(p.ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+          return (p.label||c.dataset.label)+' · '+fHMS(p.sec)+' · '+fmt(p.pace)+'/km · '+d+(p.loc?' · '+p.loc:'');}}}},
+      scales:{y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:11}},
+                 ticks:Object.assign({callback:function(v){return fmt(v);}},AXE),grid:GRILLE},
+              x:{type:'linear',ticks:Object.assign({callback:function(v){
+                   return new Date(v).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});}},AXE),grid:GRILLE}}}});
+}
+
+/* Les graphiques ne se dessinent qu'une fois leur écran affiché : un canevas
+   dans un conteneur masqué se retrouve avec une taille nulle et reste vide. */
+var _dessines={};
+function dessinerEcran(sc){
+  if(_dessines[sc]||!P)return;
+  if(sc==='plan'&&P.planDetail&&P.planDetail.semaines){
+    dessinerVolume(P.planDetail.semaines,P.planDetail.unite); _dessines.plan=true;
+  }
+  if(sc==='records'&&P.graphes){
+    if(P.graphes.predictions)dessinerPredictions(P.graphes.predictions);
+    if(P.graphes.historique)dessinerHistorique(P.graphes.historique);
+    _dessines.records=true;
+  }
 }
 
 /* ── Écran 1 · Accueil ── */
@@ -613,7 +717,6 @@ function ecranAccueil(d){
     h+=kpi(R.lbl,(+R.v).toFixed(1),'km/h');
     h+=kpi('Allure '+R.lbl,fAll(3600/R.v),'/km');
   }
-  if(d.vma)h+=kpi('VO₂max estimé',(3.5*d.vma).toFixed(1),'ml/kg/min');
   if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
   if(d.dp)h+=kpi('D′',Math.round(d.dp),'m');
   h+='</div>';
@@ -647,6 +750,10 @@ function ecranPlan(d){
   pl.semaines.forEach(function(w){ if(w.iso&&w.iso<=auj)courante=w.n; });
   if(courante==null) courante=pl.semaines[0].n;
 
+  h+='<div class="h2">Charge de la préparation</div>'
+    +'<div class="cvbox"><div class="cvt">Le volume visé semaine après semaine. La couleur donne la phase ; '
+    +'une barre plus pâle est une semaine allégée, faite pour absorber ce qui précède.</div>'
+    +'<div class="cvh"><canvas id="cv-vol"></canvas></div></div>';
   h+='<div class="h2">'+esc(pl.objectifLbl||'Préparation')+' · '+pl.semaines.length+' semaines</div>';
   pl.semaines.forEach(function(w){
     var fin=w.iso?new Date(new Date(w.iso+'T12:00:00').getTime()+6*864e5):null;
@@ -784,6 +891,22 @@ function ecranRecords(d){
   }).filter(Boolean).join('');
   h+='<div class="h2">Tes records</div>'
     +(lignes||'<div class="card2 muted">Aucun record enregistré pour l’instant. Transmets tes chronos à ton coach, ils apparaîtront ici.</div>');
+
+  var g=d.graphes||{};
+  if(g.predictions&&g.predictions.labels&&g.predictions.labels.length){
+    h+='<div class="h2">Prédictions contre tes records</div>'
+      +'<div class="cvbox"><div class="cvt">La bande montre l’allure que ta '+refDe(d).lbl+' laisse espérer sur chaque distance. '
+      +'Les points jaunes sont tes chronos réels. Seuls les résultats de moins de six mois y figurent : '
+      +'un chrono plus ancien ne dit plus rien de ta forme actuelle.'
+      +(g.predictions.ecartees?' <b>'+g.predictions.ecartees+' distance'+(g.predictions.ecartees>1?'s écartées':' écartée')+'</b> — résultat trop ancien ou sans date.':'')
+      +'</div><div class="cvh"><canvas id="cv-pred"></canvas></div></div>';
+  }
+  if(g.historique&&g.historique.length){
+    h+='<div class="h2">L’évolution de tes courses</div>'
+      +'<div class="cvbox"><div class="cvt">Ton allure au fil du temps, une couleur par distance. '
+      +'L’axe est inversé : plus un point est haut, plus tu as couru vite.</div>'
+      +'<div class="cvh"><canvas id="cv-hist"></canvas></div></div>';
+  }
 
   var passees=hist.filter(function(x){return x&&x.sec>=30;})
                   .sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,25);
