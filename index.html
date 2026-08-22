@@ -4270,7 +4270,89 @@ function updGoal(){
   saveLS();
 }
 function goalLinkRefresh(){ renderGoalSection(); }
+
+/* ══ CE QUE L'ESPACE ATHLÈTE REÇOIT DU PLAN ══
+   L'espace athlète est une page à part : il n'a ni la bibliothèque, ni le
+   moteur de périodisation, ni la VMA de calcul. Tout ce qu'il affichera doit
+   donc être calculé ICI et voyager tout prêt — semaines, séances, allures.
+   Une allure recalculée là-bas à partir d'une VMA approximative finirait par
+   diverger de ce que le coach a sous les yeux. */
+
+/* Une séance en texte simple, allures comprises. Même arithmétique que la
+   bibliothèque : c'est la même séance, elle doit donner les mêmes chiffres. */
+function _seancePourEspace(titre,vma){
+  var s=(typeof wktFindSession==='function')?wktFindSession(titre):null;
+  var th=s?(LIB_THEMES.find(function(x){return x.id===s.theme;})||LIB_THEMES[0]):null;
+  var lignes=[];
+  if(s&&s.warm&&s.warm!=='—') lignes.push({k:'Échauffement',v:s.warm});
+  (s&&s.blocks||[]).forEach(function(b,i){
+    if(b.segs){
+      // Séance en notation libre : une suite de segments, chacun son allure.
+      var parts=b.segs.map(function(sg){
+        var a=vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'';
+        return fDist(sg.d)+' '+sg.lbl+a;
+      });
+      lignes.push({k:(b.label||('Bloc '+(i+1))),
+                   v:((b.r>1&&b.segs.length===1)?b.r+' × ':'')+parts.join(' + ')
+                     +(b.rec?' (récup '+b.rec+')':'')});
+      return;
+    }
+    var pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
+    var val=b.d?(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m')
+              :(b.m?b.m+' min':(b.sec?b.sec+'s':''));
+    var core=(b.r>1?b.r+' × ':'')+val+' @ '+pctTxt+'% VMA';
+    if(b.sets)core=b.sets+' séries de '+core;
+    if(vma){
+      var pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;
+      var spd=vma*pc/100/3.6;
+      core+=' → '+fAll(1000/spd)+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');
+    }
+    var rec=[]; if(b.rec)rec.push('récup '+b.rec); if(b.recSet)rec.push(b.recSet+' entre séries');
+    if(rec.length)core+=' ('+rec.join(' · ')+')';
+    lignes.push({k:((s.blocks.length>1)?('Bloc '+(i+1)):'Corps'),v:core});
+  });
+  if(s&&s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:s.cool});
+  return {titre:titre, theme:th?th.lbl:'', col:th?th.col:'#94A3B8',
+          desc:s?(s.desc||''):'', lignes:lignes,
+          // Une séance absente de la bibliothèque n'est pas une erreur : le
+          // coach a pu la renommer ou la supprimer depuis. On la nomme quand
+          // même, l'athlète saura de quoi il s'agit.
+          connue:!!s};
+}
+
+/* Le plan tel que l'athlète le verra : les semaines, et les séances datées. */
+function _planPourEspace(p,weeks){
+  if(!p||!weeks||!weeks.length) return null;
+  var vm=(typeof wktVma==='function')?wktVma():null;
+  var vma=vm?vm.v:(S.vma||null);
+  var unite=(typeof plUnit==='function')?plUnit():'km';
+  var iso=function(d){ return d?[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'):null; };
+
+  var semaines=weeks.map(function(w){
+    var ph=PL_PHL[w.ph]||w.ph||'';
+    return {n:w.n, iso:iso(w.d0), ph:w.ph, phLbl:ph, col:PL_PHC[w.ph]||'#94A3B8',
+            km:w.km, unite:unite, rec:!!w.rec, race:!!w.race, inter:!!w.inter};
+  });
+
+  // Les séances placées au calendrier, chacune développée avec ses allures.
+  var seances=[];
+  Object.keys(_plSessions||{}).sort().forEach(function(j){
+    (_plSessions[j]||[]).forEach(function(sx){
+      seances.push(Object.assign({iso:j},_seancePourEspace(sx.t,vma)));
+    });
+  });
+
+  return {objectifLbl:p.lbl, col:p.col, unite:unite,
+          debut:semaines.length?semaines[0].iso:null,
+          fin:_plDate2||null,
+          semaines:semaines, seances:seances};
+}
+
 function renderDashPlan(){
+  // Vidé d'entrée. Cette fonction sort par anticipation dès qu'il n'y a pas
+  // de plan affichable, et la publication en série enchaîne les athlètes :
+  // un reste du précédent partirait dans la fiche du suivant.
+  window._espacePlan=null;
   const sec=document.getElementById('db-plan-section'), box=document.getElementById('db-plan');
   if(!sec||!box||typeof PLANIF==='undefined')return;
   const g=S.goal||{};
@@ -4306,6 +4388,7 @@ function renderDashPlan(){
   // manipule pas — on la déduit de la première semaine calculée.
   _plDate1=(weeks[0]&&weeks[0].d0)?[weeks[0].d0.getFullYear(),String(weeks[0].d0.getMonth()+1).padStart(2,'0'),String(weeks[0].d0.getDate()).padStart(2,'0')].join('-'):null;
   const cal=plCalendarHTML(p,weeks,{ro:true});
+  try{ window._espacePlan=_planPourEspace(p,weeks); }catch(e){ window._espacePlan=null; }
   const _unit=plUnit();
   window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null),dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
   // restauration
@@ -4387,7 +4470,7 @@ async function dbRenderRealise(force){
       _dbSeances=r.data||[];
     }catch(e){ box.innerHTML=dbNote('Lecture impossible : '+(e.message||e),'#FBBF24'); return; }
   }
-  box.innerHTML=dbRealiseHTML(_dbSeances,ath);
+  box.innerHTML=dbRealiseHTML(dbSeancesFusion(_dbSeances,ath.seances),ath);
 }
 
 /* Va chercher chez Polar ce qui est nouveau, puis relit la base. */
@@ -4444,13 +4527,15 @@ function dbRealiseHTML(rows,ath){
   var lie=(typeof polarEstLie==='function')&&polarEstLie(ath);
   var barre='<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'
     +'<button type="button" class="lib-create-btn" onclick="polarPullNow(this)" style="margin:0">↻ Récupérer les nouvelles séances</button>'
+    +'<button type="button" class="lib-create-btn" onclick="dbImportOuvrir()" style="margin:0" title="Fichier .FIT ou .TCX exporté depuis Garmin Connect, COROS, Suunto… — plusieurs à la fois acceptés">⤒ Importer un fichier</button>'
     +'<span id="db-pull-etat" style="font-size:12.5px;font-weight:700;color:'+(_dbPullMsg?_dbPullMsg.col:'var(--muted)')+'">'
     +(_dbPullMsg?String(_dbPullMsg.txt).replace(/</g,'&lt;'):'')+'</span></div>';
 
   if(!rows.length){
-    return barre+dbNote(lie
+    return barre+dbNote((lie
       ? "Aucune séance remontée pour l'instant. Polar ne livre une séance qu'après la synchronisation de la montre avec Polar Flow."
-      : "La montre de cet athlète n'est pas reliée. Va dans l'onglet <b>Athlètes</b> et clique sur <b>⌚ Connecter sa montre Polar</b> pour lui envoyer le lien d'autorisation.");
+      : "La montre de cet athlète n'est pas reliée. Pour une montre Polar, va dans l'onglet <b>Athlètes</b> et clique sur <b>⌚ Connecter sa montre Polar</b>.")
+      +"<br><br>Pour toute autre marque, <b>⤒ Importer un fichier</b> lit les <b>.FIT</b> et les <b>.TCX</b> exportés depuis Garmin Connect, COROS, Suunto ou n'importe quelle application de montre.");
   }
 
   // ── Totaux ──
@@ -4518,7 +4603,7 @@ function dbSemainesHTML(rows){
     +'<thead><tr>'
     +['Semaine','Prévu','Réalisé','Écart','',''].map(function(h){return '<th style="padding:6px 10px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);text-align:'+(h==='Semaine'||h===''?'left':'right')+';border-bottom:1px solid var(--border)">'+h+'</th>';}).join('')
     +'</tr></thead><tbody>'+lignes+'</tbody></table></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Un tiret = aucune séance remontée cette semaine ; Polar ne livre que ce que la montre a synchronisé. Le comparatif porte sur '+(enKm?'la distance':'le temps')+', donc une séance sans distance (renfo, natation) compte dans le nombre de séances mais pas dans le volume.</div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Un tiret = aucune séance connue cette semaine, qu\'elle vienne de la montre reliée ou d\'un fichier importé. Le comparatif porte sur '+(enKm?'la distance':'le temps')+', donc une séance sans distance (renfo, natation) compte dans le nombre de séances mais pas dans le volume.</div>'
     +'</div>';
 }
 
@@ -4541,13 +4626,170 @@ function dbListeHTML(rows){
     if(r.hr_avg) faits.push(chip('♥ '+r.hr_avg+(r.hr_max?' / '+r.hr_max:'')+' bpm'+(pctFc?' · '+pctFc+' % FCmax':''),'#F87171'));
     if(r.calories) faits.push(chip(r.calories+' kcal','var(--muted2)'));
     var sport=r.sport?String(r.sport).replace(/_/g,' ').toLowerCase():'séance';
+    // D'où vient la séance : la montre reliée, ou un fichier déposé. Le coach
+    // doit pouvoir retirer ce qu'il a déposé lui-même — pas ce que Polar a
+    // livré, qui ne se récupère plus une fois la transaction validée.
+    var orig=(r.src==='fichier')
+      ? '<span title="'+String(r.nom||'').replace(/"/g,'&quot;')+'" style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#60A5FA;border:1px solid rgba(96,165,250,.35);border-radius:5px;padding:1px 5px">fichier</span>'
+      : '';
+    var sup=(r.src==='fichier')
+      ? '<button type="button" onclick="dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" style="background:transparent;border:none;color:var(--muted2);font-family:var(--font);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px">×</button>'
+      : '';
     return '<div style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px">'
       +'<div style="min-width:150px"><div style="font-size:13px;font-weight:800;color:var(--text)">'+jour+(heure?' <span style="font-weight:600;color:var(--muted2)">'+heure+'</span>':'')+'</div>'
-      +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-top:2px">'+sport+'</div></div>'
+      +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-top:2px">'+sport+' '+orig+'</div></div>'
       +'<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;flex:1">'+faits.join('')+'</div>'
+      +sup
       +'</div>';
   }).join('');
-  return '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Séances remontées</div>'+lignes+'</div>';
+  return '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Séances réalisées</div>'+lignes+'</div>';
+}
+
+/* ══ SÉANCES IMPORTÉES DEPUIS UN FICHIER ══
+   Toutes les marques n'ont pas d'API, et je ne veux pas dépendre d'un
+   intermédiaire. Le fichier reste le dénominateur commun : Garmin, COROS,
+   Suunto et Polar exportent tous du FIT ou du TCX, et RedLab sait déjà les
+   lire — c'est le lecteur de course qui fait ce travail. On réutilise son
+   décodeur, on n'en garde que le résumé, et on range ça dans l'athlète.
+
+   Pourquoi dans l'athlète et pas dans Supabase : polar_exercises interdit
+   délibérément l'écriture depuis le navigateur, pour que rien ne puisse
+   fabriquer une séance réalisée. Une séance déposée à la main est autre
+   chose — elle vient du coach. Elle voyage donc avec le profil, qui part
+   déjà dans le nuage à chaque sauvegarde. Aucune table de plus, aucun
+   déploiement de plus. */
+
+/* Le décodeur du lecteur, sans ses effets de bord : on ne touche ni à App
+   ni à la page, on rend seulement les activités trouvées. */
+async function dbLireActivites(buf){
+  if(typeof window.rlActivitesDuFichier!=='function')
+    throw new Error('lecteur de fichiers indisponible');
+  return window.rlActivitesDuFichier(buf);
+}
+
+/* Une activité complète tient en quelques centaines de points ; on n'en
+   garde que le résumé. Stocker les tracés reviendrait à remplir le
+   localStorage pour une information que la vue n'affiche pas. */
+function dbFichierResume(act,nom){
+  var laps=act.laps||[];
+  var sec=0,m=0,cal=0,hrSom=0,hrPds=0,hrMax=null;
+  laps.forEach(function(l){
+    var t=+l.time||0;
+    sec+=t; m+=(+l.dist||0); cal+=(+l.cal||0);
+    // Moyenne pondérée par la durée : un tour de 20 s ne pèse pas autant
+    // qu'un tour de 20 min.
+    if(l.avgHr){ var p=t||1; hrSom+=l.avgHr*p; hrPds+=p; }
+    if(l.maxHr!=null&&(hrMax==null||l.maxHr>hrMax)) hrMax=l.maxHr;
+  });
+  var debut=isFinite(act.startMs)?new Date(act.startMs).toISOString():null;
+  return {
+    id:'fichier:'+(debut||nom),
+    start_time:debut,
+    duration_s:sec?Math.round(sec):null,
+    distance_m:m?Math.round(m):null,
+    hr_avg:hrPds?Math.round(hrSom/hrPds):null,
+    hr_max:hrMax!=null?Math.round(hrMax):null,
+    sport:act.sport||null,
+    calories:cal?Math.round(cal):null,
+    src:'fichier',
+    nom:nom||''
+  };
+}
+
+var _dbImportInput=null;
+function dbImportOuvrir(){
+  if(!dbAthCourant()) return;
+  if(!_dbImportInput){
+    _dbImportInput=document.createElement('input');
+    _dbImportInput.type='file';
+    _dbImportInput.multiple=true;
+    _dbImportInput.hidden=true;
+    // Pas d'attribut accept : iOS grise les .fit et .tcx, dont il ignore le type.
+    document.body.appendChild(_dbImportInput);
+    _dbImportInput.onchange=function(e){
+      var l=Array.prototype.slice.call(e.target.files);
+      e.target.value='';                      // permet de redéposer le même fichier
+      dbImportFichiers(l);
+    };
+  }
+  _dbImportInput.click();
+}
+
+function dbLireBuffer(f){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onerror=function(){ rej(new Error('fichier illisible')); };
+    fr.onload=function(){ res(fr.result); };
+    fr.readAsArrayBuffer(f);
+  });
+}
+
+async function dbImportFichiers(fichiers){
+  var ath=dbAthCourant();
+  if(!ath||!fichiers.length) return;
+  function dis(txt,col){
+    _dbPullMsg={txt:txt,col:col||'var(--muted)'};
+    var e=document.getElementById('db-pull-etat');
+    if(e){ e.textContent=txt; e.style.color=_dbPullMsg.col; }
+  }
+  dis('Lecture…');
+  var liste=(ath.seances||[]).slice(), ajout=0, remplace=0, refus=[];
+  for(var i=0;i<fichiers.length;i++){
+    var f=fichiers[i];
+    try{
+      var acts=await dbLireActivites(await dbLireBuffer(f));
+      if(!acts.length){ refus.push(f.name+' — aucune activité'); continue; }
+      /* eslint-disable no-loop-func */
+      acts.forEach(function(a){
+        var r=dbFichierResume(a,f.name);
+        // Sans date, impossible de ranger la séance dans une semaine :
+        // elle n'aurait aucune utilité dans le comparatif.
+        if(!r.start_time){ refus.push(f.name+' — séance sans date'); return; }
+        var j=-1;
+        for(var k=0;k<liste.length;k++) if(liste[k].id===r.id){ j=k; break; }
+        if(j>=0){ liste[j]=r; remplace++; } else { liste.push(r); ajout++; }
+      });
+    }catch(e){ refus.push(f.name+' — '+(e.message||e)); }
+  }
+  ath.seances=liste;
+  _saveAthletes(getAthletes().map(function(a){ return a.id===ath.id?ath:a; }));
+
+  var bouts=[];
+  if(ajout) bouts.push(ajout+' séance'+(ajout>1?'s ajoutées':' ajoutée'));
+  if(remplace) bouts.push(remplace+' déjà présente'+(remplace>1?'s, mises':', mise')+' à jour');
+  if(refus.length) bouts.push(refus.length+' refusé'+(refus.length>1?'s':''));
+  dis(bouts.length?bouts.join(' · ')+'.':'Rien à importer.',
+      refus.length&&!ajout&&!remplace ? '#F87171' : (refus.length?'#FBBF24':'#34D399'));
+  if(refus.length) alert('Fichiers non importés :\n· '+refus.join('\n· '));
+  dbRenderRealise();
+}
+
+function dbSupprimerSeance(id){
+  var ath=dbAthCourant(); if(!ath) return;
+  if(!confirm('Supprimer cette séance importée ? Le fichier d’origine n’est pas touché.')) return;
+  ath.seances=(ath.seances||[]).filter(function(x){ return x.id!==id; });
+  _saveAthletes(getAthletes().map(function(a){ return a.id===ath.id?ath:a; }));
+  dbRenderRealise();
+}
+
+/* Les deux sources dans une seule liste. Une même sortie peut arriver par
+   les deux chemins — la montre synchronisée ET le fichier déposé : on ne la
+   compte alors qu'une fois, sinon le volume de la semaine double. Dix
+   minutes de tolérance, parce que Polar et le fichier ne datent pas
+   forcément le départ à la seconde près. */
+function dbSeancesFusion(rowsPolar,rowsFichier){
+  var out=(rowsPolar||[]).map(function(r){
+    return {id:r.polar_id,start_time:r.start_time,duration_s:r.duration_s,
+            distance_m:r.distance_m,hr_avg:r.hr_avg,hr_max:r.hr_max,
+            sport:r.sport,calories:r.calories,src:'polar'};
+  });
+  var deja=out.map(function(r){ return Date.parse(r.start_time); }).filter(isFinite);
+  (rowsFichier||[]).forEach(function(f){
+    var t=Date.parse(f.start_time);
+    if(isFinite(t)&&deja.some(function(b){ return Math.abs(b-t)<600000; })) return;
+    out.push(f);
+  });
+  return out.sort(function(a,b){ return (Date.parse(b.start_time)||0)-(Date.parse(a.start_time)||0); });
 }
 
 /* ══ BIBLIOTHÈQUE DE SÉANCES ══ */
@@ -8140,6 +8382,10 @@ function _profilPourEspace(ath){
     dateDuTest:ath.testDate||'',
     records:ath.records||{}, historiqueCourses:ath.raceHistory||[],
     objectif:ath.goal||null, plan:ath.plan||null,
+    // Le plan développé — semaines et séances avec leurs allures — calculé
+    // par renderDashPlan. L'espace athlète ne sait pas le recalculer.
+    planDetail:(window._espacePlan||null),
+    versionEspace:2,
     progression:ath.history||[], analyses:ath.analyses||[]
   };
 }
@@ -9706,6 +9952,24 @@ async function openData(buf, name) {
 }
 const openText = (text, name) =>
   openData(new TextEncoder().encode(text).buffer, name);
+
+/* Le tableau de bord a besoin du décodeur, pas du lecteur. Tout ce module
+   vit dans une fonction anonyme — volontairement, pour ne pas répandre ses
+   quarante noms dans la portée globale. On ouvre donc une seule porte :
+   rendre les activités d'un fichier, sans toucher ni à App ni à la page. */
+window.rlActivitesDuFichier = async function (buf) {
+  let u8 = new Uint8Array(buf);
+  if (u8[0] === 0x1f && u8[1] === 0x8b) u8 = await gunzip(u8);     // .fit.gz, .tcx.gz
+  if (isFit(u8))
+    return fitToActivities(
+      fitRecords(u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.length)));
+  const txt = new TextDecoder('utf-8').decode(u8);
+  if (!/<\s*TrainingCenterDatabase/i.test(txt))
+    throw new Error(/<\s*gpx/i.test(txt)
+      ? 'GPX non pris en charge (ni durée ni fréquence cardiaque dedans)'
+      : 'format non reconnu — attendu .FIT ou .TCX');
+  return parseTCX(txt);
+};
 
 function openFile(file) {
   if (!file) return;
