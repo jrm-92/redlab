@@ -471,11 +471,11 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .pl-pick-it{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;padding:7px 10px;margin-bottom:5px;cursor:pointer}
   .pl-pick-it:hover{border-color:var(--orange);background:rgba(255,107,26,.05)}
   .pl-pick-it span{width:9px;height:9px;border-radius:3px;flex-shrink:0}
-  #cloud-fab{position:fixed;right:14px;bottom:82px;z-index:250;width:46px;height:46px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center}
+  #cloud-fab{position:fixed;right:14px;bottom:calc(132px + env(safe-area-inset-bottom,0px));z-index:250;width:46px;height:46px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center}
   #cloud-fab:hover{border-color:var(--orange);color:var(--orange)}
   #cloud-dot{position:absolute;top:7px;right:7px;width:10px;height:10px;border-radius:50%;background:#64748B;border:2px solid var(--bg2)}
   @media(min-width:861px){#cloud-fab{display:none}}
-  #ath-fab{position:fixed;left:14px;bottom:82px;z-index:250;min-width:46px;height:46px;border-radius:23px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:0 6px}
+  #ath-fab{position:fixed;left:14px;bottom:calc(132px + env(safe-area-inset-bottom,0px));z-index:250;min-width:46px;height:46px;border-radius:23px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:0 6px}
   #ath-fab:hover{border-color:var(--orange)}
   .ath-fab-av{width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,.14);border:1px solid rgba(255,107,26,.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--orange)}
   @media(min-width:861px){#ath-fab{bottom:20px}}
@@ -774,7 +774,7 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .sidebar{display:none}
   .main{overflow:visible;display:block}
   .topbar{display:none!important}
-  .scroll{overflow:visible;padding:0 0 86px}
+  .scroll{overflow:visible;padding:0 0 calc(132px + env(safe-area-inset-bottom,0px))}
 
   .mobile-header{
     display:block;background:var(--bg2);
@@ -790,28 +790,40 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .mhs-o{color:var(--orange)!important}
   .mhs-w{color:rgba(241,245,249,0.8)!important}
   .mhs-s{color:rgba(241,245,249,0.4)!important}
+  /* Barre d'outils du bas.
+     Elle défilait horizontalement : huit outils, cinq visibles, et chacun
+     large de 62 px. Viser un onglet demandait souvent de faire glisser
+     d'abord — et le glissement déplaçait la cible sous le doigt.
+     Deux rangées de quatre : tout est visible d'un coup, rien ne bouge, et
+     chaque cible dépasse largement les 44 px recommandés. */
   .mh-menu{
-    display:flex;gap:3px;position:fixed;left:0;right:0;bottom:0;z-index:300;margin:0;
-    padding:6px 5px calc(6px + env(safe-area-inset-bottom,0px));
+    display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+    position:fixed;left:0;right:0;bottom:0;z-index:300;margin:0;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));
     background:rgba(15,20,33,0.97);backdrop-filter:blur(12px);
     border-top:1px solid var(--border2);
-    flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
     box-shadow:0 -8px 26px rgba(0,0,0,0.5);
   }
-  .mh-menu::-webkit-scrollbar{display:none}
-  /* Estompe le bord du côté où il reste des onglets hors écran (classe posée par mhFade). */
-  .mh-menu.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent)}
-  .mh-menu.fade-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 30px);mask-image:linear-gradient(90deg,transparent,#000 30px)}
-  .mh-menu.fade-lr{-webkit-mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent)}
   .mh-btn{
-    flex:0 0 auto;min-width:62px;padding:6px 10px;border:none;
-    display:flex;flex-direction:column;align-items:center;gap:3px;
+    min-height:52px;padding:7px 4px;border:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
     background:transparent;color:var(--muted2);font-family:var(--font);
-    font-size:10.5px;font-weight:800;border-radius:12px;cursor:pointer;text-align:center;
-    white-space:nowrap;transition:all .15s;
+    font-size:11px;font-weight:800;border-radius:12px;cursor:pointer;text-align:center;
+    white-space:nowrap;transition:background .15s,color .15s;
+    -webkit-tap-highlight-color:rgba(255,107,26,.18);
   }
-  .mh-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-  .mh-btn.active{background:var(--accent-soft);color:var(--accent)}
+  .mh-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  /* Sur deux rangées, tous les onglets sont visibles en permanence : le fond
+     et la couleur suffisent à désigner l'outil courant. Un trait au-dessus
+     se serait glissé entre les deux rangées, où on l'aurait attribué à
+     l'onglet du dessus. */
+  .mh-btn.active{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(255,107,26,.3)}
+  .mh-btn:active{background:rgba(255,255,255,.06)}
+  /* Écrans très étroits : on garde quatre colonnes, le libellé rétrécit. */
+  @media(max-width:340px){
+    .mh-btn{font-size:10px;min-height:48px}
+    .mh-btn svg{width:19px;height:19px}
+  }
 
   .mh-ctx{flex:1;min-width:0;text-align:right;padding-left:10px}
   .mh-ctx:empty{display:none}
@@ -824,8 +836,8 @@ tr.cs-row{background:rgba(255,107,26,0.06)}
   .btn-reset{display:inline-flex;align-items:center;gap:8px}
   .input-hero{display:none}
   .input-desc-mob{display:block}
-  .input-wrap{padding:20px 16px 80px}
-  .tool-layout{padding:20px 0 80px}
+  .input-wrap{padding:20px 16px calc(150px + env(safe-area-inset-bottom,0px))}
+  .tool-layout{padding:20px 0 calc(150px + env(safe-area-inset-bottom,0px))}
   #db-profile{padding-left:16px;padding-right:16px}
   .db-section-hd{padding-left:16px;padding-right:16px}
   .mode-toggle{gap:10px}
@@ -2334,29 +2346,9 @@ function fAll(s){s=Math.round(s);const m=Math.floor(s/60),sc=s%60;return m+':'+S
 function fHMS(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;if(h>0)return h+"h"+String(m).padStart(2,'0')+"'"+String(sc).padStart(2,'0')+'"';return m+"'"+String(sc).padStart(2,'0')+'"';}
 
 /* ══ NAV ══ */
-/* Barre d'outils mobile : elle défile horizontalement. On estompe le bord du côté
-   où des onglets restent hors écran, et on ramène l'onglet actif au centre. */
-function mhFade(){
-  const m=document.querySelector('.mh-menu');if(!m)return;
-  const l=m.scrollLeft>4, r=m.scrollLeft+m.clientWidth<m.scrollWidth-4;
-  m.classList.remove('fade-l','fade-r','fade-lr');
-  if(l&&r)m.classList.add('fade-lr');else if(r)m.classList.add('fade-r');else if(l)m.classList.add('fade-l');
-}
-function mhCenterActive(smooth){
-  const m=document.querySelector('.mh-menu');if(!m)return;
-  const b=m.querySelector('.mh-btn.active');if(!b)return;
-  // scrollTo plutôt que scrollIntoView : évite de faire défiler la page derrière la barre fixe.
-  const max=m.scrollWidth-m.clientWidth;
-  const left=Math.max(0,Math.min(max,b.offsetLeft-(m.clientWidth-b.offsetWidth)/2));
-  m.scrollTo({left:left,behavior:smooth?'smooth':'auto'});
-  mhFade();
-}
-function mhNavInit(){
-  const m=document.querySelector('.mh-menu');if(!m)return;
-  m.addEventListener('scroll',mhFade,{passive:true});
-  window.addEventListener('resize',()=>{mhFade();});
-  mhCenterActive(false);
-}
+/* La barre d'outils mobile défilait horizontalement : elle affiche désormais
+   ses huit onglets sur deux rangées, tous visibles. Le fondu des bords et le
+   recentrage de l'onglet actif n'ont plus d'objet. */
 function go(id){
   if(id==='dashboard'&&!S.vma){id='input';}
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -2375,7 +2367,6 @@ function go(id){
   if(id==='knowledge') renderKnowledge();
   if(id==='watch'&&window.__lmResize)window.__lmResize();
   updMhCtx(id);
-  mhCenterActive(true);
   const sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -8801,7 +8792,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
   if(typeof cloudInit==='function')cloudInit();
   if(typeof csInit==='function')csInit();
-  if(typeof mhNavInit==='function')mhNavInit();
   // Enregistrement automatique : branché sur saveLS, appelé à chaque
   // modification du profil de travail. Hors de cloudInit à dessein — il doit
   // fonctionner même sans connexion au cloud, en local.
