@@ -125,6 +125,138 @@ a{color:var(--accent)}
 .hidden{display:none!important}
 .spin{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
 @media(max-width:640px){.hero-out{margin-left:0;text-align:left;width:100%}.rr .a{font-size:32px}.rr .b{font-size:15px;letter-spacing:5px}.brand .slg{display:none}}
+/* ══════════════════════════════════════════════════════════════════════
+   APPLICATION ATHLÈTE
+   Un athlète ouvre cette page sur son téléphone, souvent debout, souvent
+   juste avant de partir courir. D'où le parti pris : une barre d'onglets
+   en bas, à portée de pouce, et un écran par question — qu'est-ce que je
+   fais aujourd'hui, à quelle allure, où j'en suis.
+   ══════════════════════════════════════════════════════════════════════ */
+.app{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+.screen{display:none;animation:sc .18s ease-out}
+.screen.on{display:block}
+@keyframes sc{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.screen{animation:none}}
+
+/* Barre d'onglets : fixée en bas, cinq destinations, jamais plus. */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;
+  background:rgba(15,23,41,.94);backdrop-filter:blur(14px);
+  border-top:1px solid var(--border2);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.tab{flex:1;background:none;border:0;color:var(--muted2);font-family:var(--font);
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;
+  cursor:pointer;border-radius:12px;transition:color .15s,background .15s}
+.tab svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tab span{font-size:10px;font-weight:800;letter-spacing:.2px}
+.tab.on{color:var(--accent);background:var(--accent-soft)}
+.tab:not(.on):hover{color:var(--text2)}
+
+/* En-tête compact : qui je suis, mon repère principal. */
+.appbar{display:flex;align-items:center;gap:12px;padding:16px 0 14px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.appbar .av{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);
+  border:1px solid rgba(255,107,26,.3);display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:900;color:var(--accent);flex-shrink:0}
+.appbar .nm{font-size:17px;font-weight:900;letter-spacing:-.3px;line-height:1.2}
+.appbar .sb{font-size:11.5px;color:var(--muted2)}
+.appbar .mt{margin-left:auto;text-align:right}
+.appbar .mt .v{font-family:var(--disp);font-style:italic;font-weight:900;font-size:25px;color:var(--accent);line-height:1}
+.appbar .mt .l{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
+
+.h2{font-size:11.5px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin:24px 0 12px}
+.h2:first-child{margin-top:0}
+.card2{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.muted{color:var(--muted);font-size:13px;line-height:1.65}
+
+/* Compte à rebours : la première chose qu'on veut voir. */
+.obj{background:linear-gradient(135deg,rgba(255,107,26,.14),rgba(255,107,26,.03));
+  border:1px solid rgba(255,107,26,.28);border-radius:18px;padding:20px}
+.obj .top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.obj .race{font-size:20px;font-weight:900;letter-spacing:-.3px}
+.obj .when{font-size:12.5px;color:var(--muted)}
+.obj .jm{margin-left:auto;font-family:var(--disp);font-style:italic;font-weight:900;
+  font-size:38px;line-height:.9;color:var(--accent)}
+.obj .row{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,107,26,.2)}
+.obj .cl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
+.obj .cv{font-size:19px;font-weight:800;margin-top:2px}
+
+/* Une séance : le jour, puis ce qu'il y a à faire. */
+.day{background:var(--card);border:1px solid var(--border);border-radius:13px;
+  border-left:3px solid var(--muted2);padding:13px 15px;margin-bottom:9px}
+.day.today{border-color:rgba(255,107,26,.4);background:rgba(255,107,26,.06)}
+.day-hd{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.day-d{font-size:13px;font-weight:800;color:var(--text);text-transform:capitalize}
+.day-tag{font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+.day-t{font-size:14.5px;font-weight:800;margin-top:5px;line-height:1.35}
+.day-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:5px}
+.step{display:flex;gap:10px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.step-k{flex:0 0 88px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);padding-top:2px}
+.step-v{flex:1;font-size:13.5px;color:var(--text2);line-height:1.55;font-weight:600}
+.today-badge{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.8px;
+  text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:5px}
+
+/* Semaines du plan, dépliables. */
+.wk{background:var(--card);border:1px solid var(--border);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.wk-hd{display:flex;align-items:center;gap:9px;padding:13px 15px;cursor:pointer;user-select:none;width:100%;
+  background:none;border:0;font-family:var(--font);text-align:left;color:var(--text);flex-wrap:wrap}
+.wk-n{font-size:13px;font-weight:900;flex-shrink:0}
+.wk-dt{font-size:12px;color:var(--muted2)}
+.wk-ph{font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.wk-km{margin-left:auto;font-size:13px;font-weight:800;color:var(--text2);white-space:nowrap}
+.wk-ch{color:var(--muted2);transition:transform .2s;flex-shrink:0}
+.wk.open .wk-ch{transform:rotate(90deg)}
+.wk-bd{display:none;padding:0 15px 14px;border-top:1px solid var(--border)}
+.wk.open .wk-bd{display:block}
+.wk.now{border-color:rgba(255,107,26,.42)}
+
+/* Zones : tableau sur grand écran, cartes sur téléphone. */
+.zcard{background:var(--card);border:1px solid var(--border);border-left:3px solid;border-radius:13px;padding:14px;margin-bottom:9px}
+.zcard .zt{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.zcard .zn{font-size:14.5px;font-weight:800}
+.zcard .zr{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px}
+.zcard .zl{font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted2)}
+.zcard .zv{font-size:16px;font-weight:800;margin-top:1px}
+.zcard .zf{font-size:12.5px;color:var(--muted);margin-top:9px;padding-top:9px;border-top:1px solid var(--border);line-height:1.55}
+
+/* Temps de passage. */
+.splits{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.splits th{font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted2);
+  padding:10px 12px;text-align:left;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.splits td{padding:10px 12px;font-size:14px;border-bottom:1px solid var(--border)}
+.splits tr:last-child td{border-bottom:none}
+.splits .km{font-weight:800;color:var(--text2);white-space:nowrap}
+.splits .cum{font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.splits .pa{color:var(--muted);font-size:13px;white-space:nowrap}
+.splits tr.mark td{background:rgba(255,107,26,.07)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:var(--card);border:1px solid var(--border2);border-radius:9px;color:var(--muted);
+  font-family:var(--font);font-size:12.5px;font-weight:800;padding:7px 13px;cursor:pointer;transition:all .15s}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.rec{display:flex;align-items:baseline;gap:12px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:13px 15px;margin-bottom:8px}
+.rec .d{font-size:14px;font-weight:800;min-width:78px}
+.rec .t{font-size:17px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums}
+.rec .p{font-size:12.5px;color:var(--muted);margin-left:auto;text-align:right}
+
+@media(max-width:640px){
+  .wrap{padding:0 13px 60px}
+  .wk-dt{order:9;flex-basis:100%;margin-left:23px}
+  .wk-km{font-size:14px}
+  .obj .jm{font-size:32px}
+  .step{flex-direction:column;gap:3px}
+  .step-k{flex:none}
+}
+/* Menu discret : trois actions rares ne méritent pas trois boutons en haut
+   de page, au-dessus de ce que l'athlète vient chercher. */
+.menu{position:relative}
+.menu-pop{display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:50;
+  background:var(--card2);border:1px solid var(--border2);border-radius:11px;
+  padding:5px;min-width:178px;box-shadow:0 12px 34px rgba(0,0,0,.42)}
+.menu.open .menu-pop{display:block}
+.menu-pop button{display:block;width:100%;text-align:left;background:none;border:0;
+  color:var(--text2);font-family:var(--font);font-size:13.5px;font-weight:700;
+  padding:9px 11px;border-radius:8px;cursor:pointer}
+.menu-pop button:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.savetip{margin:22px 0 0}
 </style>
 </head><body>
 
@@ -157,12 +289,29 @@ a{color:var(--accent)}
   <!-- Fiche -->
   <div id="fiche" class="hidden">
     <div class="topbar">
-      <span id="who" style="font-size:13px;color:var(--muted)"></span>
+      <span id="who" style="font-size:12px;color:var(--muted2)"></span>
       <span class="sp"></span>
-      <button class="linkbtn" onclick="location.reload()">↻ Actualiser</button>
-      <button class="linkbtn" onclick="telechargerMesDonnees()" title="Télécharger toutes tes données (RGPD, droit à la portabilité)">⤓ Mes données</button>
-      <button class="linkbtn" onclick="signOut()">Se déconnecter</button>
+      <div class="menu">
+        <button class="linkbtn" id="mn-b" onclick="basculerMenu()" aria-haspopup="true" aria-expanded="false" title="Menu">•••</button>
+        <div class="menu-pop" id="mn-p">
+          <button onclick="location.reload()">↻ Actualiser</button>
+          <button onclick="telechargerMesDonnees()">⤓ Mes données</button>
+          <button onclick="signOut()">Se déconnecter</button>
+        </div>
+      </div>
     </div>
+    <div id="content"></div>
+    <div id="app" class="app hidden">
+      <div class="appbar">
+        <div class="av" id="ap-av"></div>
+        <div><div class="nm" id="ap-nm"></div><div class="sb" id="ap-sb"></div></div>
+        <div class="mt"><div class="v" id="ap-mv"></div><div class="l" id="ap-ml"></div></div>
+      </div>
+      <div class="screen on" id="sc-accueil"></div>
+      <div class="screen" id="sc-plan"></div>
+      <div class="screen" id="sc-zones"></div>
+      <div class="screen" id="sc-allures"></div>
+      <div class="screen" id="sc-records"></div>
     <div class="savetip" id="savetip">
       <div class="savetip-row">
         <span>📌 <b>Garde ton espace à portée</b> — ajoute cette page à ton écran d'accueil pour la retrouver en 1 clic. <button class="lnk" onclick="document.getElementById('savetip').classList.toggle('open')">Comment faire ?</button></span>
@@ -173,9 +322,22 @@ a{color:var(--accent)}
         <div><b>Android (Chrome)</b> : menu <b>⋮</b> en haut à droite → <b>« Ajouter à l'écran d'accueil »</b> (ou « Installer l'application »).</div>
       </div>
     </div>
-    <div id="content"></div>
+    </div>
   </div>
 </div>
+
+<nav class="tabs hidden" id="tabs">
+  <button class="tab on" data-sc="accueil" onclick="go('accueil')">
+    <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/></svg><span>Accueil</span></button>
+  <button class="tab" data-sc="plan" onclick="go('plan')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Plan</span></button>
+  <button class="tab" data-sc="zones" onclick="go('zones')">
+    <svg viewBox="0 0 24 24"><path d="M3 18l4-7 4 4 4-8 6 11"/></svg><span>Zones</span></button>
+  <button class="tab" data-sc="allures" onclick="go('allures')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 13V8.5M9 2.5h6"/></svg><span>Allures</span></button>
+  <button class="tab" data-sc="records" onclick="go('records')">
+    <svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5.5h3v2a3 3 0 0 1-3 3M7 5.5H4v2a3 3 0 0 0 3 3"/><path d="M9.5 20.5h5M12 14v6.5"/></svg><span>Records</span></button>
+</nav>
 
 <div class="foot">
   Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.<br>
@@ -340,7 +502,350 @@ function renderFiche(email,d){
 }
 function kpi(l,v,s){return '<div class="kpi"><div class="l">'+esc(l)+'</div><div class="v">'+esc(v)+'</div><div class="s">'+esc(s)+'</div></div>';}
 
-function show(id){['login','loading','fiche'].forEach(function(x){document.getElementById(x).classList.toggle('hidden',x!==id);});}
+
+/* ══════════════════════════════════════════════════════════════════════
+   APPLICATION ATHLÈTE
+   Tout ce qui suit s'appuie sur « profil », la charge utile que RedLab
+   publie avec la fiche. Rien n'est recalculé ici à partir d'à-peu-près :
+   les allures viennent du coach, telles qu'il les voit lui-même.
+   ══════════════════════════════════════════════════════════════════════ */
+var P=null;                               // le profil reçu
+var _tabCourant='accueil';
+
+function go(sc){
+  _tabCourant=sc;
+  ['accueil','plan','zones','allures','records'].forEach(function(x){
+    var e=document.getElementById('sc-'+x); if(e)e.classList.toggle('on',x===sc);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){
+    b.classList.toggle('on',b.getAttribute('data-sc')===sc);
+  });
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+/* ── Repères communs ── */
+function refDe(d){
+  if(d.mode==='tests'&&d.csKmh) return {v:d.csKmh,lbl:'VC',zones:ZONES_VC};
+  return {v:d.vma,lbl:'VMA',zones:ZONES_VMA};
+}
+function jour(iso){
+  var d=new Date(iso+'T12:00:00');
+  return isNaN(d)?iso:d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+}
+function jourCourt(iso){
+  var d=new Date(iso+'T12:00:00');
+  return isNaN(d)?iso:d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+}
+function isoAujourdhui(){
+  var d=new Date();
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+function joursAvant(iso){
+  if(!iso)return null;
+  var d=new Date(iso+'T00:00:00'); if(isNaN(d))return null;
+  return Math.round((d-new Date().setHours(0,0,0,0))/864e5);
+}
+var NOMS_COURSE={'5k':'5 km','10k':'10 km','semi':'Semi-marathon','mara':'Marathon',
+                 'trail':'Trail','ultra':'Ultra'};
+var DIST_M={'5k':5000,'10k':10000,'semi':21097.5,'mara':42195};
+
+function objectifDe(d){
+  var g=d.objectif||d.goal; if(!g)return null;
+  if(!g.id&&!g.name)return null;
+  if(!g.t&&!g.date)return null;
+  var m=DIST_M[g.id]||null;
+  return {nom:g.name||NOMS_COURSE[g.id]||'Course', id:g.id, t:g.t||null, date:g.date||'',
+          m:m, allure:(g.t&&m)?fAll(g.t/m*1000):null, jm:joursAvant(g.date)};
+}
+
+/* ── Écran 1 · Accueil ── */
+function ecranAccueil(d){
+  var R=refDe(d), o=objectifDe(d), pl=d.planDetail, h='';
+
+  if(o){
+    var jm=o.jm==null?'':(o.jm>0?'J-'+o.jm:(o.jm===0?'Jour J':'passé'));
+    h+='<div class="obj"><div class="top">'
+      +'<div><div class="race">'+esc(o.nom)+'</div>'
+      +(o.date?'<div class="when">'+esc(jour(o.date))+'</div>':'')+'</div>'
+      +(jm?'<div class="jm">'+esc(jm)+'</div>':'')+'</div>';
+    if(o.t||o.allure){
+      h+='<div class="row">'
+        +(o.t?'<div><div class="cl">Chrono visé</div><div class="cv" style="color:var(--accent)">'+fHMS(o.t)+'</div></div>':'')
+        +(o.allure?'<div><div class="cl">Allure</div><div class="cv">'+o.allure+'/km</div></div>':'')
+        +'</div>';
+    }
+    h+='</div>';
+  } else {
+    h+='<div class="card2 muted">Aucun objectif renseigné pour l’instant. Ton coach le fixera avec toi.</div>';
+  }
+
+  // Ce qu'il y a à faire maintenant : la semaine en cours, puis les séances
+  // à venir. C'est la question que l'athlète se pose en ouvrant la page.
+  if(pl&&pl.semaines&&pl.semaines.length){
+    var auj=isoAujourdhui();
+    var cur=null;
+    pl.semaines.forEach(function(w){ if(w.iso&&w.iso<=auj)cur=w; });
+    if(!cur&&pl.semaines[0].iso>auj)cur=pl.semaines[0];
+    if(cur){
+      h+='<div class="h2">Semaine en cours</div>'
+        +'<div class="card2"><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
+        +'<span style="font-size:16px;font-weight:900">Semaine '+cur.n+'</span>'
+        +'<span class="wk-ph" style="background:'+cur.col+'22;color:'+cur.col+'">'+esc(cur.phLbl)+'</span>'
+        +(cur.rec?'<span class="wk-ph" style="background:rgba(96,165,250,.16);color:#60A5FA">Allégée</span>':'')
+        +'<span style="margin-left:auto;font-size:17px;font-weight:900;color:var(--accent)">'+esc(cur.km+' '+(cur.unite||''))+'</span>'
+        +'</div>'
+        +'<div class="muted" style="margin-top:7px">Volume visé sur la semaine.'
+        +(cur.rec?' Semaine allégée : elle sert à absorber la charge des précédentes, ne la surcharge pas.':'')
+        +'</div></div>';
+    }
+  }
+
+  var aVenir=(pl&&pl.seances||[]).filter(function(s){return s.iso>=isoAujourdhui();}).slice(0,3);
+  if(aVenir.length){
+    h+='<div class="h2">Tes prochaines séances</div>'+aVenir.map(carteSeance).join('');
+  } else if(pl&&pl.seances&&pl.seances.length){
+    h+='<div class="h2">Séances</div><div class="card2 muted">Plus de séance à venir au calendrier. Regarde l’onglet <b>Plan</b> pour l’ensemble de la prépa.</div>';
+  }
+
+  // Repères chiffrés, en bas : utiles, mais pas ce qu'on vient chercher.
+  h+='<div class="h2">Tes repères</div><div class="grid">';
+  if(R.v){
+    h+=kpi(R.lbl,(+R.v).toFixed(1),'km/h');
+    h+=kpi('Allure '+R.lbl,fAll(3600/R.v),'/km');
+  }
+  if(d.vma)h+=kpi('VO₂max estimé',(3.5*d.vma).toFixed(1),'ml/kg/min');
+  if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
+  if(d.dp)h+=kpi('D′',Math.round(d.dp),'m');
+  h+='</div>';
+  if(d.dateDuTest)h+='<div class="muted" style="margin-top:10px">Repères établis le '+esc(d.dateDuTest)+'.</div>';
+  return h;
+}
+
+function carteSeance(s){
+  var auj=isoAujourdhui();
+  var lignes=(s.lignes||[]).map(function(l){
+    return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+'</div></div>';
+  }).join('');
+  return '<div class="day'+(s.iso===auj?' today':'')+'" style="border-left-color:'+(s.col||'#94A3B8')+'">'
+    +'<div class="day-hd"><span class="day-d">'+esc(jourCourt(s.iso))+'</span>'
+    +(s.theme?'<span class="day-tag" style="background:'+s.col+'22;color:'+s.col+'">'+esc(s.theme)+'</span>':'')
+    +(s.iso===auj?'<span class="today-badge">Aujourd’hui</span>':'')+'</div>'
+    +'<div class="day-t">'+esc(s.titre)+'</div>'
+    +(s.desc?'<div class="day-desc">'+esc(s.desc)+'</div>':'')
+    +lignes
+    +(s.connue===false?'<div class="day-desc" style="color:#FBBF24">Le détail de cette séance n’est pas joint — demande-le à ton coach.</div>':'')
+    +'</div>';
+}
+
+/* ── Écran 2 · Plan ── */
+function ecranPlan(d){
+  var pl=d.planDetail;
+  if(!pl||!pl.semaines||!pl.semaines.length)
+    return '<div class="card2 muted">Ton plan n’est pas encore publié. Il apparaîtra ici dès que ton coach l’aura mis en ligne.</div>';
+  var auj=isoAujourdhui(), h='';
+  var courante=null;
+  pl.semaines.forEach(function(w){ if(w.iso&&w.iso<=auj)courante=w.n; });
+  if(courante==null) courante=pl.semaines[0].n;
+
+  h+='<div class="h2">'+esc(pl.objectifLbl||'Préparation')+' · '+pl.semaines.length+' semaines</div>';
+  pl.semaines.forEach(function(w){
+    var fin=w.iso?new Date(new Date(w.iso+'T12:00:00').getTime()+6*864e5):null;
+    var deb=w.iso?new Date(w.iso+'T12:00:00'):null;
+    var opt={day:'numeric',month:'short'};
+    var per=deb?(deb.toLocaleDateString('fr-FR',opt)+' → '+(fin?fin.toLocaleDateString('fr-FR',opt):'')):'';
+    var ses=(pl.seances||[]).filter(function(s){
+      return w.iso&&s.iso>=w.iso&&s.iso<addJours(w.iso,7);
+    });
+    var estCourante=(w.n===courante);
+    h+='<div class="wk'+(estCourante?' open now':'')+'" id="wk-'+w.n+'">'
+      +'<button class="wk-hd" onclick="basculerSemaine('+w.n+')" aria-expanded="'+(estCourante?'true':'false')+'">'
+      +'<svg class="wk-ch" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'
+      +'<span class="wk-n">S'+w.n+'</span>'
+      +'<span class="wk-dt">'+esc(per)+'</span>'
+      +'<span class="wk-ph" style="background:'+w.col+'22;color:'+w.col+'">'+esc(w.phLbl)+'</span>'
+      +(w.race?'<span class="wk-ph" style="background:rgba(255,107,26,.16);color:var(--accent)">Course</span>':'')
+      +(w.rec&&!w.race?'<span class="wk-ph" style="background:rgba(96,165,250,.16);color:#60A5FA">Allégée</span>':'')
+      +'<span class="wk-km">'+esc(w.km+' '+(w.unite||''))+'</span>'
+      +'</button>'
+      +'<div class="wk-bd">'
+      +(ses.length?('<div style="margin-top:12px">'+ses.map(carteSeance).join('')+'</div>')
+                  :'<div class="muted" style="margin-top:12px">Pas de séance détaillée cette semaine — garde le volume visé, en endurance.</div>')
+      +'</div></div>';
+  });
+  h+='<div class="muted" style="margin-top:14px">Les volumes sont des repères, pas des obligations. En cas de doute ou de douleur, préviens ton coach avant d’ajuster.</div>';
+  return h;
+}
+function addJours(iso,n){
+  var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n);
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+function basculerSemaine(n){
+  var e=document.getElementById('wk-'+n); if(!e)return;
+  var ouvert=e.classList.toggle('open');
+  var b=e.querySelector('.wk-hd'); if(b)b.setAttribute('aria-expanded',ouvert?'true':'false');
+}
+
+/* ── Écran 3 · Zones ── */
+function ecranZones(d){
+  var R=refDe(d);
+  if(!R.v) return '<div class="card2 muted">Tes zones apparaîtront dès que ton coach aura renseigné ta VMA ou ta vitesse critique.</div>';
+  var h='<div class="h2">Tes zones d’entraînement</div>'
+    +'<div class="muted" style="margin-bottom:14px">Calculées sur ta '+R.lbl+' de '+(+R.v).toFixed(1)+' km/h. '
+    +'Le ressenti prime sur le chronomètre : par forte chaleur, en côte ou en fin de semaine chargée, garde la sensation plutôt que l’allure.</div>';
+  R.zones.forEach(function(z){
+    var vlo=R.v*z.lo, vhi=R.v*z.hi;
+    h+='<div class="zcard" style="border-left-color:'+z.col+'">'
+      +'<div class="zt"><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span>'
+      +'<span class="zn">'+esc(z.n)+'</span>'
+      +'<span style="margin-left:auto;font-size:12px;color:var(--muted2);font-weight:700">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+' % '+R.lbl+'</span></div>'
+      +'<div class="zr">'
+      +'<div><div class="zl">Allure</div><div class="zv" style="color:'+z.col+'">'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'<span style="font-size:12px;color:var(--muted)">/km</span></div></div>'
+      +'<div><div class="zl">Vitesse</div><div class="zv">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'<span style="font-size:12px;color:var(--muted)"> km/h</span></div></div>'
+      +'<div><div class="zl">Effort</div><div class="zv">'+z.rpe+'<span style="font-size:12px;color:var(--muted)">/10</span></div></div>'
+      +'</div>'
+      +'<div class="zf">« '+esc(z.talk)+' »</div>'
+      +'</div>';
+  });
+  return h;
+}
+
+/* ── Écran 4 · Allures et temps de passage ── */
+var _splitDist=null;
+function ecranAllures(d){
+  var R=refDe(d), o=objectifDe(d);
+  if(!d.vma&&!d.csKmh) return '<div class="card2 muted">Ces estimations apparaîtront dès que ton coach aura renseigné tes repères.</div>';
+  var vms=R.v/3.6, h='';
+
+  if(o&&o.t&&o.m){
+    h+='<div class="h2">Temps de passage — '+esc(o.nom)+'</div>'
+      +'<div class="muted" style="margin-bottom:12px">Pour finir en <b style="color:var(--accent)">'+fHMS(o.t)+'</b>, '
+      +'soit '+o.allure+'/km. Une allure régulière est presque toujours le meilleur choix : partir vite coûte plus cher que ça ne rapporte.</div>'
+      +tableauSplits(o.m,o.t);
+  }
+
+  h+='<div class="h2">Ce que tu vaux aujourd’hui</div>'
+    +'<div class="muted" style="margin-bottom:12px">Estimations calculées sur ta '+R.lbl+'. À prendre comme une fourchette, pas comme une promesse.</div>'
+    +'<div class="chips">'
+    +RACES.map(function(r){
+        var actif=_splitDist||((o&&o.id&&RACES.some(function(x){return x.id===o.id;}))?o.id:RACES[1].id);
+        return '<button class="chip'+(actif===r.id?' on':'')+'" onclick="choisirSplit(\''+r.id+'\')">'+r.nm+'</button>';
+      }).join('')
+    +'</div>';
+
+  var rid=_splitDist||((o&&o.id&&RACES.some(function(x){return x.id===o.id;}))?o.id:RACES[1].id);
+  var r=RACES.filter(function(x){return x.id===rid;})[0]||RACES[1];
+  var tF=r.d/(r.vmaHi*vms), tS=r.d/(r.vmaLo*vms), tM=(tF+tS)/2;
+  h+='<div class="card2" style="margin-bottom:14px">'
+    +'<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
+    +'<span style="font-size:18px;font-weight:900">'+esc(r.lbl)+'</span>'
+    +'<span style="margin-left:auto;font-family:var(--disp);font-style:italic;font-weight:900;font-size:28px;color:var(--accent);line-height:1">'+fHMS(tM)+'</span></div>'
+    +'<div class="muted" style="margin-top:6px">'+fAll(tM/r.d*1000)+'/km · fourchette '+fHMS(tF)+' à '+fHMS(tS)+'</div>'
+    +'</div>'
+    +tableauSplits(r.d,tM);
+  return h;
+}
+function choisirSplit(id){ _splitDist=id; document.getElementById('sc-allures').innerHTML=ecranAllures(P); }
+
+/* Les points de passage : chaque kilomètre sur les courtes distances, tous
+   les 5 km au-delà — un tableau de 42 lignes ne se lit pas sur un téléphone,
+   et personne ne regarde sa montre à chaque borne sur marathon. */
+function tableauSplits(distM,tempsSec){
+  if(!distM||!tempsSec)return '';
+  var km=distM/1000, pas=(km<=12)?1:5;
+  var pts=[], k=pas;
+  while(k<km-0.05){ pts.push(k); k+=pas; }
+  pts.push(km);
+  var demi=km/2;
+  if(km>=20&&pts.indexOf(demi)<0){ pts.push(demi); pts.sort(function(a,b){return a-b;}); }
+  var lignes=pts.map(function(x){
+    var t=tempsSec*(x/km);
+    var etiq=(Math.abs(x-km)<0.001)?('Arrivée · '+String(+km.toFixed(2)).replace('.',',')+' km')
+            :((Math.abs(x-demi)<0.001&&km>=20)?('Mi-course · '+String(+x.toFixed(1)).replace('.',',')+' km')
+            :(String(+x.toFixed(2)).replace('.',',')+' km'));
+    var fort=(Math.abs(x-km)<0.001)||(Math.abs(x-demi)<0.001&&km>=20);
+    return '<tr'+(fort?' class="mark"':'')+'><td class="km">'+etiq+'</td>'
+      +'<td class="cum">'+fHMS(t)+'</td>'
+      +'<td class="pa">'+fAll(tempsSec/km)+'/km</td></tr>';
+  }).join('');
+  return '<div class="tblwrap"><table class="splits"><thead><tr>'
+    +'<th>Point</th><th>Temps de passage</th><th>Allure</th></tr></thead><tbody>'+lignes+'</tbody></table></div>';
+}
+
+/* ── Écran 5 · Records ── */
+function ecranRecords(d){
+  var recs=d.records||{}, hist=d.historiqueCourses||d.raceHistory||[], h='';
+  var lignes=RACES.map(function(r){
+    var x=recs[r.id]; if(!x)return '';
+    var sec=(+x.hh||0)*3600+(+x.mm||0)*60+(+x.ss||0);
+    if(sec<30)return '';
+    return '<div class="rec"><span class="d">'+r.nm+'</span>'
+      +'<span class="t">'+fHMS(sec)+'</span>'
+      +'<span class="p">'+fAll(sec/r.d*1000)+'/km'+(x.date?'<br>'+esc(x.date):'')+'</span></div>';
+  }).filter(Boolean).join('');
+  h+='<div class="h2">Tes records</div>'
+    +(lignes||'<div class="card2 muted">Aucun record enregistré pour l’instant. Transmets tes chronos à ton coach, ils apparaîtront ici.</div>');
+
+  var passees=hist.filter(function(x){return x&&x.sec>=30;})
+                  .sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,25);
+  if(passees.length){
+    h+='<div class="h2">Tes courses</div>';
+    h+=passees.map(function(x){
+      var dt=x.ts?new Date(x.ts):null;
+      var dm=DIST_M[x.dist]||null;
+      return '<div class="rec"><span class="d">'+esc(x.label||NOMS_COURSE[x.dist]||'Course')+'</span>'
+        +'<span class="t">'+fHMS(x.sec)+'</span>'
+        +'<span class="p">'+(dm?fAll(x.sec/dm*1000)+'/km':'')
+        +(dt?'<br>'+dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'')+'</span></div>';
+    }).join('');
+  }
+  return h;
+}
+
+/* ── Assemblage ── */
+function rendreApp(email,row){
+  var d=row&&row.profil; if(!d)return false;
+  P=d;
+  var ini=(d.pseudo||'?').slice(0,2).toUpperCase();
+  var R=refDe(d);
+  document.getElementById('ap-av').textContent=ini;
+  document.getElementById('ap-nm').textContent=d.pseudo||'Athlète';
+  document.getElementById('ap-sb').textContent='Mis à jour '+(d.enregistreLe||d.savedAt||'');
+  document.getElementById('ap-mv').textContent=R.v?(+R.v).toFixed(1):'—';
+  document.getElementById('ap-ml').textContent=R.v?(R.lbl+' · km/h'):'';
+  document.getElementById('sc-accueil').innerHTML=ecranAccueil(d);
+  document.getElementById('sc-plan').innerHTML=ecranPlan(d);
+  document.getElementById('sc-zones').innerHTML=ecranZones(d);
+  document.getElementById('sc-allures').innerHTML=ecranAllures(d);
+  document.getElementById('sc-records').innerHTML=ecranRecords(d);
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('tabs').classList.remove('hidden');
+  document.getElementById('content').innerHTML='';
+  go('accueil');
+  return true;
+}
+
+
+function basculerMenu(){
+  var m=document.querySelector('.menu'); if(!m)return;
+  var ouvert=m.classList.toggle('open');
+  var b=document.getElementById('mn-b'); if(b)b.setAttribute('aria-expanded',ouvert?'true':'false');
+}
+// Un clic ailleurs referme : sur un téléphone, on tape à côté pour annuler.
+document.addEventListener('click',function(e){
+  var m=document.querySelector('.menu');
+  if(m&&m.classList.contains('open')&&!m.contains(e.target)){
+    m.classList.remove('open');
+    var b=document.getElementById('mn-b'); if(b)b.setAttribute('aria-expanded','false');
+  }
+});
+
+function show(id){
+  ['login','loading','fiche'].forEach(function(x){document.getElementById(x).classList.toggle('hidden',x!==id);});
+  if(id!=='fiche'){
+    var a=document.getElementById('app'), t=document.getElementById('tabs');
+    if(a)a.classList.add('hidden'); if(t)t.classList.add('hidden');
+  }
+}
 
 // ── Portabilité (RGPD art. 20) : l'athlète récupère ses données lui-même ──
 // On garde la ligne reçue de Supabase pour pouvoir la rendre sans la redemander.
@@ -385,6 +890,13 @@ async function boot(){
   var row=q.data?q.data.data:null;
   _maFiche=row; _monEmail=email;
   document.getElementById('who').textContent='Connecté : '+email;
+  // L'application structurée, dès que la fiche porte la charge utile qui va
+  // avec. Sinon on retombe sur la fiche du coach dans un cadre isolé : une
+  // fiche publiée avant cette version n'a pas de quoi nourrir les écrans.
+  if(row&&row.profil&&(row.profil.versionEspace||0)>=2){
+    var br2=document.querySelector('.brand'); if(br2)br2.style.display='none';
+    if(rendreApp(email,row)){ show('fiche'); return; }
+  }
   if(row&&row.html){
     // Fiche complète (dashboard épuré) rendue telle quelle dans un cadre isolé
     var br=document.querySelector('.brand'); if(br)br.style.display='none';

@@ -4270,7 +4270,89 @@ function updGoal(){
   saveLS();
 }
 function goalLinkRefresh(){ renderGoalSection(); }
+
+/* ══ CE QUE L'ESPACE ATHLÈTE REÇOIT DU PLAN ══
+   L'espace athlète est une page à part : il n'a ni la bibliothèque, ni le
+   moteur de périodisation, ni la VMA de calcul. Tout ce qu'il affichera doit
+   donc être calculé ICI et voyager tout prêt — semaines, séances, allures.
+   Une allure recalculée là-bas à partir d'une VMA approximative finirait par
+   diverger de ce que le coach a sous les yeux. */
+
+/* Une séance en texte simple, allures comprises. Même arithmétique que la
+   bibliothèque : c'est la même séance, elle doit donner les mêmes chiffres. */
+function _seancePourEspace(titre,vma){
+  var s=(typeof wktFindSession==='function')?wktFindSession(titre):null;
+  var th=s?(LIB_THEMES.find(function(x){return x.id===s.theme;})||LIB_THEMES[0]):null;
+  var lignes=[];
+  if(s&&s.warm&&s.warm!=='—') lignes.push({k:'Échauffement',v:s.warm});
+  (s&&s.blocks||[]).forEach(function(b,i){
+    if(b.segs){
+      // Séance en notation libre : une suite de segments, chacun son allure.
+      var parts=b.segs.map(function(sg){
+        var a=vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'';
+        return fDist(sg.d)+' '+sg.lbl+a;
+      });
+      lignes.push({k:(b.label||('Bloc '+(i+1))),
+                   v:((b.r>1&&b.segs.length===1)?b.r+' × ':'')+parts.join(' + ')
+                     +(b.rec?' (récup '+b.rec+')':'')});
+      return;
+    }
+    var pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
+    var val=b.d?(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m')
+              :(b.m?b.m+' min':(b.sec?b.sec+'s':''));
+    var core=(b.r>1?b.r+' × ':'')+val+' @ '+pctTxt+'% VMA';
+    if(b.sets)core=b.sets+' séries de '+core;
+    if(vma){
+      var pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;
+      var spd=vma*pc/100/3.6;
+      core+=' → '+fAll(1000/spd)+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');
+    }
+    var rec=[]; if(b.rec)rec.push('récup '+b.rec); if(b.recSet)rec.push(b.recSet+' entre séries');
+    if(rec.length)core+=' ('+rec.join(' · ')+')';
+    lignes.push({k:((s.blocks.length>1)?('Bloc '+(i+1)):'Corps'),v:core});
+  });
+  if(s&&s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:s.cool});
+  return {titre:titre, theme:th?th.lbl:'', col:th?th.col:'#94A3B8',
+          desc:s?(s.desc||''):'', lignes:lignes,
+          // Une séance absente de la bibliothèque n'est pas une erreur : le
+          // coach a pu la renommer ou la supprimer depuis. On la nomme quand
+          // même, l'athlète saura de quoi il s'agit.
+          connue:!!s};
+}
+
+/* Le plan tel que l'athlète le verra : les semaines, et les séances datées. */
+function _planPourEspace(p,weeks){
+  if(!p||!weeks||!weeks.length) return null;
+  var vm=(typeof wktVma==='function')?wktVma():null;
+  var vma=vm?vm.v:(S.vma||null);
+  var unite=(typeof plUnit==='function')?plUnit():'km';
+  var iso=function(d){ return d?[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'):null; };
+
+  var semaines=weeks.map(function(w){
+    var ph=PL_PHL[w.ph]||w.ph||'';
+    return {n:w.n, iso:iso(w.d0), ph:w.ph, phLbl:ph, col:PL_PHC[w.ph]||'#94A3B8',
+            km:w.km, unite:unite, rec:!!w.rec, race:!!w.race, inter:!!w.inter};
+  });
+
+  // Les séances placées au calendrier, chacune développée avec ses allures.
+  var seances=[];
+  Object.keys(_plSessions||{}).sort().forEach(function(j){
+    (_plSessions[j]||[]).forEach(function(sx){
+      seances.push(Object.assign({iso:j},_seancePourEspace(sx.t,vma)));
+    });
+  });
+
+  return {objectifLbl:p.lbl, col:p.col, unite:unite,
+          debut:semaines.length?semaines[0].iso:null,
+          fin:_plDate2||null,
+          semaines:semaines, seances:seances};
+}
+
 function renderDashPlan(){
+  // Vidé d'entrée. Cette fonction sort par anticipation dès qu'il n'y a pas
+  // de plan affichable, et la publication en série enchaîne les athlètes :
+  // un reste du précédent partirait dans la fiche du suivant.
+  window._espacePlan=null;
   const sec=document.getElementById('db-plan-section'), box=document.getElementById('db-plan');
   if(!sec||!box||typeof PLANIF==='undefined')return;
   const g=S.goal||{};
@@ -4306,6 +4388,7 @@ function renderDashPlan(){
   // manipule pas — on la déduit de la première semaine calculée.
   _plDate1=(weeks[0]&&weeks[0].d0)?[weeks[0].d0.getFullYear(),String(weeks[0].d0.getMonth()+1).padStart(2,'0'),String(weeks[0].d0.getDate()).padStart(2,'0')].join('-'):null;
   const cal=plCalendarHTML(p,weeks,{ro:true});
+  try{ window._espacePlan=_planPourEspace(p,weeks); }catch(e){ window._espacePlan=null; }
   const _unit=plUnit();
   window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null),dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
   // restauration
@@ -8299,6 +8382,10 @@ function _profilPourEspace(ath){
     dateDuTest:ath.testDate||'',
     records:ath.records||{}, historiqueCourses:ath.raceHistory||[],
     objectif:ath.goal||null, plan:ath.plan||null,
+    // Le plan développé — semaines et séances avec leurs allures — calculé
+    // par renderDashPlan. L'espace athlète ne sait pas le recalculer.
+    planDetail:(window._espacePlan||null),
+    versionEspace:2,
     progression:ath.history||[], analyses:ath.analyses||[]
   };
 }
