@@ -267,6 +267,17 @@ a{color:var(--accent)}
 .cvscroll::-webkit-scrollbar-thumb{background:rgba(255,107,26,.5);border-radius:4px}
 .cvscroll{scrollbar-width:thin;scrollbar-color:rgba(255,107,26,.5) rgba(255,255,255,.05)}
 @media(max-width:640px){.cvh{height:230px}}
+/* Courses groupées par année */
+.yr{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.yr-hd{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;list-style:none;user-select:none}
+.yr-hd::-webkit-details-marker{display:none}
+.yr-ch{color:var(--muted2);transition:transform .2s;flex-shrink:0}
+.yr[open] .yr-ch{transform:rotate(90deg)}
+.yr-n{font-size:15px;font-weight:900;color:var(--text)}
+.yr-c{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--muted2)}
+.yr-bd{padding:0 10px 10px}
+.yr-bd .rec{margin-bottom:6px}
+.yr-bd .rec:last-child{margin-bottom:0}
 </style>
 </head><body>
 
@@ -919,18 +930,44 @@ function ecranRecords(d){
       +'<div class="cvscroll"><div class="cvh" style="min-width:'+large+'"><canvas id="cv-hist"></canvas></div></div></div>';
   }
 
-  var passees=hist.filter(function(x){return x&&x.sec>=30;})
-                  .sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,25);
-  if(passees.length){
-    h+='<div class="h2">Tes courses</div>';
-    h+=passees.map(function(x){
+  // Les courses par année, la plus récente dépliée. Vingt lignes d'affilée ne
+  // se parcourent pas ; regroupées, on retrouve une saison d'un coup d'œil.
+  // <details> plutôt qu'un accordéon maison : le pliage tient sans JavaScript.
+  var passees=hist.filter(function(x){return x&&x.sec>=30&&x.ts;})
+                  .sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  var sansDate=hist.filter(function(x){return x&&x.sec>=30&&!x.ts;});
+  if(passees.length||sansDate.length){
+    var ligne=function(x){
       var dt=x.ts?new Date(x.ts):null;
       var dm=DIST_M[x.dist]||null;
       return '<div class="rec"><span class="d">'+esc(x.label||NOMS_COURSE[x.dist]||'Course')+'</span>'
         +'<span class="t">'+fHMS(x.sec)+'</span>'
         +'<span class="p">'+(dm?fAll(x.sec/dm*1000)+'/km':'')
-        +(dt?'<br>'+dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'')+'</span></div>';
+        +(dt?'<br>'+dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'')+'</span></div>';
+    };
+    var annees=[], parAn={};
+    passees.forEach(function(x){
+      var a=new Date(x.ts).getFullYear();
+      if(!parAn[a]){ parAn[a]=[]; annees.push(a); }
+      parAn[a].push(x);
+    });
+    h+='<div class="h2">Tes courses</div>';
+    h+=annees.map(function(a,i){
+      var l=parAn[a];
+      return '<details class="yr"'+(i===0?' open':'')+'>'
+        +'<summary class="yr-hd">'
+        +'<svg class="yr-ch" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'
+        +'<span class="yr-n">'+a+'</span>'
+        +'<span class="yr-c">'+l.length+' course'+(l.length>1?'s':'')+'</span>'
+        +'</summary><div class="yr-bd">'+l.map(ligne).join('')+'</div></details>';
     }).join('');
+    if(sansDate.length){
+      h+='<details class="yr"><summary class="yr-hd">'
+        +'<svg class="yr-ch" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'
+        +'<span class="yr-n">Sans date</span>'
+        +'<span class="yr-c">'+sansDate.length+' course'+(sansDate.length>1?'s':'')+'</span>'
+        +'</summary><div class="yr-bd">'+sansDate.map(ligne).join('')+'</div></details>';
+    }
   }
   return h;
 }
