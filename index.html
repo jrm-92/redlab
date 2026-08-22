@@ -314,6 +314,18 @@ input[type=range].sl{-webkit-appearance:none;appearance:none;flex:1;height:6px;b
 input[type=range].sl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 0 2px var(--orange)}
 input[type=range].sl::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg)}
 .sl-bnds{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--muted2);margin-top:2px;margin-bottom:8px}
+.sl-tp{margin-top:14px;padding-top:14px;border-top:1px dashed var(--border2)}
+.sl-tp-lbl{font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px}
+.sl-tp-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.sl-tp-row input{width:104px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border2);border-radius:9px;color:var(--text);font-family:var(--font);font-size:16px;font-weight:800;padding:9px 11px;outline:none}
+.sl-tp-row input:focus{border-color:var(--orange)}
+.sl-tp-u{font-size:13px;font-weight:700;color:var(--muted2)}
+.sl-tp-eq{font-size:15px;color:var(--muted2);margin:0 2px}
+.sl-tp-v{font-size:22px;font-weight:900;color:var(--orange);font-variant-numeric:tabular-nums}
+.sl-tp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.sl-tp-c{background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.sl-tp-c:hover{color:var(--text2);border-color:var(--muted2)}
+.sl-tp-c.on{background:rgba(255,107,26,.12);border-color:rgba(255,107,26,.45);color:var(--orange)}
 .zbar{position:relative;height:16px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,0.04)}
 
 /* ── RACE CARDS ── */
@@ -2958,6 +2970,34 @@ function renderZones(){
 }
 
 /* ── VC Slider ── */
+/* Temps de passage : à l'allure choisie sur le curseur, combien de temps pour
+   telle distance. C'est la question qu'on se pose en construisant une séance —
+   « mes 1000 m à 95 %, ça fait combien ? » — et on la posait jusqu'ici à une
+   calculatrice. La distance survit au re-rendu du curseur, sinon elle se
+   remettrait à 1000 m à chaque changement d'athlète. */
+var _slDist=1000;
+const SL_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[1000,'1 km'],[2000,'2 km'],[3000,'3 km'],[5000,'5 km'],[10000,'10 km']];
+function slDistSet(m){
+  _slDist=m;
+  const i=document.getElementById('sl-d'); if(i)i.value=m;
+  slTemps();
+}
+/* Lit la vitesse là où elle est affichée plutôt que dans le curseur : c'est
+   la valeur que le coach a sous les yeux, arrondie au dixième comme elle. */
+function slTemps(){
+  const out=document.getElementById('sl-t'); if(!out)return;
+  const i=document.getElementById('sl-d');
+  const m=i?Math.max(0,+i.value||0):_slDist;
+  if(i)_slDist=m;
+  const sv=document.getElementById('sl-v');
+  const kmh=sv?parseFloat(String(sv.textContent).replace(',','.')):0;
+  if(!m||!isFinite(kmh)||kmh<=0){ out.textContent='—'; out.style.color='var(--muted2)'; return; }
+  out.textContent=fHMS(m/(kmh/3.6));
+  out.style.color=sv?sv.style.color:'var(--orange)';
+  // Marquer les distances proposées qui correspondent à la saisie.
+  const cs=document.querySelectorAll('.sl-tp-c');
+  Array.prototype.forEach.call(cs,function(b,k){ b.classList.toggle('on', SL_DIST[k] && SL_DIST[k][0]===m); });
+}
 function renderSlider(){
   const {csKmh,vma}=S;
   const isReal=!!csKmh;
@@ -2983,6 +3023,16 @@ function renderSlider(){
         <button class="adj" onclick="adjV(+2)">+</button>
       </div>
       <div class="sl-bnds"><span>${(ref*0.5).toFixed(1)} km/h · 50%</span><span>135% · ${(ref*1.35).toFixed(1)} km/h</span></div>
+      <div class="sl-tp">
+        <div class="sl-tp-lbl">Temps de passage</div>
+        <div class="sl-tp-row">
+          <input type="number" id="sl-d" min="10" max="200000" step="10" value="${_slDist}" oninput="slTemps()" aria-label="Distance en mètres">
+          <span class="sl-tp-u">m</span>
+          <span class="sl-tp-eq">→</span>
+          <span class="sl-tp-v" id="sl-t">—</span>
+        </div>
+        <div class="sl-tp-chips">${SL_DIST.map(d=>`<button type="button" class="sl-tp-c" onclick="slDistSet(${d[0]})">${d[1]}</button>`).join('')}</div>
+      </div>
     </div>`;
   const _vsl=document.getElementById('cs-vsl'); if(_vsl&&typeof csSet==='function')csSet(_vsl,sdf); else updSl(sdf);
 }
@@ -3005,6 +3055,7 @@ function updSl(val){
   if(cs){var cf=cs.querySelector('.cs-fill'),ct=cs.querySelector('.cs-thumb');
     if(cf)cf.style.background=col;
     if(ct){ct.style.background=col;ct.style.boxShadow='0 0 0 2px '+col;}}
+  slTemps();
 }
 function adjV(d){const el=document.getElementById('cs-vsl');if(!el)return;csSet(el,(+el.dataset.val)+d);}
 function bldZbar(slo,shi){
@@ -6447,13 +6498,13 @@ function exportAthleteView(returnDoc){
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
   // Les flèches de carrousel sont de la navigation, pas une commande coach :
   // elles restent, au même titre que les + / − des curseurs.
-  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
+  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.classList.contains('sl-tp-c')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
   // La bascule Prévu / Réalisé est un outil de coach : elle lit Supabase avec
   // la session du coach, que la fiche n'a pas. On l'enlève entière, sans quoi
   // il resterait un cadre vide une fois ses boutons retirés.
   clone.querySelectorAll('#db-vue,#db-realise').forEach(el=>el.remove());
   clone.querySelectorAll('input,select,textarea').forEach(el=>{
-    if(el.type==='range') return;
+    if(el.type==='range'||el.id==='sl-d') return;
     el.setAttribute('disabled','');
     el.setAttribute('readonly','');
     el.style.pointerEvents='none';
@@ -6461,7 +6512,8 @@ function exportAthleteView(returnDoc){
   const ATTRS=['onclick','oninput','onchange','onmouseover','onmouseout','onmousedown','onmouseup','onkeydown','onkeyup','onfocus','onblur'];
   clone.querySelectorAll('*').forEach(el=>{
     if(el.classList.contains('adj')||el.classList.contains('sl')||el.classList.contains('rsl')) return;
-    if(el.id==='sim-v'||el.id==='su-kmh'||el.id==='su-pace'||(el.classList&&el.classList.contains('csm-toggle'))) return;
+    if(el.id==='sim-v'||el.id==='su-kmh'||el.id==='su-pace'||el.id==='sl-d'
+       ||(el.classList&&(el.classList.contains('csm-toggle')||el.classList.contains('sl-tp-c')))) return;
     ATTRS.forEach(a=>el.removeAttribute(a));
   });
   clone.classList.add('active');
@@ -6492,6 +6544,8 @@ function exportAthleteView(returnDoc){
     'function saveLS(){}','function delManualRace(){}',
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
+    'var _slDist='+_slDist+';', 'var SL_DIST='+JSON.stringify(SL_DIST)+';',
+    slDistSet.toString(), slTemps.toString(),
     csRender.toString(), csSet.toString(), csInit.toString(), crslInit.toString(),
     'var PERF_WINDOW_DAYS='+PERF_WINDOW_DAYS+';',
     perfCutoffTs.toString(), recDateTs.toString(), recIsRecent.toString(),
