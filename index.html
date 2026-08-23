@@ -7403,7 +7403,7 @@ function plRecovHTML(){
   const rows=PL_RECOV.map(r=>'<tr><td style="'+td+';font-weight:700;color:var(--text)">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td><td style="'+td+';color:var(--muted)">'+r[2]+'</td></tr>').join('');
   const prows=PL_POSTRACE.map(r=>{const on=(r[0].indexOf('10 km')===0&&_plD==='10k')||(r[0].indexOf('Semi')===0&&_plD==='semi')||(r[0].indexOf('Marathon')===0&&_plD==='mara');return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'"><td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td></tr>';}).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Délais de récupération — référentiel FFA</div>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Délais de récupération</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">'
     +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Restauration métabolique (après effort max)</div>'
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Système</th><th style="'+th+'">Durée</th><th style="'+th+'">Remarque</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'
@@ -7459,7 +7459,7 @@ function plDomainTimeHTML(){
     +'<td style="'+td+';font-weight:800;white-space:nowrap;color:var(--orange)">'+r[3]+'</td>'
     +'<td style="'+td+';white-space:nowrap">'+r[4]+'</td></tr>';}).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Temps de travail par domaine — référentiel FFA</div>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Temps de travail par domaine</div>'
     +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Durée de travail effectif dans la zone (échauffement/récup exclus), par séance.</div>'
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px">'
     +'<thead><tr><th style="'+th+'">Domaine</th><th style="'+th+'">Intensité (% VMA)</th><th style="'+th+'">Format d’effort</th><th style="'+th+'">Temps de travail effectif</th><th style="'+th+'">Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
@@ -7476,7 +7476,7 @@ function plSpeSessHTML(){
     +'<td style="'+td+'">'+r.frac+'</td>'
     +'<td style="'+td+';white-space:nowrap">'+r.rec+'</td></tr>';}).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Séance spécifique — référentiel FFA</div>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Séance spécifique</div>'
     +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Volume à l\u2019allure de course dans la séance pivot (échauffement/récup exclus).</div>'
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
     +'<thead><tr><th style="'+th+'">Épreuve</th><th style="'+th+'">Intensité (% VMA)</th><th style="'+th+'">Volume global</th><th style="'+th+'">Fractions types</th><th style="'+th+'">Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
@@ -8015,56 +8015,45 @@ function plWeeksTypeHTML(p,ph){
 function _plUnusedLegend(){
 }
 function plPeriodHTML(){
-  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
-  var PER=[
-   ['10 km','4 sem (2 sem post-cross)','~5-7 j','1h05-1h15, hebdo'],
-   ['Semi','4 sem','~7-10 j','1h05-1h15, hebdo'],
-   ['Marathon','6 sem','2 sem','1h30-2h /15j · jalon J-28 (jusqu’à 2h30)'],
-   ['Ultra','8 à 10 sem','2 sem','2-4h /15j']
-  ];
-  var rows=PER.map(function(r){var on=(r[0].indexOf('10 km')===0&&_plD==='10k')||(r[0]==='Semi'&&_plD==='semi')||(r[0]==='Marathon'&&_plD==='mara');return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'">'
-    +'<td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r[0]+'</td>'
-    +'<td style="'+td+';font-weight:800">'+r[1]+'</td>'
-    +'<td style="'+td+'">'+r[2]+'</td>'
-    +'<td style="'+td+'">'+r[3]+'</td></tr>';}).join('');
-  var pr=[
-   'Du général au spécifique (Canova) : Base → Développement (seuil) → Spécifique (allure course) → Affûtage.',
-   'Progression du volume ≈ 10 %/sem, avec 1 semaine allégée sur 4 (deload 3:1, -30 à -40 %).',
-   'Charge : ACWR (aiguë/chronique) en zone sûre 0,8-1,2 ; danger &gt; 1,5.',
-   'Affûtage : à S-2 volume -25 à -50 % ; S-1 ne dépasse jamais la semaine la plus lourde.',
-   'Marathon (J-10 à J-1) : J-10 dernière spé courte 6-8 km · J-7 sortie 1h30 + 15′ à allure spé · J-5/J-3/J-1 footings 30-45′.',
-   'Compétition prépa : semi placé à J-21 du marathon (1re partie à allure marathon).',
-   'Réévaluer VMA et zones toutes les 4 semaines.'
-  ];
-  var lis=pr.map(function(x){return '<li style="margin-bottom:6px">'+x+'</li>';}).join('');
+  var h='font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin:0 0 8px';
+  var li='font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:8px';
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Périodisation &amp; planification — repères FFA</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Durées de bloc spécifique, affûtage et sortie longue par distance (hors relâchement).</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
-    +'<thead><tr><th style="'+th+'">Distance</th><th style="'+th+'">Bloc spécifique</th><th style="'+th+'">Affûtage</th><th style="'+th+'">Sortie longue</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:12px"><ul style="margin:0;padding-left:18px">'+lis+'</ul></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Source du tableau : Livret CQP FFA (S2-S3).</div>'
-    +'<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Développement / spécifique — répartition indicative</div>'
-    +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:12px"><b>Spécificité croissante</b> à l’approche de la course : plus la distance est longue, plus le bloc spécifique s’allonge — c’est lui le facteur limitant.</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:340px">'
-    +'<thead><tr><th style="'+th+'">Distance</th><th style="'+th+';color:'+PL_PHC.dev+'">Développement</th><th style="'+th+';color:'+PL_PHC.spe+'">Spécifique</th></tr></thead><tbody>'
-    +['5–10 km|55–60 %|40–45 %','Semi|≈ 50 %|≈ 50 %','Marathon|≈ 40 %|≈ 60 %'].map(function(r){var c=r.split('|');return '<tr><td style="'+td+';font-weight:800;color:var(--text)">'+c[0]+'</td><td style="'+td+';font-weight:800;color:'+PL_PHC.dev+'">'+c[1]+'</td><td style="'+td+';font-weight:800;color:'+PL_PHC.spe+'">'+c[2]+'</td></tr>';}).join('')
-    +'</tbody></table></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Hors base et affûtage · à moduler avec le curseur <b>Dév. ↔ Spé</b> selon le profil de l’athlète.</div>'
-    +'<div style="margin-top:12px;padding:11px 14px;background:rgba(255,255,255,0.03);border-radius:9px">'
-    +'<div style="font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:7px">Sources</div>'
-    +'<ul style="margin:0;padding-left:16px;font-size:11.5px;color:var(--muted);line-height:1.75">'
-    +'<li>Bompa &amp; Buzzichelli — <i>Periodization: Theory and Methodology of Training</i> (spécificité croissante)</li>'
-    +'<li>Renato Canova — du fondamental au spécifique</li>'
-    +'<li>Jack Daniels — <i>Daniels’ Running Formula</i> (base → qualité → spécifique)</li>'
-    +'<li>Arthur Lydiard — périodisation orientée vers le pic</li>'
-    +'<li>Pete Pfitzinger — <i>Advanced Marathoning</i> (endurance spécifique marathon)</li>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Fiche méthodologique : la prépa marathon</div>'
+    +'<div style="'+h+'">1. Volumes &amp; repères de charge</div>'
+    +'<ul style="margin:0 0 18px;padding-left:18px">'
+    +'<li style="'+li+'"><b>Repères hebdomadaires :</b> minimum 40 km/sem (finir sereinement) · cible 60–80 km/sem (performance amateur) · élite 90–130 km/sem.</li>'
+    +'<li style="'+li+'"><b>Sortie longue (SL) :</b> 30–32 km maximum (ou 2 h 45 maximum d’effort). La régularité et la SL priment sur le pic ponctuel, même si la plus grosse semaine reste un fort prédicteur de performance (<i>Vickers &amp; Vertosick, 2016</i>).</li>'
+    +'<li style="'+li+'"><b>Ratio ACWR (Aiguë/Chronique) :</b> mesure de la fatigue.</li>'
     +'</ul>'
-    +'<div style="font-size:11px;color:var(--muted2);font-style:italic;margin-top:8px">Les pourcentages sont une <b>synthèse pratique</b> (valeurs par défaut de l’outil, ajustables), pas une constante issue d’une étude unique.</div>'
-    +'</div>'
-    +'</div>'
+    +'<div style="margin:4px auto 16px;max-width:300px;text-align:center;font-family:Georgia,serif;font-size:17px;color:var(--text)">ACWR = <span style="display:inline-block;vertical-align:middle;margin-left:6px"><span style="display:block;border-bottom:1px solid var(--text);padding:0 8px">Volume sur 7 jours</span><span style="display:block;padding:0 8px">Moyenne volume sur 28 jours</span></span></div>'
+    +'<ul style="margin:0 0 18px;padding-left:18px">'
+    +'<li style="'+li+'"><i>Zone sûre :</i> <b>0,8–1,3</b> (progression optimale).</li>'
+    +'<li style="'+li+'"><i>Zone danger :</i> <b>&gt; 1,5</b> (risque de blessure décuplé).</li>'
+    +'</ul>'
+    +'<div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">'
+    +'<div style="'+h+'">2. Périodisation &amp; cycles</div>'
+    +'<ul style="margin:0 0 18px;padding-left:18px">'
+    +'<li style="'+li+'"><b>Logique Canova :</b> Du général au spécifique → <i>Base</i> → <i>Développement (seuil)</i> → <i>Spécifique (AS42)</i> → <i>Affûtage</i>.</li>'
+    +'<li style="'+li+'"><b>Progression :</b> +10 %/sem maximum.</li>'
+    +'<li style="'+li+'"><b>Cycle 3:1 (Deload) :</b> 3 semaines de charge / 1 semaine de décharge (-30 à -40 % de volume) pour assimiler.</li>'
+    +'<li style="'+li+'"><b>Ajustement des zones :</b> pas de tests VMA en cours de prépa. On ajuste les allures selon le ressenti et la réussite des séances spécifiques.</li>'
+    +'</ul></div>'
+    +'<div style="border-top:1px solid var(--border);padding-top:16px">'
+    +'<div style="'+h+'">3. Épreuves préparatoires &amp; affûtage</div>'
+    +'<ul style="margin:0 0 18px;padding-left:18px">'
+    +'<li style="'+li+'"><b>Compétition test :</b> semi-marathon placé à <b>J-21</b> (avec portions jouées à allure marathon).</li>'
+    +'<li style="'+li+'"><b>Affûtage progressif (par rapport à la plus grosse semaine) :</b></li>'
+    +'<li style="'+li+';margin-left:18px">S-3 (J-21 à J-15) : -20 à -30 %</li>'
+    +'<li style="'+li+';margin-left:18px">S-2 (J-14 à J-8) : -40 à -50 %</li>'
+    +'<li style="'+li+';margin-left:18px">S-1 (J-7 à J-0) : -60 à -70 % <i>(fraîcheur maximale, maintien de courts rappels d’allure)</i></li>'
+    +'</ul></div>'
+    +'<div style="border-top:1px solid var(--border);padding-top:16px">'
+    +'<div style="'+h+'">4. La séquence finale (J-10 à J-0)</div>'
+    +'<ul style="margin:0;padding-left:18px">'
+    +'<li style="'+li+'"><b>J-10 :</b> dernière séance spécifique courte (ex. 6 à 8 km cumulés à allure marathon).</li>'
+    +'<li style="'+li+'"><b>J-7 :</b> dernier footing long léger (1 h 15 maximum dont 15 min à allure marathon).</li>'
+    +'<li style="'+li+'"><b>Semaine finale (J-6 à J-1) :</b> repos maximal. Seulement 2 footings de 30 min max (ex. J-4 et J-2 avec 3–4 lignes droites).</li>'
+    +'</ul></div>'
     +'</div>';
 }
 function plVO2HTML(){
@@ -8081,20 +8070,9 @@ function plVO2HTML(){
    ['Nombre de rép. / séries','À calculer pour tenir <b>≥ 10 min &gt; 90 % VO₂max</b> (latence incluse) · condenser les séries','idem']
   ];
   var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
-  var pr=[
-   'Objectif commun : <b>maximiser le temps passé à VO₂max</b> (critère d’efficacité de la séance).',
-   'Étude fondatrice (Billat, K4) : en 30/30 à VMA, les coureurs passent ~8 min à VO₂max ; le continu à 91 % VMA n’y reste qu’~1/3 du temps.',
-   '<b>Long vs court</b> : des travaux 2024 montrent que le long (~3 min) accumule autant, voire plus de temps &gt; 90 % VO₂max que le 30 s — au moins aussi efficace pour développer VO₂max.',
-   'Resynthèse de PCr : composante rapide (60 premières s) clé ; 3-5 min pour une restauration complète.',
-   'Le 30/30 à 110 % VMA = calibrage « sports collectifs » (VIFT/Buchheit) ; pour un coureur, 100-105 % VMA (Billat) est la référence.'
-  ];
-  var lis=pr.map(function(x){return '<li style="margin-bottom:6px">'+x+'</li>';}).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">VMA / VO₂max — fractionné long vs court</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Tout le travail intermittent VMA en un tableau : paramètres du fractionné long et court.</div>'
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    +'<div style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-top:12px"><ul style="margin:0;padding-left:18px">'+lis+'</ul></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px">Sources : INSEP « Sports à haute intensité » (C. Hanon) ; Billat et al. (30/30, temps à VO₂max) ; travaux 2024.</div>'
     +'</div>';
 }
 function plNutritionHTML(){
@@ -8172,7 +8150,6 @@ function plFracHTML(){
   var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Fractionné VMA — long vs court (en résumé)</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Objectif commun : passer le plus de temps possible &gt; 90 % de VO₂max.</div>'
     +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 function plRenfoHTML(){
@@ -8271,6 +8248,7 @@ function renderKnowledge(){
   w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
     +plSpeSessHTML()
     +plDomainTimeHTML()
+    +plPeriodHTML()
     +plVO2HTML()
     +plRecovHTML()
     +plRenfoHTML()
@@ -8333,11 +8311,7 @@ function renderPlanif(){
     +'<div class="card" style="padding:20px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:'+p.col+';margin-bottom:12px">Principes clés — '+p.lbl+'</div><ul style="margin:0;padding-left:18px">'+princ+'</ul>'
     +'<div style="margin-top:14px;padding:11px 13px;border-radius:9px;background:rgba(255,255,255,0.03);border-left:3px solid '+p.col+'"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px">Repères de volume</div><div style="font-size:12.5px;color:var(--text2);line-height:1.6"><b>Minimum '+PL_VOLREF[p.id].min+' '+PL_VOLREF[p.id].unit+'</b> · cible <b>'+PL_VOLREF[p.id].lo+'–'+PL_VOLREF[p.id].hi+'</b> · perf <b>'+PL_VOLREF[p.id].perf+'</b></div><div style="font-size:12px;color:var(--muted);line-height:1.55;margin-top:5px">'+PL_VOLREF[p.id].note+'</div></div></div>'
     +'<div class="card" style="padding:20px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:'+p.col+';margin-bottom:6px">Qualités à développer</div><div style="position:relative;height:280px"><canvas id="pl-radar"></canvas></div></div>'
-    +'</div>'
-    // ── Repères de périodisation (FFA) ──
-    +'<div style="margin-top:16px">'+plPeriodHTML()+'</div>'
-    // ── Phases dépliables ──
-    +'<div class="csm-limites" style="margin-top:16px"><b>Repères, pas dogmes</b> — trames standards (périodisation, 80/20, affûtage Bosquet 2007) à adapter à l’athlète.</div>';
+    +'</div>';
   plUpd();
   plDrawRadar(p);
   plTimeVerdict();plVolVerdict();
