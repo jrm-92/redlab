@@ -1,0 +1,6 @@
+config.json
+.tokens.json
+logs/
+out/
+node_modules/
+data/workouts.json

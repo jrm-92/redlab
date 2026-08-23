@@ -1,0 +1,1777 @@
+[
+  {
+    "title": "Endurance faible intensité (MAF)",
+    "category": "Entretien condition physique",
+    "sport": "Course à pied",
+    "objective": "FC ≤ 180−âge",
+    "description": "Développe l’endurance de base en aérobie stricte, sous le seuil. À placer en début de cycle pour construire le foncier.",
+    "content": "50 min @ 65% VMA",
+    "tags": [
+      "Entretien condition physique"
+    ],
+    "warm": "—",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 50,
+        "pct": 65
+      }
+    ],
+    "phase": "gen",
+    "order": {
+      "n": 4,
+      "when": "Toute la prépa"
+    }
+  },
+  {
+    "title": "5 × 1000 m à allure I",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "VO2max · allure I",
+    "description": "Fractions à l’allure « Intervalle » (≈ allure 3000–5000 m) : maximise le temps passé proche de VO2max.",
+    "content": "Échauffement : 20 min + gammes\n5 × 1 km @ 95-100% VMA (récup 3’ jog)\nRetour au calme : 10 min",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 1000,
+        "pct": [
+          95,
+          100
+        ],
+        "rec": "3’ jog"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 5,
+      "when": "S-7"
+    }
+  },
+  {
+    "title": "Cruise intervals à allure T",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "seuil · ~87% VMA",
+    "description": "Fractionné au seuil (allure « T » de Daniels) : récup courte pour accumuler du volume au seuil sans fatigue excessive.",
+    "content": "Échauffement : 20 min\n5 × 1,5 km @ 87% VMA (récup 1’)\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 1500,
+        "pct": 87,
+        "rec": "1’"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 5,
+      "when": "S-8 → S-7"
+    }
+  },
+  {
+    "title": "Double seuil (méthode norvégienne)",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "2 séances / jour",
+    "description": "Deux séances de seuil dans la journée à intensité contrôlée (lactate ~2–4,5 mmol) : matin 5×6 min, après-midi 10×1000 m. Gros volume au seuil, fatigue maîtrisée.",
+    "content": "Échauffement : 20 min (chaque séance)\n5 × 6 min @ 86% VMA (récup 1’)\n10 × 1 km @ 88% VMA (récup 1’)\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min (chaque séance)",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 5,
+        "m": 6,
+        "pct": 86,
+        "rec": "1’"
+      },
+      {
+        "r": 10,
+        "d": 1000,
+        "pct": 88,
+        "rec": "1’"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 7,
+      "when": "S-8 → S-6 · avancé"
+    }
+  },
+  {
+    "title": "Répétitions à allure R",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "5K · vitesse",
+    "description": "Répétitions courtes à l’allure « R » de Daniels (≈ allure mile/3000) avec récup complète : économie de course et vitesse spécifique.",
+    "content": "Échauffement : 20 min + 4 lignes\n8 × 400 m @ 100-105% VMA (récup récup complète (~2’))\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + 4 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 8,
+        "d": 400,
+        "pct": [
+          100,
+          105
+        ],
+        "rec": "récup complète (~2’)"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 1,
+      "when": "S-6 · pour débuter le bloc"
+    }
+  },
+  {
+    "title": "Tempo continu au seuil",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "10K · ~88% VMA",
+    "description": "Tempo continu à l’allure seuil lactique (≈ allure 15 km–semi) : la séance clé de Pfitzinger pour préparer le 10 km.",
+    "content": "Échauffement : 20 min\n8 km @ 88% VMA\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 1,
+        "d": 8000,
+        "pct": 88
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 1,
+      "when": "S-6 · pour débuter le bloc"
+    }
+  },
+  {
+    "title": "Bloc allure spécifique semi",
+    "category": "Spé semi",
+    "sport": "Course à pied",
+    "objective": "semi · ~87% VMA",
+    "description": "2 × 6 km à l’allure semi avec récup courte : habitue le corps à tenir l’allure de course sur du volume.",
+    "content": "Échauffement : 20 min\n2 × 6 km @ 86-88% VMA (récup 3’)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé semi"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "d": 6000,
+        "pct": [
+          86,
+          88
+        ],
+        "rec": "3’"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 5,
+      "when": "J-10 · dernière grosse spé"
+    }
+  },
+  {
+    "title": "Bloc spécifique Canova",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "marathon · ~103% AS",
+    "description": "3 × 7 km légèrement plus vite que l’allure marathon, récup 1 km à allure marathon : la séance signature de Canova pour « rendre l’allure marathon facile ».",
+    "content": "Échauffement : 20 min\n3 × 7 km @ 82% VMA (récup 1 km à allure marathon)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 3,
+        "d": 7000,
+        "pct": 82,
+        "rec": "1 km à allure marathon"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 5,
+      "when": "S-4"
+    }
+  },
+  {
+    "title": "Tempo à allure marathon (Hansons)",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "marathon · allure objectif",
+    "description": "Tempo continu à l’allure objectif marathon, à construire jusqu’à ~16 km : pilier de la méthode Hansons pour ancrer l’allure de course.",
+    "content": "Échauffement : 15 min\n12 km @ 80% VMA\nRetour au calme : 10 min",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "15 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 1,
+        "d": 12000,
+        "pct": 80
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 1,
+      "when": "S-8 → S-6 · pour débuter le bloc"
+    }
+  },
+  {
+    "title": "Sortie longue foncière (base Lydiard)",
+    "category": "Entretien condition physique",
+    "sport": "Course à pied",
+    "objective": "90–120 min · 65–72%",
+    "description": "Longue sortie en endurance pour développer la capacité aérobie et l’endurance de fond. Fondation de la méthode Lydiard.",
+    "content": "100 min @ 65-72% VMA",
+    "tags": [
+      "Entretien condition physique"
+    ],
+    "warm": "—",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 100,
+        "pct": [
+          65,
+          72
+        ]
+      }
+    ],
+    "phase": "gen",
+    "order": {
+      "n": 5,
+      "when": "Toute la prépa"
+    }
+  },
+  {
+    "title": "Mona Fartlek (20 min)",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "fartlek · 5K→mile",
+    "description": "Fartlek de 20 min à récup active (« float ») : 2×90s, 4×60s, 4×30s, 4×15s en accélérant à mesure que les fractions raccourcissent. Efficace et réalisable partout.",
+    "content": "Échauffement : 15 min\n2 × 90s @ 95% VMA (récup 90s float actif)\n4 × 60s @ 100% VMA (récup 60s float)\n4 × 30s @ 105% VMA (récup 30s float)\n4 × 15s @ 110% VMA (récup 15s float)\nRetour au calme : 10 min",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "15 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "sec": 90,
+        "pct": 95,
+        "rec": "90s float actif"
+      },
+      {
+        "r": 4,
+        "sec": 60,
+        "pct": 100,
+        "rec": "60s float"
+      },
+      {
+        "r": 4,
+        "sec": 30,
+        "pct": 105,
+        "rec": "30s float"
+      },
+      {
+        "r": 4,
+        "sec": 15,
+        "pct": 110,
+        "rec": "15s float"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 6,
+      "when": "Entretien qualité"
+    }
+  },
+  {
+    "title": "Billat 30-30 (2 blocs)",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "vVMA · 30s/30s",
+    "description": "Alternance 30s à vVMA (100% VMA) / 30s footing à ~50%, jusqu’à 9 répétitions par bloc, 2 blocs. Maximise le temps passé proche de VO2max.",
+    "content": "Échauffement : 20 min\n2 séries de 9 × 30s @ 100% VMA (récup 30s @ 50% VMA · 3 min entre séries)\nRetour au calme : 10 min",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 9,
+        "sec": 30,
+        "pct": 100,
+        "rec": "30s @ 50% VMA",
+        "sets": 2,
+        "recSet": "3 min"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 2,
+      "when": "S-9"
+    }
+  },
+  {
+    "title": "6 × 1000 m à allure 5K",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "VO2max · récup 2’",
+    "description": "Intervalles à l’allure 5 km (≈ 95–97% VMA) avec récup 2 min : séance VO2max de référence du plan Pfitzinger.",
+    "content": "Échauffement : 20 min\n6 × 1 km @ 95-97% VMA (récup 2’ jog)\nRetour au calme : 10 min",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 6,
+        "d": 1000,
+        "pct": [
+          95,
+          97
+        ],
+        "rec": "2’ jog"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 6,
+      "when": "S-6"
+    }
+  },
+  {
+    "title": "2 × 2000 m à allure 5K",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "5K · spécifique",
+    "description": "Deux fractions longues à l’allure objectif 5 km : ancre l’allure de course et la résistance spécifique. Récup 3–4 min.",
+    "content": "Échauffement : 20 min + 4 lignes\n2 × 2 km @ 95-97% VMA (récup 3–4’)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + 4 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "d": 2000,
+        "pct": [
+          95,
+          97
+        ],
+        "rec": "3–4’"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 5,
+      "when": "J-10 · dernière grosse spé"
+    }
+  },
+  {
+    "title": "5 × 1000 m à allure 10K",
+    "category": "Spé 10K",
+    "sport": "Course à pied",
+    "objective": "10K · spécifique",
+    "description": "Intervalles à l’allure objectif 10 km (≈ 90% VMA), récup courte 90 s : développe la résistance spécifique à l’allure de course.",
+    "content": "Échauffement : 20 min\n5 × 1 km @ 90% VMA (récup 90s)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 10K"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 1000,
+        "pct": 90,
+        "rec": "90s"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 2,
+      "when": "S-5"
+    }
+  },
+  {
+    "title": "Sortie longue + 2 × 4 km à allure semi",
+    "category": "Spé semi",
+    "sport": "Course à pied",
+    "objective": "semi · endurance spécifique",
+    "description": "Sortie longue de ~1h30 incluant 2 × 4 km à l’allure semi : travaille l’endurance spécifique en état de fatigue.",
+    "content": "30 min @ 70% VMA\n2 × 4 km @ 86-88% VMA (récup 5’ footing)\n20 min @ 70% VMA",
+    "tags": [
+      "Spé semi"
+    ],
+    "warm": "—",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 30,
+        "pct": 70
+      },
+      {
+        "r": 2,
+        "d": 4000,
+        "pct": [
+          86,
+          88
+        ],
+        "rec": "5’ footing"
+      },
+      {
+        "r": 1,
+        "m": 20,
+        "pct": 70
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 3,
+      "when": "S-4"
+    }
+  },
+  {
+    "title": "Yasso 800s",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "10 × 800 m · repère",
+    "description": "10 × 800 m à un rythme où le temps (min:s) égale l’objectif marathon (h:min), récup footing de durée égale. Séance-repère popularisée par Bart Yasso — utile à l’entraînement, mais prédicteur imparfait.",
+    "content": "Échauffement : 20 min\n10 × 800 m @ 90% VMA (récup footing durée égale)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 10,
+        "d": 800,
+        "pct": 90,
+        "rec": "footing durée égale"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 4,
+      "when": "S-4 · séance repère"
+    }
+  },
+  {
+    "title": "Footing endurance fondamentale",
+    "category": "Entretien condition physique",
+    "sport": "Course à pied",
+    "objective": "~65% VMA",
+    "description": "La base : développer l’endurance aérobie en aisance respiratoire totale, capable de tenir une conversation.",
+    "content": "50 min @ 65% VMA",
+    "tags": [
+      "Entretien condition physique"
+    ],
+    "warm": "—",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 50,
+        "pct": 65
+      }
+    ],
+    "phase": "gen",
+    "order": {
+      "n": 1,
+      "when": "Toute la prépa"
+    }
+  },
+  {
+    "title": "Footing + lignes droites",
+    "category": "Entretien condition physique",
+    "sport": "Course à pied",
+    "objective": "65% + accélérations",
+    "description": "Footing tranquille suivi de lignes pour entretenir la vivacité et la qualité de foulée.",
+    "content": "Échauffement : 15 min footing\n25 min @ 65% VMA\n6 × 100 m @ 100% VMA (récup retour marche)\nRetour au calme : 5 min souple",
+    "tags": [
+      "Entretien condition physique"
+    ],
+    "warm": "15 min footing",
+    "cool": "5 min souple",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 25,
+        "pct": 65
+      },
+      {
+        "r": 6,
+        "d": 100,
+        "pct": 100,
+        "rec": "retour marche"
+      }
+    ],
+    "phase": "gen",
+    "order": {
+      "n": 2,
+      "when": "Toute la prépa"
+    }
+  },
+  {
+    "title": "Fartlek nature",
+    "category": "Entretien condition physique",
+    "sport": "Course à pied",
+    "objective": "jeu d’allures",
+    "description": "Alternance libre vite / lent au ressenti, selon le terrain, sans regarder la montre.",
+    "content": "Échauffement : 15 min footing\n10 × 1 min @ 85-90% VMA (récup 1 min lent)\nRetour au calme : 10 min footing",
+    "tags": [
+      "Entretien condition physique"
+    ],
+    "warm": "15 min footing",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 10,
+        "m": 1,
+        "pct": [
+          85,
+          90
+        ],
+        "rec": "1 min lent"
+      }
+    ],
+    "phase": "gen",
+    "order": {
+      "n": 3,
+      "when": "Toute la prépa"
+    }
+  },
+  {
+    "title": "30/30 classique",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "~105% VMA",
+    "description": "Le grand classique du développement de la VO2max. Effort court et intense, récup courte.",
+    "content": "Échauffement : 20 min + gammes\n2 séries de 8 × 30s @ 105% VMA (récup 30s trot · 3 min entre séries)\nRetour au calme : 10 min footing",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "sets": 2,
+        "r": 8,
+        "sec": 30,
+        "pct": 105,
+        "rec": "30s trot",
+        "recSet": "3 min"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 1,
+      "when": "S-10 · pour débuter"
+    }
+  },
+  {
+    "title": "10 × 400 m",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "100% VMA",
+    "description": "Format piste de référence pour la puissance aérobie et la tolérance à l’effort.",
+    "content": "Échauffement : 20 min + 4 lignes\n10 × 400 m @ 100% VMA (récup 1'15 trot)\nRetour au calme : 10 min footing",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min + 4 lignes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 10,
+        "d": 400,
+        "pct": 100,
+        "rec": "1'15 trot"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 3,
+      "when": "S-9 → S-8"
+    }
+  },
+  {
+    "title": "5 × 1000 m",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "100–102% VMA",
+    "description": "Fractions longues à VMA : lucidité et capacité à maintenir l’intensité.",
+    "content": "Échauffement : 20 min + gammes\n5 × 1 km @ 100-102% VMA (récup 2')\nRetour au calme : 10 min footing",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 1000,
+        "pct": [
+          100,
+          102
+        ],
+        "rec": "2'"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 4,
+      "when": "S-8"
+    }
+  },
+  {
+    "title": "Seuil continu 2 × 15 min",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "~85% VMA",
+    "description": "Repousser le seuil : allure « confortablement difficile », régulière et maîtrisée.",
+    "content": "Échauffement : 20 min\n2 × 15 min @ 85% VMA (récup 3')\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "m": 15,
+        "pct": 85,
+        "rec": "3'"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 4,
+      "when": "S-9 → S-7"
+    }
+  },
+  {
+    "title": "3 × 10 min au seuil",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "~87% VMA",
+    "description": "Fractionné au seuil un peu plus soutenu, avec récupération courte.",
+    "content": "Échauffement : 20 min\n3 × 10 min @ 87% VMA (récup 2'30)\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 3,
+        "m": 10,
+        "pct": 87,
+        "rec": "2'30"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 3,
+      "when": "S-10 → S-8"
+    }
+  },
+  {
+    "title": "4 × 2000 m au seuil",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "~88% VMA",
+    "description": "Travail du seuil sur distance : gestion de l’allure et régularité.",
+    "content": "Échauffement : 20 min + 3 lignes\n4 × 2 km @ 88% VMA (récup 2')\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min + 3 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 4,
+        "d": 2000,
+        "pct": 88,
+        "rec": "2'"
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 6,
+      "when": "S-7 → S-6"
+    }
+  },
+  {
+    "title": "6 × 500 m allure 5K",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "~95% VMA",
+    "description": "Séance spécifique 5K : caler l’allure course sur des fractions courtes.",
+    "content": "Échauffement : 20 min + gammes\n6 × 500 m @ 95% VMA (récup 1'30)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 6,
+        "d": 500,
+        "pct": 95,
+        "rec": "1'30"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 3,
+      "when": "S-4"
+    }
+  },
+  {
+    "title": "5 × 1000 m allure 5K",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "93–95% VMA",
+    "description": "Fractions au format course pour ancrer le rythme du 5K.",
+    "content": "Échauffement : 20 min\n5 × 1 km @ 93-95% VMA (récup 2')\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 1000,
+        "pct": [
+          93,
+          95
+        ],
+        "rec": "2'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 4,
+      "when": "S-3"
+    }
+  },
+  {
+    "title": "2 × (6 × 300 m)",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "100% VMA",
+    "description": "Vitesse spécifique et capacité à relancer sur la fin de course.",
+    "content": "Échauffement : 20 min + 4 lignes\n2 séries de 6 × 300 m @ 100% VMA (récup 45s · 3 min entre séries)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + 4 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "sets": 2,
+        "r": 6,
+        "d": 300,
+        "pct": 100,
+        "rec": "45s",
+        "recSet": "3 min"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 2,
+      "when": "S-5"
+    }
+  },
+  {
+    "title": "5 × 2000 m allure 10K",
+    "category": "Spé 10K",
+    "sport": "Course à pied",
+    "objective": "~90% VMA",
+    "description": "La séance reine du 10K : du volume à l’allure spécifique.",
+    "content": "Échauffement : 20 min\n5 × 2 km @ 90% VMA (récup 2')\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 10K"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 2000,
+        "pct": 90,
+        "rec": "2'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 4,
+      "when": "S-3"
+    }
+  },
+  {
+    "title": "3 × 3000 m",
+    "category": "Spé 10K",
+    "sport": "Course à pied",
+    "objective": "88–90% VMA",
+    "description": "Fractions longues proches de l’allure 10K, endurance de vitesse.",
+    "content": "Échauffement : 20 min\n3 × 3 km @ 88-90% VMA (récup 2'30)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 10K"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 3,
+        "d": 3000,
+        "pct": [
+          88,
+          90
+        ],
+        "rec": "2'30"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 3,
+      "when": "S-4"
+    }
+  },
+  {
+    "title": "2 × 4 km allure 10K",
+    "category": "Spé 10K",
+    "sport": "Course à pied",
+    "objective": "~90% VMA",
+    "description": "Gros blocs à l’allure course pour la solidité physique et mentale.",
+    "content": "Échauffement : 20 min\n2 × 4 km @ 90% VMA (récup 3')\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 10K"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "d": 4000,
+        "pct": 90,
+        "rec": "3'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 5,
+      "when": "J-10 · dernière grosse spé"
+    }
+  },
+  {
+    "title": "2 × 5 km allure semi",
+    "category": "Spé semi",
+    "sport": "Course à pied",
+    "objective": "~85% VMA",
+    "description": "Blocs à l’allure spécifique semi-marathon.",
+    "content": "Échauffement : 20 min\n2 × 5 km @ 85% VMA (récup 3')\nRetour au calme : 10 min",
+    "tags": [
+      "Spé semi"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "d": 5000,
+        "pct": 85,
+        "rec": "3'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 2,
+      "when": "S-5"
+    }
+  },
+  {
+    "title": "3 × 4 km",
+    "category": "Spé semi",
+    "sport": "Course à pied",
+    "objective": "84–86% VMA",
+    "description": "Fractionné long autour de l’allure semi.",
+    "content": "Échauffement : 20 min\n3 × 4 km @ 84-86% VMA (récup 2'30)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé semi"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 3,
+        "d": 4000,
+        "pct": [
+          84,
+          86
+        ],
+        "rec": "2'30"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 1,
+      "when": "S-6 · pour débuter le bloc"
+    }
+  },
+  {
+    "title": "Sortie longue + 2 × 20 min",
+    "category": "Spé semi",
+    "sport": "Course à pied",
+    "objective": "1h30 · allure semi",
+    "description": "Sortie longue intégrant deux blocs à l’allure objectif.",
+    "content": "Échauffement : 30 min footing\n2 × 20 min @ 85% VMA (récup 5')\nRetour au calme : 20 min footing",
+    "tags": [
+      "Spé semi"
+    ],
+    "warm": "30 min footing",
+    "cool": "20 min footing",
+    "blocks": [
+      {
+        "r": 2,
+        "m": 20,
+        "pct": 85,
+        "rec": "5'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 4,
+      "when": "S-3"
+    }
+  },
+  {
+    "title": "2 × 8 km allure marathon",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "~80% VMA",
+    "description": "Ancrer l’allure marathon sur un gros volume fractionné.",
+    "content": "Échauffement : 20 min\n2 × 8 km @ 80% VMA (récup 3')\nRetour au calme : 10 min",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 2,
+        "d": 8000,
+        "pct": 80,
+        "rec": "3'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 2,
+      "when": "S-6"
+    }
+  },
+  {
+    "title": "Sortie longue + 3 × 15 min AM",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "2h · allure marathon",
+    "description": "Endurance spécifique : blocs à l’allure marathon dans le long.",
+    "content": "Échauffement : 40 min footing\n3 × 15 min @ 80% VMA (récup 5')\nRetour au calme : reste en endurance",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "40 min footing",
+    "cool": "reste en endurance",
+    "blocks": [
+      {
+        "r": 3,
+        "m": 15,
+        "pct": 80,
+        "rec": "5'"
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 3,
+      "when": "S-5"
+    }
+  },
+  {
+    "title": "30 km progressif",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "finish ~80% VMA",
+    "description": "Sortie longue progressive, terminée à l’allure marathon.",
+    "content": "120 min @ 70-80% VMA",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "—",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 120,
+        "pct": [
+          70,
+          80
+        ]
+      }
+    ],
+    "phase": "spe",
+    "order": {
+      "n": 6,
+      "when": "S-3 · dernière très longue"
+    }
+  },
+  {
+    "title": "Tempo 20 min à allure T",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "seuil · le classique",
+    "description": "LE tempo de référence : 20 minutes continues à l’allure T (≈ 88 % VMA), « confortablement difficile ». À maîtriser avant les variantes plus longues.",
+    "content": "Échauffement : 20 min\n20 min @ 88% VMA\nRetour au calme : 10 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 20,
+        "pct": 88
+      }
+    ],
+    "phase": "dev",
+    "order": {
+      "n": 2,
+      "when": "S-11 → S-9"
+    }
+  },
+  {
+    "title": "Progressif 45 min (fin au seuil)",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "progressif · 70→88%",
+    "description": "Course progressive à la kényane : départ facile, accélération continue jusqu’au seuil sur le dernier quart. Développe le contrôle d’allure et l’endurance au seuil sans traumatisme.",
+    "content": "35 min @ 70-80% VMA\n10 min @ 88% VMA\nRetour au calme : 5 min",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "—",
+    "cool": "5 min",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 35,
+        "pct": [
+          70,
+          80
+        ]
+      },
+      {
+        "r": 1,
+        "m": 10,
+        "pct": 88
+      }
+    ],
+    "phase": "gen",
+    "order": {
+      "n": 1,
+      "when": "S-12 → S-10 · pour débuter"
+    }
+  },
+  {
+    "title": "Affûtage 5K : 4 × 400 m allure course",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "J-4 à J-6 · volume réduit",
+    "description": "Rappel d’allure la semaine de course : volume divisé, intensité conservée. Jambes vives sans fatigue résiduelle.",
+    "content": "Échauffement : 15 min + 2 lignes\n4 × 400 m @ 95-97% VMA (récup 2’ marche/trot)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "15 min + 2 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 4,
+        "d": 400,
+        "pct": [
+          95,
+          97
+        ],
+        "rec": "2’ marche/trot"
+      }
+    ],
+    "phase": "aff",
+    "order": {
+      "n": 6,
+      "when": "J-4 → J-6"
+    }
+  },
+  {
+    "title": "Affûtage 10K : 3 × 1000 m allure course",
+    "category": "Spé 10K",
+    "sport": "Course à pied",
+    "objective": "J-4 à J-6 · rappel d’allure",
+    "description": "Trois fractions à l’allure objectif, récup généreuse : entretenir la vitesse spécifique pendant la décharge, sans entamer la fraîcheur.",
+    "content": "Échauffement : 15 min\n3 × 1 km @ 90% VMA (récup 3’)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 10K"
+    ],
+    "warm": "15 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 3,
+        "d": 1000,
+        "pct": 90,
+        "rec": "3’"
+      }
+    ],
+    "phase": "aff",
+    "order": {
+      "n": 6,
+      "when": "J-4 → J-6"
+    }
+  },
+  {
+    "title": "Affûtage semi : 3 × 2 km allure course",
+    "category": "Spé semi",
+    "sport": "Course à pied",
+    "objective": "J-5 à J-7 · volume réduit",
+    "description": "Dernier rappel de l’allure semi avant la course, volume minimal. La méta-analyse du tapering : réduire le volume de 40-60 % sur 8-14 jours en gardant l’intensité.",
+    "content": "Échauffement : 15 min\n3 × 2 km @ 86-88% VMA (récup 3’)\nRetour au calme : 10 min",
+    "tags": [
+      "Spé semi"
+    ],
+    "warm": "15 min",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 3,
+        "d": 2000,
+        "pct": [
+          86,
+          88
+        ],
+        "rec": "3’"
+      }
+    ],
+    "phase": "aff",
+    "order": {
+      "n": 6,
+      "when": "J-5 → J-7"
+    }
+  },
+  {
+    "title": "Répétition générale (J-14)",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "dress rehearsal · 13 km",
+    "description": "Deux semaines avant : 13 km dont 8-10 km à l’allure marathon, en tenue et ravitaillement de course. Valide l’allure, l’équipement et la nutrition.",
+    "content": "4 km @ 70% VMA\n9 km @ 80% VMA",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "—",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "d": 4000,
+        "pct": 70
+      },
+      {
+        "r": 1,
+        "d": 9000,
+        "pct": 80
+      }
+    ],
+    "phase": "aff",
+    "order": {
+      "n": 7,
+      "when": "J-14 · dernière grosse spé"
+    }
+  },
+  {
+    "title": "La séance mixte (5K)",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "5K · ladder mixte",
+    "description": "Séance complète en escalier : fractions courtes rapides puis pyramide descendante 1200→400 m avec des allures de plus en plus vives (5 km → 3000 → 2000 → VMA). Développe la résistance à l’allure de course et la vitesse spécifique.",
+    "content": "Échauffement : 20 min + gammes + 3–4 lignes\n4 × 300 m @ 95-98% VMA (récup 55s marche (2’15 après la série))\n1,2 km @ 93-95% VMA (récup 2’30)\n1 km @ 95% VMA (récup 2’30 marche)\n800 m @ 95-98% VMA (récup 2’ marche)\n600 m @ 98-100% VMA (récup 1’30 marche)\n400 m @ 100-101% VMA\nRetour au calme : 10 min footing",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + gammes + 3–4 lignes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 4,
+        "d": 300,
+        "pct": [
+          95,
+          98
+        ],
+        "rec": "55s marche (2’15 après la série)"
+      },
+      {
+        "r": 1,
+        "d": 1200,
+        "pct": [
+          93,
+          95
+        ],
+        "rec": "2’30"
+      },
+      {
+        "r": 1,
+        "d": 1000,
+        "pct": 95,
+        "rec": "2’30 marche"
+      },
+      {
+        "r": 1,
+        "d": 800,
+        "pct": [
+          95,
+          98
+        ],
+        "rec": "2’ marche"
+      },
+      {
+        "r": 1,
+        "d": 600,
+        "pct": [
+          98,
+          100
+        ],
+        "rec": "1’30 marche"
+      },
+      {
+        "r": 1,
+        "d": 400,
+        "pct": [
+          100,
+          101
+        ]
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "Répétitions de 1000 m (5K)",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "6–8 × 1000 m · progressif",
+    "description": "6 à 8 × 1000 m en négatif : départ quelques secondes plus lent que l’allure 5 km visée, milieu à l’allure visée, dernier légèrement plus rapide (allure 3000). Ancre l’allure de course et la gestion de l’effort.",
+    "content": "Échauffement : 20 min + 4 lignes\n6 × 1 km @ 93-96% VMA (récup 2’30 à 3’ (marche ou trot léger))\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + 4 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "r": 6,
+        "d": 1000,
+        "pct": [
+          93,
+          96
+        ],
+        "rec": "2’30 à 3’ (marche ou trot léger)"
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "6 × 1000 m à variation d’allure",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "5K · changements de rythme",
+    "description": "Chaque 1000 m combine une portion à allure 10 km et une portion à allure 5 km, avec une part de 5 km croissante à chaque répétition. Travaille le changement de rythme et la lucidité en fatigue.",
+    "content": "Échauffement : 20 min + gammes\nRép 1 : 800 m allure 10 km (90% VMA) + 200 m allure 5 km (94% VMA) — récup 2’30\nRép 2 : 700 m allure 10 km (90% VMA) + 300 m allure 5 km (94% VMA) — récup 2’30\nRép 3 : 600 m allure 10 km (90% VMA) + 400 m allure 5 km (94% VMA) — récup 2’30\nRép 4 : 500 m allure 10 km (90% VMA) + 500 m allure 5 km (94% VMA) — récup 2’30\nRép 5 : 400 m allure 10 km (90% VMA) + 600 m allure 5 km (94% VMA) — récup 2’30\nRép 6 : 300 m allure 10 km (90% VMA) + 700 m allure 5 km (94% VMA) — récup 2’30\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "label": "Rép 1",
+        "r": 1,
+        "rec": "2’30",
+        "segs": [
+          {
+            "d": 800,
+            "pct": 90,
+            "lbl": "allure 10 km"
+          },
+          {
+            "d": 200,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          }
+        ]
+      },
+      {
+        "label": "Rép 2",
+        "r": 1,
+        "rec": "2’30",
+        "segs": [
+          {
+            "d": 700,
+            "pct": 90,
+            "lbl": "allure 10 km"
+          },
+          {
+            "d": 300,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          }
+        ]
+      },
+      {
+        "label": "Rép 3",
+        "r": 1,
+        "rec": "2’30",
+        "segs": [
+          {
+            "d": 600,
+            "pct": 90,
+            "lbl": "allure 10 km"
+          },
+          {
+            "d": 400,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          }
+        ]
+      },
+      {
+        "label": "Rép 4",
+        "r": 1,
+        "rec": "2’30",
+        "segs": [
+          {
+            "d": 500,
+            "pct": 90,
+            "lbl": "allure 10 km"
+          },
+          {
+            "d": 500,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          }
+        ]
+      },
+      {
+        "label": "Rép 5",
+        "r": 1,
+        "rec": "2’30",
+        "segs": [
+          {
+            "d": 400,
+            "pct": 90,
+            "lbl": "allure 10 km"
+          },
+          {
+            "d": 600,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          }
+        ]
+      },
+      {
+        "label": "Rép 6",
+        "r": 1,
+        "rec": "2’30",
+        "segs": [
+          {
+            "d": 300,
+            "pct": 90,
+            "lbl": "allure 10 km"
+          },
+          {
+            "d": 700,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          }
+        ]
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "Blocs d’accélération (Heymans)",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "5K · 3 × (1000-600-400)",
+    "description": "Trois séries d’une descente 1000 → 600 → 400 m, chaque fraction plus rapide que la précédente : allure 5 km, puis 3000, puis VMA. 6 km de qualité. Inspirée de John Heymans.",
+    "content": "Échauffement : 20 min + 4 lignes\n3 × (1000-600-400) : 1 km allure 5 km (94% VMA) + 600 m allure 3000 (97% VMA) + 400 m VMA (100% VMA) — récup 1’30 entre fractions · 3–4’ entre séries\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + 4 lignes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "label": "3 × (1000-600-400)",
+        "r": 1,
+        "rec": "1’30 entre fractions · 3–4’ entre séries",
+        "segs": [
+          {
+            "d": 1000,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          },
+          {
+            "d": 600,
+            "pct": 97,
+            "lbl": "allure 3000"
+          },
+          {
+            "d": 400,
+            "pct": 100,
+            "lbl": "VMA"
+          }
+        ]
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "Navette de lactate — Lactate Shuttle",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "5K · clairance lactate",
+    "description": "6 à 10 fois (400 m rapide / 400 m actif) enchaînés sans pause : le 1er 400 m à l’allure 5 km, le 2e couru 10–12 s plus lent, en continu. Améliore la clairance du lactate et la capacité à récupérer en courant.",
+    "content": "Échauffement : 20 min + gammes\n6 à 10 × (400 / 400) : 400 m allure 5 km (94% VMA) + 400 m récup active (~10–12 s plus lent) (84% VMA) — récup enchaîné, sans pause entre les fractions\nRetour au calme : 10 min",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min",
+    "blocks": [
+      {
+        "label": "6 à 10 × (400 / 400)",
+        "r": 1,
+        "rec": "enchaîné, sans pause entre les fractions",
+        "segs": [
+          {
+            "d": 400,
+            "pct": 94,
+            "lbl": "allure 5 km"
+          },
+          {
+            "d": 400,
+            "pct": 84,
+            "lbl": "récup active (~10–12 s plus lent)"
+          }
+        ]
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "Activation semaine de course (5K)",
+    "category": "Spé 5K",
+    "sport": "Course à pied",
+    "objective": "J-3/J-4 · fraîcheur",
+    "description": "Séance d’activation le mercredi avant la course : un bloc continu à allure semi/marathon, des 600 m à allure 5 km pour réveiller la vitesse spécifique, puis un 400 m plus vif. Volume faible, on reste frais.",
+    "content": "Échauffement : 15 min + 2 lignes\n8 min @ 80-86% VMA (récup 2’)\n6 × 600 m @ 93-95% VMA (récup 2’)\n400 m @ 95-98% VMA\nRetour au calme : 10 min footing",
+    "tags": [
+      "Spé 5K"
+    ],
+    "warm": "15 min + 2 lignes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 8,
+        "pct": [
+          80,
+          86
+        ],
+        "rec": "2’"
+      },
+      {
+        "r": 6,
+        "d": 600,
+        "pct": [
+          93,
+          95
+        ],
+        "rec": "2’"
+      },
+      {
+        "r": 1,
+        "d": 400,
+        "pct": [
+          95,
+          98
+        ]
+      }
+    ],
+    "phase": "aff",
+    "order": null
+  },
+  {
+    "title": "Jog long progressif (haut de Zone 2)",
+    "category": "Entretien condition physique",
+    "sport": "Course à pied",
+    "objective": "EF · haut de Zone 2",
+    "description": "Sortie de 60 à 90 min (progression au fil des semaines) à 70–75 % de FC Max (max 80 %). Départ en footing doux 1–2 km puis calage au rythme de croisière en haut de Zone 2/EF, sans basculer vers l’allure marathon. Développe l’endurance de base et la durabilité.",
+    "content": "Échauffement : 1–2 km footing doux (inclus)\n75 min @ 72-76% VMA",
+    "tags": [
+      "Entretien condition physique"
+    ],
+    "warm": "1–2 km footing doux (inclus)",
+    "cool": "—",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 75,
+        "pct": [
+          72,
+          76
+        ]
+      }
+    ],
+    "phase": "gen",
+    "order": null
+  },
+  {
+    "title": "Bloc d’endurance long — 30/20/10 min",
+    "category": "Spé marathon",
+    "sport": "Course à pied",
+    "objective": "marathon/semi · endurance spécifique",
+    "description": "Trois blocs continus dégressifs en durée et progressifs en allure : 30 min autour du SV1 (allure marathon + 10–20 s), 20 min à l’allure marathon, 10 min un peu plus vite (effort très contrôlé). Bénéfique du 5 km au marathon.",
+    "content": "Échauffement : 20–30 min footing\n30 min @ 78% VMA (récup 3–4 min (jog/marche))\n20 min @ 80% VMA (récup 3–4 min (jog/marche))\n10 min @ 82-84% VMA\nRetour au calme : 10 min footing",
+    "tags": [
+      "Spé marathon"
+    ],
+    "warm": "20–30 min footing",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 1,
+        "m": 30,
+        "pct": 78,
+        "rec": "3–4 min (jog/marche)"
+      },
+      {
+        "r": 1,
+        "m": 20,
+        "pct": 80,
+        "rec": "3–4 min (jog/marche)"
+      },
+      {
+        "r": 1,
+        "m": 10,
+        "pct": [
+          82,
+          84
+        ]
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "8 km progressif (SV1 → SV2)",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "10K/semi/marathon · progressif",
+    "description": "8 km d’affilée en continu, du SV1 (allure marathon + 15 s) jusqu’à frôler le SV2 (allure semi) — FC de ~75 % à ~90 % FC Max. Option pic de forme : les 500 à 800 derniers mètres à l’allure 10 km. Contrôle d’allure et endurance au seuil.",
+    "content": "Échauffement : 15 min footing\n8 km @ 78-86% VMA\nRetour au calme : 10 min footing",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "15 min footing",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 1,
+        "d": 8000,
+        "pct": [
+          78,
+          86
+        ]
+      }
+    ],
+    "phase": "dev",
+    "order": null
+  },
+  {
+    "title": "Répétitions de 3000 m — 5 × 3000 m",
+    "category": "Seuil",
+    "sport": "Course à pied",
+    "objective": "semi/marathon · progressif",
+    "description": "3 à 5 × 3000 m (ou 10 min) progressifs : premier sous l’allure marathon (SV1, allure marathon + 5–15 s), chaque répétition 4–5 s/km plus rapide que la précédente, la dernière proche de l’allure semi/10 km. Récup 3–4 min au jog. Endurance au seuil et gestion d’allure.",
+    "content": "Échauffement : 20 min + 3 lignes\n5 × 3 km @ 80-86% VMA (récup 3–4 min jog)\nRetour au calme : 10 min footing",
+    "tags": [
+      "Seuil"
+    ],
+    "warm": "20 min + 3 lignes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 5,
+        "d": 3000,
+        "pct": [
+          80,
+          86
+        ],
+        "rec": "3–4 min jog"
+      }
+    ],
+    "phase": "spe",
+    "order": null
+  },
+  {
+    "title": "5 × 2000 m « découpé »",
+    "category": "VO2max",
+    "sport": "Course à pied",
+    "objective": "5/10K/semi · rythmes alternés",
+    "description": "3 à 6 × 2000 m en continu sur piste, en alternant modéré / rapide sur des blocs de plus en plus courts au sein de chaque 2000 m (400+400, 300+300, 200+200, 100+100). Travaille les changements de rythme et la tolérance au lactate. Infiniment varié.",
+    "content": "Échauffement : 20 min + gammes\n3 à 6 × 2000 m (découpé) : 5 × 400 m modéré (AM+5s) (79% VMA) + 400 m rapide (10 km) (90% VMA) + 300 m modéré (79% VMA) + 300 m rapide (8 km) (92% VMA) + 200 m modéré (79% VMA) + 200 m rapide (5 km) (94% VMA) + 100 m modéré (79% VMA) + 100 m rapide (3 km) (97% VMA) — récup jog 2–3 min entre les 2000 m\nRetour au calme : 10 min footing",
+    "tags": [
+      "VO2max"
+    ],
+    "warm": "20 min + gammes",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "label": "3 à 6 × 2000 m (découpé)",
+        "r": 5,
+        "rec": "jog 2–3 min entre les 2000 m",
+        "segs": [
+          {
+            "d": 400,
+            "pct": 79,
+            "lbl": "modéré (AM+5s)"
+          },
+          {
+            "d": 400,
+            "pct": 90,
+            "lbl": "rapide (10 km)"
+          },
+          {
+            "d": 300,
+            "pct": 79,
+            "lbl": "modéré"
+          },
+          {
+            "d": 300,
+            "pct": 92,
+            "lbl": "rapide (8 km)"
+          },
+          {
+            "d": 200,
+            "pct": 79,
+            "lbl": "modéré"
+          },
+          {
+            "d": 200,
+            "pct": 94,
+            "lbl": "rapide (5 km)"
+          },
+          {
+            "d": 100,
+            "pct": 79,
+            "lbl": "modéré"
+          },
+          {
+            "d": 100,
+            "pct": 97,
+            "lbl": "rapide (3 km)"
+          }
+        ]
+      }
+    ],
+    "phase": "dev",
+    "order": null
+  },
+  {
+    "title": "Séance combinée — 3 × (9’ steady / 5’ vite)",
+    "category": "Spé 10K",
+    "sport": "Course à pied",
+    "objective": "10K/semi/5K · steady + relance",
+    "description": "Trois enchaînements 9 min steady (SV1, allure marathon + 20 s ou haut de Z2), récup courte 1 min 30, puis 5 min à l’allure 10 km (changement de rythme marqué). Récup longue 3–4 min entre les blocs. Alterne endurance active et effort spécifique.",
+    "content": "Échauffement : 15–20 min footing\n3 × 9 min @ 76-78% VMA (récup 1’30 (jog/marche))\n3 × 5 min @ 90% VMA (récup 3–4 min entre blocs)\nRetour au calme : 10 min footing",
+    "tags": [
+      "Spé 10K"
+    ],
+    "warm": "15–20 min footing",
+    "cool": "10 min footing",
+    "blocks": [
+      {
+        "r": 3,
+        "m": 9,
+        "pct": [
+          76,
+          78
+        ],
+        "rec": "1’30 (jog/marche)"
+      },
+      {
+        "r": 3,
+        "m": 5,
+        "pct": 90,
+        "rec": "3–4 min entre blocs"
+      }
+    ],
+    "phase": "dev",
+    "order": null
+  }
+]

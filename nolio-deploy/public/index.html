@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RedLab → Nolio</title>
+<style>
+  :root{--bg:#0f1421;--bg2:#171d2b;--bd:#2a3346;--tx:#f1f5f9;--mut:#94a3b8;--or:#ff6b1a;--gr:#34d399;--rd:#f87171;--yl:#fbbf24}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-size:22px;margin:0 0 2px}
+  h1 span{color:var(--or)}
+  .sub{color:var(--mut);margin-bottom:20px}
+  .bar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--mut)}
+  input,select{background:#0e1420;border:1.5px solid var(--bd);border-radius:8px;color:var(--tx);font:inherit;padding:8px 10px;outline:none}
+  input:focus,select:focus{border-color:var(--or)}
+  input[type=date]{color-scheme:dark}
+  button{font:inherit;font-weight:700;border:none;border-radius:8px;padding:9px 15px;cursor:pointer}
+  .btn-or{background:var(--or);color:#fff}
+  .btn-gh{background:transparent;border:1px solid var(--bd);color:var(--mut)}
+  .btn-or:hover{filter:brightness(1.08)}
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  .tools input[type=search]{flex:1;min-width:160px}
+  table{width:100%;border-collapse:collapse;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--bd);font-size:13.5px}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);background:#141a27}
+  tr:last-child td{border-bottom:none}
+  td.c{width:34px;text-align:center}
+  td .cat{font-size:11px;color:var(--mut)}
+  .cathd{background:#141a27;color:var(--or);text-transform:uppercase;letter-spacing:.5px;font-size:12px;font-weight:800}
+  .cathd span{color:var(--mut);font-weight:600}
+  .ttl{font-weight:600}
+  .desc{color:var(--mut);font-size:12.5px;margin-top:3px;line-height:1.45;max-width:560px}
+  .step{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.3px;padding:2px 7px;border-radius:5px;background:rgba(255,107,26,.15);color:var(--or);margin-top:4px}
+  .det{color:var(--or);font-size:11.5px;margin-top:5px;cursor:pointer;user-select:none;font-weight:700}
+  .detbox{display:none;background:#0e1420;border:1px solid var(--bd);border-radius:6px;padding:8px 10px;margin:6px 0 2px;white-space:pre-wrap;font-family:inherit;font-size:12px;color:var(--tx);line-height:1.55;max-width:560px;overflow:auto}
+  input[type=date].row{padding:6px 8px;width:150px}
+  .foot{position:fixed;left:0;right:0;bottom:0;background:rgba(15,20,33,.96);backdrop-filter:blur(8px);border-top:1px solid var(--bd);padding:12px 18px;display:flex;gap:14px;align-items:center;justify-content:center}
+  .count{color:var(--mut)}
+  #res{margin-top:18px;display:none}
+  .rrow{display:flex;gap:8px;padding:6px 10px;border-bottom:1px solid var(--bd);font-size:13px}
+  .ok{color:var(--gr)}.sk{color:var(--yl)}.er{color:var(--rd)}
+  .hint{font-size:12px;color:var(--mut)}
+  .badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#222c40;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RedLab <span>→</span> Nolio</h1>
+  <div class="sub">Sélectionne des séances, choisis une date pour chacune et l'athlète, puis envoie-les sur le calendrier Nolio.</div>
+
+  <div class="bar">
+    <div class="fld">
+      <label>Athlète</label>
+      <select id="athlete" onchange="applyVma()"><option value="">Moi (mon calendrier)</option></select>
+    </div>
+    <div class="fld" id="vmaFld">
+      <label>VMA (km/h) <span id="vmasrc" class="hint" style="text-transform:none;letter-spacing:0;font-weight:600"></span></label>
+      <input id="vma" type="number" step="0.1" style="width:90px" onchange="saveVma()">
+    </div>
+  </div>
+
+  <div class="tools">
+    <input type="search" id="q" placeholder="Filtrer les séances…" oninput="render()">
+    <button class="btn-gh" onclick="checkAll(true)">Tout cocher (filtré)</button>
+    <button class="btn-gh" onclick="checkAll(false)">Tout décocher</button>
+  </div>
+
+  <table>
+    <thead><tr><th class="c"></th><th>Séance</th><th>Date</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div id="res"></div>
+</div>
+
+<div class="foot">
+  <span class="count" id="count">0 sélectionnée(s)</span>
+  <button class="btn-or" id="send" onclick="deploy()">Envoyer la sélection vers Nolio</button>
+</div>
+
+<script>
+let sessions = [];
+const state = {}; // index → {checked, date}
+
+const $ = (id) => document.getElementById(id);
+
+async function boot() {
+  const cfg = await fetch('/api/config').then(r => r.json());
+  window.PERCENT = cfg.paceMode === 'percent';
+  $('vma').value = cfg.vma;
+  if (window.PERCENT) {
+    document.getElementById('vmaFld').style.display = 'none';
+    document.querySelector('.sub').textContent += ' — Mode %VMA : Nolio ajuste les allures à la VMA de chaque athlète.';
+  }
+  sessions = await fetch('/api/sessions').then(r => r.json());
+  sessions.forEach(s => state[s.index] = { checked: !!s.date, date: s.date || '' });
+  const ath = await fetch('/api/athletes').then(r => r.json()).catch(() => []);
+  for (const a of ath) {
+    const o = document.createElement('option');
+    o.value = a.id; o.textContent = a.name; $('athlete').appendChild(o);
+  }
+  render();
+  if (!window.PERCENT) applyVma();
+}
+
+// L'API Nolio n'expose pas la VMA d'un athlète : on la mémorise localement,
+// par athlète, une fois saisie (rappelée automatiquement ensuite).
+function vmaKey() { return 'redlab_vma_' + ($('athlete').value || 'self'); }
+function applyVma() {
+  const saved = localStorage.getItem(vmaKey());
+  const src = $('vmasrc');
+  if (saved) { $('vma').value = saved; src.textContent = '✓ mémorisée'; }
+  else { src.textContent = '— à renseigner (sera mémorisée)'; }
+}
+function saveVma() { if ($('vma').value) localStorage.setItem(vmaKey(), $('vma').value); }
+
+const CAT_ORDER = ['Entretien condition physique', 'VO2max', 'Seuil', 'Spé 5K', 'Spé 10K', 'Spé semi', 'Spé marathon'];
+const PH = { gen: 0, dev: 1, spe: 2, aff: 3 };
+const PHLBL = { gen: 'Début de prépa', dev: 'Milieu de prépa', spe: 'Fin · spécifique', aff: 'Affûtage' };
+function whenLabel(s) {
+  if (s.order && s.order.when) return 'Étape ' + s.order.n + ' · ' + s.order.when;
+  return PHLBL[s.phase] || '';
+}
+// Ordre "prépa" : d'abord les séances avec une étape (n croissant), puis par phase.
+function byPrep(a, b) {
+  if (a.order && b.order) return a.order.n - b.order.n;
+  if (a.order) return -1;
+  if (b.order) return 1;
+  return (PH[a.phase] ?? 1) - (PH[b.phase] ?? 1);
+}
+function matches(s, q) {
+  return !q || (s.title + ' ' + s.category + ' ' + (s.objective || '') + ' ' + (s.description || '')).toLowerCase().includes(q);
+}
+function render() {
+  const q = $('q').value.toLowerCase();
+  const tb = $('rows'); tb.innerHTML = '';
+  const cats = [...new Set(sessions.map(s => s.category))]
+    .sort((a, b) => (CAT_ORDER.indexOf(a) < 0 ? 99 : CAT_ORDER.indexOf(a)) - (CAT_ORDER.indexOf(b) < 0 ? 99 : CAT_ORDER.indexOf(b)));
+  for (const cat of cats) {
+    const list = sessions.filter(s => s.category === cat && matches(s, q)).sort(byPrep);
+    if (!list.length) continue;
+    const hr = document.createElement('tr');
+    hr.innerHTML = `<td colspan="3" class="cathd">${esc(cat)} <span>(${list.length})</span></td>`;
+    tb.appendChild(hr);
+    for (const s of list) {
+      const st = state[s.index];
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        `<td class="c"><input type="checkbox" ${st.checked ? 'checked' : ''} onchange="toggle(${s.index},this.checked)"></td>`
+        + `<td><div class="ttl">${esc(s.title)}</div>`
+        + (whenLabel(s) ? `<div><span class="step">${esc(whenLabel(s))}</span></div>` : '')
+        + (s.objective ? `<div class="cat"><span class="badge">${esc(s.objective)}</span></div>` : '')
+        + (s.description ? `<div class="desc">${esc(s.description)}</div>` : '')
+        + `<div class="det" onclick="var b=this.nextElementSibling;b.style.display=b.style.display==='block'?'none':'block';this.textContent=(b.style.display==='block'?'▾ masquer':'▸ détails')">▸ détails</div>`
+        + `<pre class="detbox">${esc(s.content || '')}</pre></td>`
+        + `<td><input type="date" class="row" value="${st.date}" onchange="setDate(${s.index},this.value)"></td>`;
+      tb.appendChild(tr);
+    }
+  }
+  updateCount();
+}
+function esc(s){return String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function toggle(i, v){ state[i].checked = v; updateCount(); }
+function setDate(i, v){ state[i].date = v; }
+function checkAll(v){
+  const q = $('q').value.toLowerCase();
+  for (const s of sessions){ if(matches(s, q)) state[s.index].checked = v; }
+  render();
+}
+function updateCount(){
+  const n = Object.values(state).filter(s => s.checked).length;
+  $('count').textContent = n + ' sélectionnée(s)';
+}
+async function deploy(){
+  if (!window.PERCENT) saveVma();
+  const items = sessions.filter(s => state[s.index].checked).map(s => ({ index: s.index, date: state[s.index].date }));
+  if(!items.length){ alert('Coche au moins une séance.'); return; }
+  const missing = items.filter(x => !x.date);
+  if(missing.length){ alert(missing.length + ' séance(s) sélectionnée(s) sans date. Renseigne une date pour chacune.'); return; }
+  const btn = $('send'); btn.disabled = true; btn.textContent = 'Envoi…';
+  const body = { athleteId: $('athlete').value || null, vma: +$('vma').value, items };
+  try{
+    const { results } = await fetch('/api/deploy', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r=>r.json());
+    showResults(results);
+  }catch(e){ alert('Erreur : ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Envoyer la sélection vers Nolio';
+}
+function showResults(results){
+  const box = $('res'); box.style.display = 'block';
+  const ok = results.filter(r=>r.ok).length, sk = results.filter(r=>r.skipped).length, er = results.filter(r=>!r.ok&&!r.skipped).length;
+  box.innerHTML = `<h3>Résultat : <span class="ok">${ok} créées</span> · <span class="sk">${sk} déjà présentes</span> · <span class="er">${er} en erreur</span></h3>`
+    + results.map(r => `<div class="rrow"><span class="${r.ok?'ok':r.skipped?'sk':'er'}">${r.ok?'✓':r.skipped?'↷':'✗'}</span><span>${esc(r.date||'')}</span><span>${esc(r.title)}</span>${r.error&&!r.skipped?`<span class="er">${esc(r.error)}</span>`:''}</div>`).join('');
+  box.scrollIntoView({behavior:'smooth'});
+}
+boot();
+</script>
+</body>
+</html>

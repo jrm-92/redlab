@@ -1,0 +1,16 @@
+{
+  "_comment": "Copie ce fichier en config.json et remplis tes valeurs. Le client_id/secret vient de https://www.nolio.io/api (portail développeur). Ne partage JAMAIS config.json.",
+
+  "clientId": "TON_CLIENT_ID",
+  "clientSecret": "TON_CLIENT_SECRET",
+  "redirectUri": "http://localhost:8721/callback",
+
+  "sportId": 2,
+  "vma": 16.0,
+  "athleteId": null,
+
+  "startDate": "2026-09-01",
+  "intervalDays": 2,
+
+  "workoutsFile": "data/workouts.json"
+}

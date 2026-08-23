@@ -2976,7 +2976,7 @@ function renderZones(){
    calculatrice. La distance survit au re-rendu du curseur, sinon elle se
    remettrait à 1000 m à chaque changement d'athlète. */
 var _slDist=1000;
-const SL_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[1000,'1 km'],[2000,'2 km'],[3000,'3 km'],[5000,'5 km'],[10000,'10 km']];
+const SL_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[800,'800 m']];
 function slDistSet(m){
   _slDist=m;
   const i=document.getElementById('sl-d'); if(i)i.value=m;

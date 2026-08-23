@@ -1,0 +1,13 @@
+{
+  "name": "redlab-nolio-deploy",
+  "version": "1.0.0",
+  "description": "Déploie les séances RedLab vers le calendrier Nolio via l'API officielle (OAuth2).",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "auth": "node index.js --auth",
+    "dry": "node index.js --dry-run",
+    "deploy": "node index.js",
+    "ui": "node server.js"
+  }
+}
