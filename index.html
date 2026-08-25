@@ -473,6 +473,52 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
   .db-plan-cal{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+  /* ── Calendrier « Réalisé » : le prévu s'efface derrière le couru ── */
+  .db-ch-prevu{opacity:.62}
+  .db-ch-fait{cursor:pointer;background:rgba(52,211,153,.14);border-left:3px solid #34D399;color:var(--text);font-weight:800;align-items:center;padding:4px 5px}
+  .db-ch-fait:hover{background:rgba(52,211,153,.24)}
+  .plw-ch .db-ch-in{display:flex;flex-direction:column;gap:1px;flex:1 1 auto;min-width:0;overflow:hidden}
+  .db-ch-in b{font-size:11.5px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .db-ch-in i{font-size:10px;font-style:normal;font-weight:700;color:#34D399;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plw-ch .db-ch-loupe{flex:0 0 auto;color:#34D399;font-weight:900;align-self:center;font-size:13px}
+  /* Une case de « Réalisé » porte deux lignes — distance puis temps et allure —
+     là où « Prévu » n'affiche qu'un titre : elle a besoin d'un peu plus large,
+     sans quoi l'allure finit en points de suspension. Le calendrier défile
+     déjà horizontalement, la largeur supplémentaire ne coûte rien. */
+  .db-real-cal .plw-inner{min-width:max(100%,1150px)}
+  .db-real-cal .plw-days,.db-real-cal .plw-dow{grid-template-columns:repeat(7,minmax(152px,1fr))}
+  .db-ch-manque{font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#F87171;opacity:.75;padding:1px 4px}
+  /* ── Détail d'une séance réalisée ── */
+  .pl-modal-box.db-dt-box{max-width:880px;overflow-y:auto}
+  .db-dt-box>*{flex-shrink:0}
+  /* Sur téléphone la barre d'onglets occupe le bas de l'écran : sans cette
+     réserve, la fin de la fiche passe dessous. */
+  @media(max-width:860px){ #db-seance-modal{padding:20px 12px calc(120px + env(safe-area-inset-bottom,0px))} }
+  .db-dt-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .db-dt-badge{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);border:1px solid var(--border2);border-radius:5px;padding:2px 7px}
+  .db-dt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:9px}
+  .db-dt-t{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:11px 13px}
+  .db-dt-k{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px}
+  .db-dt-v{font-size:20px;font-weight:900;line-height:1.05;letter-spacing:-.4px}
+  .db-dt-u{font-size:11px;font-weight:700;color:var(--muted);margin-left:3px}
+  .db-dt-s{font-size:11.5px;color:var(--muted2);margin-top:4px}
+  .db-dt-sec{margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+  .db-dt-h{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .db-dt-note{font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:8px}
+  .db-dt-tab{width:100%;border-collapse:collapse;min-width:520px}
+  .db-dt-tab th{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .db-dt-tab th:nth-child(1),.db-dt-tab th:nth-child(2){text-align:left}
+  .db-dt-tab td{font-size:12.5px;color:var(--text2);padding:6px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)}
+  .db-dt-tab td:nth-child(1),.db-dt-tab td:nth-child(2){text-align:left}
+  .db-dt-tab td:nth-child(1){color:var(--muted2);font-weight:800}
+  .db-dt-tab tr.db-tr-rec td{opacity:.55}
+  .db-tr-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);border:1px solid var(--border2);border-radius:4px;padding:0 4px}
+  .db-dt-prev{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .db-dt-prev-t{font-size:13.5px;font-weight:800;color:var(--text)}
+  .db-dt-prev-l{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--text2);line-height:1.55}
+  .db-dt-prev-l b{color:var(--muted);font-weight:800}
+  .db-seance-cl{cursor:pointer}
+  .db-seance-cl:hover{border-color:rgba(52,211,153,.45)}
   .plc-grab{display:flex;align-items:center;gap:10px;margin:8px 0;padding:8px 12px;border-radius:9px;background:rgba(255,107,26,.10);border:1px solid rgba(255,107,26,.35);font-size:12.5px;font-weight:700;color:var(--orange)}
   .plc-grab button{background:none;border:1px solid rgba(255,107,26,.45);color:var(--orange);border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:800;padding:3px 10px;cursor:pointer;margin-left:auto}
   .plw-kmf,.plw-dlf{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted2)}
@@ -4447,6 +4493,7 @@ function renderDashPlan(){
   // de plan affichable, et la publication en série enchaîne les athlètes :
   // un reste du précédent partirait dans la fiche du suivant.
   window._espacePlan=null;
+  window._dashCal=null;
   const sec=document.getElementById('db-plan-section'), box=document.getElementById('db-plan');
   if(!sec||!box||typeof PLANIF==='undefined')return;
   const g=S.goal||{};
@@ -4484,6 +4531,15 @@ function renderDashPlan(){
   const cal=plCalendarHTML(p,weeks,{ro:true});
   try{ window._espacePlan=_planPourEspace(p,weeks); }catch(e){ window._espacePlan=null; }
   const _unit=plUnit();
+  /* Le calendrier « Réalisé » redessine la même grille que « Prévu », mais il
+     est reconstruit à part, après que cette fonction a rendu les globales du
+     plan à l'onglet Plan. Tout ce dont il a besoin est donc figé ici, tant que
+     _plSessions contient encore les séances de CE plan. */
+  window._dashCal={col:p.col, race:(_plDate2||null), inter:(_plDi||null),
+    sessions:(function(){var o={};Object.keys(_plSessions||{}).forEach(function(k){
+      o[k]=(_plSessions[k]||[]).map(function(x){return {t:x.t,th:x.th};});});return o;})(),
+    weeks:weeks.map(function(x){return {n:x.n,ph:x.ph,km:x.km,rec:!!x.rec,dates:(x.dates||''),
+      iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null)};})};
   window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null),dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
   // restauration
   _plD=save.D;_plW=save.W;_plCtx=save.ctx;_plVol=save.vol;_plDate1=save.d1;_plDate2=save.d2;_plDi=save.di;_plProf=save.prof;_plPhaseOverride=save.ph;_plOrient=save.orient;_plBase=save.base;_plRatio=save.ratio;_plBaseW=save.baseW;_plVolOverride=save.volOv;_plRecOverride=save.recOv;_plSessions=save.sess;
@@ -4654,7 +4710,12 @@ function dbRealiseHTML(rows,ath){
     +((mTot>1000&&secCourus>0)?tuile('Allure moyenne',fAll(secCourus/(mTot/1000))+'/km','var(--orange)'):'')
     +'</div>';
 
-  return barre+totaux+dbSemainesHTML(rows)+dbListeHTML(rows);
+  // Index par identifiant : la fenêtre de détail est ouverte depuis un
+  // onclick, qui ne peut transporter qu'une chaîne.
+  window._dbParId={};
+  rows.forEach(function(r){ window._dbParId[String(r.id)]=r; });
+
+  return barre+totaux+dbRealiseCalHTML(rows)+dbSemainesHTML(rows)+dbListeHTML(rows);
 }
 
 /* Prévu contre réalisé, semaine par semaine. Le plan raisonne en km, sauf en
@@ -4727,9 +4788,10 @@ function dbListeHTML(rows){
       ? '<span title="'+String(r.nom||'').replace(/"/g,'&quot;')+'" style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#60A5FA;border:1px solid rgba(96,165,250,.35);border-radius:5px;padding:1px 5px">fichier</span>'
       : '';
     var sup=(r.src==='fichier')
-      ? '<button type="button" onclick="dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" style="background:transparent;border:none;color:var(--muted2);font-family:var(--font);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px">×</button>'
+      ? '<button type="button" onclick="event.stopPropagation();dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" style="background:transparent;border:none;color:var(--muted2);font-family:var(--font);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px">×</button>'
       : '';
-    return '<div style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px">'
+    var ouvre=' onclick="dbSeanceOuvrir(\''+String(r.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')"';
+    return '<div class="db-seance-cl" title="Voir le détail de la séance"'+ouvre+' style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px">'
       +'<div style="min-width:150px"><div style="font-size:13px;font-weight:800;color:var(--text)">'+jour+(heure?' <span style="font-weight:600;color:var(--muted2)">'+heure+'</span>':'')+'</div>'
       +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-top:2px">'+sport+' '+orig+'</div></div>'
       +'<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;flex:1">'+faits.join('')+'</div>'
@@ -4737,6 +4799,242 @@ function dbListeHTML(rows){
       +'</div>';
   }).join('');
   return '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Séances réalisées</div>'+lignes+'</div>';
+}
+
+/* ══ LE CALENDRIER RÉALISÉ ══
+   Même grille que « Prévu » — mêmes semaines, mêmes phases, mêmes couleurs —
+   pour que l'œil compare sans avoir à changer de repère. Chaque jour porte ce
+   qui était prévu, en pâle, et ce qui a réellement été couru, en plein. La
+   séance réalisée s'ouvre au clic sur son détail complet.
+
+   La grille est reconstruite à partir de window._dashCal, figé par
+   renderDashPlan : les globales du plan appartiennent à l'onglet Plan et ont
+   déjà été rendues quand cette vue s'affiche. */
+function dbEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function dbIsoDe(d){ return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'); }
+
+/* Ce que la séance dit d'elle-même dans une case de calendrier : la distance
+   en gros, le temps et l'allure en dessous. Sur une seule ligne, la case étant
+   large de 132 px, tout finissait en points de suspension. */
+function dbChipFait(r){
+  var sec=+r.duration_s||0, m=+r.distance_m||0, km=m/1000;
+  var haut=(m>=50)?(km.toFixed(km>=10?1:2).replace('.',',')+' km'):(sec?fHMS(sec):'séance');
+  var bas=[];
+  if(m>=50&&sec) bas.push(fHMS(sec));
+  if(km>=0.4&&sec) bas.push(fAll(sec/km)+'/km');
+  return '<span class="db-ch-in"><b>'+haut+'</b>'+(bas.length?'<i>'+bas.join(' · ')+'</i>':'')+'</span>';
+}
+
+function dbRealiseCalHTML(rows){
+  var d=window._dashCal;
+  if(!d||!d.weeks||!d.weeks.length) return '';
+  var pha=function(h,a){h=(h||'#94A3B8').replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';};
+  var DOW=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var MON=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+  // Les séances rangées par jour, dans l'ordre où elles ont été courues.
+  var parJour={};
+  rows.forEach(function(r){
+    var dt=dbSeanceDate(r.start_time); if(!dt) return;
+    (parJour[dbIsoDe(dt)]=parJour[dbIsoDe(dt)]||[]).push(r);
+  });
+  Object.keys(parJour).forEach(function(k){
+    parJour[k].sort(function(a,b){return (Date.parse(a.start_time)||0)-(Date.parse(b.start_time)||0);});
+  });
+
+  var ajd=dbIsoDe(new Date());
+  var hdr='<div class="plw-dow">'+DOW.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+
+  var lignes=d.weeks.map(function(wk){
+    var c=(typeof PL_PHC!=='undefined'&&PL_PHC[wk.ph])||'#94A3B8';
+    var lundi=wk.iso?new Date(wk.iso+'T00:00:00'):null;
+    var faitSem=0, prevuSem=0;
+    var jours='';
+    for(var i=0;i<7;i++){
+      var dt=lundi?new Date(lundi.getTime()+i*864e5):null;
+      var iso=dt?dbIsoDe(dt):'';
+      var isRace=(iso&&iso===d.race), isInter=(iso&&iso===d.inter);
+      var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
+      var mo=(dt&&(i===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
+      var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px'
+             :(isInter?';outline:2px solid #FBBF24;outline-offset:-2px'
+             :(iso===ajd?';outline:2px solid var(--orange);outline-offset:-2px':''));
+
+      var prevues=(d.sessions[iso]||[]);
+      prevuSem+=prevues.length;
+      var chipsP=prevues.map(function(sx){
+        var col=((typeof LIB_THEMES!=='undefined'&&LIB_THEMES.find(function(t){return t.id===sx.th;}))||{}).col||'#94A3B8';
+        return '<div class="plw-ch plw-ch--ro db-ch-prevu" style="background:'+col+'14;border-left:3px solid '+col+'66" title="Prévu : '+dbEsc(sx.t)+'"><span>'+dbEsc(sx.t)+'</span></div>';
+      }).join('');
+
+      var faites=(parJour[iso]||[]);
+      faitSem+=faites.length;
+      var chipsF=faites.map(function(r){
+        return '<div class="plw-ch db-ch-fait" onclick="dbSeanceOuvrir(\'' + String(r.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')" title="Voir le détail de la séance réalisée">'+dbChipFait(r)+'<span class="db-ch-loupe">›</span></div>';
+      }).join('');
+
+      // Un jour prévu et resté vide se signale : c'est l'information utile.
+      var manque=(prevues.length&&!faites.length&&dt&&dt<new Date(ajd+'T00:00:00'))
+        ? '<div class="db-ch-manque">non réalisée</div>' : '';
+
+      jours+='<div class="plw-day" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'">'
+        +'<div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
+        +'<div class="plw-sess">'+chipsP+chipsF+manque+'</div></div>';
+    }
+    var meta='<div class="plw-meta">'
+      +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+dbEsc(wk.dates)+'</span></span>'
+      +'<span class="plc-ph" style="color:'+c+'">'+((typeof plPhLabel==='function')?plPhLabel(wk.ph):'')+'</span>'
+      +'<span class="plw-kmf">Prévu <b style="color:var(--text2)">'+prevuSem+'</b> · réalisé <b style="color:'+(faitSem?'#34D399':'var(--muted2)')+'">'+faitSem+'</b></span>'
+      +(wk.rec?'<span class="plw-dlf">Décharge</span>':'')
+      +'</div>';
+    return '<div class="plw-week" style="border-left:4px solid '+c+'">'+meta+'<div class="plw-days">'+jours+'</div></div>';
+  }).join('');
+
+  return '<div style="margin-bottom:22px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Le plan, jour par jour</div>'
+    +'<div class="plc-hint">Même calendrier que <b>Prévu</b>. En pâle, la séance prévue ; en plein, ce qui a été couru ce jour-là — <b>clique dessus pour le détail</b>. 🏁 = course, ★ = course prépa, contour orange = aujourd’hui.</div>'
+    +'<div class="hscroll plw-scroll db-real-cal"><div class="plw-inner">'+hdr+'<div class="plw-cal">'+lignes+'</div></div></div>'
+    +'</div>';
+}
+
+/* ══ LE DÉTAIL D'UNE SÉANCE RÉALISÉE ══
+   Tout ce que RedLab sait de la séance : le résumé, l'analyse au regard du
+   profil de l'athlète (allure en % de VMA, FC en % de FCmax), les tours quand
+   le fichier les livre, et ce qui était prévu ce jour-là.
+
+   Les séances remontées de Polar n'ont pas de tours : AccessLink livre le
+   résumé de l'exercice, et la transaction qui l'a livré est détruite — on ne
+   peut pas y revenir. Le fichier .FIT ou .TCX, lui, les contient. */
+function dbSeanceFermer(){
+  var e=document.getElementById('db-seance-modal'); if(e) e.remove();
+  if(_dbEchap){ document.removeEventListener('keydown',_dbEchap); _dbEchap=null; }
+}
+var _dbEchap=null;
+
+function dbSeanceOuvrir(id){
+  var r=(window._dbParId||{})[String(id)]; if(!r) return;
+  dbSeanceFermer();
+  var host=document.createElement('div');
+  host.id='db-seance-modal'; host.className='pl-modal';
+  host.onclick=function(e){ if(e.target===host) dbSeanceFermer(); };
+  host.innerHTML=dbSeanceModalHTML(r);
+  document.body.appendChild(host);
+  _dbEchap=function(e){ if(e.key==='Escape') dbSeanceFermer(); };
+  document.addEventListener('keydown',_dbEchap);
+}
+
+function dbSeanceModalHTML(r){
+  var dt=dbSeanceDate(r.start_time);
+  var jour=dt?dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'date inconnue';
+  var heure=dt?dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+  var sec=+r.duration_s||0, m=+r.distance_m||0;
+  var km=m/1000;
+  var kmh=(sec>0&&m>0)?(m/sec*3.6):null;
+  // L'allure ne veut rien dire sous 400 m : renfo, natation, échauffement seul.
+  var allure=(km>=0.4&&sec>0)?fAll(sec/km):null;
+  var pctVma=(kmh&&S.vma)?Math.round(kmh/S.vma*100):null;
+  var zone=null;
+  if(kmh&&S.vma&&typeof ZONES_VMA!=='undefined'){
+    var rap=kmh/S.vma;
+    zone=ZONES_VMA.filter(function(z){return rap>=z.lo;}).pop()||ZONES_VMA[0];
+  }
+  var pctFc=(r.hr_avg&&S.fcMax)?Math.round(r.hr_avg/S.fcMax*100):null;
+  var pctFcMax=(r.hr_max&&S.fcMax)?Math.round(r.hr_max/S.fcMax*100):null;
+
+  var tuile=function(lbl,val,sous,col){
+    if(val==null) return '';
+    return '<div class="db-dt-t"><div class="db-dt-k">'+lbl+'</div>'
+      +'<div class="db-dt-v" style="color:'+(col||'var(--text)')+'">'+val+'</div>'
+      +(sous?'<div class="db-dt-s">'+sous+'</div>':'')+'</div>';
+  };
+  var tuiles='<div class="db-dt-grid">'
+    +tuile('Durée', sec?fHMS(sec):null)
+    +tuile('Distance', m>=50?km.toFixed(2).replace('.',',')+' km':null)
+    +tuile('Allure moyenne', allure?allure+'<span class="db-dt-u">/km</span>':null, kmh?kmh.toFixed(1).replace('.',',')+' km/h':'', 'var(--orange)')
+    +tuile('Intensité', pctVma!=null?pctVma+'<span class="db-dt-u">% VMA</span>':null,
+           zone?('Z'+zone.z+' · '+zone.n):'', zone?zone.col:null)
+    +tuile('FC moyenne', r.hr_avg?r.hr_avg+'<span class="db-dt-u">bpm</span>':null, pctFc?pctFc+' % FCmax':'', '#F87171')
+    +tuile('FC max', r.hr_max?r.hr_max+'<span class="db-dt-u">bpm</span>':null, pctFcMax?pctFcMax+' % FCmax':'', '#F87171')
+    +tuile('Calories', r.calories?r.calories+'<span class="db-dt-u">kcal</span>':null)
+    +'</div>';
+
+  // Ce qui manque, dit franchement, plutôt qu'une case vide.
+  var creux=[];
+  if(!allure&&sec) creux.push('pas d’allure : la séance ne porte pas de distance exploitable');
+  if(pctVma!=null&&!S.vma) creux.push('renseigne la VMA pour situer l’intensité');
+  if(!S.fcMax&&r.hr_avg) creux.push('renseigne la FC max du profil pour lire la FC en pourcentage');
+  var note=creux.length?'<div class="db-dt-note">'+creux.join(' · ')+'.</div>':'';
+
+  // ── Les tours ──
+  var tours='';
+  var lt=(r.tours||[]).filter(function(t){return t&&(t.t||t.d);});
+  if(lt.length>1){
+    var lignes=lt.map(function(t,i){
+      var td=+t.d||0, tt=+t.t||0;
+      var a=(td>=200&&tt>0)?fAll(tt/(td/1000)):null;
+      var pv=(td>0&&tt>0&&S.vma)?Math.round((td/tt*3.6)/S.vma*100):null;
+      return '<tr'+(t.rec?' class="db-tr-rec"':'')+'>'
+        +'<td>'+(i+1)+'</td>'
+        +'<td>'+dbEsc(t.nm||'')+(t.rec?' <span class="db-tr-tag">récup</span>':'')+'</td>'
+        +'<td>'+(td?(td>=1000?(td/1000).toFixed(2).replace('.',',')+' km':Math.round(td)+' m'):'—')+'</td>'
+        +'<td>'+(tt?fHMS(tt):'—')+'</td>'
+        +'<td style="color:'+(a?'var(--orange)':'var(--muted2)')+'">'+(a?a+'/km':'—')+'</td>'
+        +'<td>'+(pv!=null?pv+' %':'—')+'</td>'
+        +'<td style="color:'+(t.hr?'#F87171':'var(--muted2)')+'">'+(t.hr?t.hr+(t.hx?' / '+t.hx:''):'—')+'</td>'
+        +'</tr>';
+    }).join('');
+    tours='<div class="db-dt-sec"><div class="db-dt-h">Les tours ('+lt.length+')</div>'
+      +'<div style="overflow-x:auto"><table class="db-dt-tab">'
+      +'<thead><tr><th>#</th><th>Type</th><th>Distance</th><th>Temps</th><th>Allure</th><th>% VMA</th><th>FC moy / max</th></tr></thead>'
+      +'<tbody>'+lignes+'</tbody></table></div>'
+      +'<div class="db-dt-note">Les tours viennent du fichier tel que la montre l’a enregistré. Le % VMA se lit au regard de la VMA du profil ('+(S.vma?String(S.vma).replace('.',',')+' km/h':'non renseignée')+').</div></div>';
+  } else if(r.src==='polar'){
+    tours='<div class="db-dt-sec"><div class="db-dt-h">Les tours</div>'
+      +'<div class="db-dt-note">Polar ne livre que le résumé de l’exercice, et la transaction qui l’a livré est détruite après lecture : les tours ne sont pas récupérables. Pour les avoir, exporte la séance depuis Polar Flow en <b>.TCX</b> et dépose-la avec <b>⤒ Importer un fichier</b>.</div></div>';
+  } else {
+    tours='<div class="db-dt-sec"><div class="db-dt-h">Les tours</div>'
+      +'<div class="db-dt-note">Ce fichier ne contient pas de tours exploitables, ou il a été importé avant que RedLab ne les conserve — réimporte-le pour les récupérer.</div></div>';
+  }
+
+  // ── Ce qui était prévu ce jour-là ──
+  var prevu='';
+  var cal=window._dashCal;
+  if(cal&&dt){
+    var prev=(cal.sessions[dbIsoDe(dt)]||[]);
+    if(prev.length){
+      prevu='<div class="db-dt-sec"><div class="db-dt-h">Prévu ce jour-là</div>'
+        +prev.map(function(sx){
+          var d=(typeof _seancePourEspace==='function')?_seancePourEspace(sx.t,S.vma):null;
+          if(!d) return '<div class="db-dt-note">'+dbEsc(sx.t)+'</div>';
+          return '<div class="db-dt-prev" style="border-left:3px solid '+d.col+'">'
+            +'<div class="db-dt-prev-t">'+dbEsc(d.titre)+(d.theme?' <span style="color:'+d.col+'">· '+dbEsc(d.theme)+'</span>':'')+'</div>'
+            +(d.desc?'<div class="db-dt-note" style="margin:4px 0 6px">'+dbEsc(d.desc)+'</div>':'')
+            +(d.lignes.length?'<div class="db-dt-prev-l">'+d.lignes.map(function(l){
+                return '<div><b>'+dbEsc(l.k)+'</b> — '+dbEsc(l.v)+'</div>';}).join('')+'</div>'
+              :(d.connue?'':'<div class="db-dt-note">Cette séance ne figure plus dans la bibliothèque : son contenu n’est plus consultable.</div>'))
+            +'</div>';
+        }).join('')
+        +'</div>';
+    } else {
+      prevu='<div class="db-dt-sec"><div class="db-dt-h">Prévu ce jour-là</div>'
+        +'<div class="db-dt-note">Rien n’était prévu au calendrier ce jour-là.</div></div>';
+    }
+  }
+
+  var sport=r.sport?String(r.sport).replace(/_/g,' ').toLowerCase():'séance';
+  var src=(r.src==='fichier')
+    ? '<span class="db-dt-badge" style="color:#60A5FA;border-color:rgba(96,165,250,.35)">fichier'+(r.nom?' · '+dbEsc(r.nom):'')+'</span>'
+    : '<span class="db-dt-badge" style="color:#34D399;border-color:rgba(52,211,153,.35)">montre polar</span>';
+  var app=r.device?'<span class="db-dt-badge">'+dbEsc(r.device)+'</span>':'';
+  var lib=r.notes?'<span class="db-dt-badge">'+dbEsc(r.notes)+'</span>':'';
+
+  return '<div class="pl-modal-box db-dt-box">'
+    +'<div class="pl-modal-top"><b>'+dbEsc(jour.charAt(0).toUpperCase()+jour.slice(1))+'</b>'
+      +'<span>'+(heure?heure+' · ':'')+dbEsc(sport)+'</span>'
+      +'<button type="button" class="pl-modal-x" onclick="dbSeanceFermer()">×</button></div>'
+    +'<div class="db-dt-badges">'+src+app+lib+'</div>'
+    +tuiles+note+tours+prevu
+    +'</div>';
 }
 
 /* ══ SÉANCES IMPORTÉES DEPUIS UN FICHIER ══
@@ -4761,9 +5059,12 @@ async function dbLireActivites(buf){
   return window.rlActivitesDuFichier(buf);
 }
 
-/* Une activité complète tient en quelques centaines de points ; on n'en
-   garde que le résumé. Stocker les tracés reviendrait à remplir le
-   localStorage pour une information que la vue n'affiche pas. */
+/* Une activité complète tient en quelques centaines de points GPS ; on jette
+   le tracé, qui remplirait le localStorage pour une information qu'aucune vue
+   n'affiche, et on garde le résumé plus la liste des tours — c'est elle qui
+   fait le détail de la séance : un tour tient en cinq nombres, et une séance
+   en compte quelques dizaines. Le plafond protège d'un fichier aberrant. */
+var DB_MAX_TOURS=300;
 function dbFichierResume(act,nom){
   var laps=act.laps||[];
   var sec=0,m=0,cal=0,hrSom=0,hrPds=0,hrMax=null;
@@ -4786,7 +5087,19 @@ function dbFichierResume(act,nom){
     sport:act.sport||null,
     calories:cal?Math.round(cal):null,
     src:'fichier',
-    nom:nom||''
+    nom:nom||'',
+    device:act.device||'',
+    notes:act.notes||'',
+    tours:laps.slice(0,DB_MAX_TOURS).map(function(l){
+      // « Active » et « Resting » sont l'intensité brute du TCX, pas un nom de
+      // tour : la colonne resterait remplie sans rien dire. La récupération,
+      // elle, se lit déjà sur l'étiquette de la ligne.
+      var nm=l.typeName||'';
+      if(nm==='Active'||nm==='Resting') nm='';
+      return {t:(+l.time||null), d:(l.dist!=null?Math.round(l.dist):null),
+              hr:(l.avgHr||null), hx:(l.maxHr||null),
+              nm:nm, rec:(l.work===false||l.intensity==='Resting')};
+    })
   };
 }
 
@@ -4875,7 +5188,7 @@ function dbSeancesFusion(rowsPolar,rowsFichier){
   var out=(rowsPolar||[]).map(function(r){
     return {id:r.polar_id,start_time:r.start_time,duration_s:r.duration_s,
             distance_m:r.distance_m,hr_avg:r.hr_avg,hr_max:r.hr_max,
-            sport:r.sport,calories:r.calories,src:'polar'};
+            sport:r.sport,calories:r.calories,src:'polar',tours:null};
   });
   var deja=out.map(function(r){ return Date.parse(r.start_time); }).filter(isFinite);
   (rowsFichier||[]).forEach(function(f){
