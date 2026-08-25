@@ -463,13 +463,17 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .plw-mk{margin-left:auto;font-size:12px}
   .plw-sess{display:flex;flex-direction:column;gap:3px;margin:5px 0;flex:1}
-  .plw-ch{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--text2);border-radius:5px;padding:3px 5px;line-height:1.3;cursor:grab;user-select:none;-webkit-user-select:none}
+  .plw-ch{display:flex;align-items:flex-start;gap:4px;font-size:11px;font-weight:700;color:var(--text2);border-radius:5px;padding:4px 5px;line-height:1.35;cursor:grab;user-select:none;-webkit-user-select:none}
   .plw-ch:active{cursor:grabbing}
   .plw-ch--grab{outline:2px solid var(--orange);outline-offset:1px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
   .plw-cp:hover{color:var(--orange)!important}
   .plw-day--target{border-style:dashed;border-color:rgba(255,107,26,.45)}
   .plw-day--over{outline:2px dashed var(--orange);outline-offset:-2px;background-image:linear-gradient(rgba(255,107,26,.10),rgba(255,107,26,.10))}
-  .plw-ch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+  .plw-ch span{flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere}
+  .plw-ch--ouvre{cursor:pointer}
+  .plw-ch--ouvre:hover{filter:brightness(1.35)}
+  .plw-ch .plw-oeil{flex:0 0 auto;color:var(--muted2);font-weight:900;font-size:12px;line-height:1.35}
+  .plw-ch--ouvre:hover .plw-oeil{color:var(--orange)}
   .plw-ch button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px}
   .plw-ch button:hover{color:#F87171}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
@@ -516,6 +520,16 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .db-dt-tab td:nth-child(1){color:var(--muted2);font-weight:800}
   .db-dt-tab tr.db-tr-rec td{opacity:.55}
   .db-tr-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);border:1px solid var(--border2);border-radius:4px;padding:0 4px}
+  .db-dt-box .pl-modal-top span{text-transform:none}
+  .pl-ap-d{font-size:13.5px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+  .pl-ap-l{display:flex;flex-direction:column;gap:2px}
+  .pl-ap-r{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border)}
+  .pl-ap-k{flex:0 0 118px;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);padding-top:3px}
+  .pl-ap-v{flex:1;font-size:14px;font-weight:700;color:var(--text);line-height:1.55}
+  @media(max-width:560px){
+    .pl-ap-r{flex-direction:column;gap:3px}
+    .pl-ap-k{flex:none;padding-top:0}
+  }
   .db-dt-prev{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px}
   .db-dt-prev-t{font-size:13.5px;font-weight:800;color:var(--text)}
   .db-dt-prev-l{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--text2);line-height:1.55}
@@ -4867,7 +4881,8 @@ function dbRealiseCalHTML(rows){
       prevuSem+=prevues.length;
       var chipsP=prevues.map(function(sx){
         var col=((typeof LIB_THEMES!=='undefined'&&LIB_THEMES.find(function(t){return t.id===sx.th;}))||{}).col||'#94A3B8';
-        return '<div class="plw-ch plw-ch--ro db-ch-prevu" style="background:'+col+'14;border-left:3px solid '+col+'66" title="Prévu : '+dbEsc(sx.t)+'"><span>'+dbEsc(sx.t)+'</span></div>';
+        return '<div class="plw-ch plw-ch--ro plw-ch--ouvre db-ch-prevu" style="background:'+col+'14;border-left:3px solid '+col+'66"'
+          +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\')" title="Prévu — voir le détail"><span>'+dbEsc(sx.t)+'</span><span class="plw-oeil">›</span></div>';
       }).join('');
 
       var faites=(parJour[iso]||[]);
@@ -4908,22 +4923,85 @@ function dbRealiseCalHTML(rows){
    Les séances remontées de Polar n'ont pas de tours : AccessLink livre le
    résumé de l'exercice, et la transaction qui l'a livré est détruite — on ne
    peut pas y revenir. Le fichier .FIT ou .TCX, lui, les contient. */
-function dbSeanceFermer(){
-  var e=document.getElementById('db-seance-modal'); if(e) e.remove();
-  if(_dbEchap){ document.removeEventListener('keydown',_dbEchap); _dbEchap=null; }
+/* Une fenêtre modale, un seul mécanisme : elle se ferme au clic sur le fond,
+   sur la croix, ou par Échap. */
+var _rlEchap=null;
+function rlModalFermer(id){
+  var e=document.getElementById(id); if(e) e.remove();
+  if(_rlEchap){ document.removeEventListener('keydown',_rlEchap); _rlEchap=null; }
 }
-var _dbEchap=null;
+function rlModalOuvrir(id,html){
+  rlModalFermer(id);
+  var host=document.createElement('div');
+  host.id=id; host.className='pl-modal';
+  host.onclick=function(e){ if(e.target===host) rlModalFermer(id); };
+  host.innerHTML=html;
+  document.body.appendChild(host);
+  _rlEchap=function(e){ if(e.key==='Escape') rlModalFermer(id); };
+  document.addEventListener('keydown',_rlEchap);
+}
+/* Un texte qui doit traverser un attribut HTML puis une chaîne JavaScript :
+   on protège d'abord pour JavaScript, ensuite pour le HTML. Un titre de
+   séance saisi par le coach peut contenir n'importe quoi. */
+function rlJsStr(x){
+  return String(x==null?'':x).replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
+function dbSeanceFermer(){ rlModalFermer('db-seance-modal'); }
 function dbSeanceOuvrir(id){
   var r=(window._dbParId||{})[String(id)]; if(!r) return;
-  dbSeanceFermer();
-  var host=document.createElement('div');
-  host.id='db-seance-modal'; host.className='pl-modal';
-  host.onclick=function(e){ if(e.target===host) dbSeanceFermer(); };
-  host.innerHTML=dbSeanceModalHTML(r);
-  document.body.appendChild(host);
-  _dbEchap=function(e){ if(e.key==='Escape') dbSeanceFermer(); };
-  document.addEventListener('keydown',_dbEchap);
+  rlModalOuvrir('db-seance-modal', dbSeanceModalHTML(r));
+}
+
+/* ══ LE DÉTAIL D'UNE SÉANCE PRÉVUE ══
+   Le calendrier ne montre qu'un titre ; le contenu de la séance — échauffement,
+   blocs, allures calculées sur la VMA de l'athlète, récupérations — vit dans la
+   bibliothèque. Un clic sur la pastille va le chercher.
+
+   _seancePourEspace fait déjà ce développement pour la fiche de l'athlète : on
+   s'en sert ici plutôt que de le refaire, sous peine de voir les deux versions
+   diverger. */
+function plApercuFermer(){ rlModalFermer('pl-apercu-modal'); }
+function plApercuOuvrir(titre,iso){
+  rlModalOuvrir('pl-apercu-modal', plApercuHTML(titre,iso));
+}
+function plApercuHTML(titre,iso){
+  var d=(typeof _seancePourEspace==='function')?_seancePourEspace(titre,S.vma):null;
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var jour='';
+  if(iso){
+    var dt=new Date(iso+'T00:00:00');
+    if(!isNaN(dt)){
+      jour=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+      jour=jour.charAt(0).toUpperCase()+jour.slice(1);
+    }
+  }
+  if(!d){
+    return '<div class="pl-modal-box db-dt-box"><div class="pl-modal-top"><b>'+e(titre)+'</b>'
+      +'<span>'+e(jour)+'</span><button type="button" class="pl-modal-x" onclick="plApercuFermer()">×</button></div>'
+      +'<div class="db-dt-note">Le détail de cette séance est introuvable.</div></div>';
+  }
+  var src=(typeof wktFindSession==='function')?(wktFindSession(titre)||{}):{};
+  var lignes=d.lignes.length
+    ? '<div class="pl-ap-l">'+d.lignes.map(function(l){
+        return '<div class="pl-ap-r"><span class="pl-ap-k">'+e(l.k)+'</span><span class="pl-ap-v">'+e(l.v)+'</span></div>';
+      }).join('')+'</div>'
+    : '<div class="db-dt-note">Cette séance ne figure plus dans la bibliothèque : son contenu n’est plus consultable.</div>';
+  return '<div class="pl-modal-box db-dt-box" style="border-left:3px solid '+d.col+'">'
+    +'<div class="pl-modal-top"><b>'+e(d.titre)+'</b>'
+      +'<span>'+e(jour)+'</span>'
+      +'<button type="button" class="pl-modal-x" onclick="plApercuFermer()">×</button></div>'
+    +'<div class="db-dt-badges">'
+      +(d.theme?'<span class="db-dt-badge" style="color:'+d.col+';border-color:'+d.col+'55">'+e(d.theme)+'</span>':'')
+      +(src.tag?'<span class="db-dt-badge">'+e(src.tag)+'</span>':'')
+      +(S.vma?'<span class="db-dt-badge">allures sur '+String(S.vma).replace('.',',')+' km/h</span>'
+             :'<span class="db-dt-badge" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">VMA non renseignée</span>')
+    +'</div>'
+    +(d.desc?'<div class="pl-ap-d">'+e(d.desc)+'</div>':'')
+    +lignes
+    +(src.src?'<div class="db-dt-note">Source — '+e(src.src)+'</div>':'')
+    +'</div>';
 }
 
 function dbSeanceModalHTML(r){
@@ -6965,6 +7043,11 @@ function exportAthleteView(returnDoc){
   // la session du coach, que la fiche n'a pas. On l'enlève entière, sans quoi
   // il resterait un cadre vide une fois ses boutons retirés.
   clone.querySelectorAll('#db-vue,#db-realise').forEach(el=>el.remove());
+  // Le détail d'une séance prévue s'ouvre par un onclick, que la fiche retire
+  // plus bas : on enlève aussi ce qui le promettait, plutôt que de laisser un
+  // chevron mort et un curseur de lien.
+  clone.querySelectorAll('.plw-oeil').forEach(el=>el.remove());
+  clone.querySelectorAll('.plw-ch--ouvre').forEach(el=>el.classList.remove('plw-ch--ouvre'));
   clone.querySelectorAll('input,select,textarea').forEach(el=>{
     if(el.type==='range'||el.id==='sl-d') return;
     el.setAttribute('disabled','');
@@ -8532,7 +8615,8 @@ function plCalendarHTML(p,weeks,opts){
         var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';
         var esc=String(sx.t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
         var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
-        if(RO)return '<div class="plw-ch plw-ch--ro" style="background:'+col+'20;border-left:3px solid '+col+'" title="'+esc+'"><span>'+esc+'</span></div>';
+        if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
+          +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\')" title="Voir le détail de la séance"><span>'+esc+'</span><span class="plw-oeil">›</span></div>';
         return '<div class="plw-ch'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
           +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
