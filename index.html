@@ -7701,7 +7701,7 @@ function plPhaseAdj(key,delta){
 }
 function plPhaseAuto(){_plPhaseOverride=null;renderPlanif();}
 function plSliderFill(p){const sl=document.getElementById('pl-slider');if(!sl)return;const pc=(_plW-p.wmin)/Math.max(1,(p.wmax-p.wmin))*100;sl.style.background='linear-gradient(to right,'+p.col+' 0%,'+p.col+' '+pc+'%,rgba(255,255,255,0.08) '+pc+'%,rgba(255,255,255,0.08) 100%)';}
-function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};plSave();renderPlanif();}
+function setPlD(id){_plD=id;_plW=null;_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};plSave();plSyncGoal();renderPlanif();}
 function setPlProf(id){_plProf=id;_plPicked=true;renderPlanif();}
 function setPlW(v){_plPhaseOverride=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plW=+v;plSave();plUpd();}
 function setPlCtx(c){_plCtx=c;_plPicked=true;renderPlanif();}
@@ -7719,6 +7719,7 @@ function plQ(field,val){
   const rb=document.getElementById('pl-reco');if(rb&&p)rb.innerHTML=plRecoBox(p);
   plTimeVerdict();plVolVerdict();
   plUpd();
+  plSyncGoal();
 }
 function plVolVerdict(){
   const box=document.getElementById('pl-vol-verdict'); if(!box)return;
@@ -7746,6 +7747,7 @@ function plTimeSet(){
   const rb=document.getElementById('pl-reco');if(rb&&p)rb.innerHTML=plRecoBox(p);
   plTimeVerdict();
   plUpd();
+  plSyncGoal();
 }
 function plParseTime(str){
   if(!str)return null;
@@ -8092,6 +8094,31 @@ function plImportApply(id){
    plan enregistré s'il en porte, sinon dans l'objectif du tableau de bord.
    Ne remplace jamais ce qui est déjà saisi à l'écran — le coach est peut-être
    en train de taper. */
+/* ══ « AJUSTER LA PRÉPA » ALIMENTE « COURSE À VENIR » ══
+   La course se définit désormais dans Planification. Ce qu'on y saisit doit
+   donc apparaître dans l'objectif du tableau de bord sans attendre un clic
+   sur « Ajouter ce plan » — sinon le coach voit deux vérités différentes
+   selon l'onglet où il se trouve.
+
+   Garde-fou : on ne touche à l'objectif que si une date de course est posée.
+   Sans elle, cliquer une pastille de distance en explorant les modèles
+   écraserait l'objectif de l'athlète. */
+function plSyncGoal(){
+  if(!_plDate2) return;
+  var g=S.goal||{};
+  var t=(typeof plParseTime==='function')?plParseTime(_plTime):null;
+  var neuf={id:_plD, t:(t||null), date:_plDate2, name:(_plNom||''), url:(_plUrl||'')};
+  if(g.id===neuf.id&&g.t===neuf.t&&g.date===neuf.date&&g.name===neuf.name&&g.url===neuf.url) return;
+  S.goal=neuf;
+  if(typeof saveLS==='function')saveLS();
+  // Le tableau de bord n'est pas à l'écran : on le rafraîchit quand même, il
+  // sera juste à l'arrivée.
+  try{ if(typeof renderGoalSection==='function')renderGoalSection(); }catch(e){}
+  try{ if(typeof renderPredCards==='function')renderPredCards(); }catch(e){}
+  try{ if(typeof goalReadout==='function')goalReadout(); }catch(e){}
+  try{ if(typeof renderDashPlan==='function')renderDashPlan(); }catch(e){}
+}
+
 function plSeedObjectif(){
   var pl=S.plan||{}, g=S.goal||{};
   if(!_plNom)  _plNom = pl.nom || g.name || '';
@@ -8105,8 +8132,8 @@ function plSeedObjectif(){
     }
   }
 }
-function plNomSet(v){ _plNom=String(v||'').slice(0,120); plSave(); }
-function plUrlSet(v){ _plUrl=String(v||'').trim().slice(0,300); plSave(); }
+function plNomSet(v){ _plNom=String(v||'').slice(0,120); plSave(); plSyncGoal(); }
+function plUrlSet(v){ _plUrl=String(v||'').trim().slice(0,300); plSave(); plSyncGoal(); }
 
 function plToDash(){
   var p=PLANIF.find(function(x){return x.id===_plD;}); if(!p)return;
@@ -8311,6 +8338,7 @@ function plDates(){
   if(!e1||!e2)return;
   _plDate1=e1.value||null;_plDate2=e2.value||null;_plDi=(e3&&e3.value)||null;
   plSave();
+  plSyncGoal();
   const inf=plAvailInfo();
   if(!inf){const out=document.getElementById('pl-avail');if(out)out.textContent='';plUpd();return;}
   if(inf.applied==null){plAvailRender();return;}
@@ -8628,23 +8656,6 @@ function renderPlanif(){
         +'<span style="font-size:12px;color:var(--muted2)">'+plPlansSources().length+' plan'+(plPlansSources().length>1?'s':'')+' réutilisable'+(plPlansSources().length>1?'s':'')+'</span></div>'
       : '')
     +'<div class="lib-chips" style="margin-bottom:6px"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-right:6px;align-self:center">Objectif</span>'+chips+'</div>'
-    // ── Questionnaire ──
-    +'<div class="card" style="padding:22px;margin:14px 0">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Questionnaire</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
-    +plQField('Temps visé','<span class="goal-time">'
-      +'<input id="pl-t-h" type="number" min="0" max="9" placeholder="h" value="'+plTP('h')+'" oninput="plTimeSet()" style="width:46px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">h</span>'
-      +'<input id="pl-t-m" type="number" min="0" max="59" placeholder="min" value="'+plTP('m')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">min</span>'
-      +'<input id="pl-t-s" type="number" min="0" max="59" placeholder="sec" value="'+plTP('s')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin-left:2px">s</span>'
-      +'</span><div id="pl-time-verdict" style="margin-top:8px;font-size:12px;line-height:1.5"></div>')
-    +plQField('Historique','<div class="lib-chips">'+[['fit','Déjà entraîné'],['new','Reprise']].map(o=>'<button class="lib-chip'+((_plCtx==='fit'?'fit':'new')===o[0]?' active':'')+'" onclick="plQ(\'hist\',\''+o[0]+'\')">'+o[1]+'</button>').join('')+'</div>')
-    +plQField('Volume actuel ('+(_plD==='trail'?'h':'km')+'/sem)','<input type="number" value="'+(_plVol||'')+'" placeholder="'+plDefaultVol(p)+'" oninput="plQ(\'vol\',this.value)" class="goal-date" style="width:90px"><div id="pl-vol-verdict" style="margin-top:6px;font-size:11.5px;line-height:1.5"></div>')
-    +plQField('Séances/sem','<input type="number" value="'+(_plSess||'')+'" placeholder="4" min="2" max="14" oninput="plQ(\'sess\',this.value)" class="goal-date" style="width:70px">')
-    +plQField('Dont qualité','<input type="number" value="'+(_plQual||'')+'" placeholder="2" min="0" max="6" oninput="plQ(\'qual\',this.value)" class="goal-date" style="width:70px">')
-    +plQField('Blessure récente ?','<div class="lib-chips">'+[['1','Oui'],['0','Non']].map(o=>'<button class="lib-chip'+((_plInj?'1':'0')===o[0]?' active':'')+'" onclick="plQ(\'inj\','+(o[0]==='1'?'true':'false')+')">'+o[1]+'</button>').join('')+'</div>')
-    +plQField('Course préparatoire ?','<div class="lib-chips">'+[['1','Oui'],['0','Non']].map(o=>'<button class="lib-chip'+((_plPrep?'1':'0')===o[0]?' active':'')+'" onclick="plQ(\'prep\','+(o[0]==='1'?'true':'false')+')">'+o[1]+'</button>').join('')+'</div>')
-    +'</div>'
-    +'<div id="pl-reco" style="margin-top:16px">'+plRecoBox(p)+'</div></div>'
     // ── Planificateur (durée) ──
     +'<div class="card" style="padding:22px;margin-bottom:14px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Ajuster la prépa</div>'
@@ -8659,6 +8670,22 @@ function renderPlanif(){
     +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course :</span><input type="date" id="pl-d2" class="goal-date" value="'+(_plDate2||'')+'" onchange="plDates()">'
     +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course prépa :</span><input type="date" id="pl-di" class="goal-date" value="'+(_plDi||'')+'" onchange="plDates()">'
     +'<span id="pl-avail" style="font-size:12.5px;font-weight:700"></span></div>'
+    // Le chrono visé et les deux paramètres de charge quittent le questionnaire
+    // pour rejoindre les autres réglages : la course se définit ici, en un seul
+    // endroit.
+    +'<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px;padding:11px 14px;border:1px dashed var(--border2);border-radius:10px">'
+    +'<div><div style="font-size:12.5px;font-weight:700;color:var(--muted2);margin-bottom:6px">Chrono visé</div>'
+    +'<span class="goal-time">'
+      +'<input id="pl-t-h" type="number" min="0" max="9" placeholder="h" value="'+plTP('h')+'" oninput="plTimeSet()" style="width:46px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">h</span>'
+      +'<input id="pl-t-m" type="number" min="0" max="59" placeholder="min" value="'+plTP('m')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">min</span>'
+      +'<input id="pl-t-s" type="number" min="0" max="59" placeholder="sec" value="'+plTP('s')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin-left:2px">s</span>'
+    +'</span><div id="pl-time-verdict" style="margin-top:6px;font-size:12px;line-height:1.5"></div></div>'
+    +'<div><div style="font-size:12.5px;font-weight:700;color:var(--muted2);margin-bottom:6px">Volume actuel ('+(_plD==='trail'?'h':'km')+'/sem)</div>'
+    +'<input type="number" value="'+(_plVol||'')+'" placeholder="'+plDefaultVol(p)+'" oninput="plQ(\'vol\',this.value)" class="goal-date" style="width:96px">'
+    +'<div id="pl-vol-verdict" style="margin-top:6px;font-size:11.5px;line-height:1.5"></div></div>'
+    +'<div><div style="font-size:12.5px;font-weight:700;color:var(--muted2);margin-bottom:6px">Séances / sem</div>'
+    +'<input type="number" value="'+(_plSess||'')+'" placeholder="4" min="2" max="14" oninput="plQ(\'sess\',this.value)" class="goal-date" style="width:78px"></div>'
+    +'</div>'
     +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Ratio de charge :</span>'+plRatioToggle()+'<span style="font-size:11.5px;color:var(--muted);line-height:1.4">3:1 = 3 sem de montée / 1 allégée · 2:1 = 2 / 1 (plus de récupération)</span></div>'
     +'<div id="pl-phase-box" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'+plPhaseBoxHTML(p)+'</div>'
     +'</div>'
