@@ -7760,6 +7760,152 @@ function plSyncCfg(){
   }
   if(typeof renderDashPlan==='function')renderDashPlan();
 }
+
+/* ══ REPRENDRE LE PLAN D'UN AUTRE ATHLÈTE ══
+   Deux athlètes qui préparent la même distance suivent souvent la même trame.
+   Autant la recopier plutôt que de la rebâtir écran par écran.
+
+   Ce qui voyage, c'est la STRUCTURE : objectif, durée, phases, ratio de
+   charge, volumes corrigés à la main, décharges déplacées, et les séances
+   posées au calendrier. Les volumes et décharges sont indexés par numéro de
+   semaine, ils se transposent tels quels. Les dates, elles, se recalent sur
+   la course du destinataire. */
+
+function plIsoDe(d){
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+function plLundiDe(iso){
+  var d=new Date(iso+'T12:00:00');
+  d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return d;
+}
+/* Le décalage se compte en SEMAINES ENTIÈRES, d'un lundi de course à l'autre.
+   Au jour près, une sortie longue du dimanche atterrirait un mercredi si les
+   deux courses ne tombent pas le même jour de la semaine. Or un athlète
+   s'entraîne des jours fixes : c'est le jour qui doit être préservé, et la
+   grille des semaines se recalcule de toute façon depuis la date de course. */
+function plDecalageJours(isoSource,isoCible){
+  if(!isoSource||!isoCible)return 0;
+  return Math.round((plLundiDe(isoCible)-plLundiDe(isoSource))/864e5);
+}
+
+function plPlansSources(){
+  if(typeof getAthletes!=='function')return [];
+  return getAthletes().filter(function(a){
+    return a && a.plan && a.plan.D && a.pseudo!==S.pseudo;
+  });
+}
+
+function plImportOpen(){
+  var ex=document.getElementById('pl-imp-modal'); if(ex){ex.remove();return;}
+  var srcs=plPlansSources();
+  var host=document.createElement('div'); host.id='pl-imp-modal'; host.className='pl-modal';
+  host.onclick=function(e){ if(e.target===host)host.remove(); };
+  var cible=_plDate2||(S.goal&&S.goal.date)||'';
+
+  var items=srcs.length?srcs.map(function(a){
+    var p=a.plan;
+    var d=PLANIF.find(function(x){return x.id===p.D;});
+    var nb=Object.keys(p.sess||{}).reduce(function(n,k){return n+((p.sess[k]||[]).length);},0);
+    var sem=p.W?p.W+' sem':'';
+    var course=p.d2?new Date(p.d2+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'sans date';
+    var dec=plDecalageJours(p.d2,cible);
+    var glisse=(cible&&p.d2)?(dec===0?'même semaine':(Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')+(dec>0?' plus tard':' plus tôt'))):'';
+    return '<button type="button" class="ath-it" onclick="plImportApply('+a.id+')">'
+      +'<span class="ath-it-av">'+String(a.pseudo).slice(0,2).toUpperCase()+'</span>'
+      +'<span class="ath-it-tx"><b>'+String(a.pseudo).replace(/</g,'&lt;')+'</b>'
+      +'<span>'+(d?d.lbl:p.D)+(sem?' · '+sem:'')+' · '+nb+' séance'+(nb>1?'s':'')+'<br>'
+      +'<span style="color:var(--muted2)">course du '+course+(glisse?' — décalage : '+glisse:'')+'</span></span></span></button>';
+  }).join('')
+  :'<div style="font-size:13px;color:var(--muted);padding:8px 0;line-height:1.6">Aucun autre athlète n’a de plan enregistré. Construis-en un, ajoute-le au tableau de bord, et il deviendra réutilisable ici.</div>';
+
+  var avert='';
+  if(!cible){
+    avert='<div style="font-size:12.5px;line-height:1.6;color:#FBBF24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:9px;padding:10px 12px;margin-bottom:12px">'
+      +'Renseigne d’abord la <b>date de course</b> ci-dessus. Sans elle, impossible de recaler les séances : elles arriveraient aux dates de l’autre athlète.</div>';
+  } else if(S.plan&&S.plan.D){
+    avert='<div style="font-size:12.5px;line-height:1.6;color:var(--text2);background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:9px;padding:10px 12px;margin-bottom:12px">'
+      +(S.pseudo?String(S.pseudo).replace(/</g,'&lt;'):'Cet athlète')+' a déjà un plan : il sera <b>remplacé</b>.</div>';
+  }
+
+  host.innerHTML='<div class="pl-modal-box" style="max-width:440px">'
+    +'<div class="pl-modal-top"><b>Reprendre le plan d’un autre athlète</b><span style="flex:1"></span>'
+    +'<button type="button" class="pl-modal-x" onclick="var m=document.getElementById(\'pl-imp-modal\');if(m)m.remove()">×</button></div>'
+    +avert
+    +'<div style="max-height:56vh;overflow:auto">'+items+'</div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:12px">'
+    +'La trame est recopiée puis recalée sur ta date de course, par semaines entières — les séances gardent leur jour. '
+    +'Les allures, elles, se recalculent sur la VMA de l’athlète chargé.</div>'
+    +'</div>';
+  document.body.appendChild(host);
+}
+
+function plImportApply(id){
+  var src=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===id;});
+  var m=document.getElementById('pl-imp-modal');
+  if(!src||!src.plan||!src.plan.D){ if(m)m.remove(); return; }
+  var p=src.plan;
+  var cible=_plDate2||(S.goal&&S.goal.date)||'';
+  if(!cible){ alert('Renseigne la date de course avant de reprendre un plan : sans elle, les séances ne peuvent pas être recalées.'); return; }
+  if(S.plan&&S.plan.D&&!confirm('Remplacer le plan actuel de '+(S.pseudo||'cet athlète')+' par celui de '+src.pseudo+' ?')) return;
+
+  var dec=plDecalageJours(p.d2,cible);
+  var glisse=function(iso){
+    if(!iso)return null;
+    var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+dec);
+    return plIsoDe(d);
+  };
+
+  _plD=p.D;
+  _plW=(p.W!=null?Math.max(1,p.W):null);
+  _plCtx=p.ctx; _plVol=p.vol; _plProf=p.prof;
+  _plPhaseOverride=p.ph||null;
+  _plOrient=p.orient||0;
+  _plBase=(p.base!==false);
+  _plRatio=(p.ratio===2?2:3);
+  _plBaseW=(p.baseW!=null?p.baseW:null);
+  // Volumes et décharges sont indexés par NUMÉRO de semaine : rien à recaler.
+  _plVolOverride=Object.assign({},p.volOv||{});
+  _plRecOverride=Object.assign({},p.recOv||{});
+  // Les séances, elles, sont indexées par date.
+  var s={};
+  Object.keys(p.sess||{}).forEach(function(k){
+    var nk=glisse(k); if(!nk)return;
+    (s[nk]=s[nk]||[]).push.apply(s[nk],(p.sess[k]||[]).map(function(x){return Object.assign({},x);}));
+  });
+  _plSessions=s;
+  _plDate2=cible;
+  _plDate1=glisse(p.d1);
+  _plDi=glisse(p.di);
+  _plDatesSeeded=true;
+  _plPicked=true;
+
+  if(typeof plSave==='function')plSave();
+  if(m)m.remove();
+  renderPlanif();
+
+  var nb=Object.keys(s).reduce(function(n,k){return n+s[k].length;},0);
+  var msg=document.getElementById('pl-dash-msg');
+  if(!msg)return;
+
+  /* Deux situations où le recalage ne peut pas être exact. Les taire
+     laisserait le coach devant un calendrier faux sans savoir pourquoi. */
+  var alerte='';
+  if(!p.d2){
+    alerte=' Le plan d’origine n’avait pas de date de course : les séances ont gardé leurs dates telles quelles, elles sont sûrement à replacer.';
+  } else {
+    var jS=new Date(p.d2+'T12:00:00').getDay(), jC=new Date(cible+'T12:00:00').getDay();
+    if(jS!==jC){
+      var nom=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+      alerte=' Les deux courses ne tombent pas le même jour ('+nom[jS]+' contre '+nom[jC]
+        +') : les séances gardent leur jour de semaine, mais vérifie la dernière semaine avant la course.';
+    }
+  }
+  msg.style.color=alerte?'#FBBF24':'#34D399';
+  msg.textContent='Plan de '+src.pseudo+' repris'+(dec?(' et décalé de '+Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')):'')
+    +' — '+nb+' séance'+(nb>1?'s':'')+'.'+(alerte||' Vérifie les dates, puis ajoute-le au tableau de bord.');
+}
+
 function plToDash(){
   var p=PLANIF.find(function(x){return x.id===_plD;}); if(!p)return;
   var msg=document.getElementById('pl-dash-msg');
@@ -8271,6 +8417,11 @@ function renderPlanif(){
   wrap.innerHTML=
     '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Planification</div><div class="input-hero-sub">Assistant de préparation : réponds au questionnaire, l’outil propose une durée, une répartition, une charge et un calendrier. Ajuste ce que tu veux.</div></div>'
     +toolAthleteBar()
+    +(plPlansSources().length
+      ? '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
+        +'<button type="button" class="lib-create-btn" style="margin:0" onclick="plImportOpen()" title="Recopier la trame d\'un plan existant et la recaler sur la date de course de cet athlète">⤵ Reprendre le plan d\'un autre athlète</button>'
+        +'<span style="font-size:12px;color:var(--muted2)">'+plPlansSources().length+' plan'+(plPlansSources().length>1?'s':'')+' réutilisable'+(plPlansSources().length>1?'s':'')+'</span></div>'
+      : '')
     +'<div class="lib-chips" style="margin-bottom:6px"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-right:6px;align-self:center">Objectif</span>'+chips+'</div>'
     // ── Questionnaire ──
     +'<div class="card" style="padding:22px;margin:14px 0">'
