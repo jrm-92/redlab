@@ -371,6 +371,15 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lib-create-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:2px 0 22px}
   /* Éditeur de blocs : une ligne par bloc, qui se replie plutôt que de déborder */
   .lb-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px;margin-bottom:6px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
+  /* Bloc en alternance : plusieurs allures dans une même répétition. */
+  .lb-row--alt{flex-direction:column;align-items:stretch;gap:8px}
+  .lb-alt-hd{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .lb-segs{display:flex;flex-direction:column;gap:7px;padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.03);border:1px dashed var(--border2)}
+  .lb-seg{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .lb-alt{background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:11.5px;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
+  .lb-alt:hover{color:var(--orange);border-color:rgba(255,107,26,.45)}
+  .lb-add--seg{margin-top:2px;font-size:12px;padding:7px}
+  .lb-acts{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
   .lb-del{width:28px;height:28px;flex-shrink:0;border-radius:7px;border:1px solid rgba(248,113,113,.25);background:transparent;color:#F87171;cursor:pointer;font-size:14px;line-height:1}
   .lb-del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
@@ -4358,7 +4367,7 @@ function _seancePourEspace(titre,vma){
         return fDist(sg.d)+' '+sg.lbl+a;
       });
       lignes.push({k:(b.label||('Bloc '+(i+1))),
-                   v:((b.r>1&&b.segs.length===1)?b.r+' × ':'')+parts.join(' + ')
+                   v:((b.r>1&&(b.alt||b.segs.length===1))?b.r+' × ':'')+parts.join(' + ')
                      +(b.rec?' (récup '+b.rec+')':'')});
       return;
     }
@@ -5457,16 +5466,29 @@ function parseWorkout(raw){
   return {blocks:blocks,warnings:warnings,header:header,hRep:hRep,hDist:hDist,hasSeries:hasSeries};
 }
 function libBlockSegs(b,vma){
-  const multi=b.segs.length>1;
+  // Un bloc bâti dans l'éditeur porte alt:true et son « r » compte vraiment
+  // les répétitions — il doit s'afficher. Les blocs venus de la notation libre
+  // gardent leur rendu d'origine.
+  const multi=b.segs.length>1 && !b.alt;
   const parts=b.segs.map(function(sg){ let calc=''; if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';} return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>'; });
   const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
   const rec=b.rec?' <span class="lib-rec">(récup '+b.rec+')</span>':'';
   const key=multi?b.label:((b.r>1)?'Répétitions':b.label);
   return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+key+'</span><span class="lib-step-v">'+body+rec+'</span></div>';
 }
+/* Créer une séance, c'est le même écran que la modifier. Le formulaire en
+   notation libre reste accessible aux séances qui en portent une — il est le
+   seul à savoir relire leur champ « raw » — mais on n'y entre plus par la
+   création : un éditeur unique vaut mieux que deux à apprendre. */
 function toggleLibCreate(){
   const box=document.getElementById('lib-create'); if(!box)return;
-  if(box.style.display==='none'||!box.style.display){ _libEdit=null; box.innerHTML=libCreateFormHTML(); box.style.display='block'; libPreview(); }
+  if(box.style.display==='none'||!box.style.display){
+    _libEdit={src:'new',id:null,orig:'',blocks:[{r:1,d:1000,pct:90,rec:''}],
+              nouvelle:true,apres:null,hote:'lib-create'};
+    box.innerHTML=libEditFormHTML({title:'',theme:'vo2',tag:'',desc:'',warm:'',cool:''});
+    box.style.display='block';
+    libPreview();
+  }
   else { _libEdit=null; box.style.display='none'; box.innerHTML=''; }
 }
 function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
@@ -5490,7 +5512,7 @@ function libCreateFormHTML(pre){
     +'<div class="lc-legend">Allures reconnues : <b>AS3 AS5 AS10 AS21</b> (allures 3/5/10/21 km) · <b>AM</b> (marathon) · <b>EF</b> · <b>Seuil</b> · <b>VMA</b> · <b>VMA+</b> · ou un <b>%</b> direct. Distances en m (ou km). Récup : <b>R3&#39;</b> ou <b>R90"</b>. Plusieurs variantes ? Sépare-les par <b>série 1 / série 2…</b></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
     +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
-      +((_libEdit&&_libEdit.src==='c')?'Enregistrer les modifications':(pre.raw!=null?'↓ Enregistrer dans ma banque':'Enregistrer la séance'))
+      +((_libEdit&&_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':(pre.raw!=null?'↓ Enregistrer dans ma banque':'Enregistrer la séance'))
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>';
 }
 function libBuildFromForm(){
@@ -5501,11 +5523,20 @@ function libBuildFromForm(){
 }
 /* Même contrat que libBuildFromForm, mais depuis l'éditeur de blocs. */
 function libBuildFromEditor(){
-  const blocks=(_libEdit&&_libEdit.blocks||[]).filter(function(b){
+  const brut=(_libEdit&&_libEdit.blocks||[]);
+  const blocks=brut.map(function(b){
+    if(!b.segs) return b;
+    // Un segment sans distance ou sans allure ne veut rien dire : on l'écarte.
+    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && sg.pct>0; })
+                   .map(function(sg){ return {d:sg.d, pct:sg.pct, lbl:(sg.lbl||(sg.pct+' %'))}; });
+    return segs.length?Object.assign({},b,{segs:segs}):null;
+  }).filter(function(b){
+    if(!b) return false;
+    if(b.segs) return b.segs.length>0;
     return (b.d>0||b.m>0||b.sec>0) && (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0);
   });
   const s={
-    id:(_libEdit&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
+    id:(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
     custom:true,
     theme:lcVal('lc-theme')||'vo2',
     title:(lcVal('lc-title').trim()||'Séance perso'),
@@ -5516,7 +5547,7 @@ function libBuildFromEditor(){
     blocks:JSON.parse(JSON.stringify(blocks))
   };
   const warnings=[];
-  if(blocks.length<(_libEdit&&_libEdit.blocks||[]).length)
+  if(blocks.length<brut.length)
     warnings.push('bloc incomplet ignoré (valeur ou % manquant)');
   return {s:s,warnings:warnings,ok:blocks.length>0};
 }
@@ -5541,7 +5572,9 @@ function libSaveSession(){
   }
   // Modification d'une séance perso : on remplace à sa place, pour ne pas la
   // voir sauter en fin de liste à chaque retouche.
-  const majId=(_libEdit&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:null;
+  // _libEdit.nouvelle : on décline plutôt qu'on ne retouche. Aucun identifiant
+  // n'est réutilisé, la séance d'origine reste où elle est.
+  const majId=(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:null;
   b.s.title=libTitreUnique(b.s.title,majId);
   const i=majId?CUSTOM_SESSIONS.findIndex(function(x){return x.id===majId;}):-1;
   if(i>=0)CUSTOM_SESSIONS[i]=b.s; else CUSTOM_SESSIONS.push(b.s);
@@ -5598,6 +5631,7 @@ function libEditOpen(kind,idx,opts){
   var copie=JSON.parse(JSON.stringify(s));
   if(opts.titre)copie.title=opts.titre;
   _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[],
+            nouvelle:!!opts.nouvelle,
             apres:opts.apres||null,hote:opts.modal?'lib-edit-modal':'lib-create'};
   var html=copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie);
   if(opts.modal){
@@ -5624,6 +5658,7 @@ function libEditCancel(){
    VMA — un seul, ou une fourchette — avec sa récupération. */
 function libBlocRow(b,i){
   var IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none';
+  if(b.segs) return libBlocRowAlt(b,i,IS);
   var unite=b.m?'min':(b.sec?'sec':(b.d>=1000?'km':'m'));
   var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
   var p0=Array.isArray(b.pct)?b.pct[0]:(b.pct||70), p1=Array.isArray(b.pct)?b.pct[1]:'';
@@ -5638,17 +5673,105 @@ function libBlocRow(b,i){
     +'<span class="lb-at">–</span>'
     +'<input type="number" min="30" max="130" step="1" value="'+p1+'" placeholder="max" oninput="libBlocSet('+i+',\'p1\',this.value)" title="% VMA haut (facultatif)" style="'+IS+';width:66px;text-align:center">'
     +'<span class="lb-at">% VMA</span>'
-    +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:130px">'
-    +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+    +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:110px">'
+    +'<span class="lb-acts">'
+      +'<button type="button" class="lb-alt" onclick="libBlocEnAlt('+i+')" title="Transformer en alternance : plusieurs allures dans la même répétition">⇄ Alterner</button>'
+      +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+    +'</span>'
     +'</div>';
+}
+
+/* ══ BLOC EN ALTERNANCE ══
+   « 4 × [1 km à 82 % + 1 km à 88 %] » : une répétition qui enchaîne plusieurs
+   allures. Le format existait déjà dans les données — c'est ce que produit la
+   notation libre — mais rien ne permettait de le construire à la main.
+   Chaque segment porte sa distance, son pourcentage et un libellé libre
+   (AS42, AS21…) ; sans libellé, le pourcentage fait office de nom. */
+function libBlocRowAlt(b,i,IS){
+  var segs=b.segs||[];
+  var lignes=segs.map(function(sg,j){
+    var km=(sg.d>=1000);
+    var val=km?(sg.d/1000):(sg.d||0);
+    return '<div class="lb-seg" data-i="'+i+'" data-j="'+j+'">'
+      +'<input type="number" min="0" step="any" value="'+val+'" oninput="libSegSet('+i+','+j+',\'val\',this.value)" title="distance" style="'+IS+';width:74px;text-align:center">'
+      +'<select onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
+        +'<option value="m"'+(km?'':' selected')+'>m</option><option value="km"'+(km?' selected':'')+'>km</option></select>'
+      +'<span class="lb-at">à</span>'
+      +'<input type="number" min="30" max="130" step="1" value="'+(sg.pct||80)+'" oninput="libSegSet('+i+','+j+',\'pct\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
+      +'<span class="lb-at">%</span>'
+      +'<input value="'+String(sg.lbl||'').replace(/"/g,'&quot;')+'" placeholder="libellé (ex : AS42)" oninput="libSegSet('+i+','+j+',\'lbl\',this.value)" style="'+IS+';flex:1;min-width:120px">'
+      +(segs.length>1?'<button type="button" class="lb-del" onclick="libSegDel('+i+','+j+')" title="Retirer ce segment">✕</button>':'')
+      +'</div>';
+  }).join('');
+  return '<div class="lb-row lb-row--alt" data-i="'+i+'">'
+    +'<div class="lb-alt-hd">'
+      +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
+      +'<span class="lb-x">× alternance</span>'
+      +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup entre répétitions" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:150px">'
+      +'<span class="lb-acts">'
+        +'<button type="button" class="lb-alt" onclick="libBlocEnSimple('+i+')" title="Revenir à un bloc à une seule allure">⇄ Simple</button>'
+        +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+      +'</span>'
+    +'</div>'
+    +'<div class="lb-segs">'+lignes
+      +'<button type="button" class="lb-add lb-add--seg" onclick="libSegAdd('+i+')">+ Ajouter une allure</button>'
+    +'</div></div>';
+}
+function libBlocsRedraw(){
+  var box=document.getElementById('lb-rows');
+  if(box)box.innerHTML=(_libEdit&&_libEdit.blocks||[]).map(libBlocRow).join('');
+  libPreview();
+}
+/* Passage simple → alterné : le bloc devient sa propre première allure, on en
+   ajoute une seconde. Les durées ne survivent pas — un segment se mesure en
+   distance — donc on part sur 1 km quand le bloc était en minutes. */
+function libBlocEnAlt(i){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
+  var d=b.d||1000;
+  var p=Array.isArray(b.pct)?b.pct[0]:(b.pct||80);
+  _libEdit.blocks[i]={r:b.r||1, rec:b.rec||'', label:b.label||'Alternance', alt:true,
+    segs:[{d:d,pct:p,lbl:''},{d:d,pct:Math.min(130,p+8),lbl:''}]};
+  libBlocsRedraw();
+}
+function libBlocEnSimple(i){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var sg=b.segs[0]||{};
+  _libEdit.blocks[i]={r:b.r||1, d:sg.d||1000, pct:sg.pct||80, rec:b.rec||''};
+  libBlocsRedraw();
+}
+function libSegAdd(i){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var der=b.segs[b.segs.length-1]||{d:1000,pct:80};
+  b.segs.push({d:der.d,pct:der.pct,lbl:''});
+  libBlocsRedraw();
+}
+function libSegDel(i,j){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  b.segs.splice(j,1);
+  if(b.segs.length<2 && b.segs.length>0) return libBlocEnSimple(i);
+  libBlocsRedraw();
+}
+function libSegSet(i,j,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var sg=b.segs[j]; if(!sg)return;
+  if(champ==='lbl'){ sg.lbl=String(v||'').slice(0,24); }
+  else if(champ==='pct'){ sg.pct=Math.max(30,Math.min(130,Math.round(+v||0))); }
+  else {
+    var row=document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]');
+    var val=+((row&&row.querySelector('input').value)||0);
+    var u=(row&&row.querySelector('select').value)||'m';
+    sg.d=(u==='km')?Math.round(val*1000):Math.round(val);
+  }
+  libPreview();
 }
 function libEditFormHTML(s){
   var themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'"'+(t.id===s.theme?' selected':'')+'>'+t.lbl+'</option>';}).join('');
   var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
   var rows=(_libEdit.blocks||[]).map(libBlocRow).join('');
-  return '<div class="lc-head">Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »</div>'
+  var creation=(_libEdit.src==='new');
+  return '<div class="lc-head">'+(creation?'Nouvelle séance':('Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »'))+'</div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" placeholder="10 × 1000 m à allure 10 km" oninput="libPreview()"></div>'
       +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
     +'</div>'
     +'<div class="lc-field"><label>Contenu de la séance</label><div id="lb-rows">'+rows+'</div>'
@@ -5661,9 +5784,12 @@ function libEditFormHTML(s){
     +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
     +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
-      +(_libEdit.src==='c'?'Enregistrer les modifications':'↓ Enregistrer dans ma banque')
+      +(creation?'Enregistrer la séance':((_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':'↓ Enregistrer dans ma banque'))
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
-    +(_libEdit.src==='l'?'<div class="lc-legend">La bibliothèque de référence n’est pas modifiable : l’enregistrement crée une copie dans tes séances perso, l’originale reste intacte.</div>':'');
+    +(creation
+       ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].</div>'
+       :((_libEdit.src==='l'||_libEdit.nouvelle)
+         ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
 function libBlocSet(i,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
@@ -7708,9 +7834,12 @@ function plEditSession(iso,i){
   var it=(_plSessions[iso]||[])[i]; if(!it)return;
   var trouve=libParTitre(it.t);
   if(!trouve){ alert('Séance introuvable dans la bibliothèque : « '+it.t+' ».'); return; }
-  var titre=(trouve.kind==='l')?libTitreUnique(trouve.s.title+' (adapté)'):trouve.s.title;
+  // Adapter, c'est décliner : on part de la séance existante mais on en crée
+  // une nouvelle, y compris quand la source est déjà une séance perso. Écraser
+  // l'originale la modifierait dans tous les autres plans où elle est posée.
+  var titre=libTitreUnique(trouve.s.title+' (adapté)');
   libEditOpen(trouve.kind,trouve.idx,{
-    modal:true, titre:titre,
+    modal:true, titre:titre, nouvelle:true,
     apres:function(nouvelle){
       var lst=_plSessions[iso]; if(!lst||!lst[i])return;
       lst[i]={t:nouvelle.title,th:nouvelle.theme};
