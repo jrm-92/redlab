@@ -371,6 +371,15 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lib-create-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:2px 0 22px}
   /* Éditeur de blocs : une ligne par bloc, qui se replie plutôt que de déborder */
   .lb-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px;margin-bottom:6px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
+  /* Bloc en alternance : plusieurs allures dans une même répétition. */
+  .lb-row--alt{flex-direction:column;align-items:stretch;gap:8px}
+  .lb-alt-hd{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .lb-segs{display:flex;flex-direction:column;gap:7px;padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.03);border:1px dashed var(--border2)}
+  .lb-seg{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .lb-alt{background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:11.5px;font-weight:700;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
+  .lb-alt:hover{color:var(--orange);border-color:rgba(255,107,26,.45)}
+  .lb-add--seg{margin-top:2px;font-size:12px;padding:7px}
+  .lb-acts{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
   .lb-del{width:28px;height:28px;flex-shrink:0;border-radius:7px;border:1px solid rgba(248,113,113,.25);background:transparent;color:#F87171;cursor:pointer;font-size:14px;line-height:1}
   .lb-del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
@@ -4358,7 +4367,7 @@ function _seancePourEspace(titre,vma){
         return fDist(sg.d)+' '+sg.lbl+a;
       });
       lignes.push({k:(b.label||('Bloc '+(i+1))),
-                   v:((b.r>1&&b.segs.length===1)?b.r+' × ':'')+parts.join(' + ')
+                   v:((b.r>1&&(b.alt||b.segs.length===1))?b.r+' × ':'')+parts.join(' + ')
                      +(b.rec?' (récup '+b.rec+')':'')});
       return;
     }
@@ -5457,16 +5466,29 @@ function parseWorkout(raw){
   return {blocks:blocks,warnings:warnings,header:header,hRep:hRep,hDist:hDist,hasSeries:hasSeries};
 }
 function libBlockSegs(b,vma){
-  const multi=b.segs.length>1;
+  // Un bloc bâti dans l'éditeur porte alt:true et son « r » compte vraiment
+  // les répétitions — il doit s'afficher. Les blocs venus de la notation libre
+  // gardent leur rendu d'origine.
+  const multi=b.segs.length>1 && !b.alt;
   const parts=b.segs.map(function(sg){ let calc=''; if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';} return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>'; });
   const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
   const rec=b.rec?' <span class="lib-rec">(récup '+b.rec+')</span>':'';
   const key=multi?b.label:((b.r>1)?'Répétitions':b.label);
   return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+key+'</span><span class="lib-step-v">'+body+rec+'</span></div>';
 }
+/* Créer une séance, c'est le même écran que la modifier. Le formulaire en
+   notation libre reste accessible aux séances qui en portent une — il est le
+   seul à savoir relire leur champ « raw » — mais on n'y entre plus par la
+   création : un éditeur unique vaut mieux que deux à apprendre. */
 function toggleLibCreate(){
   const box=document.getElementById('lib-create'); if(!box)return;
-  if(box.style.display==='none'||!box.style.display){ _libEdit=null; box.innerHTML=libCreateFormHTML(); box.style.display='block'; libPreview(); }
+  if(box.style.display==='none'||!box.style.display){
+    _libEdit={src:'new',id:null,orig:'',blocks:[{r:1,d:1000,pct:90,rec:''}],
+              nouvelle:true,apres:null,hote:'lib-create'};
+    box.innerHTML=libEditFormHTML({title:'',theme:'vo2',tag:'',desc:'',warm:'',cool:''});
+    box.style.display='block';
+    libPreview();
+  }
   else { _libEdit=null; box.style.display='none'; box.innerHTML=''; }
 }
 function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
@@ -5490,7 +5512,7 @@ function libCreateFormHTML(pre){
     +'<div class="lc-legend">Allures reconnues : <b>AS3 AS5 AS10 AS21</b> (allures 3/5/10/21 km) · <b>AM</b> (marathon) · <b>EF</b> · <b>Seuil</b> · <b>VMA</b> · <b>VMA+</b> · ou un <b>%</b> direct. Distances en m (ou km). Récup : <b>R3&#39;</b> ou <b>R90"</b>. Plusieurs variantes ? Sépare-les par <b>série 1 / série 2…</b></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
     +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
-      +((_libEdit&&_libEdit.src==='c')?'Enregistrer les modifications':(pre.raw!=null?'↓ Enregistrer dans ma banque':'Enregistrer la séance'))
+      +((_libEdit&&_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':(pre.raw!=null?'↓ Enregistrer dans ma banque':'Enregistrer la séance'))
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>';
 }
 function libBuildFromForm(){
@@ -5501,11 +5523,20 @@ function libBuildFromForm(){
 }
 /* Même contrat que libBuildFromForm, mais depuis l'éditeur de blocs. */
 function libBuildFromEditor(){
-  const blocks=(_libEdit&&_libEdit.blocks||[]).filter(function(b){
+  const brut=(_libEdit&&_libEdit.blocks||[]);
+  const blocks=brut.map(function(b){
+    if(!b.segs) return b;
+    // Un segment sans distance ou sans allure ne veut rien dire : on l'écarte.
+    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && sg.pct>0; })
+                   .map(function(sg){ return {d:sg.d, pct:sg.pct, lbl:(sg.lbl||(sg.pct+' %'))}; });
+    return segs.length?Object.assign({},b,{segs:segs}):null;
+  }).filter(function(b){
+    if(!b) return false;
+    if(b.segs) return b.segs.length>0;
     return (b.d>0||b.m>0||b.sec>0) && (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0);
   });
   const s={
-    id:(_libEdit&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
+    id:(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
     custom:true,
     theme:lcVal('lc-theme')||'vo2',
     title:(lcVal('lc-title').trim()||'Séance perso'),
@@ -5516,7 +5547,7 @@ function libBuildFromEditor(){
     blocks:JSON.parse(JSON.stringify(blocks))
   };
   const warnings=[];
-  if(blocks.length<(_libEdit&&_libEdit.blocks||[]).length)
+  if(blocks.length<brut.length)
     warnings.push('bloc incomplet ignoré (valeur ou % manquant)');
   return {s:s,warnings:warnings,ok:blocks.length>0};
 }
@@ -5541,7 +5572,9 @@ function libSaveSession(){
   }
   // Modification d'une séance perso : on remplace à sa place, pour ne pas la
   // voir sauter en fin de liste à chaque retouche.
-  const majId=(_libEdit&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:null;
+  // _libEdit.nouvelle : on décline plutôt qu'on ne retouche. Aucun identifiant
+  // n'est réutilisé, la séance d'origine reste où elle est.
+  const majId=(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:null;
   b.s.title=libTitreUnique(b.s.title,majId);
   const i=majId?CUSTOM_SESSIONS.findIndex(function(x){return x.id===majId;}):-1;
   if(i>=0)CUSTOM_SESSIONS[i]=b.s; else CUSTOM_SESSIONS.push(b.s);
@@ -5598,6 +5631,7 @@ function libEditOpen(kind,idx,opts){
   var copie=JSON.parse(JSON.stringify(s));
   if(opts.titre)copie.title=opts.titre;
   _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[],
+            nouvelle:!!opts.nouvelle,
             apres:opts.apres||null,hote:opts.modal?'lib-edit-modal':'lib-create'};
   var html=copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie);
   if(opts.modal){
@@ -5624,6 +5658,7 @@ function libEditCancel(){
    VMA — un seul, ou une fourchette — avec sa récupération. */
 function libBlocRow(b,i){
   var IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none';
+  if(b.segs) return libBlocRowAlt(b,i,IS);
   var unite=b.m?'min':(b.sec?'sec':(b.d>=1000?'km':'m'));
   var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
   var p0=Array.isArray(b.pct)?b.pct[0]:(b.pct||70), p1=Array.isArray(b.pct)?b.pct[1]:'';
@@ -5638,17 +5673,105 @@ function libBlocRow(b,i){
     +'<span class="lb-at">–</span>'
     +'<input type="number" min="30" max="130" step="1" value="'+p1+'" placeholder="max" oninput="libBlocSet('+i+',\'p1\',this.value)" title="% VMA haut (facultatif)" style="'+IS+';width:66px;text-align:center">'
     +'<span class="lb-at">% VMA</span>'
-    +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:130px">'
-    +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+    +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:110px">'
+    +'<span class="lb-acts">'
+      +'<button type="button" class="lb-alt" onclick="libBlocEnAlt('+i+')" title="Transformer en alternance : plusieurs allures dans la même répétition">⇄ Alterner</button>'
+      +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+    +'</span>'
     +'</div>';
+}
+
+/* ══ BLOC EN ALTERNANCE ══
+   « 4 × [1 km à 82 % + 1 km à 88 %] » : une répétition qui enchaîne plusieurs
+   allures. Le format existait déjà dans les données — c'est ce que produit la
+   notation libre — mais rien ne permettait de le construire à la main.
+   Chaque segment porte sa distance, son pourcentage et un libellé libre
+   (AS42, AS21…) ; sans libellé, le pourcentage fait office de nom. */
+function libBlocRowAlt(b,i,IS){
+  var segs=b.segs||[];
+  var lignes=segs.map(function(sg,j){
+    var km=(sg.d>=1000);
+    var val=km?(sg.d/1000):(sg.d||0);
+    return '<div class="lb-seg" data-i="'+i+'" data-j="'+j+'">'
+      +'<input type="number" min="0" step="any" value="'+val+'" oninput="libSegSet('+i+','+j+',\'val\',this.value)" title="distance" style="'+IS+';width:74px;text-align:center">'
+      +'<select onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
+        +'<option value="m"'+(km?'':' selected')+'>m</option><option value="km"'+(km?' selected':'')+'>km</option></select>'
+      +'<span class="lb-at">à</span>'
+      +'<input type="number" min="30" max="130" step="1" value="'+(sg.pct||80)+'" oninput="libSegSet('+i+','+j+',\'pct\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
+      +'<span class="lb-at">%</span>'
+      +'<input value="'+String(sg.lbl||'').replace(/"/g,'&quot;')+'" placeholder="libellé (ex : AS42)" oninput="libSegSet('+i+','+j+',\'lbl\',this.value)" style="'+IS+';flex:1;min-width:120px">'
+      +(segs.length>1?'<button type="button" class="lb-del" onclick="libSegDel('+i+','+j+')" title="Retirer ce segment">✕</button>':'')
+      +'</div>';
+  }).join('');
+  return '<div class="lb-row lb-row--alt" data-i="'+i+'">'
+    +'<div class="lb-alt-hd">'
+      +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
+      +'<span class="lb-x">× alternance</span>'
+      +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup entre répétitions" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:150px">'
+      +'<span class="lb-acts">'
+        +'<button type="button" class="lb-alt" onclick="libBlocEnSimple('+i+')" title="Revenir à un bloc à une seule allure">⇄ Simple</button>'
+        +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
+      +'</span>'
+    +'</div>'
+    +'<div class="lb-segs">'+lignes
+      +'<button type="button" class="lb-add lb-add--seg" onclick="libSegAdd('+i+')">+ Ajouter une allure</button>'
+    +'</div></div>';
+}
+function libBlocsRedraw(){
+  var box=document.getElementById('lb-rows');
+  if(box)box.innerHTML=(_libEdit&&_libEdit.blocks||[]).map(libBlocRow).join('');
+  libPreview();
+}
+/* Passage simple → alterné : le bloc devient sa propre première allure, on en
+   ajoute une seconde. Les durées ne survivent pas — un segment se mesure en
+   distance — donc on part sur 1 km quand le bloc était en minutes. */
+function libBlocEnAlt(i){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
+  var d=b.d||1000;
+  var p=Array.isArray(b.pct)?b.pct[0]:(b.pct||80);
+  _libEdit.blocks[i]={r:b.r||1, rec:b.rec||'', label:b.label||'Alternance', alt:true,
+    segs:[{d:d,pct:p,lbl:''},{d:d,pct:Math.min(130,p+8),lbl:''}]};
+  libBlocsRedraw();
+}
+function libBlocEnSimple(i){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var sg=b.segs[0]||{};
+  _libEdit.blocks[i]={r:b.r||1, d:sg.d||1000, pct:sg.pct||80, rec:b.rec||''};
+  libBlocsRedraw();
+}
+function libSegAdd(i){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var der=b.segs[b.segs.length-1]||{d:1000,pct:80};
+  b.segs.push({d:der.d,pct:der.pct,lbl:''});
+  libBlocsRedraw();
+}
+function libSegDel(i,j){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  b.segs.splice(j,1);
+  if(b.segs.length<2 && b.segs.length>0) return libBlocEnSimple(i);
+  libBlocsRedraw();
+}
+function libSegSet(i,j,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var sg=b.segs[j]; if(!sg)return;
+  if(champ==='lbl'){ sg.lbl=String(v||'').slice(0,24); }
+  else if(champ==='pct'){ sg.pct=Math.max(30,Math.min(130,Math.round(+v||0))); }
+  else {
+    var row=document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]');
+    var val=+((row&&row.querySelector('input').value)||0);
+    var u=(row&&row.querySelector('select').value)||'m';
+    sg.d=(u==='km')?Math.round(val*1000):Math.round(val);
+  }
+  libPreview();
 }
 function libEditFormHTML(s){
   var themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'"'+(t.id===s.theme?' selected':'')+'>'+t.lbl+'</option>';}).join('');
   var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
   var rows=(_libEdit.blocks||[]).map(libBlocRow).join('');
-  return '<div class="lc-head">Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »</div>'
+  var creation=(_libEdit.src==='new');
+  return '<div class="lc-head">'+(creation?'Nouvelle séance':('Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »'))+'</div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" placeholder="10 × 1000 m à allure 10 km" oninput="libPreview()"></div>'
       +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
     +'</div>'
     +'<div class="lc-field"><label>Contenu de la séance</label><div id="lb-rows">'+rows+'</div>'
@@ -5661,9 +5784,12 @@ function libEditFormHTML(s){
     +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
     +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
-      +(_libEdit.src==='c'?'Enregistrer les modifications':'↓ Enregistrer dans ma banque')
+      +(creation?'Enregistrer la séance':((_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':'↓ Enregistrer dans ma banque'))
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
-    +(_libEdit.src==='l'?'<div class="lc-legend">La bibliothèque de référence n’est pas modifiable : l’enregistrement crée une copie dans tes séances perso, l’originale reste intacte.</div>':'');
+    +(creation
+       ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].</div>'
+       :((_libEdit.src==='l'||_libEdit.nouvelle)
+         ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
 function libBlocSet(i,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
@@ -7079,6 +7205,10 @@ const PL_SKEL={
 let _plD='10k',_plProf='rout',_plW=null,_plCtx='new',_plPicked=false;
 let _plDate1=null,_plDate2=null,_plDi=null,_plDatesSeeded=false,_plPhaseOverride=null,_plOrient=0,_plBase=true,_plRatio=3,_plBaseW=null,_plVolOverride={},_plRecOverride={},_plSessions={};
 let _plTime='',_plVol=null,_plSess=null,_plQual=null,_plInj=false,_plPrep=false;
+/* Nom et lien de la course. L'objectif se renseigne désormais ici : le
+   planificateur est l'endroit où le coach pose la course, plus le tableau
+   de bord. plToDash les recopie dans S.goal. */
+let _plNom='',_plUrl='';
 let _plOpen={},plRadarChart=null;
 
 function plProf(){return PL_PROFILES.find(x=>x.id===_plProf)||PL_PROFILES[1];}
@@ -7704,9 +7834,12 @@ function plEditSession(iso,i){
   var it=(_plSessions[iso]||[])[i]; if(!it)return;
   var trouve=libParTitre(it.t);
   if(!trouve){ alert('Séance introuvable dans la bibliothèque : « '+it.t+' ».'); return; }
-  var titre=(trouve.kind==='l')?libTitreUnique(trouve.s.title+' (adapté)'):trouve.s.title;
+  // Adapter, c'est décliner : on part de la séance existante mais on en crée
+  // une nouvelle, y compris quand la source est déjà une séance perso. Écraser
+  // l'originale la modifierait dans tous les autres plans où elle est posée.
+  var titre=libTitreUnique(trouve.s.title+' (adapté)');
   libEditOpen(trouve.kind,trouve.idx,{
-    modal:true, titre:titre,
+    modal:true, titre:titre, nouvelle:true,
     apres:function(nouvelle){
       var lst=_plSessions[iso]; if(!lst||!lst[i])return;
       lst[i]={t:nouvelle.title,th:nouvelle.theme};
@@ -7747,7 +7880,7 @@ function plDayTap(iso){
 function plGrabCancel(){if(_plGrab){_plGrab=null;plUpd();}}
 function plSyncCfg(){
   if(!_plPicked)return;
-  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
+  S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions,time:_plTime,nom:_plNom,url:_plUrl};
   if(typeof saveLS==='function')saveLS();
   // Le plan doit aussi rejoindre la fiche de l'athlète : saveLS n'écrit que
   // l'instantané du profil, et changer d'athlète sans passer par « Enregistrer »
@@ -7760,6 +7893,221 @@ function plSyncCfg(){
   }
   if(typeof renderDashPlan==='function')renderDashPlan();
 }
+
+/* ══ REPRENDRE LE PLAN D'UN AUTRE ATHLÈTE ══
+   Deux athlètes qui préparent la même distance suivent souvent la même trame.
+   Autant la recopier plutôt que de la rebâtir écran par écran.
+
+   Ce qui voyage, c'est la STRUCTURE : objectif, durée, phases, ratio de
+   charge, volumes corrigés à la main, décharges déplacées, et les séances
+   posées au calendrier. Les volumes et décharges sont indexés par numéro de
+   semaine, ils se transposent tels quels. Les dates, elles, se recalent sur
+   la course du destinataire. */
+
+function plIsoDe(d){
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+function plLundiDe(iso){
+  var d=new Date(iso+'T12:00:00');
+  d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return d;
+}
+/* Le décalage se compte en SEMAINES ENTIÈRES, d'un lundi de course à l'autre.
+   Au jour près, une sortie longue du dimanche atterrirait un mercredi si les
+   deux courses ne tombent pas le même jour de la semaine. Or un athlète
+   s'entraîne des jours fixes : c'est le jour qui doit être préservé, et la
+   grille des semaines se recalcule de toute façon depuis la date de course. */
+function plDecalageJours(isoSource,isoCible){
+  if(!isoSource||!isoCible)return 0;
+  return Math.round((plLundiDe(isoCible)-plLundiDe(isoSource))/864e5);
+}
+
+/* Deux façons de reprendre un plan, et elles répondent à deux besoins :
+   — MÊMES DATES : plusieurs athlètes préparent LA MÊME course. Tout est
+     identique, objectif compris, y compris le nom et le chrono visé.
+   — RECALER : même trame, course différente. Les dates glissent.
+   Le premier cas est le plus fréquent chez un coach qui suit un groupe, il
+   est donc proposé par défaut. */
+var _plImpMode='memes';
+function plImpMode(m){
+  _plImpMode=(m==='recaler')?'recaler':'memes';
+  var mo=document.getElementById('pl-imp-modal');
+  if(mo){ mo.remove(); plImportOpen(); }
+}
+function plPlansSources(){
+  if(typeof getAthletes!=='function')return [];
+  return getAthletes().filter(function(a){
+    return a && a.plan && a.plan.D && a.pseudo!==S.pseudo;
+  });
+}
+
+function plImportOpen(){
+  var ex=document.getElementById('pl-imp-modal'); if(ex){ex.remove();return;}
+  var srcs=plPlansSources();
+  var host=document.createElement('div'); host.id='pl-imp-modal'; host.className='pl-modal';
+  host.onclick=function(e){ if(e.target===host)host.remove(); };
+  var cible=_plDate2||(S.goal&&S.goal.date)||'';
+
+  var memes=(_plImpMode!=='recaler');
+  var items=srcs.length?srcs.map(function(a){
+    var p=a.plan;
+    var d=PLANIF.find(function(x){return x.id===p.D;});
+    var nb=Object.keys(p.sess||{}).reduce(function(n,k){return n+((p.sess[k]||[]).length);},0);
+    var sem=p.W?p.W+' sem':'';
+    var course=p.d2?new Date(p.d2+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'sans date';
+    var dec=plDecalageJours(p.d2,cible);
+    var glisse=memes
+      ? (p.nom?('« '+String(p.nom).replace(/</g,'&lt;')+' »'):'')
+      : ((cible&&p.d2)?('décalage : '+(dec===0?'même semaine':(Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')+(dec>0?' plus tard':' plus tôt')))):'');
+    return '<button type="button" class="ath-it" onclick="plImportApply('+a.id+')">'
+      +'<span class="ath-it-av">'+String(a.pseudo).slice(0,2).toUpperCase()+'</span>'
+      +'<span class="ath-it-tx"><b>'+String(a.pseudo).replace(/</g,'&lt;')+'</b>'
+      +'<span>'+(d?d.lbl:p.D)+(sem?' · '+sem:'')+' · '+nb+' séance'+(nb>1?'s':'')+'<br>'
+      +'<span style="color:var(--muted2)">course du '+course+(glisse?' — '+glisse:'')+'</span></span></span></button>';
+  }).join('')
+  :'<div style="font-size:13px;color:var(--muted);padding:8px 0;line-height:1.6">Aucun autre athlète n’a de plan enregistré. Construis-en un, ajoute-le au tableau de bord, et il deviendra réutilisable ici.</div>';
+
+  var avert='';
+  if(memes){
+    avert='<div style="font-size:12.5px;line-height:1.6;color:var(--text2);background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:9px;padding:10px 12px;margin-bottom:12px">'
+      +'Le plan est repris <b>tel quel</b> : mêmes dates, même course, même chrono visé. Pour des athlètes qui courent ensemble.'
+      +((S.plan&&S.plan.D)?' Le plan actuel de '+(S.pseudo?String(S.pseudo).replace(/</g,'&lt;'):'cet athlète')+' sera <b>remplacé</b>.':'')
+      +'</div>';
+  } else if(!cible){
+    avert='<div style="font-size:12.5px;line-height:1.6;color:#FBBF24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:9px;padding:10px 12px;margin-bottom:12px">'
+      +'Renseigne d’abord la <b>date de course</b> ci-dessus. Sans elle, impossible de recaler les séances : elles arriveraient aux dates de l’autre athlète.</div>';
+  } else if(S.plan&&S.plan.D){
+    avert='<div style="font-size:12.5px;line-height:1.6;color:var(--text2);background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:9px;padding:10px 12px;margin-bottom:12px">'
+      +(S.pseudo?String(S.pseudo).replace(/</g,'&lt;'):'Cet athlète')+' a déjà un plan : il sera <b>remplacé</b>.</div>';
+  }
+
+  host.innerHTML='<div class="pl-modal-box" style="max-width:440px">'
+    +'<div class="pl-modal-top"><b>Reprendre le plan d’un autre athlète</b><span style="flex:1"></span>'
+    +'<button type="button" class="pl-modal-x" onclick="var m=document.getElementById(\'pl-imp-modal\');if(m)m.remove()">×</button></div>'
+    +'<div class="lib-chips" style="margin-bottom:12px">'
+    +'<button type="button" class="lib-chip'+(memes?' active':'')+'" onclick="plImpMode(\'memes\')">Mêmes dates</button>'
+    +'<button type="button" class="lib-chip'+(memes?'':' active')+'" onclick="plImpMode(\'recaler\')">Recaler sur sa course</button>'
+    +'</div>'
+    +avert
+    +'<div style="max-height:56vh;overflow:auto">'+items+'</div>'
+    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:12px">'
+    +(memes
+      ? 'Dates, objectif et séances sont repris à l’identique. '
+      : 'La trame est recopiée puis recalée sur ta date de course, par semaines entières — les séances gardent leur jour. ')
+    +'Les allures, elles, se recalculent sur la VMA de l’athlète chargé.</div>'
+    +'</div>';
+  document.body.appendChild(host);
+}
+
+function plImportApply(id){
+  var src=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===id;});
+  var m=document.getElementById('pl-imp-modal');
+  if(!src||!src.plan||!src.plan.D){ if(m)m.remove(); return; }
+  var p=src.plan;
+  var memes=(_plImpMode!=='recaler');
+  var cible=memes ? (p.d2||_plDate2||(S.goal&&S.goal.date)||'')
+                  : (_plDate2||(S.goal&&S.goal.date)||'');
+  if(!memes&&!cible){ alert('Renseigne la date de course avant de recaler un plan : sans elle, les séances ne peuvent pas être replacées.'); return; }
+  if(S.plan&&S.plan.D&&!confirm('Remplacer le plan actuel de '+(S.pseudo||'cet athlète')+' par celui de '+src.pseudo+' ?')) return;
+
+  // En mode « mêmes dates », rien ne bouge : c'est la même course.
+  var dec=memes?0:plDecalageJours(p.d2,cible);
+  var glisse=function(iso){
+    if(!iso)return null;
+    var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+dec);
+    return plIsoDe(d);
+  };
+
+  _plD=p.D;
+  _plW=(p.W!=null?Math.max(1,p.W):null);
+  _plCtx=p.ctx; _plVol=p.vol; _plProf=p.prof;
+  _plPhaseOverride=p.ph||null;
+  _plOrient=p.orient||0;
+  _plBase=(p.base!==false);
+  _plRatio=(p.ratio===2?2:3);
+  _plBaseW=(p.baseW!=null?p.baseW:null);
+  // Volumes et décharges sont indexés par NUMÉRO de semaine : rien à recaler.
+  _plVolOverride=Object.assign({},p.volOv||{});
+  _plRecOverride=Object.assign({},p.recOv||{});
+  // Les séances, elles, sont indexées par date.
+  var s={};
+  Object.keys(p.sess||{}).forEach(function(k){
+    var nk=glisse(k); if(!nk)return;
+    (s[nk]=s[nk]||[]).push.apply(s[nk],(p.sess[k]||[]).map(function(x){return Object.assign({},x);}));
+  });
+  _plSessions=s;
+  _plDate2=cible;
+  _plDate1=glisse(p.d1);
+  _plDi=glisse(p.di);
+  /* Mêmes dates veut dire même course : l'objectif suit — le nom, le lien et
+     le chrono visé. Recaler, c'est une autre course : on garde l'objectif du
+     destinataire, seule la trame est empruntée. */
+  if(memes){
+    _plNom = p.nom || (src.goal&&src.goal.name) || '';
+    _plUrl = p.url || (src.goal&&src.goal.url) || '';
+    if(p.time) _plTime = p.time;
+    else if(src.goal&&src.goal.t){
+      var t=src.goal.t, h=Math.floor(t/3600), mm=Math.floor((t%3600)/60), sc=t%60;
+      _plTime = h ? (h+':'+String(mm).padStart(2,'0')+':'+String(sc).padStart(2,'0'))
+                  : (mm+':'+String(sc).padStart(2,'0'));
+    }
+  }
+  _plDatesSeeded=true;
+  _plPicked=true;
+
+  if(typeof plSave==='function')plSave();
+  if(m)m.remove();
+  renderPlanif();
+
+  var nb=Object.keys(s).reduce(function(n,k){return n+s[k].length;},0);
+  var msg=document.getElementById('pl-dash-msg');
+  if(!msg)return;
+
+  /* Deux situations où le recalage ne peut pas être exact. Les taire
+     laisserait le coach devant un calendrier faux sans savoir pourquoi. */
+  var alerte='';
+  if(memes){
+    msg.style.color='#34D399';
+    msg.textContent='Plan de '+src.pseudo+' repris à l’identique — '+nb+' séance'+(nb>1?'s':'')
+      +(_plNom?', course « '+_plNom+' »':'')+(_plTime?', objectif '+_plTime:'')
+      +'. Ajoute-le au tableau de bord pour le rendre actif.';
+    return;
+  }
+  if(!p.d2){
+    alerte=' Le plan d’origine n’avait pas de date de course : les séances ont gardé leurs dates telles quelles, elles sont sûrement à replacer.';
+  } else {
+    var jS=new Date(p.d2+'T12:00:00').getDay(), jC=new Date(cible+'T12:00:00').getDay();
+    if(jS!==jC){
+      var nom=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+      alerte=' Les deux courses ne tombent pas le même jour ('+nom[jS]+' contre '+nom[jC]
+        +') : les séances gardent leur jour de semaine, mais vérifie la dernière semaine avant la course.';
+    }
+  }
+  msg.style.color=alerte?'#FBBF24':'#34D399';
+  msg.textContent='Plan de '+src.pseudo+' repris'+(dec?(' et décalé de '+Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')):'')
+    +' — '+nb+' séance'+(nb>1?'s':'')+'.'+(alerte||' Vérifie les dates, puis ajoute-le au tableau de bord.');
+}
+
+/* Reprend le nom, le lien et le temps visé là où ils se trouvent : dans le
+   plan enregistré s'il en porte, sinon dans l'objectif du tableau de bord.
+   Ne remplace jamais ce qui est déjà saisi à l'écran — le coach est peut-être
+   en train de taper. */
+function plSeedObjectif(){
+  var pl=S.plan||{}, g=S.goal||{};
+  if(!_plNom)  _plNom = pl.nom || g.name || '';
+  if(!_plUrl)  _plUrl = pl.url || g.url || '';
+  if(!_plTime){
+    if(pl.time) _plTime = pl.time;
+    else if(g.t){
+      var h=Math.floor(g.t/3600), m=Math.floor((g.t%3600)/60), sc=g.t%60;
+      _plTime = h ? (h+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0'))
+                  : (m+':'+String(sc).padStart(2,'0'));
+    }
+  }
+}
+function plNomSet(v){ _plNom=String(v||'').slice(0,120); plSave(); }
+function plUrlSet(v){ _plUrl=String(v||'').trim().slice(0,300); plSave(); }
+
 function plToDash(){
   var p=PLANIF.find(function(x){return x.id===_plD;}); if(!p)return;
   var msg=document.getElementById('pl-dash-msg');
@@ -7773,7 +8121,9 @@ function plToDash(){
   _plPicked=true;
   S.plan={D:_plD,W:_plW,ctx:_plCtx,vol:_plVol,prof:_plProf,ph:_plPhaseOverride,d1:_plDate1,d2:_plDate2,di:_plDi,orient:_plOrient,base:_plBase,ratio:_plRatio,baseW:_plBaseW,volOv:_plVolOverride,recOv:_plRecOverride,sess:_plSessions};
   var g=S.goal||{};
-  S.goal={id:_plD,t:g.t||null,date:date,name:g.name||'',url:g.url||''};
+  var tv=(typeof plParseTime==='function')?plParseTime(_plTime):null;
+  S.goal={id:_plD, t:(tv||g.t||null), date:date,
+          name:(_plNom||g.name||''), url:(_plUrl||g.url||'')};
   if(typeof saveLS==='function')saveLS();
   if(typeof renderGoalSection==='function')renderGoalSection();
   if(typeof renderPredCards==='function')renderPredCards();
@@ -8259,6 +8609,7 @@ function renderPlanif(){
   const wrap=document.getElementById('planif-wrap');if(!wrap)return;
   if(!_plPicked&&S.plan&&S.plan.D&&PLANIF.some(x=>x.id===S.plan.D)){_plD=S.plan.D;_plW=S.plan.W;_plCtx=S.plan.ctx;_plVol=S.plan.vol;_plProf=S.plan.prof;if(S.plan.ph)_plPhaseOverride=S.plan.ph;if('orient' in S.plan)_plOrient=S.plan.orient||0;if('base' in S.plan)_plBase=S.plan.base!==false;if('ratio' in S.plan)_plRatio=S.plan.ratio===2?2:3;if('baseW' in S.plan)_plBaseW=(S.plan.baseW!=null?S.plan.baseW:null);if('volOv' in S.plan)_plVolOverride=S.plan.volOv||{};if('recOv' in S.plan)_plRecOverride=S.plan.recOv||{};if('sess' in S.plan)_plSessions=S.plan.sess||{};if('d2' in S.plan){_plDate1=S.plan.d1||null;_plDate2=S.plan.d2||null;_plDi=S.plan.di||null;}_plPicked=true;}
   else if(!_plPicked&&S.goal&&S.goal.id&&PLANIF.some(x=>x.id===S.goal.id))_plD=S.goal.id;
+  plSeedObjectif();
   const p=PLANIF.find(x=>x.id===_plD)||PLANIF[1];
   if(_plPhaseOverride){_plW=Math.max(1,_plPhaseOverride.base+_plPhaseOverride.dev+_plPhaseOverride.spe+_plPhaseOverride.aff);}
   else{if(_plW==null)_plW=plRecoWeeks(p);_plW=Math.max(1,_plW);}
@@ -8271,6 +8622,11 @@ function renderPlanif(){
   wrap.innerHTML=
     '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Planification</div><div class="input-hero-sub">Assistant de préparation : réponds au questionnaire, l’outil propose une durée, une répartition, une charge et un calendrier. Ajuste ce que tu veux.</div></div>'
     +toolAthleteBar()
+    +(plPlansSources().length
+      ? '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
+        +'<button type="button" class="lib-create-btn" style="margin:0" onclick="plImportOpen()" title="Recopier la trame d\'un plan existant et la recaler sur la date de course de cet athlète">⤵ Reprendre le plan d\'un autre athlète</button>'
+        +'<span style="font-size:12px;color:var(--muted2)">'+plPlansSources().length+' plan'+(plPlansSources().length>1?'s':'')+' réutilisable'+(plPlansSources().length>1?'s':'')+'</span></div>'
+      : '')
     +'<div class="lib-chips" style="margin-bottom:6px"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-right:6px;align-self:center">Objectif</span>'+chips+'</div>'
     // ── Questionnaire ──
     +'<div class="card" style="padding:22px;margin:14px 0">'
@@ -8292,6 +8648,12 @@ function renderPlanif(){
     // ── Planificateur (durée) ──
     +'<div class="card" style="padding:22px;margin-bottom:14px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Ajuster la prépa</div>'
+    +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;padding:11px 14px;border:1px dashed var(--border2);border-radius:10px">'
+    +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Course :</span>'
+    +'<input type="text" id="pl-nom" class="goal-date" maxlength="120" placeholder="nom de la course" value="'+String(_plNom||'').replace(/"/g,'&quot;')+'" oninput="plNomSet(this.value)" style="flex:1;min-width:170px">'
+    +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Lien :</span>'
+    +'<input type="url" id="pl-url" class="goal-date" maxlength="300" placeholder="https://… inscription, parcours" value="'+String(_plUrl||'').replace(/"/g,'&quot;')+'" oninput="plUrlSet(this.value)" style="flex:1;min-width:190px">'
+    +'</div>'
     +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:11px 14px;border:1px dashed var(--border2);border-radius:10px">'
     +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">Début :</span><input type="date" id="pl-d1" class="goal-date" value="'+(_plDate1||'')+'" onchange="plDates()">'
     +'<span style="font-size:12.5px;font-weight:700;color:var(--muted2)">course :</span><input type="date" id="pl-d2" class="goal-date" value="'+(_plDate2||'')+'" onchange="plDates()">'
