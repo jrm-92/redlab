@@ -135,16 +135,18 @@ a{color:var(--accent)}
    en bas, à portée de pouce, et un écran par question — qu'est-ce que je
    fais aujourd'hui, à quelle allure, où j'en suis.
    ══════════════════════════════════════════════════════════════════════ */
-.app{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+.app{padding-bottom:calc(108px + env(safe-area-inset-bottom))}
 .screen{display:none;animation:sc .18s ease-out}
 .screen.on{display:block}
 @keyframes sc{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.screen{animation:none}}
 
 /* Barre d'onglets : fixée en bas, cinq destinations, jamais plus. */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:4px;
-  background:rgba(15,23,41,.94);backdrop-filter:blur(14px);
-  border-top:1px solid var(--border2);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs{position:fixed;left:12px;right:12px;z-index:40;display:flex;gap:4px;
+  bottom:calc(12px + env(safe-area-inset-bottom));
+  background:rgba(15,23,41,.96);backdrop-filter:blur(14px);
+  border:1px solid var(--border2);border-radius:20px;padding:6px;
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.7)}
 /* Les onglets se touchaient : un pouce un peu à côté tombait sur le voisin.
    Un écart de 4 px crée une zone morte entre deux cibles, et la hauteur passe
    de 47 à 54 px — au-dessus des 44 px recommandés, pas juste dessus. */
@@ -218,6 +220,18 @@ a{color:var(--accent)}
 .wk-ch{color:var(--muted2);transition:transform .2s;flex-shrink:0}
 .wk.open .wk-ch{transform:rotate(90deg)}
 .wk-bd{display:none;padding:0 15px 14px;border-top:1px solid var(--border)}
+/* Les séances d'une semaine défilent côte à côte : empilées, il fallait
+   dérouler la page entière pour comparer mardi et jeudi. Le rail déborde de
+   la carte pour que la séance suivante affleure au bord — c'est ce qui
+   indique qu'il y a autre chose à droite. */
+.rail{display:flex;gap:10px;margin:12px -15px 0;padding:0 15px 4px;
+  overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.rail>.day{flex:0 0 min(84%,320px);scroll-snap-align:start;margin-bottom:0}
+.rail--seule>.day{flex:1 1 auto}
+.rail::-webkit-scrollbar{height:5px}
+.rail::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.rail-hint{font-size:11px;color:var(--muted2);font-weight:700;margin-top:7px}
 .wk.open .wk-bd{display:block}
 .wk.now{border-color:rgba(255,107,26,.42)}
 
@@ -235,13 +249,8 @@ a{color:var(--accent)}
 .zcard .zf{font-size:12.5px;color:var(--muted);margin-top:10px;padding-top:9px;border-top:1px solid var(--border);line-height:1.55;font-style:italic}
 .zcard .zuse{font-size:12.5px;color:var(--muted2);margin-top:5px;line-height:1.55}
 .zcard .zuse b{color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.8px;font-size:10.5px;margin-right:4px}
-.zcard.zflash{box-shadow:0 0 0 2px var(--accent) inset;border-color:var(--accent)}
-/* L'échelle : la place de chaque zone entre le plus lent et le plus rapide. */
-.zscale{margin:0 0 16px}
-.zscale-bar{display:flex;gap:3px;height:34px}
-.zscale-s{flex:1;border:none;border-radius:7px;color:#0b1020;font-family:var(--font);font-size:11.5px;font-weight:900;cursor:pointer;padding:0;opacity:.88;transition:opacity .15s,transform .15s}
-.zscale-s:hover,.zscale-s:focus-visible{opacity:1;transform:translateY(-1px)}
-.zscale-ends{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted2);font-weight:700;margin-top:5px}
+.zbornes{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted2);font-weight:700;margin:0 2px 14px}
+.zbornes b{color:var(--text2);font-weight:800}
 
 /* Temps de passage. */
 .splits{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -829,7 +838,8 @@ function ecranPlan(d){
       +'<span class="wk-km">'+esc(w.km+' '+(w.unite||''))+'</span>'
       +'</button>'
       +'<div class="wk-bd">'
-      +(ses.length?('<div style="margin-top:12px">'+ses.map(carteSeance).join('')+'</div>')
+      +(ses.length?('<div class="rail'+(ses.length>1?'':' rail--seule')+'">'+ses.map(carteSeance).join('')+'</div>'
+                    +(ses.length>1?'<div class="rail-hint">'+ses.length+' séances — fais glisser vers la gauche</div>':''))
                   :'<div class="muted" style="margin-top:12px">Pas de séance détaillée cette semaine — garde le volume visé, en endurance.</div>')
       +'</div></div>';
   });
@@ -868,18 +878,10 @@ function ecranZones(d){
     +'<div class="muted" style="margin-bottom:12px">Calculées sur ta '+R.lbl+' de <b>'+nb1(R.v)+' km/h</b>. '
     +'Le ressenti prime sur le chronomètre : par forte chaleur, en côte ou en fin de semaine chargée, garde la sensation plutôt que l’allure.</div>';
 
-  // ── L'échelle ──
-  h+='<div class="zscale">'
-    +'<div class="zscale-bar">'
-    + Z.map(function(z){
-        var part=Math.max(6,Math.round((z.hi-z.lo)/etendue*100));
-        return '<button type="button" class="zscale-s" style="flex:'+part+' 1 0;background:'+z.col+'" '
-          +'onclick="allerZone('+z.z+')" title="'+esc(z.n)+'">Z'+z.z+'</button>';
-      }).join('')
-    +'</div>'
-    +'<div class="zscale-ends"><span>'+fAll(3600/(R.v*lo0))+'/km · le plus lent</span>'
-    +'<span>'+(Z[Z.length-1].open?'plus vite que ':'')+fAll(3600/(R.v*hi0))+'/km</span></div>'
-    +'</div>';
+  // Les bornes de l'ensemble, en une ligne : de quoi situer les cartes qui
+  // suivent sans une bande de couleurs de plus au-dessus d'elles.
+  h+='<div class="zbornes"><span>Le plus lent <b>'+fAll(3600/(R.v*lo0))+'/km</b></span>'
+    +'<span>Le plus rapide <b>'+(Z[Z.length-1].open?'&gt; ':'')+fAll(3600/(R.v*hi0))+'/km</b></span></div>';
 
   Z.forEach(function(z){
     var vlo=R.v*z.lo, vhi=R.v*z.hi;
@@ -905,12 +907,7 @@ function ecranZones(d){
   if(!fcOk) h+='<div class="muted" style="margin-top:4px">Les fourchettes de fréquence cardiaque apparaîtront dès que ton coach aura renseigné ta FC max et ta FC de repos.</div>';
   return h;
 }
-function allerZone(n){
-  var e=document.getElementById('z-'+n); if(!e) return;
-  e.scrollIntoView({behavior:'smooth',block:'center'});
-  e.classList.add('zflash');
-  setTimeout(function(){ e.classList.remove('zflash'); },1200);
-}
+
 
 /* ── Écran 4 · Allures et temps de passage ── */
 var _splitDist=null;
