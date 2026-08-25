@@ -219,13 +219,26 @@ a{color:var(--accent)}
 .wk.now{border-color:rgba(255,107,26,.42)}
 
 /* Zones : tableau sur grand écran, cartes sur téléphone. */
-.zcard{background:var(--card);border:1px solid var(--border);border-left:3px solid;border-radius:13px;padding:14px;margin-bottom:9px}
-.zcard .zt{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-.zcard .zn{font-size:14.5px;font-weight:800}
-.zcard .zr{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px}
-.zcard .zl{font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted2)}
-.zcard .zv{font-size:16px;font-weight:800;margin-top:1px}
-.zcard .zf{font-size:12.5px;color:var(--muted);margin-top:9px;padding-top:9px;border-top:1px solid var(--border);line-height:1.55}
+.zcard{background:var(--card);border:1px solid var(--border);border-left:3px solid;border-radius:13px;padding:13px 14px;margin-bottom:9px;transition:box-shadow .3s,border-color .3s}
+.zcard .zt{display:flex;align-items:flex-start;gap:8px;flex-wrap:nowrap}
+.zcard .zn{font-size:14.5px;font-weight:800;flex:1;min-width:0;line-height:1.3}
+.zcard .zp{flex:0 0 auto;font-size:11.5px;color:var(--muted2);font-weight:700;white-space:nowrap;padding-top:2px}
+.zcard .zbadge{flex:0 0 auto}
+/* L'allure d'abord : c'est le seul chiffre qu'on emporte en courant. */
+.zcard .zmain{font-family:var(--disp);font-style:italic;font-weight:900;font-size:29px;line-height:1.05;letter-spacing:-.5px;margin:9px 0 5px}
+.zcard .zu{font-family:var(--font);font-style:normal;font-size:12.5px;font-weight:700;color:var(--muted);margin-left:4px}
+.zcard .zmeta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.zcard .zmeta b{color:var(--text);font-weight:800}
+.zcard .zf{font-size:12.5px;color:var(--muted);margin-top:10px;padding-top:9px;border-top:1px solid var(--border);line-height:1.55;font-style:italic}
+.zcard .zuse{font-size:12.5px;color:var(--muted2);margin-top:5px;line-height:1.55}
+.zcard .zuse b{color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.8px;font-size:10.5px;margin-right:4px}
+.zcard.zflash{box-shadow:0 0 0 2px var(--accent) inset;border-color:var(--accent)}
+/* L'échelle : la place de chaque zone entre le plus lent et le plus rapide. */
+.zscale{margin:0 0 16px}
+.zscale-bar{display:flex;gap:3px;height:34px}
+.zscale-s{flex:1;border:none;border-radius:7px;color:#0b1020;font-family:var(--font);font-size:11.5px;font-weight:900;cursor:pointer;padding:0;opacity:.88;transition:opacity .15s,transform .15s}
+.zscale-s:hover,.zscale-s:focus-visible{opacity:1;transform:translateY(-1px)}
+.zscale-ends{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted2);font-weight:700;margin-top:5px}
 
 /* Temps de passage. */
 .splits{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -394,18 +407,28 @@ function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'
 
 // ── Référentiels (identiques à RedLab) ──
 var ZONES_VMA=[
- {z:1,n:'Récupération',lo:.60,hi:.70,col:'#94A3B8',talk:'Je peux parler sans aucune difficulté',rpe:'2–3'},
- {z:2,n:'Endurance fondamentale',lo:.70,hi:.80,col:'#60A5FA',talk:'Je peux tenir une conversation normale',rpe:'3–4'},
- {z:3,n:'Endurance active / Tempo',lo:.80,hi:.88,col:'#34D399',talk:'Je peux parler mais je dois faire des pauses',rpe:'5–6'},
- {z:4,n:'Seuil',lo:.88,hi:.94,col:'#FB923C',talk:'Je peux dire seulement quelques mots',rpe:'7–8'},
- {z:5,n:'VO₂max',lo:.94,hi:1.05,col:'#F87171',talk:'Je ne peux plus parler',rpe:'9–10'}
+ {z:1,n:'Récupération',lo:.60,hi:.70,col:'#94A3B8',talk:'Je peux parler sans aucune difficulté',rpe:'2–3',fcLo:55,fcHi:65,
+  use:'Footing très facile, récupération entre séances, décrassage'},
+ {z:2,n:'Endurance fondamentale',lo:.70,hi:.80,col:'#60A5FA',talk:'Je peux tenir une conversation normale',rpe:'3–4',fcLo:65,fcHi:75,
+  use:'Footings quotidiens, sorties longues, développement de la base aérobie'},
+ {z:3,n:'Endurance active / Tempo',lo:.80,hi:.88,col:'#34D399',talk:'Je peux parler mais je dois faire des pauses',rpe:'5–6',fcLo:75,fcHi:83,
+  use:'Footings soutenus, blocs d’endurance active, travail d’allure marathon'},
+ {z:4,n:'Seuil',lo:.88,hi:.94,col:'#FB923C',talk:'Je peux dire seulement quelques mots',rpe:'7–8',fcLo:83,fcHi:90,
+  use:'Intervalles longs, tempo soutenu, travail au seuil lactique'},
+ {z:5,n:'VO₂max',lo:.94,hi:1.05,col:'#F87171',talk:'Je ne peux plus parler',rpe:'9–10',fcLo:90,fcHi:100,
+  use:'Intervalles courts à moyens, répétitions VMA, développement VO₂max'}
 ];
 var ZONES_VC=[
- {z:1,n:'Modéré',lo:.60,hi:.81,col:'#94A3B8',talk:'Conversation fluide',rpe:'2–3'},
- {z:2,n:'Intermédiaire (SV1)',lo:.81,hi:.95,col:'#60A5FA',talk:'Parole par phrases courtes',rpe:'4–5'},
- {z:3,n:'Seuil (SV2−)',lo:.95,hi:1.00,col:'#34D399',talk:'Parole rude, soutenue',rpe:'6–7'},
- {z:4,n:'VO₂max',lo:1.00,hi:1.07,col:'#FB923C',talk:'Respiration intense',rpe:'8–9'},
- {z:5,n:'Anaérobie',lo:1.07,hi:1.30,col:'#F87171',talk:'Effort explosif',rpe:'9–10'}
+ {z:1,n:'Modéré',lo:.60,hi:.81,col:'#94A3B8',talk:'Conversation fluide',rpe:'2–3',fcLo:45,fcHi:65,
+  use:'Récupération active, footing facile — base aérobie'},
+ {z:2,n:'Intermédiaire (SV1)',lo:.81,hi:.95,col:'#60A5FA',talk:'Parole par phrases courtes',rpe:'4–5',fcLo:65,fcHi:80,
+  use:'Endurance active, sorties longues, allure marathon'},
+ {z:3,n:'Seuil (SV2−)',lo:.95,hi:1.00,col:'#34D399',talk:'Parole rude, soutenue',rpe:'6–7',fcLo:80,fcHi:88,
+  use:'Tempo, efforts de 30 min à 1 h 30 (2 × 20 min, 3 × 15 min)'},
+ {z:4,n:'VO₂max',lo:1.00,hi:1.07,col:'#FB923C',talk:'Respiration intense',rpe:'8–9',fcLo:88,fcHi:96,
+  use:'Intervalles longs de 1 à 6 min (1000–1600 m), allure 10 km'},
+ {z:5,n:'Anaérobie',lo:1.07,hi:1.30,col:'#F87171',talk:'Effort explosif',rpe:'9–10',fcLo:96,fcHi:100,open:1,
+  use:'Sprints, 30/30, 200–400 m — vitesse et capacité anaérobie'}
 ];
 var RACES=[
  {id:'5k',nm:'5K',d:5000,lbl:'5 km',vmaLo:.90,vmaHi:.95},
@@ -472,13 +495,13 @@ function renderFiche(email,d){
   h+='<div class="hero"><div class="hero-top">'
     +'<div class="hero-av">'+esc(initials)+'</div>'
     +'<div><div class="hero-name">'+esc(d.pseudo||'Athlète')+'</div><div class="hero-sub">Mis à jour '+esc(d.savedAt||'')+'</div></div>'
-    +'<div class="hero-out"><div class="l">'+R.lbl+'</div><div class="v">'+(+v).toFixed(1)+'</div><div class="s">km/h · '+fAll(3600/v)+'/km</div></div>'
+    +'<div class="hero-out"><div class="l">'+R.lbl+'</div><div class="v">'+nb1(v)+'</div><div class="s">km/h · '+fAll(3600/v)+'/km</div></div>'
     +'</div></div>';
   // KPIs
   h+='<div class="sec-hd"><span class="dot"></span><b>Repères</b></div><div class="grid">';
-  h+=kpi(R.lbl,(+v).toFixed(1),'km/h');
+  h+=kpi(R.lbl,nb1(v),'km/h');
   h+=kpi('Allure '+R.lbl,fAll(3600/v),'/km');
-  if(vo2)h+=kpi('VO₂max estimé',vo2.toFixed(1),'ml/kg/min');
+  if(vo2)h+=kpi('VO₂max estimé',nb1(vo2),'ml/kg/min');
   if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
   h+='</div>';
   // Zones
@@ -489,7 +512,7 @@ function renderFiche(email,d){
     h+='<tr>'
       +'<td><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span></td>'
       +'<td><b style="color:var(--text)">'+esc(z.n)+'</b><br><span style="color:var(--muted2);font-size:11.5px">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+'%</span></td>'
-      +'<td style="color:'+z.col+';font-weight:800">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'</td>'
+      +'<td style="color:'+z.col+';font-weight:800">'+nb1(vlo)+'–'+nb1(vhi)+'</td>'
       +'<td>'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'/km</td>'
       +'<td style="font-size:12.5px;color:var(--muted)">'+esc(z.talk)+'</td>'
       +'<td>'+z.rpe+'</td></tr>';
@@ -558,6 +581,8 @@ function go(sc){
 }
 
 /* ── Repères communs ── */
+/* Les nombres s'écrivent avec une virgule : « 19,5 km/h », pas « 19.5 ». */
+function nb1(x){ return (+x).toFixed(1).replace('.',','); }
 function refDe(d){
   if(d.mode==='tests'&&d.csKmh) return {v:d.csKmh,lbl:'VC',zones:ZONES_VC};
   return {v:d.vma,lbl:'VMA',zones:ZONES_VMA};
@@ -740,7 +765,7 @@ function ecranAccueil(d){
   // Repères chiffrés, en bas : utiles, mais pas ce qu'on vient chercher.
   h+='<div class="h2">Tes repères</div><div class="grid">';
   if(R.v){
-    h+=kpi(R.lbl,(+R.v).toFixed(1),'km/h');
+    h+=kpi(R.lbl,nb1(R.v),'km/h');
     h+=kpi('Allure '+R.lbl,fAll(3600/R.v),'/km');
   }
   if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
@@ -818,28 +843,70 @@ function basculerSemaine(n){
   var b=e.querySelector('.wk-hd'); if(b)b.setAttribute('aria-expanded',ouvert?'true':'false');
 }
 
-/* ── Écran 3 · Zones ── */
+/* ── Écran 3 · Zones ──
+   Ce que l'athlète cherche ici, c'est une allure : elle passe donc au premier
+   plan, en grand et en couleur. La vitesse, l'effort ressenti et la fourchette
+   de fréquence cardiaque suivent sur une ligne discrète. Le test de la parole
+   et l'usage de la zone — quand on court là-dedans — ferment la carte : ce
+   sont eux qui font comprendre à quoi sert le chiffre.
+
+   L'échelle en tête donne d'un coup d'œil la place de chaque zone entre le
+   footing le plus lent et la vitesse maximale aérobie ; on peut la toucher
+   pour sauter à la zone voulue. */
 function ecranZones(d){
   var R=refDe(d);
   if(!R.v) return '<div class="card2 muted">Tes zones apparaîtront dès que ton coach aura renseigné ta VMA ou ta vitesse critique.</div>';
+  var Z=R.zones, lo0=Z[0].lo, hi0=Z[Z.length-1].hi, etendue=(hi0-lo0)||1;
+  // Karvonen, comme dans RedLab : FC cible = FC repos + % × (FC max − FC repos).
+  var fcOk=!!(d.fcMax&&d.fcRest);
+  var fcRes=(d.fcReserve!=null)?d.fcReserve:((d.fcMax||0)-(d.fcRest||0));
+
   var h='<div class="h2">Tes zones d’entraînement</div>'
-    +'<div class="muted" style="margin-bottom:14px">Calculées sur ta '+R.lbl+' de '+(+R.v).toFixed(1)+' km/h. '
+    +'<div class="muted" style="margin-bottom:12px">Calculées sur ta '+R.lbl+' de <b>'+nb1(R.v)+' km/h</b>. '
     +'Le ressenti prime sur le chronomètre : par forte chaleur, en côte ou en fin de semaine chargée, garde la sensation plutôt que l’allure.</div>';
-  R.zones.forEach(function(z){
+
+  // ── L'échelle ──
+  h+='<div class="zscale">'
+    +'<div class="zscale-bar">'
+    + Z.map(function(z){
+        var part=Math.max(6,Math.round((z.hi-z.lo)/etendue*100));
+        return '<button type="button" class="zscale-s" style="flex:'+part+' 1 0;background:'+z.col+'" '
+          +'onclick="allerZone('+z.z+')" title="'+esc(z.n)+'">Z'+z.z+'</button>';
+      }).join('')
+    +'</div>'
+    +'<div class="zscale-ends"><span>'+fAll(3600/(R.v*lo0))+'/km · le plus lent</span>'
+    +'<span>'+(Z[Z.length-1].open?'plus vite que ':'')+fAll(3600/(R.v*hi0))+'/km</span></div>'
+    +'</div>';
+
+  Z.forEach(function(z){
     var vlo=R.v*z.lo, vhi=R.v*z.hi;
-    h+='<div class="zcard" style="border-left-color:'+z.col+'">'
+    var allure=z.open ? ('plus vite que '+fAll(3600/vlo))
+                      : (fAll(3600/vhi)+'–'+fAll(3600/vlo));
+    var vitesse=z.open ? ('≥ '+nb1(vlo)) : (nb1(vlo)+'–'+nb1(vhi));
+    var meta=['<span><b>'+vitesse+'</b> km/h</span>',
+              '<span>effort <b>'+z.rpe+'</b>/10</span>'];
+    if(fcOk&&z.fcLo!=null){
+      meta.push('<span><b>'+Math.round(d.fcRest+z.fcLo/100*fcRes)+'–'
+        +Math.round(d.fcRest+z.fcHi/100*fcRes)+'</b> bpm</span>');
+    }
+    h+='<div class="zcard" id="z-'+z.z+'" style="border-left-color:'+z.col+'">'
       +'<div class="zt"><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span>'
       +'<span class="zn">'+esc(z.n)+'</span>'
-      +'<span style="margin-left:auto;font-size:12px;color:var(--muted2);font-weight:700">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+' % '+R.lbl+'</span></div>'
-      +'<div class="zr">'
-      +'<div><div class="zl">Allure</div><div class="zv" style="color:'+z.col+'">'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'<span style="font-size:12px;color:var(--muted)">/km</span></div></div>'
-      +'<div><div class="zl">Vitesse</div><div class="zv">'+vlo.toFixed(1)+'–'+vhi.toFixed(1)+'<span style="font-size:12px;color:var(--muted)"> km/h</span></div></div>'
-      +'<div><div class="zl">Effort</div><div class="zv">'+z.rpe+'<span style="font-size:12px;color:var(--muted)">/10</span></div></div>'
-      +'</div>'
+      +'<span class="zp">'+Math.round(z.lo*100)+'–'+Math.round(z.hi*100)+' % '+R.lbl+'</span></div>'
+      +'<div class="zmain" style="color:'+z.col+'">'+allure+'<span class="zu">/km</span></div>'
+      +'<div class="zmeta">'+meta.join('')+'</div>'
       +'<div class="zf">« '+esc(z.talk)+' »</div>'
+      +(z.use?'<div class="zuse"><b>Quand</b> '+esc(z.use)+'</div>':'')
       +'</div>';
   });
+  if(!fcOk) h+='<div class="muted" style="margin-top:4px">Les fourchettes de fréquence cardiaque apparaîtront dès que ton coach aura renseigné ta FC max et ta FC de repos.</div>';
   return h;
+}
+function allerZone(n){
+  var e=document.getElementById('z-'+n); if(!e) return;
+  e.scrollIntoView({behavior:'smooth',block:'center'});
+  e.classList.add('zflash');
+  setTimeout(function(){ e.classList.remove('zflash'); },1200);
 }
 
 /* ── Écran 4 · Allures et temps de passage ── */
@@ -992,7 +1059,7 @@ function rendreApp(email,row){
   document.getElementById('ap-av').textContent=ini;
   document.getElementById('ap-nm').textContent=d.pseudo||'Athlète';
   document.getElementById('ap-sb').textContent='Mis à jour '+(d.enregistreLe||d.savedAt||'');
-  document.getElementById('ap-mv').textContent=R.v?(+R.v).toFixed(1):'—';
+  document.getElementById('ap-mv').textContent=R.v?nb1(R.v):'—';
   document.getElementById('ap-ml').textContent=R.v?(R.lbl+' · km/h'):'';
   document.getElementById('sc-accueil').innerHTML=ecranAccueil(d);
   document.getElementById('sc-plan').innerHTML=ecranPlan(d);
