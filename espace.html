@@ -263,6 +263,41 @@ a{color:var(--accent)}
 .splits .pa{color:var(--muted);font-size:13px;white-space:nowrap}
 .splits tr.mark td{background:rgba(255,107,26,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+/* ── Calculateur d'allure ── */
+.calc{padding:16px}
+.calc-l{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2);margin-bottom:9px}
+.calc-out{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.calc-out #ca-v{font-family:var(--disp);font-style:italic;font-weight:900;font-size:34px;line-height:1;color:var(--accent)}
+.calc-out #ca-a{font-family:var(--disp);font-style:italic;font-weight:900;font-size:34px;line-height:1;color:var(--text)}
+.calc-u{font-size:13px;font-weight:600;color:var(--muted)}
+.calc-out #ca-p{font-size:12.5px;font-weight:700;color:var(--muted2)}
+.calc-row{display:flex;align-items:center;gap:12px}
+/* 40 px de côté : on règle ça au pouce, souvent en marchant. */
+.calc-adj{width:40px;height:40px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--border2);
+  background:transparent;color:var(--text2);font-family:var(--font);font-size:20px;line-height:1;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+  -webkit-tap-highlight-color:rgba(255,107,26,.18);transition:border-color .14s,color .14s,background .14s}
+.calc-adj:active{transform:scale(.92)}
+.calc-adj:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+/* Curseur natif : il se prend au doigt sans effort et répond au clavier.
+   --ca-col suit la zone d'intensité, comme le chiffre au-dessus. */
+#ca-s{flex:1;min-width:0;height:32px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;margin:0}
+#ca-s::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:rgba(255,255,255,.10)}
+#ca-s::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,.10)}
+#ca-s::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;
+  background:var(--ca-col,var(--accent));border:3px solid var(--bg);box-shadow:0 0 0 2px var(--ca-col,var(--accent));margin-top:-9px}
+#ca-s::-moz-range-thumb{width:20px;height:20px;border-radius:50%;
+  background:var(--ca-col,var(--accent));border:3px solid var(--bg);box-shadow:0 0 0 2px var(--ca-col,var(--accent))}
+#ca-s:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+.calc-bnds{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;font-weight:700;color:var(--muted2);margin-top:4px}
+.calc-tp{margin-top:16px;padding-top:14px;border-top:1px dashed var(--border2)}
+.calc-tp-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.calc-tp-row input{width:104px;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);border-radius:9px;
+  color:var(--text);font-family:var(--font);font-size:16px;font-weight:800;padding:9px 11px;outline:none}
+.calc-tp-row input:focus{border-color:var(--accent)}
+.calc-tp-u{font-size:13px;font-weight:700;color:var(--muted2)}
+.calc-tp-eq{font-size:15px;color:var(--muted2)}
+.calc-tp-v{font-family:var(--disp);font-style:italic;font-weight:900;font-size:30px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
 .chip{background:var(--card);border:1px solid var(--border2);border-radius:9px;color:var(--muted);
   font-family:var(--font);font-size:12.5px;font-weight:800;padding:7px 13px;cursor:pointer;transition:all .15s}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -784,7 +819,92 @@ function ecranAccueil(d){
   if(d.dp)h+=kpi('D′',Math.round(d.dp),'m');
   h+='</div>';
   if(d.dateDuTest)h+='<div class="muted" style="margin-top:10px">Repères établis le '+esc(d.dateDuTest)+'.</div>';
+  h+=blocCalculateur(d);
   return h;
+}
+
+/* ── Le calculateur d'allure ──
+   Le même outil que côté coach : on déplace le curseur sur une vitesse, il rend
+   l'allure, le pourcentage de référence et la zone ; en dessous, le temps de
+   passage sur la distance qu'on veut. C'est ce qu'on se demande au bord de la
+   piste — « mes 400 à 95 %, ça fait combien ? » — et ça évite d'écrire au coach.
+
+   Le curseur est un input natif et non le composant sur mesure de RedLab :
+   sur téléphone, un curseur natif se prend au doigt sans effort et reste
+   accessible au clavier. Le pas vaut 1/20e de km/h, comme côté coach. */
+var CA_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[800,'800 m'],[1000,'1 km'],[2000,'2 km'],[5000,'5 km']];
+var _caDist=1000;
+function blocCalculateur(d){
+  var R=refDe(d);
+  if(!R.v) return '';
+  var lo=Math.round(R.v*0.5*20), hi=Math.round(R.v*1.35*20), df=Math.round(R.v*20);
+  return '<div class="h2">Calculateur d’allure '+R.lbl+'</div>'
+    +'<div class="card2 calc">'
+    +'<div class="calc-l">Vitesse → allure</div>'
+    +'<div class="calc-out"><span id="ca-v">'+nb1(R.v)+'</span>'
+      +'<span class="calc-u">km/h →</span>'
+      +'<span id="ca-a">'+fAll(3600/R.v)+'</span>'
+      +'<span id="ca-p">(100 % '+R.lbl+')</span></div>'
+    +'<div class="calc-row">'
+      +'<button type="button" class="calc-adj" onclick="caAdj(-2)" aria-label="Moins vite">−</button>'
+      +'<input type="range" id="ca-s" min="'+lo+'" max="'+hi+'" step="1" value="'+df+'"'
+        +' oninput="caMaj(this.value)" aria-label="Vitesse">'
+      +'<button type="button" class="calc-adj" onclick="caAdj(2)" aria-label="Plus vite">+</button>'
+    +'</div>'
+    +'<div class="calc-bnds"><span>'+nb1(R.v*0.5)+' km/h · 50 %</span><span>135 % · '+nb1(R.v*1.35)+' km/h</span></div>'
+    +'<div class="calc-tp">'
+      +'<div class="calc-l">Temps de passage</div>'
+      +'<div class="calc-tp-row">'
+        +'<input type="number" id="ca-d" min="10" max="200000" step="10" value="'+_caDist+'" oninput="caTemps()" aria-label="Distance en mètres">'
+        +'<span class="calc-tp-u">m</span><span class="calc-tp-eq">→</span>'
+        +'<span class="calc-tp-v" id="ca-t">—</span>'
+      +'</div>'
+      +'<div class="chips" style="margin-top:10px">'
+      + CA_DIST.map(function(x){ return '<button type="button" class="chip ca-c" data-m="'+x[0]+'" onclick="caDist('+x[0]+')">'+x[1]+'</button>'; }).join('')
+      +'</div>'
+    +'</div></div>';
+}
+function caAdj(n){
+  var e=document.getElementById('ca-s'); if(!e) return;
+  e.value=Math.max(+e.min,Math.min(+e.max,(+e.value)+n));
+  caMaj(e.value);
+}
+function caDist(m){
+  _caDist=m;
+  var i=document.getElementById('ca-d'); if(i) i.value=m;
+  caTemps();
+}
+function caMaj(val){
+  var R=refDe(P||{}); if(!R.v) return;
+  var kmh=(+val)/20, pct=Math.round(kmh/R.v*100);
+  var col='var(--muted2)', zn='< Z1';
+  for(var i=0;i<R.zones.length;i++){
+    var z=R.zones[i];
+    if(kmh>=R.v*z.lo&&(i===R.zones.length-1||kmh<R.v*z.hi)){ col=z.col; zn='Z'+z.z; break; }
+  }
+  var v=document.getElementById('ca-v'); if(!v) return;
+  v.textContent=nb1(kmh); v.style.color=col;
+  // La vitesse affichée est arrondie au dixième ; le temps de passage doit se
+  // calculer sur la valeur exacte, sinon l'allure annoncée et le temps sur
+  // 1 000 m se contredisent d'une seconde.
+  v.dataset.kmh=kmh;
+  document.getElementById('ca-a').textContent=fAll(3600/kmh);
+  document.getElementById('ca-p').textContent='('+pct+' % '+R.lbl+' · '+zn+')';
+  var s=document.getElementById('ca-s'); if(s) s.style.setProperty('--ca-col',col);
+  caTemps();
+}
+function caTemps(){
+  var out=document.getElementById('ca-t'); if(!out) return;
+  var i=document.getElementById('ca-d');
+  var m=i?Math.max(0,+i.value||0):_caDist;
+  if(i) _caDist=m;
+  var v=document.getElementById('ca-v');
+  var kmh=v?parseFloat(v.dataset.kmh||String(v.textContent).replace(',','.')):0;
+  if(!m||!isFinite(kmh)||kmh<=0){ out.textContent='—'; out.style.color='var(--muted2)'; }
+  else { out.textContent=fHMS(m/(kmh/3.6)); out.style.color=v?v.style.color:'var(--accent)'; }
+  // La puce n'est allumée que si elle correspond vraiment à la distance saisie.
+  var l=document.querySelectorAll('.ca-c');
+  for(var k=0;k<l.length;k++) l[k].classList.toggle('on', +l[k].getAttribute('data-m')===m);
 }
 
 function carteSeance(s){
@@ -1069,6 +1189,9 @@ function rendreApp(email,row){
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('tabs').classList.remove('hidden');
   document.getElementById('content').innerHTML='';
+  // Le curseur part sur la référence de l'athlète : le temps de passage doit
+  // s'afficher dès l'ouverture, pas seulement au premier mouvement.
+  try{ var _cs=document.getElementById('ca-s'); if(_cs) caMaj(_cs.value); }catch(e){}
   go('accueil');
   return true;
 }
