@@ -3082,7 +3082,7 @@ function slTemps(){
   const m=i?Math.max(0,+i.value||0):_slDist;
   if(i)_slDist=m;
   const sv=document.getElementById('sl-v');
-  const kmh=sv?parseFloat(String(sv.textContent).replace(',','.')):0;
+  const kmh=sv?parseFloat(sv.dataset.kmh||String(sv.textContent).replace(',','.')):0;
   if(!m||!isFinite(kmh)||kmh<=0){ out.textContent='—'; out.style.color='var(--muted2)'; return; }
   out.textContent=fHMS(m/(kmh/3.6));
   out.style.color=sv?sv.style.color:'var(--orange)';
@@ -3141,6 +3141,9 @@ function updSl(val){
   }
   const sv=document.getElementById('sl-v');if(!sv)return;
   sv.textContent=kmh.toFixed(1);sv.style.color=col;
+  // Vitesse exacte pour le temps de passage : affichée au dixième, elle
+  // donnait un temps en désaccord d'une seconde avec l'allure annoncée.
+  sv.dataset.kmh=kmh;
   document.getElementById('sl-a').textContent=fAll(3600/kmh);
   document.getElementById('sl-p').textContent=` (${pct}% ${lbl} · ${zn})`;
   const cs=document.getElementById('cs-vsl');
