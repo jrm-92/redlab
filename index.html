@@ -467,6 +467,41 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .db-dt-tab tr.db-tr-rec td{opacity:.55}
   .db-tr-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);border:1px solid var(--border2);border-radius:4px;padding:0 4px}
   .db-dt-box .pl-modal-top span{text-transform:none}
+  /* ── Éditeur de séance de musculation ── */
+  .mx-row{border:1px solid var(--border);border-radius:11px;padding:10px 11px;margin-bottom:8px;background:rgba(255,255,255,.02)}
+  .mx-l1{display:flex;align-items:center;gap:8px}
+  .mx-l2,.mx-l3{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;margin-top:9px}
+  .mx-g{display:inline-flex;align-items:center;gap:6px}
+  .mx-nom{flex:1;min-width:0;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
+    color:var(--text);font-family:var(--font);font-size:14px;font-weight:800;padding:8px 10px;outline:none}
+  .mx-nom:focus,.mx-n:focus,.mx-rec:focus,.mx-vid:focus{border-color:var(--orange)}
+  .mx-n{width:62px;text-align:center;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
+    color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 4px;outline:none}
+  .mx-n--rm{width:48px}
+  .mx-rec{width:70px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
+    color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none}
+  .mx-vid{flex:1;min-width:150px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
+    color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;padding:7px 9px;outline:none}
+  .mx-sel{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);
+    font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none;cursor:pointer}
+  .mx-u{font-size:12px;font-weight:700;color:var(--muted2);white-space:nowrap}
+  .mx-pdc{font-size:12.5px;font-weight:700;color:#34D399;white-space:nowrap}
+  .mx-acts{display:flex;gap:2px;flex-shrink:0}
+  .mx-b{background:none;border:none;color:var(--muted2);font-family:var(--font);font-size:16px;line-height:1;
+    cursor:pointer;padding:4px 6px;border-radius:6px}
+  .mx-b:hover{color:var(--orange)}
+  .mx-b--x:hover{color:#F87171}
+  .mx-ok{font-size:12px;font-weight:800;color:#34D399;text-decoration:none;white-space:nowrap;
+    border:1px solid rgba(52,211,153,.4);border-radius:6px;padding:3px 8px}
+  .mx-ok:hover{background:rgba(52,211,153,.12)}
+  .mx-ko{font-size:11.5px;font-weight:700;color:#FBBF24;white-space:nowrap}
+  .lib-yt{margin-left:6px;font-size:11px;color:#F87171;text-decoration:none;border:1px solid rgba(248,113,113,.4);
+    border-radius:5px;padding:0 5px;line-height:1.5;display:inline-block}
+  .lib-yt:hover{background:rgba(248,113,113,.14)}
+  @media(max-width:640px){
+    .mx-l2,.mx-l3{gap:8px 10px}
+    .mx-vid{min-width:120px}
+  }
   .ath-verrou,.ath-histo{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:9px;font-family:var(--font);font-size:12px;font-weight:800;padding:8px 12px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
   .ath-verrou:hover,.ath-histo:hover{color:var(--text2);border-color:var(--muted2)}
   .ath-verrou.on{background:rgba(255,107,26,.12);border-color:rgba(255,107,26,.45);color:var(--orange)}
@@ -4097,6 +4132,18 @@ function _seancePourEspace(titre,vma){
   var th=s?(LIB_THEMES.find(function(x){return x.id===s.theme;})||LIB_THEMES[0]):null;
   var lignes=[];
   if(s&&s.warm&&s.warm!=='—') lignes.push({k:'Échauffement',v:s.warm});
+  /* Une séance de musculation : un exercice par ligne, avec sa vidéo. Le lien
+     part avec la fiche — l'athlète doit pouvoir revoir le mouvement au moment
+     de le faire, pas seulement quand son coach le lui montre. */
+  if(s&&s.muscu){
+    (s.exos||[]).forEach(function(e){
+      lignes.push({k:e.nom, v:muscuLigneExo(e), video:(e.video?ytLien(e.video):'')});
+    });
+    if(s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:s.cool});
+    var mt=muscuType(s.mtype);
+    return {titre:titre, theme:'Musculation · '+mt.lbl, col:mt.col,
+            desc:s.desc||'', lignes:lignes, muscu:true, connue:true};
+  }
   (s&&s.blocks||[]).forEach(function(b,i){
     if(b.segs){
       // Séance en notation libre : une suite de segments, chacun son allure.
@@ -4651,8 +4698,9 @@ function plApercuHTML(titre,iso){
     +'<div class="db-dt-badges">'
       +(d.theme?'<span class="db-dt-badge" style="color:'+d.col+';border-color:'+d.col+'55">'+e(d.theme)+'</span>':'')
       +(src.tag?'<span class="db-dt-badge">'+e(src.tag)+'</span>':'')
-      +(S.vma?'<span class="db-dt-badge">allures sur '+String(S.vma).replace('.',',')+' km/h</span>'
-             :'<span class="db-dt-badge" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">VMA non renseignée</span>')
+      +(d.muscu?''
+        :(S.vma?'<span class="db-dt-badge">allures sur '+String(S.vma).replace('.',',')+' km/h</span>'
+               :'<span class="db-dt-badge" style="color:#FBBF24;border-color:rgba(251,191,36,.4)">VMA non renseignée</span>'))
     +'</div>'
     +(d.desc?'<div class="pl-ap-d">'+e(d.desc)+'</div>':'')
     +lignes
@@ -4947,7 +4995,48 @@ const LIB_THEMES=[
   {id:'10k',lbl:'Spé 10K',col:'#FF6B1A'},
   {id:'semi',lbl:'Spé semi',col:'#10B981'},
   {id:'marathon',lbl:'Spé marathon',col:'#8B5CF6'},
+  {id:'muscu',lbl:'Musculation',col:'#EAB308'},
 ];
+/* Les quatre régimes de musculation utiles à un coureur. L'identifiant est
+   stocké dans la séance ; seul le libellé change à l'affichage. */
+const MUSCU_TYPES=[
+  {id:'force',      lbl:'Force',                col:'#EAB308'},
+  {id:'plio',       lbl:'Pliométrie',           col:'#F97316'},
+  {id:'hyper',      lbl:'Hypertrophie',         col:'#A855F7'},
+  {id:'force-plio', lbl:'Force + pliométrie',   col:'#EF4444'},
+];
+function muscuType(id){ return MUSCU_TYPES.find(function(t){return t.id===id;})||MUSCU_TYPES[0]; }
+/* La charge d'un exercice s'exprime de trois façons, et une seule à la fois :
+   un poids en kilos, le poids du corps, ou un pourcentage d'un maximum à n
+   répétitions (1RM, 2RM…). */
+function muscuCharge(e){
+  if(!e) return '';
+  if(e.ct==='pdc') return 'poids du corps';
+  if(e.ct==='rm')  return (e.pct?e.pct+' % ':'')+'du '+(e.rm||1)+'RM';
+  return (e.kg!=null&&e.kg!=='')?(String(e.kg).replace('.',',')+' kg'):'';
+}
+/* Une séance de musculation en une ligne par exercice. */
+function muscuLigneExo(e){
+  var bouts=[];
+  if(e.series>0&&e.reps>0) bouts.push(e.series+' × '+e.reps);
+  else if(e.reps>0) bouts.push(e.reps+' rép.');
+  var ch=muscuCharge(e);
+  if(ch) bouts.push(ch);
+  if(e.rec) bouts.push('récup '+e.rec);
+  return bouts.join(' · ');
+}
+/* Identifiant d'une vidéo YouTube, quelle que soit la forme du lien collé.
+   On ne garde que l'identifiant : c'est lui qui sert à bâtir une adresse sûre,
+   plutôt que de rejouer telle quelle une URL venue du presse-papiers. */
+function ytId(url){
+  var u=String(url||'').trim();
+  if(!u) return '';
+  var m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/);
+  if(m) return m[1];
+  if(/^[A-Za-z0-9_-]{11}$/.test(u)) return u;   // identifiant collé seul
+  return '';
+}
+function ytLien(url){ var i=ytId(url); return i?('https://www.youtube.com/watch?v='+i):''; }
 const LIB_SESSIONS=[
   // ── Veille séances · sources reconnues ──
   {theme:'entretien',title:'Endurance faible intensité (MAF)',tag:'FC ≤ 180−âge',desc:'Développe l’endurance de base en aérobie stricte, sous le seuil. À placer en début de cycle pour construire le foncier.',warm:'—',blocks:[{r:1,m:50,pct:65}],cool:'—',src:'Dr Phil Maffetone — méthode MAF (180-Formula)'},
@@ -5144,6 +5233,7 @@ function libBlock(b,vma,lbl){
 function libCard(s,vma,opts){
   opts=opts||{};
   const t=LIB_THEMES.find(x=>x.id===s.theme)||LIB_THEMES[1];
+  const mt=s.muscu?muscuType(s.mtype):null;
   /* La durée-intensité et l'étape de prépa ne s'affichent plus sur la carte :
      l'information reste dans s.tag et LIB_ORDER, qui pilotent toujours le tri
      et l'export, mais elle encombrait le bandeau. */
@@ -5155,14 +5245,18 @@ function libCard(s,vma,opts){
     +(_kind==='c'?'Modifier cette séance':'Modifier et enregistrer une copie dans ta banque')+'">'
     +'<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Modifier</button>';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
-  const blocks=s.blocks.map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
+  const blocks=s.muscu
+    ? libMuscuBody(s)
+    : (s.blocks||[]).map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
   const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
   const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
   return '<div class="lib-card" style="border-top:3px solid '+t.col+';position:relative">'+delBtn+
-    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'+persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
+    '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'
+    +(mt?'<div class="lib-badge" style="background:'+mt.col+'22;color:'+mt.col+'">'+mt.lbl+'</div>':'')
+    +persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
-    '<div class="lib-wkt-row">'+wktBtn+editBtn+'</div>'+
+    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+editBtn+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
     (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
@@ -5449,21 +5543,25 @@ function wktDl(bytes,name,mime){
 function wktExportPlan(){
   const vm=wktVma();
   if(!vm){alert('Charge un athlète (ou renseigne une VMA dans la bibliothèque) : c’est elle qui cale les allures cibles.');return;}
-  const files=[], absents=[];
+  const files=[], absents=[], muscles=[];
   Object.keys(_plSessions).sort().forEach(function(iso){
     (_plSessions[iso]||[]).forEach(function(sx,i){
       const s=wktFindSession(sx.t);
       if(!s){absents.push(sx.t);return;}
+      if(s.muscu){muscles.push(sx.t);return;}   // le format .fit ne décrit que de la course
       const jm=iso.slice(8,10)+'/'+iso.slice(5,7);
       const dated=Object.assign({},s,{title:jm+' · '+s.title});
       files.push({name:iso.slice(5).replace('-','')+(i?'-'+(i+1):'')+'-'+wktSlug(s.title)+'.fit',
                   data:wktToFit(dated,vm.v)});
     });
   });
-  if(!files.length){alert('Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.');return;}
+  if(!files.length){alert(muscles.length
+    ? 'Les seules séances du calendrier sont des séances de musculation : le format montre ne sait pas les décrire.'
+    : 'Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.');return;}
   const who=vm.who?wktSlug(vm.who):'athlete';
   wktDl(zipBuild(files),'redlab-'+who+'-seances.zip','application/zip');
   if(absents.length)alert('Séances introuvables dans la bibliothèque, non exportées :\n· '+absents.join('\n· '));
+  if(muscles.length)alert('Séances de musculation non exportées — le format montre ne décrit que de la course :\n· '+muscles.join('\n· '));
 }
 
 function wktSlug(t){
@@ -5543,16 +5641,24 @@ function libBlockSegs(b,vma){
    notation libre reste accessible aux séances qui en portent une — il est le
    seul à savoir relire leur champ « raw » — mais on n'y entre plus par la
    création : un éditeur unique vaut mieux que deux à apprendre. */
-function toggleLibCreate(){
+function toggleLibCreate(muscu){
   const box=document.getElementById('lib-create'); if(!box)return;
-  if(box.style.display==='none'||!box.style.display){
+  const ouvert=!(box.style.display==='none'||!box.style.display);
+  // Rouvrir sur l'autre type bascule le formulaire au lieu de tout refermer.
+  if(ouvert && !!(_libEdit&&_libEdit.muscu)===!!muscu){
+    _libEdit=null; box.style.display='none'; box.innerHTML=''; return;
+  }
+  if(muscu){
+    _libEdit={src:'new',id:null,orig:'',blocks:[],exos:[muscuExoVide()],
+              muscu:true,nouvelle:true,apres:null,hote:'lib-create'};
+    box.innerHTML=libMuscuFormHTML({title:'',mtype:'force',tag:'',desc:'',warm:'',cool:''});
+  } else {
     _libEdit={src:'new',id:null,orig:'',blocks:[{r:1,d:1000,pct:90,rec:''}],
               nouvelle:true,apres:null,hote:'lib-create'};
     box.innerHTML=libEditFormHTML({title:'',theme:'vo2',tag:'',desc:'',warm:'',cool:''});
-    box.style.display='block';
-    libPreview();
   }
-  else { _libEdit=null; box.style.display='none'; box.innerHTML=''; }
+  box.style.display='block';
+  libPreview();
 }
 function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
 function libCreateFormHTML(pre){
@@ -5616,6 +5722,7 @@ function libBuildFromEditor(){
 }
 /* Le formulaire actif décide de la fonction de construction. */
 function libBuildActive(){
+  if(document.getElementById('mx-rows')) return libMuscuBuild();
   return document.getElementById('lb-rows')?libBuildFromEditor():libBuildFromForm();
 }
 function libPreview(){
@@ -5628,9 +5735,11 @@ function libPreview(){
 function libSaveSession(){
   const b=libBuildActive();
   if(!b.ok){
-    alert(document.getElementById('lb-rows')
-      ? "La séance n'a aucun bloc exploitable. Chaque bloc a besoin d'une valeur et d'un % de VMA."
-      : "Impossible de lire la séance. Vérifie la notation, ex : 10x1000 800as10 200as5 R3'");
+    alert(document.getElementById('mx-rows')
+      ? "La séance n'a aucun exercice : donne un nom à au moins un exercice."
+      : (document.getElementById('lb-rows')
+        ? "La séance n'a aucun bloc exploitable. Chaque bloc a besoin d'une valeur et d'un % de VMA."
+        : "Impossible de lire la séance. Vérifie la notation, ex : 10x1000 800as10 200as5 R3'"));
     return;
   }
   // Modification d'une séance perso : on remplace à sa place, pour ne pas la
@@ -5694,9 +5803,11 @@ function libEditOpen(kind,idx,opts){
   var copie=JSON.parse(JSON.stringify(s));
   if(opts.titre)copie.title=opts.titre;
   _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[],
+            muscu:!!copie.muscu, exos:(copie.exos&&copie.exos.length)?copie.exos:[muscuExoVide()],
             nouvelle:!!opts.nouvelle,
             apres:opts.apres||null,hote:opts.modal?'lib-edit-modal':'lib-create'};
-  var html=copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie);
+  var html=copie.muscu?libMuscuFormHTML(copie)
+          :(copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie));
   if(opts.modal){
     // Depuis le plan : l'éditeur vit dans une fenêtre, l'onglet Bibliothèque
     // n'étant pas à l'écran.
@@ -5854,6 +5965,142 @@ function libEditFormHTML(s){
        :((_libEdit.src==='l'||_libEdit.nouvelle)
          ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
+/* ══ ÉDITEUR DE SÉANCE DE MUSCULATION ══
+   Une séance de course se décrit par des distances et des pourcentages de
+   VMA ; une séance de musculation par des exercices, des séries et une
+   charge. Les deux ne rentrent pas dans le même formulaire — celui-ci est
+   donc distinct, mais il enregistre dans la même banque perso et la séance
+   se pose au calendrier exactement comme les autres. */
+function muscuExoVide(){ return {nom:'',series:3,reps:8,ct:'kg',kg:'',pct:80,rm:1,rec:'',video:''}; }
+
+function libMuscuRow(e,i){
+  var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');};
+  var yid=ytId(e.video);
+  var charge='';
+  if(e.ct==='kg'){
+    charge='<input class="mx-n" type="number" min="0" step="0.5" value="'+esc(e.kg)+'" placeholder="kg" oninput="muscuSet('+i+',\'kg\',this.value)"><span class="mx-u">kg</span>';
+  } else if(e.ct==='rm'){
+    charge='<input class="mx-n" type="number" min="1" max="100" step="1" value="'+esc(e.pct)+'" placeholder="%" oninput="muscuSet('+i+',\'pct\',this.value)"><span class="mx-u">% du</span>'
+      +'<input class="mx-n mx-n--rm" type="number" min="1" max="20" step="1" value="'+esc(e.rm)+'" oninput="muscuSet('+i+',\'rm\',this.value)"><span class="mx-u">RM</span>';
+  } else {
+    charge='<span class="mx-pdc">au poids du corps</span>';
+  }
+  return '<div class="mx-row" data-i="'+i+'">'
+    +'<div class="mx-l1">'
+      +'<input class="mx-nom" value="'+esc(e.nom)+'" placeholder="Nom de l’exercice — squat, fentes, mollets…" oninput="muscuSet('+i+',\'nom\',this.value)">'
+      +'<div class="mx-acts">'
+        +(i>0?'<button type="button" class="mx-b" title="Monter" onclick="muscuMonter('+i+')">↑</button>':'')
+        +'<button type="button" class="mx-b mx-b--x" title="Retirer cet exercice" onclick="muscuDel('+i+')">×</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="mx-l2">'
+      +'<span class="mx-g"><input class="mx-n" type="number" min="1" max="30" value="'+esc(e.series)+'" oninput="muscuSet('+i+',\'series\',this.value)"><span class="mx-u">séries de</span>'
+      +'<input class="mx-n" type="number" min="1" max="100" value="'+esc(e.reps)+'" oninput="muscuSet('+i+',\'reps\',this.value)"><span class="mx-u">rép.</span></span>'
+      +'<span class="mx-g"><select class="mx-sel" onchange="muscuSet('+i+',\'ct\',this.value)">'
+        +'<option value="kg"'+(e.ct==='kg'?' selected':'')+'>Charge en kg</option>'
+        +'<option value="pdc"'+(e.ct==='pdc'?' selected':'')+'>Poids du corps</option>'
+        +'<option value="rm"'+(e.ct==='rm'?' selected':'')+'>% du max (RM)</option>'
+      +'</select>'+charge+'</span>'
+      +'<span class="mx-g"><span class="mx-u">récup</span><input class="mx-rec" value="'+esc(e.rec)+'" placeholder="2’" oninput="muscuSet('+i+',\'rec\',this.value)"></span>'
+    +'</div>'
+    +'<div class="mx-l3">'
+      +'<span class="mx-u">Vidéo</span>'
+      +'<input class="mx-vid" value="'+esc(e.video)+'" placeholder="Lien YouTube expliquant l’exercice — facultatif" oninput="muscuSet('+i+',\'video\',this.value)">'
+      +(yid?'<a class="mx-ok" href="'+ytLien(e.video)+'" target="_blank" rel="noopener noreferrer">▶ Voir</a>'
+           :(String(e.video||'').trim()?'<span class="mx-ko">lien YouTube non reconnu</span>':''))
+    +'</div>'
+  +'</div>';
+}
+function muscuRedraw(){
+  var box=document.getElementById('mx-rows');
+  if(box) box.innerHTML=(_libEdit.exos||[]).map(libMuscuRow).join('');
+  libPreview();
+}
+function muscuSet(i,champ,v){
+  var e=_libEdit&&_libEdit.exos&&_libEdit.exos[i]; if(!e)return;
+  if(champ==='series'||champ==='reps'||champ==='rm') e[champ]=Math.max(1,Math.round(+v||1));
+  else if(champ==='pct') e.pct=Math.max(1,Math.min(100,Math.round(+v||0)));
+  else e[champ]=v;
+  // Le type de charge change les champs affichés : il faut redessiner la ligne.
+  if(champ==='ct'||champ==='video') muscuRedraw(); else libPreview();
+}
+function muscuAdd(){ if(!_libEdit)return; (_libEdit.exos=_libEdit.exos||[]).push(muscuExoVide()); muscuRedraw(); }
+function muscuDel(i){ if(!_libEdit)return; _libEdit.exos.splice(i,1); if(!_libEdit.exos.length)_libEdit.exos.push(muscuExoVide()); muscuRedraw(); }
+function muscuMonter(i){
+  if(!_libEdit||i<1)return;
+  var l=_libEdit.exos; var t=l[i-1]; l[i-1]=l[i]; l[i]=t; muscuRedraw();
+}
+
+function libMuscuFormHTML(s){
+  var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
+  var creation=(_libEdit.src==='new');
+  var typeOpts=MUSCU_TYPES.map(function(t){return '<option value="'+t.id+'"'+(t.id===(s.mtype||'force')?' selected':'')+'>'+t.lbl+'</option>';}).join('');
+  return '<div class="lc-head">'+(creation?'Nouvelle séance de musculation':('Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »'))+'</div>'
+    +'<div class="lc-grid">'
+      +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" placeholder="Renfo bas du corps — force" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Type de musculation</label><select id="lc-mtype" onchange="libPreview()">'+typeOpts+'</select></div>'
+    +'</div>'
+    +'<div class="lc-field"><label>Exercices</label><div id="mx-rows">'+(_libEdit.exos||[]).map(libMuscuRow).join('')+'</div>'
+      +'<button type="button" class="lb-add" onclick="muscuAdd()">+ Ajouter un exercice</button></div>'
+    +'<div class="lc-grid">'
+      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" placeholder="10 min vélo + mobilité" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" placeholder="étirements 5 min" oninput="libPreview()"></div>'
+    +'</div>'
+    +'<div class="lc-field"><label>Description</label><input id="lc-desc" value="'+esc(s.desc)+'" oninput="libPreview()"></div>'
+    +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
+    +'<div id="lc-preview" class="lc-preview"></div>'
+    +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
+      +(creation?'Enregistrer la séance':'Enregistrer les modifications')+'</button>'
+      +'<button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
+    +'<div class="lc-legend">Une séance de musculation se pose au calendrier comme une séance de course. '
+      +'Elle n’a en revanche <b>pas d’export montre</b> : le format des montres ne décrit que de la course.</div>';
+}
+/* Construit la séance depuis le formulaire de musculation. */
+function libMuscuBuild(){
+  var brut=(_libEdit&&_libEdit.exos||[]);
+  var exos=brut.filter(function(e){ return e && String(e.nom||'').trim(); })
+    .map(function(e){
+      var o={nom:String(e.nom).trim().slice(0,80),
+             series:Math.max(1,Math.round(+e.series||1)),
+             reps:Math.max(1,Math.round(+e.reps||1)),
+             ct:(e.ct==='pdc'||e.ct==='rm')?e.ct:'kg',
+             rec:String(e.rec||'').trim().slice(0,30)};
+      if(o.ct==='kg') o.kg=(e.kg===''||e.kg==null)?'':(+e.kg||0);
+      if(o.ct==='rm'){ o.pct=Math.max(1,Math.min(100,Math.round(+e.pct||0))); o.rm=Math.max(1,Math.round(+e.rm||1)); }
+      // On ne garde que l'identifiant vidéo, jamais l'URL brute : le lien
+      // affiché est reconstruit par ytLien, il ne peut donc pointer que sur
+      // une page YouTube.
+      var yid=ytId(e.video);
+      if(yid) o.video=yid;
+      return o;
+    });
+  var s={
+    id:(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
+    custom:true, muscu:true, theme:'muscu',
+    mtype:lcVal('lc-mtype')||'force',
+    title:(lcVal('lc-title').trim()||'Séance de musculation'),
+    tag:lcVal('lc-tag').trim(),
+    desc:lcVal('lc-desc').trim(),
+    warm:lcVal('lc-warm').trim()||'—',
+    cool:lcVal('lc-cool').trim()||'—',
+    exos:exos,
+    blocks:[]     // aucune allure : les autres vues savent lire un tableau vide
+  };
+  var warnings=[];
+  if(exos.length<brut.filter(function(e){return e;}).length)
+    warnings.push('exercice sans nom ignoré');
+  return {s:s,warnings:warnings,ok:exos.length>0};
+}
+/* Le corps d'une carte de musculation : un exercice par ligne. */
+function libMuscuBody(s){
+  var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;');};
+  return (s.exos||[]).map(function(e){
+    var lien=e.video?(' <a class="lib-yt" href="'+ytLien(e.video)+'" target="_blank" rel="noopener noreferrer" title="Voir la démonstration sur YouTube">▶</a>'):'';
+    return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+esc(e.nom)+lien+'</span>'
+      +'<span class="lib-step-v">'+esc(muscuLigneExo(e))+'</span></div>';
+  }).join('');
+}
+
 function libBlocSet(i,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
   if(champ==='r'){ b.r=Math.max(1,Math.round(+v||1)); }
@@ -5999,7 +6246,12 @@ function libBlockText(b){
 function libSessionText(s){
   var lines=[];
   if(s.warm&&s.warm!=='—')lines.push('Échauffement : '+s.warm);
-  s.blocks.forEach(function(b){lines.push(libBlockText(b));});
+  if(s.muscu){
+    (s.exos||[]).forEach(function(e){
+      lines.push(e.nom+' — '+muscuLigneExo(e)+(e.video?' — '+ytLien(e.video):''));
+    });
+  } else
+  (s.blocks||[]).forEach(function(b){lines.push(libBlockText(b));});
   if(s.cool&&s.cool!=='—')lines.push('Retour au calme : '+s.cool);
   return lines.join('\n');
 }
@@ -6010,7 +6262,7 @@ function libExportData(){
     return {
       title:s.title,
       category:th?th.lbl:s.theme,
-      sport:'Course à pied',
+      sport:s.muscu?'Musculation':'Course à pied',
       objective:s.tag||'',
       description:s.desc||'',
       content:libSessionText(s),
@@ -6046,7 +6298,8 @@ function renderLibrary(){
     '<div class="lib-toolbar">'+
       '<div class="lib-vma-field"><label style="margin-bottom:8px">VMA de calcul</label><div class="iw" style="max-width:180px"><div class="ii"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><input type="number" id="lib-vma" step="0.5" min="6" max="35" placeholder="14.5" value="'+(S.vma?S.vma.toFixed(1):'')+'" oninput="updLibVma()"><span class="iu">km/h</span></div></div>'+
       '<div class="lib-chips">'+chips+'</div>'+
-      '<button class="lib-create-btn" onclick="toggleLibCreate()">+ Créer une séance</button>'+
+      '<button class="lib-create-btn" onclick="toggleLibCreate(false)">+ Créer une séance</button>'+
+      '<button class="lib-create-btn" onclick="toggleLibCreate(true)" title="Exercices, séries, répétitions, charge et vidéo de démonstration">+ Créer une séance de musculation</button>'+
       '<button class="lib-create-btn" onclick="exportNolioJSON()" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.1);color:#60A5FA">⬇ Exporter (JSON)</button>'+
       '<button class="lib-create-btn" onclick="openNolioDeploy()" style="border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34D399" title="Lance d\'abord node server.js dans le dossier nolio-deploy">→ Déployer vers Nolio</button>'+
     '</div>'+
@@ -8172,7 +8425,7 @@ function plDayPick(iso){
   window._plPickList=LIB_SESSIONS.concat((typeof CUSTOM_SESSIONS!=='undefined'&&CUSTOM_SESSIONS)||[]);
   plModalClose();
   var byTheme={}; window._plPickList.forEach(function(s,i){(byTheme[s.theme]=byTheme[s.theme]||[]).push(i);});
-  var order=['entretien','vo2','seuil','5k','10k','semi','marathon'];
+  var order=['entretien','vo2','seuil','5k','10k','semi','marathon','muscu'];
   var list=order.filter(function(t){return byTheme[t];}).map(function(t){
     var th=LIB_THEMES.find(function(x){return x.id===t;})||{}; var col=th.col||'#94A3B8';
     var items=byTheme[t].map(function(i){var s=window._plPickList[i];return '<button type="button" class="pl-pick-it" data-s="'+String(s.title).toLowerCase().replace(/"/g,'')+'" onclick="plDayAddSession(\''+iso+'\','+i+')"><span style="background:'+col+'"></span>'+String(s.title).replace(/</g,'&lt;')+'</button>';}).join('');
