@@ -790,8 +790,8 @@ function ecranAccueil(d){
    Le curseur est un input natif et non le composant sur mesure de RedLab :
    sur téléphone, un curseur natif se prend au doigt sans effort et reste
    accessible au clavier. Le pas vaut 1/20e de km/h, comme côté coach. */
-var CA_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[800,'800 m'],[1000,'1 km'],[2000,'2 km'],[5000,'5 km']];
-var _caDist=1000;
+var CA_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[800,'800 m']];
+var _caDist=400;
 function blocCalculateur(d){
   var R=refDe(d);
   if(!R.v) return '';
