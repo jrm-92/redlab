@@ -197,43 +197,16 @@ a{color:var(--accent)}
 /* Une séance : le jour, puis ce qu'il y a à faire. */
 .day{background:var(--card);border:1px solid var(--border);border-radius:13px;
   border-left:3px solid var(--muted2);padding:13px 15px;margin-bottom:9px}
-.day.today{border-color:rgba(255,107,26,.4);background:rgba(255,107,26,.06)}
-.day-hd{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-.day-d{font-size:13px;font-weight:800;color:var(--text);text-transform:capitalize}
-.day-tag{font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
-.day-t{font-size:14.5px;font-weight:800;margin-top:5px;line-height:1.35}
-.day-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:5px}
+
 .step{display:flex;gap:10px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
 .step-k{flex:0 0 88px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);padding-top:2px}
 .step-v{flex:1;font-size:13.5px;color:var(--text2);line-height:1.55;font-weight:600}
-.today-badge{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.8px;
-  text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:5px}
 
-/* Semaines du plan, dépliables. */
-.wk{background:var(--card);border:1px solid var(--border);border-radius:13px;margin-bottom:9px;overflow:hidden}
-.wk-hd{display:flex;align-items:center;gap:9px;padding:13px 15px;cursor:pointer;user-select:none;width:100%;
-  background:none;border:0;font-family:var(--font);text-align:left;color:var(--text);flex-wrap:wrap}
-.wk-n{font-size:13px;font-weight:900;flex-shrink:0}
-.wk-dt{font-size:12px;color:var(--muted2)}
-.wk-ph{font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:5px;white-space:nowrap}
-.wk-km{margin-left:auto;font-size:13px;font-weight:800;color:var(--text2);white-space:nowrap}
-.wk-ch{color:var(--muted2);transition:transform .2s;flex-shrink:0}
-.wk.open .wk-ch{transform:rotate(90deg)}
-.wk-bd{display:none;padding:0 15px 14px;border-top:1px solid var(--border)}
-/* Les séances d'une semaine défilent côte à côte : empilées, il fallait
-   dérouler la page entière pour comparer mardi et jeudi. Le rail déborde de
-   la carte pour que la séance suivante affleure au bord — c'est ce qui
-   indique qu'il y a autre chose à droite. */
-.rail{display:flex;gap:10px;margin:12px -15px 0;padding:0 15px 4px;
+/* Semaines du plan{background:var(--card);border:1px solid var(--border);border-radius:13px;margin-bottom:9px;overflow:hidden}
+
+/* Les séances d'une semaine défilent côte à côte : empilées{display:flex;gap:10px;margin:12px -15px 0;padding:0 15px 4px;
   overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;
   -webkit-overflow-scrolling:touch;scrollbar-width:thin}
-.rail>.day{flex:0 0 min(84%,320px);scroll-snap-align:start;margin-bottom:0}
-.rail--seule>.day{flex:1 1 auto}
-.rail::-webkit-scrollbar{height:5px}
-.rail::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-.rail-hint{font-size:11px;color:var(--muted2);font-weight:700;margin-top:7px}
-.wk.open .wk-bd{display:block}
-.wk.now{border-color:rgba(255,107,26,.42)}
 
 /* Zones : tableau sur grand écran, cartes sur téléphone. */
 .zcard{background:var(--card);border:1px solid var(--border);border-left:3px solid;border-radius:13px;padding:13px 14px;margin-bottom:9px;transition:box-shadow .3s,border-color .3s}
@@ -249,8 +222,6 @@ a{color:var(--accent)}
 .zcard .zf{font-size:12.5px;color:var(--muted);margin-top:10px;padding-top:9px;border-top:1px solid var(--border);line-height:1.55;font-style:italic}
 .zcard .zuse{font-size:12.5px;color:var(--muted2);margin-top:5px;line-height:1.55}
 .zcard .zuse b{color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.8px;font-size:10.5px;margin-right:4px}
-.zbornes{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted2);font-weight:700;margin:0 2px 14px}
-.zbornes b{color:var(--text2);font-weight:800}
 
 /* Temps de passage. */
 .splits{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -263,6 +234,44 @@ a{color:var(--accent)}
 .splits .pa{color:var(--muted);font-size:13px;white-space:nowrap}
 .splits tr.mark td{background:rgba(255,107,26,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+/* ── Calendrier du plan : la grille du coach, à l'identique ── */
+.pcal{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  padding-bottom:6px;scrollbar-width:thin}
+.pcal::-webkit-scrollbar{height:5px}
+.pcal::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.pcal-in{min-width:max(100%,880px)}
+.pcal-l{display:flex;flex-direction:column;gap:8px}
+.pj-dow{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:5px;margin:0 0 5px;padding:0 12px 0 15px}
+.pj-dow span{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);text-align:center}
+.psem{border:1px solid var(--border);border-radius:12px;padding:10px 11px;background:var(--card)}
+.psem-h{display:flex;flex-wrap:wrap;align-items:center;gap:7px 11px;margin-bottom:8px}
+.psem-n{font-size:13px;font-weight:900;color:var(--text)}
+.psem-p{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.psem-a{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#60A5FA}
+.psem-k{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--accent);white-space:nowrap}
+.pj-g{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:5px}
+.pj{position:relative;min-height:104px;border:1px solid var(--border);border-radius:8px;
+  display:flex;flex-direction:column;padding:6px 6px 7px}
+.pj-t{display:flex;align-items:center;gap:4px;min-height:16px}
+.pj-n{font-size:14px;font-weight:800;color:var(--text2)}
+.pj-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
+.pj-mk{margin-left:auto;font-size:12px}
+.pj-l{display:flex;flex-direction:column;gap:3px;margin-top:5px}
+.pj-s{width:100%;text-align:left;border:0;border-radius:5px;color:var(--text2);font-family:var(--font);
+  font-size:11px;font-weight:700;line-height:1.35;padding:4px 5px;cursor:pointer;
+  -webkit-tap-highlight-color:rgba(255,107,26,.18)}
+.pj-s:hover{filter:brightness(1.3)}
+.pj-s span{overflow-wrap:anywhere}
+/* ── Détail d'une séance ── */
+.esp-modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;
+  justify-content:center;overflow:auto;padding:24px 12px calc(120px + env(safe-area-inset-bottom))}
+.esp-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;max-width:560px;width:100%;padding:16px}
+.esp-top{display:flex;align-items:flex-start;gap:10px}
+.esp-top b{flex:1;font-size:16px;font-weight:900;line-height:1.3;color:var(--text)}
+.esp-x{flex:0 0 auto;background:none;border:0;color:var(--muted2);font-size:26px;line-height:1;cursor:pointer;padding:0 4px}
+.esp-sub{font-size:12px;font-weight:700;color:var(--muted2);margin-top:3px}
+.esp-d{font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px}
+
 /* ── Calculateur d'allure ── */
 .calc{padding:16px}
 .calc-l{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2);margin-bottom:9px}
@@ -310,8 +319,7 @@ a{color:var(--accent)}
 
 @media(max-width:640px){
   .wrap{padding:0 13px 60px}
-  .wk-dt{order:9;flex-basis:100%;margin-left:23px}
-  .wk-km{font-size:14px}
+
   .obj .jm{font-size:32px}
   .step{flex-direction:column;gap:3px}
   .step-k{flex:none}
@@ -630,6 +638,7 @@ function go(sc){
 /* ── Repères communs ── */
 /* Les nombres s'écrivent avec une virgule : « 19,5 km/h », pas « 19.5 ». */
 function nb1(x){ return (+x).toFixed(1).replace('.',','); }
+function majuscule(t){ t=String(t||''); return t.charAt(0).toUpperCase()+t.slice(1); }
 function refDe(d){
   if(d.mode==='tests'&&d.csKmh) return {v:d.csKmh,lbl:'VC',zones:ZONES_VC};
   return {v:d.vma,lbl:'VMA',zones:ZONES_VMA};
@@ -637,10 +646,6 @@ function refDe(d){
 function jour(iso){
   var d=new Date(iso+'T12:00:00');
   return isNaN(d)?iso:d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-}
-function jourCourt(iso){
-  var d=new Date(iso+'T12:00:00');
-  return isNaN(d)?iso:d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
 }
 function isoAujourdhui(){
   var d=new Date();
@@ -701,28 +706,6 @@ function dessinerVolume(sem,unite){
               x:{ticks:AXE,grid:{display:false}}}}});
 }
 
-/* Prédictions contre records : deux bandes d'allure, et les points réels. */
-function dessinerPredictions(g){
-  var cv=_neuf('cv-pred'); if(!cv||!g||!g.labels||!g.labels.length)return;
-  var fmt=function(sec){sec=Math.round(sec);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');};
-  _cv['cv-pred']=new Chart(cv,{type:'line',
-    data:{labels:g.labels,datasets:[
-      {label:'Prédiction rapide',data:g.paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,.13)',
-       borderWidth:2.5,pointRadius:0,tension:.3,fill:'+1'},
-      {label:'Prédiction lente',data:g.paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',
-       borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.3,fill:false},
-      {label:'Tes records',data:g.recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',
-       borderWidth:2,showLine:false,pointRadius:6,pointHoverRadius:8,spanGaps:true}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#CBD5E1',usePointStyle:true,boxWidth:9,font:{family:'Manrope',size:11.5,weight:'700'}}},
-        tooltip:{callbacks:{label:function(c){
-          if(c.parsed.y==null)return null;
-          return c.dataset.label+' : '+fmt(c.parsed.y)+'/km';}}}},
-      scales:{y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:11}},
-                 ticks:Object.assign({callback:function(v){return fmt(v);}},AXE),grid:GRILLE},
-              x:{ticks:AXE,grid:GRILLE}}}});
-}
-
 /* Historique des courses : une allure, une date, une série par distance. */
 function dessinerHistorique(series){
   var cv=_neuf('cv-hist'); if(!cv||!series||!series.length)return;
@@ -754,7 +737,6 @@ function dessinerEcran(sc){
     dessinerVolume(P.planDetail.semaines,P.planDetail.unite); _dessines.plan=true;
   }
   if(sc==='records'&&P.graphes){
-    if(P.graphes.predictions)dessinerPredictions(P.graphes.predictions);
     if(P.graphes.historique)dessinerHistorique(P.graphes.historique);
     _dessines.records=true;
   }
@@ -779,34 +761,6 @@ function ecranAccueil(d){
     h+='</div>';
   } else {
     h+='<div class="card2 muted">Aucun objectif renseigné pour l’instant. Ton coach le fixera avec toi.</div>';
-  }
-
-  // Ce qu'il y a à faire maintenant : la semaine en cours, puis les séances
-  // à venir. C'est la question que l'athlète se pose en ouvrant la page.
-  if(pl&&pl.semaines&&pl.semaines.length){
-    var auj=isoAujourdhui();
-    var cur=null;
-    pl.semaines.forEach(function(w){ if(w.iso&&w.iso<=auj)cur=w; });
-    if(!cur&&pl.semaines[0].iso>auj)cur=pl.semaines[0];
-    if(cur){
-      h+='<div class="h2">Semaine en cours</div>'
-        +'<div class="card2"><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
-        +'<span style="font-size:16px;font-weight:900">Semaine '+cur.n+'</span>'
-        +'<span class="wk-ph" style="background:'+cur.col+'22;color:'+cur.col+'">'+esc(cur.phLbl)+'</span>'
-        +(cur.rec?'<span class="wk-ph" style="background:rgba(96,165,250,.16);color:#60A5FA">Allégée</span>':'')
-        +'<span style="margin-left:auto;font-size:17px;font-weight:900;color:var(--accent)">'+esc(cur.km+' '+(cur.unite||''))+'</span>'
-        +'</div>'
-        +'<div class="muted" style="margin-top:7px">Volume visé sur la semaine.'
-        +(cur.rec?' Semaine allégée : elle sert à absorber la charge des précédentes, ne la surcharge pas.':'')
-        +'</div></div>';
-    }
-  }
-
-  var aVenir=(pl&&pl.seances||[]).filter(function(s){return s.iso>=isoAujourdhui();}).slice(0,3);
-  if(aVenir.length){
-    h+='<div class="h2">Tes prochaines séances</div>'+aVenir.map(carteSeance).join('');
-  } else if(pl&&pl.seances&&pl.seances.length){
-    h+='<div class="h2">Séances</div><div class="card2 muted">Plus de séance à venir au calendrier. Regarde l’onglet <b>Plan</b> pour l’ensemble de la prépa.</div>';
   }
 
   // Repères chiffrés, en bas : utiles, mais pas ce qu'on vient chercher.
@@ -907,73 +861,107 @@ function caTemps(){
   for(var k=0;k<l.length;k++) l[k].classList.toggle('on', +l[k].getAttribute('data-m')===m);
 }
 
-function carteSeance(s){
-  var auj=isoAujourdhui();
-  var lignes=(s.lignes||[]).map(function(l){
-    return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+'</div></div>';
-  }).join('');
-  return '<div class="day'+(s.iso===auj?' today':'')+'" style="border-left-color:'+(s.col||'#94A3B8')+'">'
-    +'<div class="day-hd"><span class="day-d">'+esc(jourCourt(s.iso))+'</span>'
-    +(s.theme?'<span class="day-tag" style="background:'+s.col+'22;color:'+s.col+'">'+esc(s.theme)+'</span>':'')
-    +(s.iso===auj?'<span class="today-badge">Aujourd’hui</span>':'')+'</div>'
-    +'<div class="day-t">'+esc(s.titre)+'</div>'
-    +(s.desc?'<div class="day-desc">'+esc(s.desc)+'</div>':'')
-    +lignes
-    +(s.connue===false?'<div class="day-desc" style="color:#FBBF24">Le détail de cette séance n’est pas joint — demande-le à ton coach.</div>':'')
-    +'</div>';
-}
-
 /* ── Écran 2 · Plan ── */
+/* ── Écran 2 · Plan ──
+   Le calendrier du coach, tel quel : une ligne par semaine, sept jours du
+   lundi au dimanche, la couleur de la phase en fond, les séances posées sur
+   leur jour. L'athlète et son coach regardent ainsi la même chose, avec les
+   mêmes repères — 🏁 la course, ★ la course de préparation, un contour orange
+   sur aujourd'hui.
+
+   Le détail d'une séance — échauffement, blocs, allures, récupérations — ne
+   tient pas dans une case : on le montre au clic. */
 function ecranPlan(d){
   var pl=d.planDetail;
   if(!pl||!pl.semaines||!pl.semaines.length)
     return '<div class="card2 muted">Ton plan n’est pas encore publié. Il apparaîtra ici dès que ton coach l’aura mis en ligne.</div>';
   var auj=isoAujourdhui(), h='';
-  var courante=null;
-  pl.semaines.forEach(function(w){ if(w.iso&&w.iso<=auj)courante=w.n; });
-  if(courante==null) courante=pl.semaines[0].n;
 
   h+='<div class="h2">Charge de la préparation</div>'
     +'<div class="cvbox"><div class="cvt">Le volume visé semaine après semaine. La couleur donne la phase ; '
     +'une barre plus pâle est une semaine allégée, faite pour absorber ce qui précède.</div>'
     +'<div class="cvh"><canvas id="cv-vol"></canvas></div></div>';
-  h+='<div class="h2">'+esc(pl.objectifLbl||'Préparation')+' · '+pl.semaines.length+' semaines</div>';
-  pl.semaines.forEach(function(w){
-    var fin=w.iso?new Date(new Date(w.iso+'T12:00:00').getTime()+6*864e5):null;
-    var deb=w.iso?new Date(w.iso+'T12:00:00'):null;
-    var opt={day:'numeric',month:'short'};
-    var per=deb?(deb.toLocaleDateString('fr-FR',opt)+' → '+(fin?fin.toLocaleDateString('fr-FR',opt):'')):'';
-    var ses=(pl.seances||[]).filter(function(s){
-      return w.iso&&s.iso>=w.iso&&s.iso<addJours(w.iso,7);
-    });
-    var estCourante=(w.n===courante);
-    h+='<div class="wk'+(estCourante?' open now':'')+'" id="wk-'+w.n+'">'
-      +'<button class="wk-hd" onclick="basculerSemaine('+w.n+')" aria-expanded="'+(estCourante?'true':'false')+'">'
-      +'<svg class="wk-ch" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'
-      +'<span class="wk-n">S'+w.n+'</span>'
-      +'<span class="wk-dt">'+esc(per)+'</span>'
-      +'<span class="wk-ph" style="background:'+w.col+'22;color:'+w.col+'">'+esc(w.phLbl)+'</span>'
-      +(w.race?'<span class="wk-ph" style="background:rgba(255,107,26,.16);color:var(--accent)">Course</span>':'')
-      +(w.rec&&!w.race?'<span class="wk-ph" style="background:rgba(96,165,250,.16);color:#60A5FA">Allégée</span>':'')
-      +'<span class="wk-km">'+esc(w.km+' '+(w.unite||''))+'</span>'
-      +'</button>'
-      +'<div class="wk-bd">'
-      +(ses.length?('<div class="rail'+(ses.length>1?'':' rail--seule')+'">'+ses.map(carteSeance).join('')+'</div>'
-                    +(ses.length>1?'<div class="rail-hint">'+ses.length+' séances — fais glisser vers la gauche</div>':''))
-                  :'<div class="muted" style="margin-top:12px">Pas de séance détaillée cette semaine — garde le volume visé, en endurance.</div>')
-      +'</div></div>';
+
+  h+='<div class="h2">'+esc(pl.objectifLbl||'Préparation')+' · '+pl.semaines.length+' semaines</div>'
+    +'<div class="muted" style="margin-bottom:12px">Chaque ligne est une semaine, du lundi au dimanche. '
+    +'Touche une séance pour en voir le détail. 🏁 = ta course, ★ = course de préparation, contour orange = aujourd’hui. '
+    +'Fais glisser le calendrier vers la gauche pour voir la fin de semaine.</div>';
+
+  // Les séances rangées par jour.
+  var parJour={};
+  (pl.seances||[]).forEach(function(sx,i){
+    if(!sx||!sx.iso)return;
+    (parJour[sx.iso]=parJour[sx.iso]||[]).push(Object.assign({_i:i},sx));
   });
+  window._espSeances=(pl.seances||[]);
+
+  var DOW=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var MON=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var pha=function(c,a){c=(c||'#94A3B8').replace('#','');
+    return 'rgba('+parseInt(c.slice(0,2),16)+','+parseInt(c.slice(2,4),16)+','+parseInt(c.slice(4,6),16)+','+a+')';};
+
+  var lignes=pl.semaines.map(function(w){
+    var lundi=w.iso?new Date(w.iso+'T12:00:00'):null;
+    var jours='';
+    for(var i=0;i<7;i++){
+      var dt=lundi?new Date(lundi.getTime()+i*864e5):null;
+      var iso=dt?[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-'):'';
+      var course=(iso&&iso===pl.fin), prepa=(iso&&iso===pl.interIso);
+      var mk=course?'<span class="pj-mk">🏁</span>':(prepa?'<span class="pj-mk">★</span>':'');
+      var mo=(dt&&(i===0||dt.getDate()===1))?'<span class="pj-mo">'+MON[dt.getMonth()]+'</span>':'';
+      var bord=course?';outline:2px solid #34D399;outline-offset:-2px'
+              :(prepa?';outline:2px solid #FBBF24;outline-offset:-2px'
+              :(iso===auj?';outline:2px solid var(--accent);outline-offset:-2px':''));
+      var chips=(parJour[iso]||[]).map(function(sx){
+        return '<button type="button" class="pj-s" style="background:'+(sx.col||'#94A3B8')+'22;border-left:3px solid '+(sx.col||'#94A3B8')+'"'
+          +' onclick="espSeanceOuvrir('+sx._i+')"><span>'+esc(sx.titre)+'</span></button>';
+      }).join('');
+      jours+='<div class="pj" style="background:'+pha(w.col,w.rec?0.06:0.13)+bord+'">'
+        +'<div class="pj-t"><span class="pj-n">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
+        +'<div class="pj-l">'+chips+'</div></div>';
+    }
+    return '<div class="psem" style="border-left:4px solid '+w.col+'">'
+      +'<div class="psem-h"><span class="psem-n">S'+w.n+'</span>'
+      +'<span class="psem-p" style="color:'+w.col+'">'+esc(w.phLbl)+'</span>'
+      +(w.rec?'<span class="psem-a">Allégée</span>':'')
+      +'<span class="psem-k">'+esc(w.km+' '+(w.unite||''))+'</span></div>'
+      +'<div class="pj-g">'+jours+'</div></div>';
+  }).join('');
+
+  h+='<div class="pcal"><div class="pcal-in">'
+    +'<div class="pj-dow">'+DOW.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>'
+    +'<div class="pcal-l">'+lignes+'</div></div></div>';
+
   h+='<div class="muted" style="margin-top:14px">Les volumes sont des repères, pas des obligations. En cas de doute ou de douleur, préviens ton coach avant d’ajuster.</div>';
   return h;
 }
-function addJours(iso,n){
-  var d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n);
-  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+
+/* Le détail d'une séance du calendrier. */
+function espSeanceFermer(){
+  var e=document.getElementById('esp-seance'); if(e)e.remove();
+  if(_espEchap){ document.removeEventListener('keydown',_espEchap); _espEchap=null; }
 }
-function basculerSemaine(n){
-  var e=document.getElementById('wk-'+n); if(!e)return;
-  var ouvert=e.classList.toggle('open');
-  var b=e.querySelector('.wk-hd'); if(b)b.setAttribute('aria-expanded',ouvert?'true':'false');
+var _espEchap=null;
+function espSeanceOuvrir(i){
+  var sx=(window._espSeances||[])[i]; if(!sx) return;
+  espSeanceFermer();
+  var host=document.createElement('div');
+  host.id='esp-seance'; host.className='esp-modal';
+  host.onclick=function(e){ if(e.target===host) espSeanceFermer(); };
+  host.innerHTML='<div class="esp-box" style="border-left:3px solid '+(sx.col||'#94A3B8')+'">'
+    +'<div class="esp-top"><b>'+esc(sx.titre)+'</b>'
+      +'<button type="button" class="esp-x" onclick="espSeanceFermer()" aria-label="Fermer">×</button></div>'
+    +'<div class="esp-sub">'+esc(majuscule(jour(sx.iso)))+(sx.theme?' · <span style="color:'+sx.col+'">'+esc(sx.theme)+'</span>':'')+'</div>'
+    +(sx.desc?'<div class="esp-d">'+esc(sx.desc)+'</div>':'')
+    +((sx.lignes||[]).length
+        ? (sx.lignes||[]).map(function(l){
+            return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+'</div></div>';
+          }).join('')
+        : '<div class="muted">Le détail de cette séance n’est pas joint — demande-le à ton coach.</div>')
+    +'</div>';
+  document.body.appendChild(host);
+  _espEchap=function(e){ if(e.key==='Escape') espSeanceFermer(); };
+  document.addEventListener('keydown',_espEchap);
 }
 
 /* ── Écran 3 · Zones ──
@@ -994,14 +982,7 @@ function ecranZones(d){
   var fcOk=!!(d.fcMax&&d.fcRest);
   var fcRes=(d.fcReserve!=null)?d.fcReserve:((d.fcMax||0)-(d.fcRest||0));
 
-  var h='<div class="h2">Tes zones d’entraînement</div>'
-    +'<div class="muted" style="margin-bottom:12px">Calculées sur ta '+R.lbl+' de <b>'+nb1(R.v)+' km/h</b>. '
-    +'Le ressenti prime sur le chronomètre : par forte chaleur, en côte ou en fin de semaine chargée, garde la sensation plutôt que l’allure.</div>';
-
-  // Les bornes de l'ensemble, en une ligne : de quoi situer les cartes qui
-  // suivent sans une bande de couleurs de plus au-dessus d'elles.
-  h+='<div class="zbornes"><span>Le plus lent <b>'+fAll(3600/(R.v*lo0))+'/km</b></span>'
-    +'<span>Le plus rapide <b>'+(Z[Z.length-1].open?'&gt; ':'')+fAll(3600/(R.v*hi0))+'/km</b></span></div>';
+  var h='<div class="h2">Tes zones d’entraînement</div>';
 
   Z.forEach(function(z){
     var vlo=R.v*z.lo, vhi=R.v*z.hi;
@@ -1038,13 +1019,10 @@ function ecranAllures(d){
 
   if(o&&o.t&&o.m){
     h+='<div class="h2">Temps de passage — '+esc(o.nom)+'</div>'
-      +'<div class="muted" style="margin-bottom:12px">Pour finir en <b style="color:var(--accent)">'+fHMS(o.t)+'</b>, '
-      +'soit '+o.allure+'/km. Une allure régulière est presque toujours le meilleur choix : partir vite coûte plus cher que ça ne rapporte.</div>'
       +tableauSplits(o.m,o.t);
   }
 
   h+='<div class="h2">Ce que tu vaux aujourd’hui</div>'
-    +'<div class="muted" style="margin-bottom:12px">Estimations calculées sur ta '+R.lbl+'. À prendre comme une fourchette, pas comme une promesse.</div>'
     +'<div class="chips">'
     +RACES.map(function(r){
         var actif=_splitDist||((o&&o.id&&RACES.some(function(x){return x.id===o.id;}))?o.id:RACES[1].id);
@@ -1106,14 +1084,6 @@ function ecranRecords(d){
     +(lignes||'<div class="card2 muted">Aucun record enregistré pour l’instant. Transmets tes chronos à ton coach, ils apparaîtront ici.</div>');
 
   var g=d.graphes||{};
-  if(g.predictions&&g.predictions.labels&&g.predictions.labels.length){
-    h+='<div class="h2">Prédictions contre tes records</div>'
-      +'<div class="cvbox"><div class="cvt">La bande montre l’allure que ta '+refDe(d).lbl+' laisse espérer sur chaque distance. '
-      +'Les points jaunes sont tes chronos réels. Seuls les résultats de moins de six mois y figurent : '
-      +'un chrono plus ancien ne dit plus rien de ta forme actuelle.'
-      +(g.predictions.ecartees?' <b>'+g.predictions.ecartees+' distance'+(g.predictions.ecartees>1?'s écartées':' écartée')+'</b> — résultat trop ancien ou sans date.':'')
-      +'</div><div class="cvh"><canvas id="cv-pred"></canvas></div></div>';
-  }
   if(g.historique&&g.historique.length){
     // Une largeur par course, et le conteneur défile : à vingt courses sur
     // un écran de 390 px, les points se chevauchaient et les dates

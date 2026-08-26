@@ -1017,15 +1017,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   .db-section{margin-bottom:48px}
 }
 
-/* ── Légende graphique ── */
-.perf-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px}
-.cl-chip{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:30px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.03);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;line-height:1}
-.cl-chip:hover{border-color:var(--c);background:rgba(255,255,255,0.07);color:var(--text)}
-.cl-chip.off{opacity:0.38;text-decoration:line-through;text-decoration-thickness:1px}
-.cl-swatch{position:relative;width:26px;height:3px;border-radius:3px;background:var(--c);flex-shrink:0}
-.cl-swatch.cl-dash{height:0;background:transparent;border-top:3px dashed var(--c);border-radius:0}
-.cl-swatch.cl-dot::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:var(--c);border:2px solid var(--card);box-shadow:0 0 0 1px var(--c)}
-
 /* ── Sauvegarde / export-import ── */
 
 /* ── Editeur VMA (dashboard) ── */
@@ -2140,22 +2131,6 @@ table.lm-laps tbody tr{cursor:pointer}
             </div>
           </div>
 
-          <!-- Graphique de performance -->
-          <div class="db-section">
-            <div class="db-section-hd">
-              <div class="db-section-ico">
-                <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
-              </div>
-              <div class="db-section-title">Prédictions vs vos records</div>
-            </div>
-            <div class="card" style="padding:20px">
-              <div id="perf-legend" class="perf-legend"></div>
-              <div style="position:relative;height:340px"><canvas id="perf-chart"></canvas></div>
-              <div id="perf-empty" style="display:none;text-align:center;color:var(--muted2);font-size:13px;padding:10px 0 0;line-height:1.5">Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.</div>
-              <div id="perf-note" style="text-align:center;color:var(--muted2);font-size:12px;padding:12px 0 0;line-height:1.5"></div>
-            </div>
-          </div>
-
           <!-- Modele Vitesse Critique -->
           <div class="db-section" id="db-csmodel-section" style="display:none">
             <div class="db-section-hd">
@@ -2339,7 +2314,7 @@ function go(id){
   document.querySelectorAll('.mh-btn').forEach(b=>b.classList.remove('active'));
   const sb=document.getElementById('sbn-'+id);if(sb)sb.classList.add('active');
   const mb=document.getElementById('mbn-'+id);if(mb)mb.classList.add('active');
-  if(id==='dashboard'&&S.vma&&typeof renderChart==='function')renderChart();if(id==='dashboard'&&S.vma&&typeof renderCsModel==='function')renderCsModel();if(id==='dashboard'&&typeof renderDashPlan==='function')renderDashPlan();
+  if(id==='dashboard'&&S.vma&&typeof renderCsModel==='function')renderCsModel();if(id==='dashboard'&&typeof renderDashPlan==='function')renderDashPlan();
   if(id==='athletes') renderAthletes();
   const ac=document.getElementById('sbn-ath-count');
   if(ac){const n=getAthletes().length;ac.textContent=n>0?n:'';ac.style.display=n>0?'':'none';}
@@ -2750,7 +2725,6 @@ function renderDashboard(){
   renderRecords();
   renderDashAnalyses();
   buildRaces();
-  renderChart();
   renderRaceHistory();
 }
 
@@ -3185,7 +3159,7 @@ function recAddDist(id){
 }
 function recRemove(id){
   if(S.records&&S.records[id])delete S.records[id];
-  renderRecords();saveLS();renderChart();
+  renderRecords();saveLS();
 }
 function renderRecords(){
   const el=document.getElementById('db-records');if(!el)return;
@@ -3345,7 +3319,7 @@ function updRecord(id,skipSave){
   if(!T||T<30){
     if(out)out.innerHTML=`<div class="rec-out-empty">Entrez un temps pour voir l'allure</div>`;
     if(badge)badge.style.display='none';
-    if(!skipSave){saveLS();renderChart();}
+    if(!skipSave){saveLS();}
     return;
   }
   const spd=r.d/T;
@@ -3361,140 +3335,10 @@ function updRecord(id,skipSave){
       <div class="rec-kmh">${kmh.toFixed(2)} km/h · ${fHMS(T)}</div>
     </div>`;
   if(badge)badge.style.display='none';
-  if(!skipSave){saveLS();renderChart();}
+  if(!skipSave){saveLS();}
 }
 
 /* ══ GRAPHIQUE PERFORMANCE ══ */
-const CHART_DISTS=[
-  {id:'1500',nm:'1 500 m', d:1500,    vmaLo:1.00,vmaHi:1.05},
-  {id:'3000',nm:'3 000 m', d:3000,    vmaLo:0.95,vmaHi:1.00},
-  {id:'5k',  nm:'5 km',    d:5000,    vmaLo:0.90,vmaHi:0.95},
-  {id:'10k', nm:'10 km',   d:10000,   vmaLo:0.85,vmaHi:0.90},
-  {id:'semi',nm:'Semi',    d:21097.5, vmaLo:0.80,vmaHi:0.85},
-  {id:'mara',nm:'Marathon',d:42195,   vmaLo:0.75,vmaHi:0.80},
-];
-let perfChart=null;
-function recSeconds(id){
-  const r=(S.records||{})[id];if(!r)return null;
-  const T=(+r.hh||0)*3600+(+r.mm||0)*60+(+r.ss||0);
-  return T>=30?T:null;
-}
-/* Date d'un record (AAAA-MM-JJ) → horodatage, ou null si absente ou invalide. */
-function recDateTs(rec){
-  if(!rec||!rec.date)return null;
-  const t=Date.parse(rec.date+'T12:00:00');
-  return isFinite(t)?t:null;
-}
-/* La courbe compare des prédictions calculées sur la VMA du jour à des
-   performances réelles. Un chrono d'il y a deux ans ne dit plus rien de la
-   forme actuelle : confronté aux bandes d'aujourd'hui, il donne une lecture
-   flatteuse ou sévère selon le sens de la progression. Seuls les six derniers
-   mois alimentent donc la courbe. */
-const PERF_WINDOW_DAYS=183; // ~6 mois
-function perfCutoffTs(){return Date.now()-PERF_WINDOW_DAYS*864e5;}
-/* Un record saisi ne compte que s'il est daté ET dans la fenêtre. Sans date,
-   impossible de prouver qu'il est récent : il est écarté, et le message sous
-   le graphique explique comment le réintégrer. */
-function recIsRecent(rec){const t=recDateTs(rec);return t!=null&&t>=perfCutoffTs();}
-function chartSeconds(id){
-  const cut=perfCutoffTs();
-  const valid=(S.raceHistory||[]).filter(r=>r&&r.ts!=null&&r.dist===id&&r.ts>=cut&&r.sec>=30);
-  if(valid.length)return Math.min.apply(null,valid.map(r=>r.sec));
-  return recIsRecent((S.records||{})[id])?recSeconds(id):null;
-}
-/* Distances dont la performance existe mais a été écartée — trop ancienne ou
-   sans date. Sans ce décompte, une distance disparaîtrait sans explication. */
-function perfStaleCount(){
-  const cut=perfCutoffTs();
-  let n=0;
-  CHART_DISTS.forEach(r=>{
-    if(chartSeconds(r.id)!=null)return;
-    const oldRace=(S.raceHistory||[]).some(x=>x&&x.dist===r.id&&x.sec>=30&&(x.ts==null||x.ts<cut));
-    const rec=(S.records||{})[r.id];
-    const oldRec=!!rec&&((+rec.hh||0)*3600+(+rec.mm||0)*60+(+rec.ss||0))>=30;
-    if(oldRace||oldRec)n++;
-  });
-  return n;
-}
-function renderChart(){
-  const cv=document.getElementById('perf-chart');
-  if(!cv||typeof Chart==='undefined'||!S.vma)return;
-  const vmaMs=S.vma/3.6;
-  // n'afficher que les distances renseignées (avec un record) ; si aucune, on garde tout
-  const _cdRec=CHART_DISTS.filter(r=>chartSeconds(r.id)!=null);
-  const CD=_cdRec.length?_cdRec:CHART_DISTS;
-  const labels=CD.map(r=>r.nm);
-  const paceHi=CD.map(r=>Math.round(1000/(r.vmaHi*vmaMs)));
-  const paceLo=CD.map(r=>Math.round(1000/(r.vmaLo*vmaMs)));
-  const recPace=CD.map(r=>{const T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;});
-  const hasRec=recPace.some(v=>v!=null);
-  const stale=perfStaleCount();
-  const emptyEl=document.getElementById('perf-empty');
-  if(emptyEl){
-    emptyEl.style.display=hasRec?'none':'block';
-    const hasHist=(S.raceHistory||[]).some(r=>r&&r.ts!=null);
-    emptyEl.textContent=stale
-      ? "Aucun résultat de moins de 6 mois : la courbe n'affiche que les performances récentes. Renseigne la date d'un record pour le réintégrer."
-      : (hasHist
-        ? "Saisis un record (ou importe une fiche) pour superposer les performances aux bandes de prédiction."
-        : "Renseignez vos records ci-dessus : votre courbe se superposera aux bandes de prédiction.");
-  }
-  const noteEl=document.getElementById('perf-note');
-  if(noteEl){
-    noteEl.textContent='Seuls les résultats de moins de 6 mois alimentent la courbe.'
-      +(stale?' · '+stale+' distance'+(stale>1?'s écartées':' écartée')+' (résultat trop ancien ou sans date).':'');
-  }
-  const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
-  const fh=t=>{t=Math.round(t);const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sc=t%60;return h>0?h+'h'+String(m).padStart(2,'0'):m+"'"+String(sc).padStart(2,'0')+'"';};
-  const data={labels,datasets:[
-    // Bande de prédiction — bord haut ORANGE (rapide, trait plein), bord bas BLEU (lente, pointillé), zone violette douce
-    {label:'Prédiction (rapide)',data:paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,0.13)',borderWidth:2.5,pointRadius:0,tension:0.3,fill:'+1'},
-    {label:'Prédiction (lente)', data:paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.3,fill:false},
-    // Records — réel mesuré : gros points JAUNES cerclés, aucune ligne
-    {label:'Records < 6 mois',data:recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',borderWidth:2,showLine:false,pointRadius:6.5,pointHoverRadius:8.5,pointStyle:'circle',spanGaps:true},
-  ]};
-  const opts={
-    responsive:true,maintainAspectRatio:false,
-    interaction:{mode:'index',intersect:false},
-    plugins:{
-      legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>{
-        const r=CD[ctx.dataIndex];const sec=ctx.parsed.y;if(sec==null)return null;
-        const pct=Math.round((1000/sec)*3.6/S.vma*100);
-        return `${ctx.dataset.label}: ${fmt(sec)}/km · ${pct}% VMA · ${fh(sec*r.d/1000)}`;
-      }}}
-    },
-    scales:{
-      y:{reverse:true,title:{display:true,text:'Allure (min/km) — plus haut = plus rapide',color:'#94A3B8',font:{size:12}},
-         ticks:{color:'#94A3B8',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.06)'}},
-      x:{ticks:{color:'#CBD5E1',font:{family:'Manrope',weight:'700'}},grid:{color:'rgba(255,255,255,0.04)'}}
-    }
-  };
-  if(perfChart){perfChart.data=data;perfChart.options=opts;perfChart.update();}
-  else{perfChart=new Chart(cv,{type:'line',data,options:opts});}
-  buildPerfLegend();
-}
-function buildPerfLegend(){
-  const box=document.getElementById('perf-legend');if(!box||!perfChart)return;
-  const defs=[
-    {i:0,c:'#FF6B1A',dash:false,dot:false,t:'Prédiction rapide'},
-    {i:1,c:'#38BDF8',dash:true, dot:false,t:'Prédiction lente'},
-    {i:2,c:'#FACC15',dash:false,dot:true, t:'Records < 6 mois'},
-  ];
-  box.innerHTML=defs.map(d=>{
-    const vis=perfChart.isDatasetVisible(d.i);
-    return `<button type="button" class="cl-chip${vis?'':' off'}" style="--c:${d.c}" onclick="togglePerfDs(${d.i},this)">
-      <span class="cl-swatch${d.dash?' cl-dash':''}${d.dot?' cl-dot':''}"></span>${d.t}</button>`;
-  }).join('');
-}
-function togglePerfDs(i,btn){
-  if(!perfChart)return;
-  const vis=perfChart.isDatasetVisible(i);
-  perfChart.setDatasetVisibility(i,!vis);
-  perfChart.update();
-  btn.classList.toggle('off',vis);
-}
-
 /* ══ ROAD PERFORMANCE CALCULATOR ══ */
 function toggleRoadDist(){
   const sel=document.getElementById('road-dist');
@@ -4313,6 +4157,7 @@ function _planPourEspace(p,weeks){
   return {objectifLbl:p.lbl, col:p.col, unite:unite,
           debut:semaines.length?semaines[0].iso:null,
           fin:_plDate2||null,
+          interIso:_plDi||null,
           semaines:semaines, seances:seances};
 }
 
@@ -6749,7 +6594,6 @@ function goalReadout(){
 /* ══ EXPORT VUE ATHLÈTE (fichier HTML autonome, calculateurs interactifs) ══ */
 function exportAthleteView(returnDoc){
   if((!S.vma&&!S.csKmh)||!S.pseudo){ if(!returnDoc)alert("Génère d'abord un profil athlète avant de le partager."); return; }
-  try{ if(typeof renderChart==='function') renderChart(); }catch(e){}
   const src=document.getElementById('p-dashboard');
   if(!src){alert('Dashboard introuvable.');return;}
   const clone=src.cloneNode(true);
@@ -6859,21 +6703,16 @@ function exportAthleteView(returnDoc){
     'var ZONES_VC='+JSON.stringify(ZONES_VC)+';',
     'var ZONES_VMA='+JSON.stringify(ZONES_VMA)+';',
     'var RACES='+JSON.stringify(RACES)+';',
-    'var CHART_DISTS='+JSON.stringify(CHART_DISTS)+';',
     'var DIST_M='+JSON.stringify(DIST_M)+';',
     'var HIST_COL='+JSON.stringify(HIST_COL)+';',
     'var HIST_LBL='+JSON.stringify(HIST_LBL)+';',
-    'var perfChart=null;var histChart=null;',
+    'var histChart=null;',
     'function saveLS(){}','function delManualRace(){}',
     fAll.toString(), fHMS.toString(),
     updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
     'var _slDist='+_slDist+';', 'var SL_DIST='+JSON.stringify(SL_DIST)+';',
     slDistSet.toString(), slTemps.toString(),
     csRender.toString(), csSet.toString(), csInit.toString(), crslInit.toString(),
-    'var PERF_WINDOW_DAYS='+PERF_WINDOW_DAYS+';',
-    perfCutoffTs.toString(), recDateTs.toString(), recIsRecent.toString(),
-    recSeconds.toString(), chartSeconds.toString(), perfStaleCount.toString(),
-    renderChart.toString(), buildPerfLegend.toString(), togglePerfDs.toString(),
     renderRaceHistory.toString(),
     'var PL_PHC='+JSON.stringify(PL_PHC)+';',
     'var _fVol='+JSON.stringify(window._dashVolData||null)+';',
@@ -6885,8 +6724,8 @@ function exportAthleteView(returnDoc){
     // Les flèches des carrousels sont clonées avec le DOM, mais leurs gestionnaires
     // ne le sont pas : on remet le drapeau à zéro et on recâble dans la fiche.
     +'try{document.querySelectorAll(".race-grid,.pred-grid,.rec-grid,.ath-grid").forEach(function(g){g.dataset.crsl="";crslInit(g);});}catch(e){}'
-    +'document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("cs-vsl");if(v)csSet(v,+v.dataset.val);RACES.forEach(function(r){var s=document.getElementById("cs-"+r.id);if(s)csSet(s,+s.dataset.val);});try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
-    'window.addEventListener("load",function(){setTimeout(function(){try{renderChart();}catch(e){}try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},250);});'
+    +'document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("cs-vsl");if(v)csSet(v,+v.dataset.val);RACES.forEach(function(r){var s=document.getElementById("cs-"+r.id);if(s)csSet(s,+s.dataset.val);});try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
+    'window.addEventListener("load",function(){setTimeout(function(){try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},250);});'
   ].join('\n');
 
   // 4) CSS de l'app + surcouche autonome
@@ -7079,7 +6918,6 @@ function ffaApply(){
   }});
   S.raceHistory=window._ffaRaces||[];
   if(typeof renderRecords==='function')renderRecords();
-  if(typeof renderChart==='function')renderChart();
   if(typeof renderRaceHistory==='function')renderRaceHistory();
   if(typeof saveLS==='function')saveLS();
   ffaClose();
@@ -7134,12 +6972,12 @@ function addManualRace(){
   S.raceHistory.push({ts:dt.getTime(),dist:dist,label:HIST_LBL[dist]||dist,sec:T,kmh:+((DIST_M[dist]||0)/T*3.6).toFixed(2),loc:(document.getElementById('mr-loc').value||'').trim(),manual:true});
   S.raceHistory.sort((a,b)=>a.ts-b.ts);
   ['mr-h','mr-m','mr-s','mr-loc'].forEach(id=>{document.getElementById(id).value='';});
-  renderRaceHistory();renderChart();saveLS();
+  renderRaceHistory();saveLS();
 }
 function delManualRace(ts,sec){
   if(!confirm('Supprimer cette course de l\'historique ?'))return;
   S.raceHistory=(S.raceHistory||[]).filter(r=>!(r.ts===ts&&r.sec===sec));
-  renderRaceHistory();renderChart();saveLS();
+  renderRaceHistory();saveLS();
 }
 let histChart=null;
 function renderRaceHistory(){
@@ -8764,21 +8602,6 @@ const ESPACE_URL='https://coach.reding-running.fr/espace.html';
 function _graphesPourEspace(ath){
   if(!ath||!S.pseudo||ath.pseudo!==S.pseudo) return null;
   var g={};
-
-  // Prédictions contre records — les bandes, et les points réellement courus.
-  if(S.vma){
-    var vmaMs=S.vma/3.6;
-    var retenues=CHART_DISTS.filter(function(r){return chartSeconds(r.id)!=null;});
-    var CD=retenues.length?retenues:CHART_DISTS;
-    g.predictions={
-      labels:CD.map(function(r){return r.nm;}),
-      paceHi:CD.map(function(r){return Math.round(1000/(r.vmaHi*vmaMs));}),
-      paceLo:CD.map(function(r){return Math.round(1000/(r.vmaLo*vmaMs));}),
-      recPace:CD.map(function(r){var T=chartSeconds(r.id);return T?Math.round(T/r.d*1000):null;}),
-      recSec:CD.map(function(r){return chartSeconds(r.id);}),
-      ecartees:(typeof perfStaleCount==='function')?perfStaleCount():0
-    };
-  }
 
   // Historique des courses, une série par distance.
   var list=(ath.raceHistory||[]).filter(function(r){return r&&r.ts!=null&&r.sec>=30;});
