@@ -467,6 +467,19 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .db-dt-tab tr.db-tr-rec td{opacity:.55}
   .db-tr-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);border:1px solid var(--border2);border-radius:4px;padding:0 4px}
   .db-dt-box .pl-modal-top span{text-transform:none}
+  .ath-verrou,.ath-histo{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:9px;font-family:var(--font);font-size:12px;font-weight:800;padding:8px 12px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+  .ath-verrou:hover,.ath-histo:hover{color:var(--text2);border-color:var(--muted2)}
+  .ath-verrou.on{background:rgba(255,107,26,.12);border-color:rgba(255,107,26,.45);color:var(--orange)}
+  .ath-cad{font-size:13px}
+  .ah-list{display:flex;flex-direction:column;gap:7px;margin-bottom:4px}
+  .ah-l{display:flex;gap:14px;align-items:center;padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
+  .ah-l>div:first-child{flex:1;min-width:0}
+  .ah-d{font-size:13.5px;font-weight:800;color:var(--text)}
+  .ah-now{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--orange);border:1px solid rgba(255,107,26,.4);border-radius:4px;padding:1px 5px;margin-left:4px}
+  .ah-m{font-size:12.5px;color:var(--text2);margin-top:3px}
+  .ah-r{font-size:11.5px;color:var(--muted2);margin-top:2px}
+  .ah-b{flex:0 0 auto;background:transparent;border:1px solid rgba(255,107,26,.45);color:var(--orange);border-radius:8px;font-family:var(--font);font-size:12px;font-weight:800;padding:7px 13px;cursor:pointer}
+  .ah-b:hover{background:rgba(255,107,26,.12)}
   .pl-ap-d{font-size:13.5px;color:var(--text2);line-height:1.6;margin-bottom:14px}
   .pl-ap-l{display:flex;flex-direction:column;gap:2px}
   .pl-ap-r{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border)}
@@ -2341,7 +2354,12 @@ function go(id){
 }
 
 /* ══ STATE ══ */
-const S={mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,analyses:[]};
+/* athId : l'athlète auquel ce profil de travail est rattaché. Il vaut null
+   tant que le profil n'a pas été chargé depuis la liste ou enregistré.
+   L'outil désignait l'athlète par son PRÉNOM ; il suffisait qu'un prénom
+   retapé dans Saisie corresponde à quelqu'un d'autre pour que
+   l'enregistrement automatique écrase sa fiche entière. */
+const S={athId:null,mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,analyses:[]};
 
 /* ══ MODE ══ */
 function setMode(m){
@@ -2510,6 +2528,19 @@ function generate(){
     document.getElementById('pseudo-inp').focus();
     return;
   }
+  /* Le prénom saisi est celui d'un autre athlète : on détache le profil de
+     travail plutôt que de le faire glisser sur cette fiche. Sans ça, générer
+     un profil sous un nom déjà pris écrasait l'athlète correspondant à la
+     seconde suivante, sans un mot. */
+  var _autre=athHomonyme(S.pseudo, S.athId);
+  if(_autre){
+    var _avant=athRattache();
+    S.athId=null;
+    err.innerHTML='<strong>Attention :</strong> un athlète nommé « '+String(S.pseudo).replace(/</g,'&lt;')+' » existe déjà. '
+      +'Ce profil n\u2019est plus rattaché'+(_avant?' à '+String(_avant.pseudo).replace(/</g,'&lt;'):'')+' et ne s\u2019enregistre plus tout seul. '
+      +'Charge '+String(S.pseudo).replace(/</g,'&lt;')+' depuis l\u2019onglet Athlètes pour le modifier, ou clique Enregistrer pour décider quoi faire.';
+    err.style.display='block';
+  }
   updPseudo();
 
   if(S.mode==='vma'){
@@ -2666,10 +2697,12 @@ function loadLS(){
     // Les analyses font foi dans la fiche athlète : l'instantané du profil peut être
     // plus ancien (il n'est réécrit qu'au prochain saveLS). On les relit donc de là,
     // sinon une analyse ajoutée juste avant de quitter l'outil semblerait perdue.
-    if(S.pseudo){
-      const _ath=getAthletes().find(a=>a.pseudo===S.pseudo);
-      if(_ath&&Array.isArray(_ath.analyses))S.analyses=_ath.analyses;
-    }
+    // Rattachement : par identifiant s'il a été enregistré, jamais deviné par
+    // le prénom. Un profil restauré sans athId reste non rattaché — il ne
+    // s'enregistrera nulle part tant que le coach n'aura pas cliqué Enregistrer.
+    const _ath=(S.athId!=null)?getAthletes().find(a=>a.id===S.athId):null;
+    if(!_ath) S.athId=null;
+    if(_ath&&Array.isArray(_ath.analyses))S.analyses=_ath.analyses;
     renderDashboard();
     go('dashboard');
   }catch(e){}
@@ -2677,7 +2710,7 @@ function loadLS(){
 function resetAll(){
   if(!confirm('Réinitialiser le profil en cours ? Les données non enregistrées du dashboard seront effacées (les athlètes sauvegardés sont conservés).'))return;
   try{localStorage.removeItem(LS_KEY);}catch(e){}
-  Object.assign(S,{mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,csPts:null,raceHistory:[],analyses:[]});
+  Object.assign(S,{athId:null,mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,pseudo:'',testDate:null,records:{},goal:{id:'',t:null,date:''},plan:null,csPts:null,raceHistory:[],analyses:[]});
   tmiSec=null;
   raceRef={id:'',mm:'',ss:''};
   const ids=['pseudo-inp','vma-inp','fc-max','fc-rest'];
@@ -3642,10 +3675,48 @@ function athSaveCurrent(btn){
   if(btn){ var sp=btn.querySelector('span'); if(sp)sp.textContent='Enregistré ✓'; setTimeout(function(){ renderAthletes(); }, 1200); }
   else renderAthletes();
 }
+/* L'athlète auquel le profil de travail est rattaché — par identifiant, jamais
+   par prénom. Deux athlètes peuvent porter le même, et un prénom retapé dans
+   Saisie en désignerait alors un autre. */
+function athRattache(){
+  if(S.athId==null) return null;
+  return getAthletes().find(function(a){ return a.id===S.athId; })||null;
+}
+/* Un autre athlète porte-t-il déjà ce prénom ? */
+function athHomonyme(pseudo,saufId){
+  return getAthletes().find(function(a){
+    return a.pseudo===pseudo && a.id!==saufId;
+  })||null;
+}
+
 function saveCurrentAthlete(silencieux){
   if(!S.vma||!S.pseudo){return;}
   const athletes=getAthletes();
-  const existing=athletes.findIndex(a=>a.pseudo===S.pseudo);
+  // On écrit dans l'athlète rattaché, et dans lui seul. Sans rattachement, un
+  // enregistrement automatique ne fait rien : c'est au coach de dire à qui ce
+  // profil appartient, en cliquant Enregistrer.
+  let existing=-1;
+  const lie=athRattache();
+  if(lie){
+    existing=athletes.findIndex(a=>a.id===lie.id);
+  } else if(silencieux){
+    return;
+  } else {
+    // Enregistrement manuel d'un profil non rattaché : s'il existe un
+    // homonyme, on demande. On n'écrase jamais quelqu'un sans le dire.
+    const h=athHomonyme(S.pseudo,null);
+    if(h){
+      if(!confirm('Un athlète nommé « '+S.pseudo+' » existe déjà.\n\n'
+        +'OK  → remplacer son profil par celui qui est ouvert (ses repères, records, objectif et plan actuels seront perdus).\n'
+        +'Annuler → ne rien faire ; renomme le profil ouvert, ou charge d\'abord '+S.pseudo+' depuis la liste.')) return;
+      existing=athletes.findIndex(a=>a.id===h.id);
+    }
+  }
+  if(existing>=0 && athletes[existing].verrouille){
+    if(silencieux) return;
+    if(!confirm('Le profil de « '+athletes[existing].pseudo+' » est verrouillé.\n\n'
+      +'OK → le déverrouiller et enregistrer par-dessus.\nAnnuler → ne rien changer.')) return;
+  }
   const ath={
     id:existing>=0?athletes[existing].id:Date.now(),
     pseudo:S.pseudo,
@@ -3674,8 +3745,14 @@ function saveCurrentAthlete(silencieux){
   if(di>=0) hist[di]=snap; else hist.push(snap);
   hist.sort((a,b)=>(a.ts||0)-(b.ts||0));
   ath.history=hist;
+  // Le verrou appartient à la fiche, pas au profil de travail : il traverse
+  // l'enregistrement. Un « OK » à la question ci-dessus l'a déjà levé.
+  if(existing>=0 && athletes[existing].verrouille && !silencieux) ath.verrouille=false;
+  else if(existing>=0) ath.verrouille=athletes[existing].verrouille||false;
   if(existing>=0){athletes[existing]=ath;}else{athletes.unshift(ath);}
   _saveAthletes(athletes);
+  // Désormais rattaché : les enregistrements suivants savent où aller.
+  S.athId=ath.id;
   // Feedback visuel — sauté en enregistrement automatique : un bouton qui
   // clignote à chaque frappe est plus agaçant qu'informatif.
   const btn=silencieux?null:document.getElementById('btn-save-ath');
@@ -3753,11 +3830,91 @@ var _athSaveTimer=null;
 function athAutoSave(){
   if(typeof S==='undefined'||!S.pseudo)return;
   if(!S.vma&&!S.csKmh)return;
-  var existe=getAthletes().some(function(a){return a.pseudo===S.pseudo;});
-  if(!existe)return;
+  var lie=athRattache();
+  if(!lie)return;                       // profil non rattaché : rien d'automatique
+  if(lie.verrouille)return;             // fiche verrouillée par le coach
+  // Renommage en cours : tant que le prénom saisi est celui d'un AUTRE athlète,
+  // on ne touche à rien. C'est exactement le cas qui faisait atterrir les
+  // records d'un athlète sur la fiche d'un autre.
+  if(S.pseudo!==lie.pseudo && athHomonyme(S.pseudo,lie.id))return;
   try{ saveCurrentAthlete(true); }catch(e){}
 }
 function athAutoSaveDebounced(){ clearTimeout(_athSaveTimer); _athSaveTimer=setTimeout(athAutoSave,1200); }
+
+/* ══ VERROU ══
+   Une fiche verrouillée n'est plus touchée par l'enregistrement automatique,
+   et l'enregistrement manuel demande confirmation. C'est le garde-fou pour un
+   athlète dont le profil est arrêté : on peut continuer à le consulter sans
+   risquer de lui écrire dessus. */
+function athVerrouiller(id){
+  var l=getAthletes(), i=l.findIndex(function(a){return a.id===id;});
+  if(i<0) return;
+  l[i].verrouille=!l[i].verrouille;
+  _saveAthletes(l);
+  renderAthletes();
+}
+
+/* ══ RESTAURER UN ÉTAT PRÉCÉDENT ══
+   Chaque enregistrement laisse un instantané dans l'historique de l'athlète :
+   ses repères, sa fréquence cardiaque et ses records à cette date. Si une
+   fiche a été écrasée, c'est là qu'on retrouve ce qu'elle contenait.
+
+   L'instantané ne porte NI l'objectif, NI le plan, NI l'historique de courses,
+   NI les analyses : ces quatre-là ne sont pas dans l'historique et ne se
+   restaurent pas d'ici. On le dit plutôt que de laisser croire à un retour en
+   arrière complet. */
+function athHistoOuvrir(id){
+  var a=getAthletes().find(function(x){return x.id===id;});
+  if(!a) return;
+  var h=(a.history||[]).slice().sort(function(x,y){return (y.ts||0)-(x.ts||0);});
+  var e=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;');};
+  var lignes=h.map(function(sn,i){
+    var recs=Object.keys(sn.records||{}).map(function(k){
+      var r=sn.records[k]||{};
+      var sec=(+r.hh||0)*3600+(+r.mm||0)*60+(+r.ss||0);
+      return sec>=30?(k+' '+fHMS(sec)):null;
+    }).filter(Boolean);
+    var ref=sn.csKmh?(sn.csKmh.toFixed(2)+' km/h VC'):(sn.vma?(sn.vma.toFixed(1)+' km/h VMA'):'—');
+    return '<div class="ah-l">'
+      +'<div><div class="ah-d">'+e(sn.date||'sans date')+(i===0?' <span class="ah-now">actuel</span>':'')+'</div>'
+      +'<div class="ah-m">'+e(ref)+(sn.fcMax?(' · FC max '+sn.fcMax):'')+'</div>'
+      +'<div class="ah-r">'+(recs.length?e(recs.join(' · ')):'aucun record')+'</div></div>'
+      +(i===0?'':'<button type="button" class="ah-b" onclick="athHistoRestaurer('+a.id+','+(sn.ts||0)+')">Restaurer</button>')
+      +'</div>';
+  }).join('');
+  rlModalOuvrir('ath-histo-modal',
+    '<div class="pl-modal-box db-dt-box"><div class="pl-modal-top"><b>Historique de '+e(a.pseudo)+'</b>'
+    +'<span>'+h.length+' état'+(h.length>1?'s':'')+' enregistré'+(h.length>1?'s':'')+'</span>'
+    +'<button type="button" class="pl-modal-x" onclick="rlModalFermer(\'ath-histo-modal\')">×</button></div>'
+    +(h.length?('<div class="ah-list">'+lignes+'</div>')
+              :'<div class="db-dt-note">Aucun état antérieur : cette fiche n\u2019a été enregistrée qu\u2019une fois.</div>')
+    +'<div class="db-dt-note">Restaurer réécrit les <b>repères, la fréquence cardiaque et les records</b> de la fiche. '
+    +'L\u2019objectif, le plan, l\u2019historique de courses et les analyses ne figurent pas dans ces instantanés : '
+    +'ils ne se restaurent pas d\u2019ici. Si la fiche de cet athlète a déjà été publiée dans son espace, la version publiée, elle, les contient.</div>'
+    +'</div>');
+}
+function athHistoRestaurer(id,ts){
+  var l=getAthletes(), i=l.findIndex(function(a){return a.id===id;});
+  if(i<0) return;
+  var sn=(l[i].history||[]).find(function(h){return (h.ts||0)===ts;});
+  if(!sn) return;
+  if(!confirm('Remettre « '+l[i].pseudo+' » dans son état du '+(sn.date||'?')+' ?\n\n'
+    +'Repères, fréquence cardiaque et records seront remplacés. Objectif, plan, historique de courses et analyses ne bougent pas.')) return;
+  l[i].mode=sn.mode||l[i].mode;
+  l[i].vma=sn.vma; l[i].csKmh=sn.csKmh; l[i].dp=sn.dp;
+  l[i].fcMax=sn.fcMax; l[i].fcRest=sn.fcRest;
+  l[i].fcReserve=(sn.fcMax&&sn.fcRest)?(sn.fcMax-sn.fcRest):l[i].fcReserve;
+  l[i].records=JSON.parse(JSON.stringify(sn.records||{}));
+  l[i].testDate=sn.date||l[i].testDate;
+  // L'instantané restauré devient l'état courant : on l'ajoute en tête de
+  // l'historique plutôt que d'effacer ce qui suit, pour pouvoir revenir.
+  l[i].history=(l[i].history||[]).concat([Object.assign({},sn,{ts:Date.now()})]);
+  _saveAthletes(l);
+  rlModalFermer('ath-histo-modal');
+  renderAthletes();
+  if(S.athId===id) loadAthlete(id);
+  alert('« '+l[i].pseudo+' » a retrouvé son état du '+(sn.date||'?')+'.');
+}
 
 function deleteAthlete(id){
   var ath=getAthletes().find(function(a){return a.id===id;});
@@ -3852,6 +4009,7 @@ function loadAthlete(id){
   const ath=getAthletes().find(a=>a.id===id);
   if(!ath) return;
   Object.assign(S,{
+    athId:ath.id,
     pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,
     csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,
     fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,
@@ -3931,8 +4089,8 @@ function renderAthletes(){
     const metricFc=a.fcMax?`<div class="ath-metric"><div class="ath-metric-lbl">FC max</div><div class="ath-metric-val" style="color:#F87171">${a.fcMax} bpm</div></div>`:'';
     return `<div class="ath-card">
       <div class="ath-avatar">${initials}</div>
-      <div class="ath-name">${a.pseudo}</div>
-      <div class="ath-date">Enregistré le ${a.savedAt}</div>
+      <div class="ath-name">${a.pseudo}${a.verrouille?' <span class="ath-cad">🔒</span>':''}</div>
+      <div class="ath-date">Enregistré le ${a.savedAt}${S.athId===a.id?' · <span style="color:var(--orange);font-weight:800">profil ouvert</span>':''}</div>
       <div class="ath-metrics">
         <div class="ath-metric">
           <div class="ath-metric-lbl">${mainLbl}</div>
@@ -3950,6 +4108,8 @@ function renderAthletes(){
         <button class="ath-polar" onclick="polarConnect(${a.id},this)" title="${polarEstLie(a)?'Montre déjà reliée — recliquer prépare un nouveau lien (utile si l\'athlète a révoqué l\'accès)':'Copier le lien d\'autorisation Polar à envoyer à l\'athlète'}">${polarEstLie(a)?'⌚ Polar relié ✓':'⌚ Connecter sa montre Polar'}</button>
       </div>
       <div class="ath-actions">
+        <button class="ath-verrou${a.verrouille?' on':''}" onclick="athVerrouiller(${a.id})" title="${a.verrouille?'Fiche verrouillée : aucun enregistrement automatique n\'y touche. Cliquer pour déverrouiller.':'Verrouiller cette fiche : plus aucun enregistrement automatique ne l\'écrira.'}">${a.verrouille?'🔒 Verrouillé':'🔓 Verrouiller'}</button>
+        <button class="ath-histo" onclick="athHistoOuvrir(${a.id})" title="Voir les états précédents de cette fiche et en restaurer un">↺ Historique${(a.history&&a.history.length>1)?' ('+a.history.length+')':''}</button>
         <button class="btn-load" onclick="loadAthlete(${a.id})">
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           Charger le profil
