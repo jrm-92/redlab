@@ -706,28 +706,6 @@ function dessinerVolume(sem,unite){
               x:{ticks:AXE,grid:{display:false}}}}});
 }
 
-/* Prédictions contre records : deux bandes d'allure, et les points réels. */
-function dessinerPredictions(g){
-  var cv=_neuf('cv-pred'); if(!cv||!g||!g.labels||!g.labels.length)return;
-  var fmt=function(sec){sec=Math.round(sec);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');};
-  _cv['cv-pred']=new Chart(cv,{type:'line',
-    data:{labels:g.labels,datasets:[
-      {label:'Prédiction rapide',data:g.paceHi,borderColor:'#FF6B1A',backgroundColor:'rgba(139,92,246,.13)',
-       borderWidth:2.5,pointRadius:0,tension:.3,fill:'+1'},
-      {label:'Prédiction lente',data:g.paceLo,borderColor:'#38BDF8',backgroundColor:'transparent',
-       borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.3,fill:false},
-      {label:'Tes records',data:g.recPace,borderColor:'#CA8A04',backgroundColor:'#FACC15',
-       borderWidth:2,showLine:false,pointRadius:6,pointHoverRadius:8,spanGaps:true}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#CBD5E1',usePointStyle:true,boxWidth:9,font:{family:'Manrope',size:11.5,weight:'700'}}},
-        tooltip:{callbacks:{label:function(c){
-          if(c.parsed.y==null)return null;
-          return c.dataset.label+' : '+fmt(c.parsed.y)+'/km';}}}},
-      scales:{y:{reverse:true,title:{display:true,text:'Allure (min/km)',color:'#94A3B8',font:{size:11}},
-                 ticks:Object.assign({callback:function(v){return fmt(v);}},AXE),grid:GRILLE},
-              x:{ticks:AXE,grid:GRILLE}}}});
-}
-
 /* Historique des courses : une allure, une date, une série par distance. */
 function dessinerHistorique(series){
   var cv=_neuf('cv-hist'); if(!cv||!series||!series.length)return;
@@ -759,7 +737,6 @@ function dessinerEcran(sc){
     dessinerVolume(P.planDetail.semaines,P.planDetail.unite); _dessines.plan=true;
   }
   if(sc==='records'&&P.graphes){
-    if(P.graphes.predictions)dessinerPredictions(P.graphes.predictions);
     if(P.graphes.historique)dessinerHistorique(P.graphes.historique);
     _dessines.records=true;
   }
@@ -1107,14 +1084,6 @@ function ecranRecords(d){
     +(lignes||'<div class="card2 muted">Aucun record enregistré pour l’instant. Transmets tes chronos à ton coach, ils apparaîtront ici.</div>');
 
   var g=d.graphes||{};
-  if(g.predictions&&g.predictions.labels&&g.predictions.labels.length){
-    h+='<div class="h2">Prédictions contre tes records</div>'
-      +'<div class="cvbox"><div class="cvt">La bande montre l’allure que ta '+refDe(d).lbl+' laisse espérer sur chaque distance. '
-      +'Les points jaunes sont tes chronos réels. Seuls les résultats de moins de six mois y figurent : '
-      +'un chrono plus ancien ne dit plus rien de ta forme actuelle.'
-      +(g.predictions.ecartees?' <b>'+g.predictions.ecartees+' distance'+(g.predictions.ecartees>1?'s écartées':' écartée')+'</b> — résultat trop ancien ou sans date.':'')
-      +'</div><div class="cvh"><canvas id="cv-pred"></canvas></div></div>';
-  }
   if(g.historique&&g.historique.length){
     // Une largeur par course, et le conteneur défile : à vingt courses sur
     // un écran de 390 px, les points se chevauchaient et les dates
