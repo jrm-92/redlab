@@ -4137,7 +4137,7 @@ function _seancePourEspace(titre,vma){
      de le faire, pas seulement quand son coach le lui montre. */
   if(s&&s.muscu){
     (s.exos||[]).forEach(function(e){
-      lignes.push({k:e.nom, v:muscuLigneExo(e), video:(e.video?ytLien(e.video):'')});
+      lignes.push({k:e.nom, v:muscuLigneExo(e), video:(e.video?ytLien(e.video):''), exo:true});
     });
     if(s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:s.cool});
     var mt=muscuType(s.mtype);
