@@ -234,6 +234,17 @@ a{color:var(--accent)}
 .splits .pa{color:var(--muted);font-size:13px;white-space:nowrap}
 .splits tr.mark td{background:rgba(255,107,26,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+/* ── Carnet de charges ── */
+.ch-box{margin-top:9px;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.ch-r{font-size:12px;color:var(--muted);font-weight:600}
+.ch-r b{color:var(--accent);font-weight:900}
+.ch-vide{color:var(--muted2);font-style:italic}
+.ch-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px}
+.ch-lbl{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.ch-i{flex:1;min-width:110px;background:rgba(255,255,255,.05);border:1.5px solid var(--border2);
+  border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;font-weight:800;padding:7px 10px;outline:none}
+.ch-i:focus{border-color:var(--accent)}
+.ch-ok{font-size:11px;font-weight:800;color:var(--success);opacity:0;transition:opacity .25s;white-space:nowrap}
 .step-yt{display:inline-block;margin-left:8px;font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;
   border:1px solid rgba(255,107,26,.4);border-radius:6px;padding:1px 7px;white-space:nowrap}
 .step-yt:hover{background:var(--accent-soft)}
@@ -940,6 +951,89 @@ function ecranPlan(d){
   return h;
 }
 
+/* ══ LE CARNET DE CHARGES ══
+   Ce que l'athlète a réellement mis sur la barre, exercice par exercice. Ce
+   n'est pas un journal : on garde le dernier repère, celui qu'on relit avant
+   de charger la barre à la séance suivante.
+
+   Deux étages, dans cet ordre : le navigateur d'abord, toujours, parce qu'une
+   salle de sport en sous-sol n'a pas de réseau et qu'une note perdue au
+   moment où on la prend est pire que pas de note du tout ; le nuage ensuite,
+   au mieux, pour que le carnet suive l'athlète d'un téléphone à l'autre.
+   Si la table n'existe pas encore côté Supabase, le local suffit et rien ne
+   casse — on le dit une fois, on n'insiste pas. */
+var CH_KEY='redlab_charges_v1';
+var _charges={};      // clé normalisée → {v, d, s, lbl}
+var _chDistant=null;  // null = pas encore tenté, true/false = table jointe ou non
+
+function chCle(nom){
+  return String(nom||'').trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/\s+/g,' ').slice(0,80);
+}
+function chLireLocal(){
+  try{ return JSON.parse(localStorage.getItem(CH_KEY)||'{}')||{}; }catch(e){ return {}; }
+}
+function chEcrireLocal(){
+  try{ localStorage.setItem(CH_KEY, JSON.stringify(_charges)); }catch(e){}
+}
+/* Au démarrage : le local, puis le distant par-dessus quand il est plus
+   récent. Le distant fait autorité à égalité de date, il vient du même
+   athlète mais possiblement d'un appareil qu'il utilise davantage. */
+async function chargesCharger(){
+  _charges=chLireLocal();
+  if(!_sb||!_monEmail) return;
+  try{
+    var q=await _sb.from('muscu_charges').select('exercice,libelle,charge,seance,fait_le,maj')
+                   .ilike('email',_monEmail);
+    if(q.error){ _chDistant=false; return; }
+    _chDistant=true;
+    (q.data||[]).forEach(function(r){
+      var k=r.exercice, loc=_charges[k];
+      if(!loc || String(r.maj||'') >= String(loc.maj||'')){
+        _charges[k]={v:r.charge, d:r.fait_le||'', s:r.seance||'', lbl:r.libelle||'', maj:r.maj||''};
+      }
+    });
+    chEcrireLocal();
+  }catch(e){ _chDistant=false; }
+}
+async function chargesNoter(nom,valeur,seance,iso){
+  var k=chCle(nom); if(!k) return;
+  valeur=String(valeur||'').trim().slice(0,40);
+  var maj=new Date().toISOString();
+  if(!valeur){ delete _charges[k]; }
+  else { _charges[k]={v:valeur, d:iso||isoAujourdhui(), s:seance||'', lbl:nom, maj:maj}; }
+  chEcrireLocal();
+  if(!_sb||!_monEmail||_chDistant===false) return;
+  try{
+    if(!valeur) await _sb.from('muscu_charges').delete().ilike('email',_monEmail).eq('exercice',k);
+    else await _sb.from('muscu_charges').upsert([{email:String(_monEmail).toLowerCase(), exercice:k,
+      libelle:nom, charge:valeur, seance:seance||'', fait_le:(iso||isoAujourdhui()), maj:maj}],
+      {onConflict:'email,exercice'});
+  }catch(e){ _chDistant=false; }
+}
+/* Ce que dit le carnet pour cet exercice, en une ligne. */
+function chRepere(nom){
+  var c=_charges[chCle(nom)];
+  if(!c||!c.v) return '';
+  var quand='';
+  if(c.d){
+    var d=new Date(c.d+'T12:00:00');
+    if(!isNaN(d)) quand=' · '+d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  }
+  return 'La dernière fois : <b>'+esc(c.v)+'</b>'+esc(quand);
+}
+/* Saisie depuis la fiche de séance. On enregistre quand le champ est quitté,
+   pas à chaque frappe : « 8 » puis « 80 » ne doivent pas laisser « 8 ». */
+function chSaisie(i,nom,seance,iso){
+  var e=document.getElementById('ch-i-'+i); if(!e) return;
+  chargesNoter(nom,e.value,seance,iso);
+  var r=document.getElementById('ch-r-'+i);
+  if(r) r.innerHTML=chRepere(nom)||'<span class="ch-vide">Pas encore de repère pour cet exercice.</span>';
+  var ok=document.getElementById('ch-ok-'+i);
+  if(ok){ ok.style.opacity='1'; setTimeout(function(){ ok.style.opacity='0'; },1400); }
+}
+
 /* Le détail d'une séance du calendrier. */
 function espSeanceFermer(){
   var e=document.getElementById('esp-seance'); if(e)e.remove();
@@ -958,9 +1052,23 @@ function espSeanceOuvrir(i){
     +'<div class="esp-sub">'+esc(majuscule(jour(sx.iso)))+(sx.theme?' · <span style="color:'+sx.col+'">'+esc(sx.theme)+'</span>':'')+'</div>'
     +(sx.desc?'<div class="esp-d">'+esc(sx.desc)+'</div>':'')
     +((sx.lignes||[]).length
-        ? (sx.lignes||[]).map(function(l){
+        ? (sx.lignes||[]).map(function(l,li){
             var v=l.video?(' <a class="step-yt" href="'+esc(l.video)+'" target="_blank" rel="noopener noreferrer">▶ voir le mouvement</a>'):'';
-            return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+v+'</div></div>';
+            // Un exercice de musculation porte son carnet : la charge de la
+            // dernière fois, et de quoi noter celle du jour.
+            var carnet='';
+            if(l.exo){
+              var c=_charges[chCle(l.k)]||{};
+              var arg="'"+String(l.k).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"','"
+                     +String(sx.titre||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"','"+(sx.iso||'')+"'";
+              carnet='<div class="ch-box">'
+                +'<div class="ch-r" id="ch-r-'+li+'">'+(chRepere(l.k)||'<span class="ch-vide">Pas encore de repère pour cet exercice.</span>')+'</div>'
+                +'<div class="ch-l"><span class="ch-lbl">Charge faite</span>'
+                +'<input id="ch-i-'+li+'" class="ch-i" value="'+esc(c.v||'')+'" placeholder="80 kg, élastique…" '
+                +'onchange="chSaisie('+li+','+arg+')">'
+                +'<span class="ch-ok" id="ch-ok-'+li+'">enregistré ✓</span></div></div>';
+            }
+            return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+v+carnet+'</div></div>';
           }).join('')
         : '<div class="muted">Le détail de cette séance n’est pas joint — demande-le à ton coach.</div>')
     +'</div>';
@@ -1240,6 +1348,9 @@ async function boot(){
   // L'application structurée, dès que la fiche porte la charge utile qui va
   // avec. Sinon on retombe sur la fiche du coach dans un cadre isolé : une
   // fiche publiée avant cette version n'a pas de quoi nourrir les écrans.
+  // Le carnet de charges avant le premier rendu : sans lui, la fiche d'une
+  // séance de musculation s'ouvrirait sans les repères de la dernière fois.
+  try{ await chargesCharger(); }catch(e){}
   if(row&&row.profil&&(row.profil.versionEspace||0)>=2){
     var br2=document.querySelector('.brand'); if(br2)br2.style.display='none';
     if(rendreApp(email,row)){ show('fiche'); return; }

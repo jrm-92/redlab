@@ -106,3 +106,52 @@ create policy "coach voit les seances de ses athletes" on public.polar_exercises
 drop policy if exists "coach supprime les seances de ses athletes" on public.polar_exercises;
 create policy "coach supprime les seances de ses athletes" on public.polar_exercises
   for delete to authenticated using (auth.uid() = coach_id);
+
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- CHARGES DE MUSCULATION
+--
+-- L'athlète note la charge qu'il a réellement mise sur chaque exercice.
+-- Ce n'est pas une donnée du coach : c'est son carnet à lui, qu'il relit
+-- à la séance suivante. Une ligne par exercice, écrasée à chaque fois —
+-- on garde le dernier repère, pas l'historique complet.
+--
+-- La clé est l'e-mail : c'est ce que l'athlète prouve en se connectant par
+-- lien magique, et c'est déjà la clé de sa fiche dans athlete_spaces.
+-- ═══════════════════════════════════════════════════════════════════════
+create table if not exists public.muscu_charges (
+  email     text        not null,
+  exercice  text        not null,       -- nom normalisé (minuscules, sans accent)
+  libelle   text,                       -- nom tel qu'il s'affiche
+  charge    text        not null,       -- ce que l'athlète a noté, tel quel
+  seance    text,                       -- titre de la séance, pour le contexte
+  fait_le   date,
+  maj       timestamptz not null default now(),
+  primary key (email, exercice)
+);
+
+alter table public.muscu_charges enable row level security;
+
+-- L'athlète, et lui seul, lit et écrit ses propres charges. La comparaison
+-- porte sur l'e-mail du jeton, en minuscules : c'est la seule identité qu'il
+-- ait prouvée, et athlete_spaces l'utilise déjà de la même façon.
+drop policy if exists "athlete lit ses charges" on public.muscu_charges;
+create policy "athlete lit ses charges" on public.muscu_charges
+  for select to authenticated
+  using (lower(email) = lower(auth.jwt() ->> 'email'));
+
+drop policy if exists "athlete note ses charges" on public.muscu_charges;
+create policy "athlete note ses charges" on public.muscu_charges
+  for insert to authenticated
+  with check (lower(email) = lower(auth.jwt() ->> 'email'));
+
+drop policy if exists "athlete corrige ses charges" on public.muscu_charges;
+create policy "athlete corrige ses charges" on public.muscu_charges
+  for update to authenticated
+  using (lower(email) = lower(auth.jwt() ->> 'email'))
+  with check (lower(email) = lower(auth.jwt() ->> 'email'));
+
+drop policy if exists "athlete efface ses charges" on public.muscu_charges;
+create policy "athlete efface ses charges" on public.muscu_charges
+  for delete to authenticated
+  using (lower(email) = lower(auth.jwt() ->> 'email'));

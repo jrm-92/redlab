@@ -467,23 +467,27 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .db-dt-tab tr.db-tr-rec td{opacity:.55}
   .db-tr-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);border:1px solid var(--border2);border-radius:4px;padding:0 4px}
   .db-dt-box .pl-modal-top span{text-transform:none}
-  /* ── Éditeur de séance de musculation ── */
+  /* ── Éditeur de séance de musculation ──
+     Tous les sélecteurs sont préfixés par .mx-row : les champs vivent dans un
+     .lc-field, dont la règle « .lc-field input,.lc-field select{width:100%} »
+     l'emporterait sinon sur les largeurs ci-dessous — le menu de charge se
+     retrouvait à 66 px, illisible, et le champ de récup à 222 px. */
   .mx-row{border:1px solid var(--border);border-radius:11px;padding:10px 11px;margin-bottom:8px;background:rgba(255,255,255,.02)}
   .mx-l1{display:flex;align-items:center;gap:8px}
-  .mx-l2,.mx-l3{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;margin-top:9px}
+  .mx-l2,.mx-l3{display:flex;align-items:center;gap:9px 14px;flex-wrap:wrap;margin-top:9px}
   .mx-g{display:inline-flex;align-items:center;gap:6px}
-  .mx-nom{flex:1;min-width:0;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
-    color:var(--text);font-family:var(--font);font-size:14px;font-weight:800;padding:8px 10px;outline:none}
-  .mx-nom:focus,.mx-n:focus,.mx-rec:focus,.mx-vid:focus{border-color:var(--orange)}
-  .mx-n{width:62px;text-align:center;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
-    color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 4px;outline:none}
-  .mx-n--rm{width:48px}
-  .mx-rec{width:70px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
+  .mx-row .mx-nom{flex:1 1 auto;width:auto;min-width:0;background:var(--input-bg);border:1.5px solid var(--input-border);
+    border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;font-weight:800;padding:8px 10px;outline:none}
+  .mx-row .mx-nom:focus,.mx-row .mx-n:focus,.mx-row .mx-rec:focus,.mx-row .mx-vid:focus,.mx-row .mx-sel:focus{border-color:var(--orange)}
+  .mx-row .mx-n{flex:0 0 auto;width:60px;text-align:center;background:var(--input-bg);border:1.5px solid var(--input-border);
+    border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 4px;outline:none}
+  .mx-row .mx-n--rm{width:48px}
+  .mx-row .mx-rec{flex:0 0 auto;width:76px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
     color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none}
-  .mx-vid{flex:1;min-width:150px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;
-    color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;padding:7px 9px;outline:none}
-  .mx-sel{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);
-    font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none;cursor:pointer}
+  .mx-row .mx-vid{flex:1 1 180px;width:auto;min-width:0;background:var(--input-bg);border:1.5px solid var(--input-border);
+    border-radius:8px;color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;padding:7px 9px;outline:none}
+  .mx-row .mx-sel{flex:0 0 auto;width:auto;min-width:150px;background:var(--input-bg);border:1.5px solid var(--input-border);
+    border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none;cursor:pointer}
   .mx-u{font-size:12px;font-weight:700;color:var(--muted2);white-space:nowrap}
   .mx-pdc{font-size:12.5px;font-weight:700;color:#34D399;white-space:nowrap}
   .mx-acts{display:flex;gap:2px;flex-shrink:0}
@@ -498,9 +502,16 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lib-yt{margin-left:6px;font-size:11px;color:#F87171;text-decoration:none;border:1px solid rgba(248,113,113,.4);
     border-radius:5px;padding:0 5px;line-height:1.5;display:inline-block}
   .lib-yt:hover{background:rgba(248,113,113,.14)}
-  @media(max-width:640px){
-    .mx-l2,.mx-l3{gap:8px 10px}
-    .mx-vid{min-width:120px}
+  /* Sur téléphone, chaque groupe prend sa ligne : à trois groupes sur une
+     seule, le menu de charge et le lien vidéo n'avaient plus la place d'être
+     lus. */
+  @media(max-width:700px){
+    .mx-l2{flex-direction:column;align-items:stretch;gap:9px}
+    .mx-g{width:100%;flex-wrap:wrap}
+    .mx-row .mx-sel{flex:1 1 100%;min-width:0}
+    .mx-l3{flex-wrap:wrap;gap:6px}
+    .mx-row .mx-vid{flex:1 1 100%}
+    .mx-row .mx-rec{flex:0 1 120px}
   }
   .ath-verrou,.ath-histo{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:9px;font-family:var(--font);font-size:12px;font-weight:800;padding:8px 12px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
   .ath-verrou:hover,.ath-histo:hover{color:var(--text2);border-color:var(--muted2)}
@@ -4137,7 +4148,7 @@ function _seancePourEspace(titre,vma){
      de le faire, pas seulement quand son coach le lui montre. */
   if(s&&s.muscu){
     (s.exos||[]).forEach(function(e){
-      lignes.push({k:e.nom, v:muscuLigneExo(e), video:(e.video?ytLien(e.video):'')});
+      lignes.push({k:e.nom, v:muscuLigneExo(e), video:(e.video?ytLien(e.video):''), exo:true});
     });
     if(s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:s.cool});
     var mt=muscuType(s.mtype);
@@ -5987,7 +5998,7 @@ function libMuscuRow(e,i){
   }
   return '<div class="mx-row" data-i="'+i+'">'
     +'<div class="mx-l1">'
-      +'<input class="mx-nom" value="'+esc(e.nom)+'" placeholder="Nom de l’exercice — squat, fentes, mollets…" oninput="muscuSet('+i+',\'nom\',this.value)">'
+      +'<input class="mx-nom" value="'+esc(e.nom)+'" placeholder="Nom de l’exercice" oninput="muscuSet('+i+',\'nom\',this.value)">'
       +'<div class="mx-acts">'
         +(i>0?'<button type="button" class="mx-b" title="Monter" onclick="muscuMonter('+i+')">↑</button>':'')
         +'<button type="button" class="mx-b mx-b--x" title="Retirer cet exercice" onclick="muscuDel('+i+')">×</button>'
@@ -6005,7 +6016,7 @@ function libMuscuRow(e,i){
     +'</div>'
     +'<div class="mx-l3">'
       +'<span class="mx-u">Vidéo</span>'
-      +'<input class="mx-vid" value="'+esc(e.video)+'" placeholder="Lien YouTube expliquant l’exercice — facultatif" oninput="muscuSet('+i+',\'video\',this.value)">'
+      +'<input class="mx-vid" value="'+esc(e.video)+'" placeholder="Lien YouTube (facultatif)" oninput="muscuSet('+i+',\'video\',this.value)">'
       +(yid?'<a class="mx-ok" href="'+ytLien(e.video)+'" target="_blank" rel="noopener noreferrer">▶ Voir</a>'
            :(String(e.video||'').trim()?'<span class="mx-ko">lien YouTube non reconnu</span>':''))
     +'</div>'
