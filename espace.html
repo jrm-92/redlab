@@ -234,6 +234,10 @@ a{color:var(--accent)}
 .splits .pa{color:var(--muted);font-size:13px;white-space:nowrap}
 .splits tr.mark td{background:rgba(255,107,26,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.step-yt{display:inline-block;margin-left:8px;font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;
+  border:1px solid rgba(255,107,26,.4);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.step-yt:hover{background:var(--accent-soft)}
+
 /* ── Calendrier du plan : la grille du coach, à l'identique ── */
 .pcal{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
   padding-bottom:6px;scrollbar-width:thin}
@@ -786,8 +790,8 @@ function ecranAccueil(d){
    Le curseur est un input natif et non le composant sur mesure de RedLab :
    sur téléphone, un curseur natif se prend au doigt sans effort et reste
    accessible au clavier. Le pas vaut 1/20e de km/h, comme côté coach. */
-var CA_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[800,'800 m'],[1000,'1 km'],[2000,'2 km'],[5000,'5 km']];
-var _caDist=1000;
+var CA_DIST=[[200,'200 m'],[400,'400 m'],[600,'600 m'],[800,'800 m']];
+var _caDist=400;
 function blocCalculateur(d){
   var R=refDe(d);
   if(!R.v) return '';
@@ -955,7 +959,8 @@ function espSeanceOuvrir(i){
     +(sx.desc?'<div class="esp-d">'+esc(sx.desc)+'</div>':'')
     +((sx.lignes||[]).length
         ? (sx.lignes||[]).map(function(l){
-            return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+'</div></div>';
+            var v=l.video?(' <a class="step-yt" href="'+esc(l.video)+'" target="_blank" rel="noopener noreferrer">▶ voir le mouvement</a>'):'';
+            return '<div class="step"><div class="step-k">'+esc(l.k)+'</div><div class="step-v">'+esc(l.v)+v+'</div></div>';
           }).join('')
         : '<div class="muted">Le détail de cette séance n’est pas joint — demande-le à ton coach.</div>')
     +'</div>';
