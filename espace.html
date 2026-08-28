@@ -455,6 +455,7 @@ a{color:var(--accent)}
 </nav>
 
 <div class="foot">
+  Espace athlète · <b>Reding Running</b> — données mises à jour par ton coach.<br>
   <a href="https://reding-running.fr/politique-confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a>
   · <a href="https://reding-running.fr/mentions-legales.html" target="_blank" rel="noopener">Mentions légales</a>
   · <a href="mailto:contact@reding-running.fr?subject=Mes%20donn%C3%A9es%20personnelles">Exercer mes droits</a>
@@ -892,10 +893,15 @@ function ecranPlan(d){
   var auj=isoAujourdhui(), h='';
 
   h+='<div class="h2">Charge de la préparation</div>'
+    +'<div class="cvbox"><div class="cvt">Le volume visé semaine après semaine. La couleur donne la phase ; '
+    +'une barre plus pâle est une semaine allégée, faite pour absorber ce qui précède.</div>'
     +'<div class="cvh"><canvas id="cv-vol"></canvas></div></div>';
 
   h+='<div class="h2">'+esc(pl.objectifLbl||'Préparation')+' · '+pl.semaines.length+' semaines</div>'
-    
+    +'<div class="muted" style="margin-bottom:12px">Chaque ligne est une semaine, du lundi au dimanche. '
+    +'Touche une séance pour en voir le détail. 🏁 = ta course, ★ = course de préparation, contour orange = aujourd’hui. '
+    +'Fais glisser le calendrier vers la gauche pour voir la fin de semaine.</div>';
+
   // Les séances rangées par jour.
   var parJour={};
   (pl.seances||[]).forEach(function(sx,i){
@@ -940,6 +946,8 @@ function ecranPlan(d){
   h+='<div class="pcal"><div class="pcal-in">'
     +'<div class="pj-dow">'+DOW.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>'
     +'<div class="pcal-l">'+lignes+'</div></div></div>';
+
+  h+='<div class="muted" style="margin-top:14px">Les volumes sont des repères, pas des obligations. En cas de doute ou de douleur, préviens ton coach avant d’ajuster.</div>';
   return h;
 }
 
@@ -1110,7 +1118,8 @@ function ecranZones(d){
       +(z.use?'<div class="zuse"><b>Quand</b> '+esc(z.use)+'</div>':'')
       +'</div>';
   });
-  if(!fcOk) 
+  if(!fcOk) h+='<div class="muted" style="margin-top:4px">Les fourchettes de fréquence cardiaque apparaîtront dès que ton coach aura renseigné ta FC max et ta FC de repos.</div>';
+  return h;
 }
 
 
@@ -1195,7 +1204,8 @@ function ecranRecords(d){
     var nbPts=g.historique.reduce(function(n,s){return n+s.points.length;},0);
     var large='max(100%,'+Math.max(1,nbPts)*68+'px)';
     h+='<div class="h2">L’évolution de tes courses</div>'
-      +'<div class="cvbox"><div class="cvt">L’évolution de tes chronos au fil du temps, une couleur par distance. '
+      +'<div class="cvbox"><div class="cvt">Ton allure au fil du temps, une couleur par distance. '
+      +'L’axe est inversé : plus un point est haut, plus tu as couru vite.'
       +(nbPts>5?' <b>Fais glisser le graphique</b> pour parcourir toute la période.':'')
       +'</div>'
       +'<div class="cvscroll"><div class="cvh" style="min-width:'+large+'"><canvas id="cv-hist"></canvas></div></div></div>';
