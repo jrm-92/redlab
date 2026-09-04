@@ -501,10 +501,10 @@ var ZONES_VC=[
   use:'Sprints, 30/30, 200–400 m — vitesse et capacité anaérobie'}
 ];
 var RACES=[
- {id:'5k',nm:'5K',d:5000,lbl:'5 km',vmaLo:.90,vmaHi:.95},
- {id:'10k',nm:'10K',d:10000,lbl:'10 km',vmaLo:.85,vmaHi:.90},
- {id:'semi',nm:'Semi',d:21097.5,lbl:'21,1 km',vmaLo:.80,vmaHi:.85},
- {id:'mara',nm:'Marathon',d:42195,lbl:'42,2 km',vmaLo:.75,vmaHi:.80}
+ {id:'5k',nm:'5K',d:5000,lbl:'5 km',vmaLo:.90,vmaHi:.95,csLo:1.02,csHi:1.06},
+ {id:'10k',nm:'10K',d:10000,lbl:'10 km',vmaLo:.85,vmaHi:.90,csLo:1.01,csHi:1.03},
+ {id:'semi',nm:'Semi',d:21097.5,lbl:'21,1 km',vmaLo:.80,vmaHi:.85,csLo:.91,csHi:.97},
+ {id:'mara',nm:'Marathon',d:42195,lbl:'42,2 km',vmaLo:.75,vmaHi:.80,csLo:.83,csHi:.92}
 ];
 var PH={base:['#94A3B8','Base'],dev:['#FB923C','Développement'],spe:['#34D399','Spécifique'],aff:['#A78BFA','Affûtage']};
 
@@ -1145,7 +1145,9 @@ function ecranAllures(d){
 
   var rid=_splitDist||((o&&o.id&&RACES.some(function(x){return x.id===o.id;}))?o.id:RACES[1].id);
   var r=RACES.filter(function(x){return x.id===rid;})[0]||RACES[1];
-  var tF=r.d/(r.vmaHi*vms), tS=r.d/(r.vmaLo*vms), tM=(tF+tS)/2;
+  var estVC=(R.lbl==='VC');
+  var pHi=estVC?r.csHi:r.vmaHi, pLo=estVC?r.csLo:r.vmaLo;
+  var tF=r.d/(pHi*vms), tS=r.d/(pLo*vms), tM=(tF+tS)/2;
   h+='<div class="card2" style="margin-bottom:14px">'
     +'<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
     +'<span style="font-size:18px;font-weight:900">'+esc(r.lbl)+'</span>'
