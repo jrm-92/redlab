@@ -8586,32 +8586,49 @@ function plImportApply(id){
   renderPlanif();
 
   var nb=Object.keys(s).reduce(function(n,k){return n+s[k].length;},0);
-  var msg=document.getElementById('pl-dash-msg');
-  if(!msg)return;
 
   /* Deux situations où le recalage ne peut pas être exact. Les taire
      laisserait le coach devant un calendrier faux sans savoir pourquoi. */
-  var alerte='';
+  var alerte='', texte;
   if(memes){
-    msg.style.color='#34D399';
-    msg.textContent='Plan de '+src.pseudo+' repris à l’identique — '+nb+' séance'+(nb>1?'s':'')
+    texte='Plan de '+src.pseudo+' repris à l’identique — '+nb+' séance'+(nb>1?'s':'')
       +(_plNom?', course « '+_plNom+' »':'')+(_plTime?', objectif '+_plTime:'')
       +'. Ajoute-le au tableau de bord pour le rendre actif.';
-    return;
-  }
-  if(!p.d2){
-    alerte=' Le plan d’origine n’avait pas de date de course : les séances ont gardé leurs dates telles quelles, elles sont sûrement à replacer.';
   } else {
-    var jS=new Date(p.d2+'T12:00:00').getDay(), jC=new Date(cible+'T12:00:00').getDay();
-    if(jS!==jC){
-      var nom=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-      alerte=' Les deux courses ne tombent pas le même jour ('+nom[jS]+' contre '+nom[jC]
-        +') : les séances gardent leur jour de semaine, mais vérifie la dernière semaine avant la course.';
+    if(!p.d2){
+      alerte=' Le plan d’origine n’avait pas de date de course : les séances ont gardé leurs dates telles quelles, elles sont sûrement à replacer.';
+    } else {
+      var jS=new Date(p.d2+'T12:00:00').getDay(), jC=new Date(cible+'T12:00:00').getDay();
+      if(jS!==jC){
+        var nom=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+        alerte=' Les deux courses ne tombent pas le même jour ('+nom[jS]+' contre '+nom[jC]
+          +') : les séances gardent leur jour de semaine, mais vérifie la dernière semaine avant la course.';
+      }
     }
+    texte='Plan de '+src.pseudo+' repris'+(dec?(' et décalé de '+Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')):'')
+      +' — '+nb+' séance'+(nb>1?'s':'')+'.'+(alerte||' Vérifie les dates, puis ajoute-le au tableau de bord.');
   }
-  msg.style.color=alerte?'#FBBF24':'#34D399';
-  msg.textContent='Plan de '+src.pseudo+' repris'+(dec?(' et décalé de '+Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')):'')
-    +' — '+nb+' séance'+(nb>1?'s':'')+'.'+(alerte||' Vérifie les dates, puis ajoute-le au tableau de bord.');
+  plImportSignale(texte, alerte?'#FBBF24':'#34D399');
+}
+
+/* Reprendre un plan ne se voyait pas. Le bouton d'import est en haut de
+   l'écran ; le calendrier et le compte rendu, plusieurs milliers de pixels
+   plus bas. Le coach touchait un athlète, la fenêtre se fermait, et rien ne
+   bougeait sous ses yeux — le plan avait pourtant bien été repris.
+   On affiche donc le résultat contre le calendrier, et on l'amène à l'écran. */
+function plImportSignale(texte,col){
+  var msg=document.getElementById('pl-imp-msg');
+  if(msg){
+    msg.textContent=texte;
+    msg.style.display='block';
+    msg.style.color=col;
+    msg.style.borderColor=col+'66';
+    msg.style.background=col+'14';
+  }
+  var vers=msg||document.getElementById('pl-cal');
+  if(!vers||!vers.scrollIntoView)return;
+  try{ vers.scrollIntoView({behavior:'smooth',block:'start'}); }
+  catch(e){ vers.scrollIntoView(); }
 }
 
 /* Reprend le nom, le lien et le temps visé là où ils se trouvent : dans le
@@ -9099,6 +9116,9 @@ function renderPlanif(){
     +'<div id="pl-load">'+plLoadHTML(p,weeks,{cid:'pl-vol-canvas'})+'</div>'
     +'</div>'
     // ── Cohérence ──
+    // Le compte rendu d'un plan repris s'affiche ici, collé au calendrier :
+    // c'est le calendrier que le coach vient chercher.
+    +'<div id="pl-imp-msg" style="display:none;font-size:13px;font-weight:700;line-height:1.6;border:1px solid var(--border2);border-radius:10px;padding:11px 14px;margin-bottom:14px"></div>'
     +'<div class="card" style="padding:22px;margin-bottom:14px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Calendrier de la prépa</div><div id="pl-cal">'+plCalendarHTML(p,weeks)+'</div></div>'
     +'<div style="display:flex;justify-content:center;margin-top:16px"><button onclick="plToDash()" style="display:inline-flex;align-items:center;gap:9px;background:'+p.col+';border:none;border-radius:11px;color:#fff;font-family:var(--font);font-size:14px;font-weight:800;padding:13px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.28)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Ajouter ce plan au dashboard</button></div>'
     +'<div id="pl-dash-msg" style="text-align:center;font-size:12.5px;font-weight:700;margin-top:8px;min-height:16px"></div>'
