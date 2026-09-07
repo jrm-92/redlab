@@ -449,6 +449,20 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
+  .pd-l{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+  .pd-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .pd-r input{width:110px;text-align:center;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:20px;font-weight:800;padding:10px 12px;outline:none}
+  .pd-r input:focus{border-color:var(--orange)}
+  .pd-u{font-size:13px;font-weight:800;color:var(--text2)}
+  .pd-o{font-size:11.5px;color:var(--muted2);margin-left:auto}
+  .pd-a{display:flex;gap:10px;flex-wrap:wrap}
+  /* La durée réglée pour ce jour-là, distincte de celle de la bibliothèque. */
+  /* Le titre de la pastille se coupe n'importe où pour tenir dans sa case
+     (« overflow-wrap:anywhere ») ; la durée, elle, doit rester d'un bloc,
+     sans quoi « 1 h 50 » se lit à la verticale, une lettre par ligne.
+     Sélecteur à deux classes, sinon « .plw-ch span » l'emporte : c'est une
+     règle qui a déjà mangé le chevron et la loupe de cette même pastille. */
+  .plw-ch .plw-ov{display:inline-block;margin-left:3px;padding:0 5px;border-radius:9px;background:rgba(255,107,26,.18);color:var(--orange);font-size:10px;font-weight:800;white-space:nowrap;overflow-wrap:normal;word-break:keep-all;flex:0 0 auto;align-self:center}
   .db-plan-cal{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
   /* ── Calendrier « Réalisé » : le prévu s'efface derrière le couru ── */
   .db-ch-prevu{opacity:.62}
@@ -4164,8 +4178,52 @@ function goalLinkRefresh(){ renderGoalSection(); }
 
 /* Une séance en texte simple, allures comprises. Même arithmétique que la
    bibliothèque : c'est la même séance, elle doit donner les mêmes chiffres. */
-function _seancePourEspace(titre,vma){
+/* ══ AJUSTER LA DURÉE D'UNE SÉANCE POSÉE ══
+   Une même séance de la bibliothèque se pose dix fois dans un plan. Le
+   dimanche de la semaine 3, la sortie longue fait 1 h 20 ; celle de la
+   semaine 9 en fait 1 h 50. C'est la même séance : seule sa durée change.
+   Elle se règle donc sur la pastille du calendrier, jour par jour, et non
+   dans la bibliothèque — sinon chaque ajustement y ajouterait une séance de
+   plus, et la banque perso finirait en liste de doublons.
+
+   L'ajustement ne vaut que pour les séances d'un seul tenant — footing,
+   sortie longue, tempo continu. Un fractionné n'a pas « une durée », il a
+   une structure : 5 × 1000 m ne se rallonge pas d'un curseur. */
+function plSeanceAjustable(s){
+  var b=(s&&s.blocks)||[];
+  if(!s||s.muscu||b.length!==1) return null;
+  var x=b[0];
+  if(x.segs||x.sets||(x.r||1)!==1) return null;
+  if(x.m>0)   return {u:'min', v:x.m};
+  if(x.sec>0) return {u:'min', v:Math.round(x.sec/60)};
+  if(x.d>0)   return {u:'km',  v:x.d/1000};
+  return null;
+}
+/* Rend une copie de la séance à la durée demandée. L'originale n'est jamais
+   touchée : elle sert encore aux autres jours et aux autres athlètes. */
+function plSeanceAjustee(s,ov){
+  if(!s||!ov||(ov.min==null&&ov.dist==null)) return s;
+  if(!plSeanceAjustable(s)) return s;
+  var c=JSON.parse(JSON.stringify(s));
+  var b=c.blocks[0];
+  delete b.m; delete b.sec; delete b.d;
+  if(ov.min!=null) b.m=ov.min; else b.d=ov.dist;
+  return c;
+}
+/* L'ajustement se lit sur la pastille : sans cela, deux dimanches identiques
+   à l'écran cacheraient trente minutes d'écart. */
+function plOvTxt(sx){
+  if(!sx) return '';
+  if(sx.min!=null){
+    var h=Math.floor(sx.min/60), m=sx.min%60;
+    return h?(h+' h'+(m?' '+String(m).padStart(2,'0'):'')):(sx.min+' min');
+  }
+  if(sx.dist!=null&&typeof fDist==='function') return fDist(sx.dist);
+  return '';
+}
+function _seancePourEspace(titre,vma,ov){
   var s=(typeof wktFindSession==='function')?wktFindSession(titre):null;
+  if(s&&ov) s=plSeanceAjustee(s,ov);
   var th=s?(LIB_THEMES.find(function(x){return x.id===s.theme;})||LIB_THEMES[0]):null;
   var lignes=[];
   if(s&&s.warm&&s.warm!=='—') lignes.push({k:'Échauffement',v:s.warm});
@@ -4238,7 +4296,7 @@ function _planPourEspace(p,weeks){
   var seances=[];
   Object.keys(_plSessions||{}).sort().forEach(function(j){
     (_plSessions[j]||[]).forEach(function(sx){
-      seances.push(Object.assign({iso:j},_seancePourEspace(sx.t,vma)));
+      seances.push(Object.assign({iso:j},_seancePourEspace(sx.t,vma,sx)));
     });
   });
 
@@ -4298,7 +4356,7 @@ function renderDashPlan(){
      _plSessions contient encore les séances de CE plan. */
   window._dashCal={col:p.col, race:(_plDate2||null), inter:(_plDi||null),
     sessions:(function(){var o={};Object.keys(_plSessions||{}).forEach(function(k){
-      o[k]=(_plSessions[k]||[]).map(function(x){return {t:x.t,th:x.th};});});return o;})(),
+      o[k]=(_plSessions[k]||[]).map(function(x){return {t:x.t,th:x.th,min:x.min,dist:x.dist};});});return o;})(),
     weeks:weeks.map(function(x){return {n:x.n,ph:x.ph,km:x.km,rec:!!x.rec,dates:(x.dates||''),
       iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null)};})};
   window._dashVolData={col:p.col,unit:_unit,weeks:weeks.map(function(x){return {km:x.km,ph:x.ph,rec:!!x.rec,race:!!x.race,inter:!!x.inter,n:x.n,iso:(x.d0?[x.d0.getFullYear(),String(x.d0.getMonth()+1).padStart(2,'0'),String(x.d0.getDate()).padStart(2,'0')].join('-'):null),dt:(x.race&&x.d0)?new Date(x.d0.getTime()+6*864e5).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):(x.d0?x.d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):('S'+x.n))};})};
@@ -4623,10 +4681,12 @@ function dbRealiseCalHTML(rows){
 
       var prevues=(d.sessions[iso]||[]);
       prevuSem+=prevues.length;
-      var chipsP=prevues.map(function(sx){
+      var chipsP=prevues.map(function(sx,si){
         var col=((typeof LIB_THEMES!=='undefined'&&LIB_THEMES.find(function(t){return t.id===sx.th;}))||{}).col||'#94A3B8';
+        var ov=plOvTxt(sx);
         return '<div class="plw-ch plw-ch--ro plw-ch--ouvre db-ch-prevu" style="background:'+col+'14;border-left:3px solid '+col+'66"'
-          +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\')" title="Prévu — voir le détail"><span>'+dbEsc(sx.t)+'</span><span class="plw-oeil">›</span></div>';
+          +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\','+si+')" title="Prévu — voir le détail"><span>'+dbEsc(sx.t)
+          +(ov?' <span class="plw-ov">'+ov+'</span>':'')+'</span><span class="plw-oeil">›</span></div>';
       }).join('');
 
       var faites=(parJour[iso]||[]);
@@ -4707,11 +4767,18 @@ function dbSeanceOuvrir(id){
    s'en sert ici plutôt que de le refaire, sous peine de voir les deux versions
    diverger. */
 function plApercuFermer(){ rlModalFermer('pl-apercu-modal'); }
-function plApercuOuvrir(titre,iso){
-  rlModalOuvrir('pl-apercu-modal', plApercuHTML(titre,iso));
+function plApercuOuvrir(titre,iso,si){
+  rlModalOuvrir('pl-apercu-modal', plApercuHTML(titre,iso,si));
 }
-function plApercuHTML(titre,iso){
-  var d=(typeof _seancePourEspace==='function')?_seancePourEspace(titre,S.vma):null;
+function plOvDe(iso,si){
+  if(iso==null||si==null) return null;
+  var l=(typeof _plSessions!=='undefined'&&_plSessions&&_plSessions[iso])
+        || (window._dashCal&&window._dashCal.sessions&&window._dashCal.sessions[iso]);
+  return (l&&l[si])||null;
+}
+function plApercuHTML(titre,iso,si){
+  var ov=plOvDe(iso,si);
+  var d=(typeof _seancePourEspace==='function')?_seancePourEspace(titre,S.vma,ov):null;
   var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   var jour='';
   if(iso){
@@ -4830,7 +4897,7 @@ function dbSeanceModalHTML(r){
     if(prev.length){
       prevu='<div class="db-dt-sec"><div class="db-dt-h">Prévu ce jour-là</div>'
         +prev.map(function(sx){
-          var d=(typeof _seancePourEspace==='function')?_seancePourEspace(sx.t,S.vma):null;
+          var d=(typeof _seancePourEspace==='function')?_seancePourEspace(sx.t,S.vma,sx):null;
           if(!d) return '<div class="db-dt-note">'+dbEsc(sx.t)+'</div>';
           return '<div class="db-dt-prev" style="border-left:3px solid '+d.col+'">'
             +'<div class="db-dt-prev-t">'+dbEsc(d.titre)+(d.theme?' <span style="color:'+d.col+'">· '+dbEsc(d.theme)+'</span>':'')+'</div>'
@@ -5737,8 +5804,9 @@ function wktExportPlan(){
   const files=[], absents=[], muscles=[], sansVma=[];
   Object.keys(_plSessions).sort().forEach(function(iso){
     (_plSessions[iso]||[]).forEach(function(sx,i){
-      const s=wktFindSession(sx.t);
+      var s=wktFindSession(sx.t);
       if(!s){absents.push(sx.t);return;}
+      s=plSeanceAjustee(s,sx);
       if(s.muscu){muscles.push(sx.t);return;}   // le format .fit ne décrit que de la course
       // Sans VMA, seules les séances écrites de bout en bout en allures
       // peuvent être calées : les autres attendent.
@@ -8426,7 +8494,7 @@ function plMoveSession(fromIso,fromIdx,toIso,copy){
   if(!src||!src[fromIdx]||!toIso)return;
   if(fromIso===toIso&&!copy){_plGrab=null;plUpd();return;}
   const it=src[fromIdx];
-  const moved=copy?{t:it.t,th:it.th}:src.splice(fromIdx,1)[0];
+  const moved=copy?Object.assign({},it):src.splice(fromIdx,1)[0];
   if(!copy&&!src.length)delete _plSessions[fromIso];
   (_plSessions[toIso]=_plSessions[toIso]||[]).push(moved);
   _plGrab=null; plSave(); plUpd();
@@ -8437,8 +8505,65 @@ function plDaySessCopy(iso,i){plMoveSession(iso,i,iso,true);}
    Le plan référence ses séances par leur titre : une modification ne peut donc
    pas rester locale à un jour, elle produit une séance à part entière. On la
    range dans la banque perso — la bibliothèque de référence reste intacte — et
-   on remplace la pastille par la nouvelle. Le suffixe « (adapté) » est proposé
-   d'emblée : le coach le voit, et le corrige s'il préfère un autre nom. */
+   on remplace la pastille par la nouvelle. Le titre est repris tel quel ;
+   libTitreUnique se charge seul de le distinguer s'il est déjà pris. */
+/* ══ RÉGLER LA DURÉE D'UNE SÉANCE POSÉE ══
+   Le chemin le plus court entre « cette sortie longue fait 1 h 50 » et un
+   plan à jour. Ce que le coach règle ici ne vaut que pour ce jour-là : la
+   séance de la bibliothèque n'est pas touchée, et les autres jours où elle
+   est posée gardent leur propre durée.
+   Pour tout le reste — changer les allures, la structure — le bouton du bas
+   ouvre l'éditeur complet, qui lui produit bien une séance à part. */
+function plDureeFermer(){ rlModalFermer('pl-duree-modal'); }
+function plDureeOuvrir(iso,i){
+  var it=(_plSessions[iso]||[])[i]; if(!it)return;
+  var trouve=(typeof libParTitre==='function')?libParTitre(it.t):null;
+  if(!trouve){ alert('Séance introuvable dans la bibliothèque : « '+it.t+' ».'); return; }
+  var aj=plSeanceAjustable(trouve.s);
+  // Un fractionné n'a pas de durée à régler : on va droit à l'éditeur.
+  if(!aj) return plEditSession(iso,i);
+
+  var val=(it.min!=null)?it.min:((it.dist!=null)?(it.dist/1000):aj.v);
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var pas=(aj.u==='min')?'5':'0.5';
+  rlModalOuvrir('pl-duree-modal',
+    '<div class="pl-modal-box" style="max-width:420px">'
+    +'<div class="pl-modal-top"><b>'+e(it.t)+'</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="plDureeFermer()">×</button></div>'
+    +'<div class="pd-l">Durée de cette séance, <b>pour ce jour-là seulement</b>. '
+      +'La séance de la bibliothèque n’est pas modifiée : les autres jours gardent la leur.</div>'
+    +'<div class="pd-r">'
+      +'<input type="number" id="pd-val" min="1" step="'+pas+'" value="'+e(val)+'" '
+        +'onkeydown="if(event.key===\'Enter\')plDureeSet(\''+iso+'\','+i+',\''+aj.u+'\')">'
+      +'<span class="pd-u">'+(aj.u==='min'?'minutes':'km')+'</span>'
+      +'<span class="pd-o">bibliothèque : '+e(aj.v)+' '+(aj.u==='min'?'min':'km')+'</span>'
+    +'</div>'
+    +'<div class="pd-a">'
+      +'<button type="button" class="lc-save" onclick="plDureeSet(\''+iso+'\','+i+',\''+aj.u+'\')">Enregistrer</button>'
+      +((it.min!=null||it.dist!=null)
+        ?'<button type="button" class="lc-cancel" onclick="plDureeReset(\''+iso+'\','+i+')">Rétablir la durée d’origine</button>':'')
+    +'</div>'
+    +'<div class="pd-l" style="margin:14px 0 0;padding-top:12px;border-top:1px solid var(--border)">'
+      +'Pour changer les allures ou la structure, il faut une séance à part :'
+      +'<div style="margin-top:9px"><button type="button" class="lb-add" style="margin:0" '
+        +'onclick="plDureeFermer();plEditSession(\''+iso+'\','+i+')">✎ Modifier le contenu de la séance…</button></div></div>'
+    +'</div>');
+  var f=document.getElementById('pd-val'); if(f){ f.focus(); f.select(); }
+}
+function plDureeSet(iso,i,u){
+  var it=(_plSessions[iso]||[])[i]; if(!it)return;
+  var v=parseFloat((document.getElementById('pd-val')||{}).value);
+  if(!(v>0)){ alert('Indique une durée supérieure à zéro.'); return; }
+  delete it.min; delete it.dist;
+  if(u==='min') it.min=Math.round(v);
+  else          it.dist=Math.round(v*1000);
+  plDureeFermer(); plSave(); plUpd();
+}
+function plDureeReset(iso,i){
+  var it=(_plSessions[iso]||[])[i]; if(!it)return;
+  delete it.min; delete it.dist;
+  plDureeFermer(); plSave(); plUpd();
+}
 function plEditSession(iso,i){
   var it=(_plSessions[iso]||[])[i]; if(!it)return;
   var trouve=libParTitre(it.t);
@@ -8446,7 +8571,7 @@ function plEditSession(iso,i){
   // Adapter, c'est décliner : on part de la séance existante mais on en crée
   // une nouvelle, y compris quand la source est déjà une séance perso. Écraser
   // l'originale la modifierait dans tous les autres plans où elle est posée.
-  var titre=libTitreUnique(trouve.s.title+' (adapté)');
+  var titre=libTitreUnique(trouve.s.title);
   libEditOpen(trouve.kind,trouve.idx,{
     modal:true, titre:titre, nouvelle:true,
     apres:function(nouvelle){
@@ -8814,16 +8939,18 @@ function plCalendarHTML(p,weeks,opts){
         var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';
         var esc=String(sx.t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
         var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
+        var ov=plOvTxt(sx);
+        var lbl=esc+(ov?' <span class="plw-ov">'+ov+'</span>':'');
         if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
-          +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\')" title="Voir le détail de la séance"><span>'+esc+'</span><span class="plw-oeil">›</span></div>';
+          +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\','+si+')" title="Voir le détail de la séance"><span>'+lbl+'</span><span class="plw-oeil">›</span></div>';
         return '<div class="plw-ch plw-ch--act'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
           +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
           +' style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
-          +'<span>'+esc+'</span>'
+          +'<span>'+lbl+'</span>'
           +'<div class="plw-acts">'
-            +'<button type="button" class="plw-cp" title="Adapter cette séance" aria-label="Adapter cette séance" onclick="event.stopPropagation();plEditSession(\''+iso+'\','+si+')">✎</button>'
+            +'<button type="button" class="plw-cp" title="Régler la durée, ou modifier la séance" aria-label="Régler la durée, ou modifier la séance" onclick="event.stopPropagation();plDureeOuvrir(\''+iso+'\','+si+')">✎</button>'
             +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
             +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
           +'</div></div>';
