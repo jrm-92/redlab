@@ -8899,15 +8899,24 @@ function plSyncGoal(){
 
 function plSeedObjectif(){
   var pl=S.plan||{}, g=S.goal||{};
-  if(!_plNom)  _plNom = pl.nom || g.name || '';
-  if(!_plUrl)  _plUrl = pl.url || g.url || '';
+  /* L'objectif du tableau de bord fait foi, le plan ne vient qu'en secours.
+     S.plan est un instantané pris quand le plan a été ajouté au tableau de
+     bord ; S.goal est l'objectif vivant, celui que le coach corrige sur le
+     tableau de bord et qui nourrit les prédictions. Lire le plan en premier
+     faisait réapparaître un chrono périmé dès qu'on rouvrait Planification —
+     3h30 d'un côté, 3h59 de l'autre, pour la même course.
+     Le sens inverse est déjà assuré : modifier le chrono ici passe par
+     plSyncGoal, qui met le tableau de bord à jour. Les deux ne peuvent donc
+     plus diverger. */
+  if(!_plNom)  _plNom = g.name || pl.nom || '';
+  if(!_plUrl)  _plUrl = g.url  || pl.url || '';
   if(!_plTime){
-    if(pl.time) _plTime = pl.time;
-    else if(g.t){
+    if(g.t){
       var h=Math.floor(g.t/3600), m=Math.floor((g.t%3600)/60), sc=g.t%60;
       _plTime = h ? (h+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0'))
                   : (m+':'+String(sc).padStart(2,'0'));
     }
+    else if(pl.time) _plTime = pl.time;
   }
 }
 function plNomSet(v){ _plNom=String(v||'').slice(0,120); plSave(); plSyncGoal(); }
