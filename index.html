@@ -427,8 +427,20 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-ch--ouvre:hover{filter:brightness(1.35)}
   .plw-ch .plw-oeil{flex:0 0 auto;color:var(--muted2);font-weight:900;font-size:12px;line-height:1.35}
   .plw-ch--ouvre:hover .plw-oeil{color:var(--orange)}
-  .plw-ch button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px}
-  .plw-ch button:hover{color:#F87171}
+  /* Les trois actions d'une séance posée ont longtemps tenu sur la même ligne
+     que son titre : neuf pixels de large, trois d'écart. Viser « retirer » au
+     doigt revenait à dupliquer la séance une fois sur deux. Elles occupent
+     maintenant leur propre ligne, à trois largeurs égales. */
+  .plw-ch--act{flex-direction:column;align-items:stretch;gap:4px}
+  /* Le titre reste la plus grande cible de la pastille : c'est lui qu'on
+     touche pour prendre la séance et la déposer un autre jour. */
+  .plw-ch--act>span{min-height:28px;display:flex;align-items:center}
+  .plw-acts{display:flex;gap:4px}
+  .plw-ch button{flex:1 1 0;min-width:0;height:26px;background:rgba(255,255,255,.05);border:1px solid transparent;border-radius:5px;color:var(--muted2);font-family:var(--font);font-size:12px;line-height:1;padding:0;cursor:pointer;transition:color .15s,background .15s,border-color .15s}
+  .plw-ch button:hover{background:rgba(255,255,255,.11);color:var(--text)}
+  .plw-x:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
+  .db-suppr{width:28px;height:28px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:16px;line-height:1;cursor:pointer;padding:0}
+  .db-suppr:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
@@ -4530,7 +4542,7 @@ function dbListeHTML(rows){
       ? '<span title="'+String(r.nom||'').replace(/"/g,'&quot;')+'" style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#60A5FA;border:1px solid rgba(96,165,250,.35);border-radius:5px;padding:1px 5px">fichier</span>'
       : '';
     var sup=(r.src==='fichier')
-      ? '<button type="button" onclick="event.stopPropagation();dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" style="background:transparent;border:none;color:var(--muted2);font-family:var(--font);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px">×</button>'
+      ? '<button type="button" class="db-suppr" onclick="event.stopPropagation();dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" aria-label="Retirer cette séance importée">×</button>'
       : '';
     var ouvre=' onclick="dbSeanceOuvrir(\''+String(r.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')"';
     return '<div class="db-seance-cl" title="Voir le détail de la séance"'+ouvre+' style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px">'
@@ -8704,15 +8716,17 @@ function plCalendarHTML(p,weeks,opts){
         var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
         if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\')" title="Voir le détail de la séance"><span>'+esc+'</span><span class="plw-oeil">›</span></div>';
-        return '<div class="plw-ch'+held+'" draggable="true"'
+        return '<div class="plw-ch plw-ch--act'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
           +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
           +' style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
           +'<span>'+esc+'</span>'
-          +'<button type="button" class="plw-cp" title="Adapter cette séance" onclick="event.stopPropagation();plEditSession(\''+iso+'\','+si+')">✎</button>'
-          +'<button type="button" class="plw-cp" title="Dupliquer" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
-          +'<button type="button" title="Retirer" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button></div>';
+          +'<div class="plw-acts">'
+            +'<button type="button" class="plw-cp" title="Adapter cette séance" aria-label="Adapter cette séance" onclick="event.stopPropagation();plEditSession(\''+iso+'\','+si+')">✎</button>'
+            +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
+            +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
+          +'</div></div>';
       }).join('');
       var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
