@@ -338,6 +338,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lb-add--seg{margin-top:2px;font-size:12px;padding:7px}
   .lb-acts{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
+  /* Poignée de déplacement. touch-action:none pour que le doigt fasse glisser
+     l'étape au lieu de faire défiler la page. */
+  .lb-grip{display:inline-flex;align-items:center;justify-content:center;width:24px;height:30px;flex-shrink:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted2);font-size:15px;line-height:1;border-radius:7px;border:1px solid transparent;background:transparent}
+  .lb-grip:hover,.lb-grip:focus-visible{background:rgba(255,255,255,.06);border-color:var(--border2);color:var(--text);outline:none}
+  .lb-row--drag{opacity:.6;border-color:var(--orange)}
+  .lb-seg.lb-row--drag{outline:1px solid var(--orange);outline-offset:3px;border-radius:8px}
+  .lb-row--drag .lb-grip{cursor:grabbing;color:var(--orange)}
   .lb-del{width:28px;height:28px;flex-shrink:0;border-radius:7px;border:1px solid rgba(248,113,113,.25);background:transparent;color:#F87171;cursor:pointer;font-size:14px;line-height:1}
   .lb-del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
   .lb-add{margin-top:4px;padding:7px 13px;border:1px dashed var(--border2);background:transparent;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer}
@@ -420,8 +427,20 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-ch--ouvre:hover{filter:brightness(1.35)}
   .plw-ch .plw-oeil{flex:0 0 auto;color:var(--muted2);font-weight:900;font-size:12px;line-height:1.35}
   .plw-ch--ouvre:hover .plw-oeil{color:var(--orange)}
-  .plw-ch button{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 2px}
-  .plw-ch button:hover{color:#F87171}
+  /* Les trois actions d'une séance posée ont longtemps tenu sur la même ligne
+     que son titre : neuf pixels de large, trois d'écart. Viser « retirer » au
+     doigt revenait à dupliquer la séance une fois sur deux. Elles occupent
+     maintenant leur propre ligne, à trois largeurs égales. */
+  .plw-ch--act{flex-direction:column;align-items:stretch;gap:4px}
+  /* Le titre reste la plus grande cible de la pastille : c'est lui qu'on
+     touche pour prendre la séance et la déposer un autre jour. */
+  .plw-ch--act>span{min-height:28px;display:flex;align-items:center}
+  .plw-acts{display:flex;gap:4px}
+  .plw-ch button{flex:1 1 0;min-width:0;height:26px;background:rgba(255,255,255,.05);border:1px solid transparent;border-radius:5px;color:var(--muted2);font-family:var(--font);font-size:12px;line-height:1;padding:0;cursor:pointer;transition:color .15s,background .15s,border-color .15s}
+  .plw-ch button:hover{background:rgba(255,255,255,.11);color:var(--text)}
+  .plw-x:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
+  .db-suppr{width:28px;height:28px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:16px;line-height:1;cursor:pointer;padding:0}
+  .db-suppr:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
@@ -4159,7 +4178,8 @@ function _seancePourEspace(titre,vma){
     if(b.segs){
       // Séance en notation libre : une suite de segments, chacun son allure.
       var parts=b.segs.map(function(sg){
-        var a=vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'';
+        var a=(sg.all!=null)?(' → '+allTxt(sg.all))
+             :(vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'');
         return fDist(sg.d)+' '+sg.lbl+a;
       });
       lignes.push({k:(b.label||('Bloc '+(i+1))),
@@ -4170,9 +4190,12 @@ function _seancePourEspace(titre,vma){
     var pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
     var val=b.d?(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m')
               :(b.m?b.m+' min':(b.sec?b.sec+'s':''));
-    var core=(b.r>1?b.r+' × ':'')+val+' @ '+pctTxt+'% VMA';
+    var core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pctTxt+'% VMA'));
     if(b.sets)core=b.sets+' séries de '+core;
-    if(vma){
+    if(b.all!=null){
+      var spdA=allVit(b.all);
+      if(b.d)core+=' · '+fHMS(b.d/spdA)+'/rép';
+    } else if(vma){
       var pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;
       var spd=vma*pc/100/3.6;
       core+=' → '+fAll(1000/spd)+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');
@@ -4519,7 +4542,7 @@ function dbListeHTML(rows){
       ? '<span title="'+String(r.nom||'').replace(/"/g,'&quot;')+'" style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#60A5FA;border:1px solid rgba(96,165,250,.35);border-radius:5px;padding:1px 5px">fichier</span>'
       : '';
     var sup=(r.src==='fichier')
-      ? '<button type="button" onclick="event.stopPropagation();dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" style="background:transparent;border:none;color:var(--muted2);font-family:var(--font);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px">×</button>'
+      ? '<button type="button" class="db-suppr" onclick="event.stopPropagation();dbSupprimerSeance(\''+String(r.id).replace(/'/g,"\\'")+'\')" title="Retirer cette séance importée" aria-label="Retirer cette séance importée">×</button>'
       : '';
     var ouvre=' onclick="dbSeanceOuvrir(\''+String(r.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')"';
     return '<div class="db-seance-cl" title="Voir le détail de la séance"'+ouvre+' style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px">'
@@ -5227,16 +5250,43 @@ let libTheme='all';
 function libVmaVal(){const e=document.getElementById('lib-vma');let v=e?parseFloat(e.value):null;if(!v||v<6||v>35)v=null;return v;}
 function setLibTheme(t){libTheme=t;renderLibrary();}
 function updLibVma(){renderLibCards();}
+
+/* ══ ALLURE ÉCRITE ══
+   Un bloc porte soit un pourcentage de VMA — b.pct — soit une allure au
+   kilomètre exprimée en secondes — b.all : 245, c'est 4:05/km. Une fourchette
+   s'écrit du plus rapide au plus lent, [240,250] = 4:00 à 4:10/km.
+   Les deux ne se mélangent pas dans un même bloc : quand l'allure est là,
+   elle l'emporte, on ne la recalcule pas depuis la VMA. C'est le sujet même
+   du champ — un fractionné se pense en pourcentage de VMA, une sortie à
+   allure marathon se pense en minutes au kilomètre. */
+function allSec(txt){
+  if(txt==null) return null;
+  var t=String(txt).trim().replace(',','.');
+  if(!t) return null;
+  var m=t.match(/^(\d{1,2})\s*[:'’.\s]\s*(\d{1,2})$/);      // 4:05 · 4'05 · 4.05
+  if(!m) m=t.match(/^(\d{1,2})(\d{2})$/);                    // 405
+  var v=null;
+  if(m){ if(+m[2]>=60) return null; v=+m[1]*60 + +m[2]; }
+  else if(/^\d{1,2}$/.test(t)) v=+t*60;                       // 4 → 4:00
+  if(v==null||v<100||v>1800) return null;                     // 1:40 à 30:00 au km
+  return v;
+}
+function allMoy(a){ return Array.isArray(a)?(a[0]+a[1])/2:a; }
+function allTxt(a){ return Array.isArray(a)?(fAll(a[0])+'–'+fAll(a[1])+'/km'):(fAll(a)+'/km'); }
+function allVit(a){ return 1000/allMoy(a); }   // m/s, pour les temps par répétition
 function libBlock(b,vma,lbl){
   const pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
   let val='';
   if(b.d)val=(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m');
   else if(b.m)val=b.m+' min';
   else if(b.sec)val=b.sec+'s';
-  let core=(b.r>1?b.r+' × ':'')+val+' @ '+pctTxt+'% VMA';
+  let core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pctTxt+'% VMA'));
   if(b.sets)core=b.sets+' séries de '+core;
   let calc='';
-  if(vma){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
+  // Allure écrite : il n'y a rien à convertir, seul le temps par répétition
+  // reste à dire. Pourcentage : on montre ce qu'il vaut pour cet athlète.
+  if(b.all!=null){const spd=allVit(b.all);calc=b.d?fHMS(b.d/spd)+'/rép':'';}
+  else if(vma){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
   const rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   const recTxt=rec.length?' <span class="lib-rec">('+rec.join(' · ')+')</span>':'';
   return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+lbl+'</span><span class="lib-step-v"><b>'+core+'</b>'+(calc?' <span class="lib-calc">→ '+calc+'</span>':'')+recTxt+'</span></div>';
@@ -5392,14 +5442,118 @@ function wktSpeed(vma,pct){
   const v=ms(pct);
   return {lo:Math.round(v*0.985*1000),hi:Math.round(v*1.015*1000)};
 }
+/* Allure au km (secondes) → même fenêtre de vitesse en mm/s. Une fourchette
+   écrite est respectée telle quelle : l'allure la plus lente donne la vitesse
+   basse. Une allure seule s'ouvre de ±1,5 %, comme un pourcentage isolé. */
+function wktSpeedAll(a){
+  if(a==null)return null;
+  if(Array.isArray(a))return {lo:Math.round(1000/Math.max(a[0],a[1])*1000),
+                              hi:Math.round(1000/Math.min(a[0],a[1])*1000)};
+  const v=1000/a;
+  return {lo:Math.round(v*0.985*1000),hi:Math.round(v*1.015*1000)};
+}
+/* La cible d'une étape : l'allure que le coach a écrite s'il en a écrit une,
+   sinon le pourcentage de VMA. */
+function wktCible(vma,o){
+  if(o&&o.all!=null)return wktSpeedAll(o.all);
+  return wktSpeed(vma,o?o.pct:null);
+}
+/* Une séance entièrement écrite en allures se passe de VMA : il n'y a rien à
+   convertir. L'échauffement et le retour au calme restent alors sans cible —
+   sans conséquence, leur durée est libre de toute façon. */
+function wktToutEnAllure(s){
+  const bl=(s&&s.blocks)||[];
+  if(!bl.length)return false;
+  return bl.every(function(b){
+    return b.segs? b.segs.every(function(sg){return sg.all!=null;}) : b.all!=null;
+  });
+}
 function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);}
+
+/* — Échauffement et retour au calme —
+   Ce sont des étapes à part entière, avec une allure cible, et d'une durée
+   LIBRE : l'étape s'arrête quand l'athlète appuie sur le bouton tour. Celui
+   qui a besoin de vingt-cinq minutes pour se mettre en route les prend ; celui
+   à qui douze suffisent passe à la suite. Une durée figée obligeait à
+   attendre la fin du compte à rebours, ou à couper l'échauffement en cours.
+
+   La durée écrite par le coach n'est pas perdue pour autant : elle passe dans
+   le nom de l'étape — « Échauffement 20 min » — où elle reste une intention
+   plutôt qu'une contrainte. */
+/* Par défaut, l'échauffement se court en endurance fondamentale — zone 2 —
+   et le retour au calme en récupération — zone 1. Les bornes ne sont pas
+   recopiées ici : elles sont lues dans ZONES_VMA, la table qui sert déjà aux
+   zones du tableau de bord et à celles de l'espace athlète. Deux jeux de
+   chiffres finiraient par diverger. */
+const WKT_ZONE_WARM=2, WKT_ZONE_COOL=1;
+function wktZonePct(n){
+  if(typeof ZONES_VMA==='undefined') return null;
+  const z=ZONES_VMA.find(function(x){return x.z===n;});
+  return z?[Math.round(z.lo*100),Math.round(z.hi*100)]:null;
+}
+/* L'allure que le coach a écrite, s'il en a écrit une : une zone — « Z2 »,
+   « zone 2 » — un pourcentage en toutes lettres — « 65 % », « 60-70 % » — ou
+   le vocabulaire de l'endurance facile, « EF », « footing ».
+
+   Volontairement, ni « seuil » ni « VMA » ni « AS42 » : « 20 min + 4 lignes à
+   VMA » décrit des lignes en fin d'échauffement, pas un échauffement couru à
+   VMA. Les reconnaître viserait toute l'étape beaucoup trop haut, et la
+   montre réclamerait 100 % pendant vingt minutes. */
+function wktBordPct(txt){
+  if(!txt) return null;
+  const t=String(txt).toLowerCase().replace(/[–—]/g,'-');
+  let m=t.match(/(\d{2,3})\s*-\s*(\d{2,3})\s*%/);
+  if(m) return [+m[1],+m[2]];
+  m=t.match(/(\d{2,3})\s*%/);
+  if(m) return +m[1];
+  // « Z2 », « zone 2 » : la zone l'emporte, c'est la façon la plus directe
+  // de le dire et elle ne laisse aucune ambiguïté.
+  m=t.match(/\bz(?:one)?\s*([1-5])\b/);
+  if(m) return wktZonePct(+m[1]);
+  m=t.match(/\b(ef|fond\w*|foot\w*)\b/);
+  if(m&&typeof resolvePace==='function'){
+    const r=resolvePace(m[1]);
+    if(r) return r.pct;
+  }
+  return null;
+}
+/* Une allure écrite dans le champ — « 20 min à 5:30/km », « 5:20-5:40/km ».
+   On exige soit le marqueur /km, soit une valeur mm:ss dans la fourchette
+   plausible d'une allure de course : « 20 min + 4 lignes » ne doit rien
+   déclencher. */
+function wktBordAll(txt){
+  if(!txt)return null;
+  const t=String(txt).replace(/[–—]/g,'-');
+  let m=t.match(/(\d{1,2})[:'’](\d{2})\s*-\s*(\d{1,2})[:'’](\d{2})\s*(?:\/\s*km)?/);
+  if(m){
+    const a=allSec(m[1]+':'+m[2]), b=allSec(m[3]+':'+m[4]);
+    if(a!=null&&b!=null)return [Math.min(a,b),Math.max(a,b)];
+  }
+  m=t.match(/(\d{1,2})[:'’](\d{2})\s*\/\s*km/);
+  if(!m) m=t.match(/\b([2-9]|1[0-2])[:'’](\d{2})\b/);
+  return m?allSec(m[1]+':'+m[2]):null;
+}
+function wktBordStep(txt,vma,quoi){
+  if(!txt||txt==='—') return null;
+  if(/enchain|enchaîn|sans pause/i.test(String(txt))) return null;
+  const d=wktParseDur(txt);
+  let nom=(quoi==='warmup')?'Échauffement':'Retour au calme';
+  if(d&&d.dur==='time'&&d.val>=60)      nom+=' '+Math.round(d.val/60)+' min';
+  else if(d&&d.dur==='distance')        nom+=' '+fDist(d.val);
+  const ecrite=wktBordAll(txt);
+  if(ecrite!=null)
+    return {name:wktName(nom), dur:'open', val:null, sp:wktSpeedAll(ecrite), int:quoi};
+  const zoneParDefaut=(quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL;
+  return {name:wktName(nom), dur:'open', val:null,
+          sp:wktSpeed(vma, wktBordPct(txt)||wktZonePct(zoneParDefaut)), int:quoi};
+}
 
 /* Séance RedLab → liste d'étapes FIT, boucles imbriquées comprises. */
 function wktSteps(s,vma){
   const st=[];
   const add=o=>{st.push(o);return st.length-1;};
-  const warm=wktParseDur(s.warm);
-  if(warm)add({name:'Échauffement',dur:warm.dur,val:warm.val,int:'warmup'});
+  const warm=wktBordStep(s.warm,vma,'warmup');
+  if(warm)add(warm);
 
   (s.blocks||[]).forEach(function(b){
     const sets=Math.max(1,b.sets||wktLabelReps(b.label));
@@ -5408,7 +5562,7 @@ function wktSteps(s,vma){
 
     if(b.segs&&b.segs.length){
       b.segs.forEach(function(sg){
-        add({name:wktName(sg.lbl||fDist(sg.d)),dur:'distance',val:sg.d,sp:wktSpeed(vma,sg.pct),int:'interval'});
+        add({name:wktName(sg.lbl||fDist(sg.d)),dur:'distance',val:sg.d,sp:wktCible(vma,sg),int:'interval'});
       });
     } else {
       let dur='open',val=null;
@@ -5416,7 +5570,7 @@ function wktSteps(s,vma){
       else if(b.sec){dur='time';val=b.sec;}
       else if(b.m){dur='time';val=b.m*60;}
       add({name:wktName(b.label||b.lbl||(b.d?fDist(b.d):'Effort')),dur:dur,val:val,
-           sp:wktSpeed(vma,b.pct),int:(b.m&&b.m>=20)?'active':'interval'});
+           sp:wktCible(vma,b),int:(b.m&&b.m>=20)?'active':'interval'});
     }
     const rc=wktParseDur(b.rec);
     if(rc)add({name:'Récup',dur:rc.dur,val:rc.val,int:'recovery'});
@@ -5429,8 +5583,8 @@ function wktSteps(s,vma){
     }
   });
 
-  const cool=wktParseDur(s.cool);
-  if(cool)add({name:'Retour au calme',dur:cool.dur,val:cool.val,int:'cooldown'});
+  const cool=wktBordStep(s.cool,vma,'cooldown');
+  if(cool)add(cool);
   return st;
 }
 
@@ -5553,26 +5707,31 @@ function wktDl(bytes,name,mime){
    préfixées de leur date pour que l'athlète sache laquelle faire quand. */
 function wktExportPlan(){
   const vm=wktVma();
-  if(!vm){alert('Charge un athlète (ou renseigne une VMA dans la bibliothèque) : c’est elle qui cale les allures cibles.');return;}
-  const files=[], absents=[], muscles=[];
+  const files=[], absents=[], muscles=[], sansVma=[];
   Object.keys(_plSessions).sort().forEach(function(iso){
     (_plSessions[iso]||[]).forEach(function(sx,i){
       const s=wktFindSession(sx.t);
       if(!s){absents.push(sx.t);return;}
       if(s.muscu){muscles.push(sx.t);return;}   // le format .fit ne décrit que de la course
+      // Sans VMA, seules les séances écrites de bout en bout en allures
+      // peuvent être calées : les autres attendent.
+      if(!vm&&!wktToutEnAllure(s)){sansVma.push(sx.t);return;}
       const jm=iso.slice(8,10)+'/'+iso.slice(5,7);
       const dated=Object.assign({},s,{title:jm+' · '+s.title});
       files.push({name:iso.slice(5).replace('-','')+(i?'-'+(i+1):'')+'-'+wktSlug(s.title)+'.fit',
-                  data:wktToFit(dated,vm.v)});
+                  data:wktToFit(dated,vm?vm.v:null)});
     });
   });
-  if(!files.length){alert(muscles.length
-    ? 'Les seules séances du calendrier sont des séances de musculation : le format montre ne sait pas les décrire.'
-    : 'Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.');return;}
-  const who=vm.who?wktSlug(vm.who):'athlete';
+  if(!files.length){alert(sansVma.length
+    ? 'Charge un athlète (ou renseigne une VMA dans la bibliothèque) : c’est elle qui cale les allures cibles.'
+    : (muscles.length
+      ? 'Les seules séances du calendrier sont des séances de musculation : le format montre ne sait pas les décrire.'
+      : 'Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.'));return;}
+  const who=(vm&&vm.who)?wktSlug(vm.who):'athlete';
   wktDl(zipBuild(files),'redlab-'+who+'-seances.zip','application/zip');
   if(absents.length)alert('Séances introuvables dans la bibliothèque, non exportées :\n· '+absents.join('\n· '));
   if(muscles.length)alert('Séances de musculation non exportées — le format montre ne décrit que de la course :\n· '+muscles.join('\n· '));
+  if(sansVma.length)alert('Séances non exportées, faute de VMA pour caler leurs pourcentages :\n· '+sansVma.join('\n· '));
 }
 
 function wktSlug(t){
@@ -5585,9 +5744,9 @@ function wktExport(kind,idx){
   const s=(kind==='c')?CUSTOM_SESSIONS[idx]:LIB_SESSIONS[idx];
   if(!s)return;
   const vm=wktVma();
-  if(!vm){alert('Charge un athlète (ou renseigne une VMA en haut de la bibliothèque) : c’est elle qui cale les allures cibles de la séance.');return;}
-  const nom=(vm.who?wktSlug(vm.who)+'-':'')+wktSlug(s.title)+'.fit';
-  wktDl(wktToFit(s,vm.v),nom);
+  if(!vm&&!wktToutEnAllure(s)){alert('Charge un athlète (ou renseigne une VMA en haut de la bibliothèque) : c’est elle qui cale les allures cibles de la séance.');return;}
+  const nom=((vm&&vm.who)?wktSlug(vm.who)+'-':'')+wktSlug(s.title)+'.fit';
+  wktDl(wktToFit(s,vm?vm.v:null),nom);
 }
 
 /* ══ SÉANCES PERSO — parseur de notation libre ══ */
@@ -5642,7 +5801,12 @@ function libBlockSegs(b,vma){
   // les répétitions — il doit s'afficher. Les blocs venus de la notation libre
   // gardent leur rendu d'origine.
   const multi=b.segs.length>1 && !b.alt;
-  const parts=b.segs.map(function(sg){ let calc=''; if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';} return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>'; });
+  const parts=b.segs.map(function(sg){
+    let calc='';
+    if(sg.all!=null) calc=' <span class="lib-calc">→ '+allTxt(sg.all)+'</span>';
+    else if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';}
+    return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>';
+  });
   const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
   const rec=b.rec?' <span class="lib-rec">(récup '+b.rec+')</span>':'';
   const key=multi?b.label:((b.r>1)?'Répétitions':b.label);
@@ -5707,13 +5871,17 @@ function libBuildFromEditor(){
   const blocks=brut.map(function(b){
     if(!b.segs) return b;
     // Un segment sans distance ou sans allure ne veut rien dire : on l'écarte.
-    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && sg.pct>0; })
-                   .map(function(sg){ return {d:sg.d, pct:sg.pct, lbl:(sg.lbl||(sg.pct+' %'))}; });
+    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && (sg.all!=null || sg.pct>0); })
+                   .map(function(sg){
+                     var o={d:sg.d, lbl:(sg.lbl||(sg.all!=null?allTxt(sg.all):(sg.pct+' %')))};
+                     if(sg.all!=null)o.all=sg.all; else o.pct=sg.pct;
+                     return o;
+                   });
     return segs.length?Object.assign({},b,{segs:segs}):null;
   }).filter(function(b){
     if(!b) return false;
     if(b.segs) return b.segs.length>0;
-    return (b.d>0||b.m>0||b.sec>0) && (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0);
+    return (b.d>0||b.m>0||b.sec>0) && (b.all!=null || (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0));
   });
   const s={
     id:(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
@@ -5728,7 +5896,7 @@ function libBuildFromEditor(){
   };
   const warnings=[];
   if(blocks.length<brut.length)
-    warnings.push('bloc incomplet ignoré (valeur ou % manquant)');
+    warnings.push('bloc incomplet ignoré (durée, distance ou intensité manquante)');
   return {s:s,warnings:warnings,ok:blocks.length>0};
 }
 /* Le formulaire actif décide de la fonction de construction. */
@@ -5839,25 +6007,42 @@ function libEditCancel(){
   var box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
 }
 
-/* Une ligne de bloc : répétitions × valeur (m, km ou min) à un pourcentage de
-   VMA — un seul, ou une fourchette — avec sa récupération. */
+/* Les deux champs d'intensité d'une ligne. Selon le sélecteur qui les suit,
+   ce sont deux pourcentages de VMA ou deux allures au kilomètre — l'un ou
+   l'autre, jamais les deux : c'est le choix du coach pour ce bloc-là.
+   Une seule valeur = une allure ronde ; les deux = une fourchette. */
+function libIntensiteHTML(o,IS,appel,large){
+  var all=(o.all!=null);
+  var v0=all?fAll(Array.isArray(o.all)?o.all[0]:o.all):(Array.isArray(o.pct)?o.pct[0]:(o.pct||70));
+  var v1=all?(Array.isArray(o.all)?fAll(o.all[1]):''):(Array.isArray(o.pct)?o.pct[1]:'');
+  var num=all
+    ? 'type="text" inputmode="numeric" maxlength="5"'
+    : 'type="number" min="30" max="130" step="1"';
+  var w0=all?'62px':'62px', w1=large?'66px':'62px';
+  return '<input '+num+' value="'+v0+'" oninput="'+appel+'\'v0\',this.value)" title="'+(all?'allure au km (4:05)':'% VMA')+'" style="'+IS+';width:'+w0+';text-align:center">'
+    +'<span class="lb-at">–</span>'
+    +'<input '+num+' value="'+v1+'" placeholder="'+(all?'à':'max')+'" oninput="'+appel+'\'v1\',this.value)" title="'+(all?'allure la plus lente (facultatif)':'% VMA haut (facultatif)')+'" style="'+IS+';width:'+w1+';text-align:center">'
+    +'<select onchange="'+appel+'\'mode\',this.value)" title="unité d’intensité" style="'+IS+';width:88px">'
+      +'<option value="pct"'+(all?'':' selected')+'>% VMA</option>'
+      +'<option value="all"'+(all?' selected':'')+'>min/km</option></select>';
+}
+
+/* Une ligne de bloc : répétitions × valeur (m, km ou min) à une intensité —
+   pourcentage de VMA ou allure — avec sa récupération. */
 function libBlocRow(b,i){
   var IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none';
   if(b.segs) return libBlocRowAlt(b,i,IS);
   var unite=b.m?'min':(b.sec?'sec':(b.d>=1000?'km':'m'));
   var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
-  var p0=Array.isArray(b.pct)?b.pct[0]:(b.pct||70), p1=Array.isArray(b.pct)?b.pct[1]:'';
   var o=function(v,t){return '<option value="'+v+'"'+(unite===v?' selected':'')+'>'+t+'</option>';};
   return '<div class="lb-row" data-i="'+i+'">'
+    +lbGrip(i,null)
     +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
     +'<span class="lb-x">×</span>'
     +'<input type="number" min="0" step="any" value="'+val+'" oninput="libBlocSet('+i+',\'val\',this.value)" title="valeur" style="'+IS+';width:74px;text-align:center">'
     +'<select onchange="libBlocSet('+i+',\'unite\',this.value)" title="unité" style="'+IS+';width:72px">'+o('m','m')+o('km','km')+o('min','min')+o('sec','sec')+'</select>'
     +'<span class="lb-at">à</span>'
-    +'<input type="number" min="30" max="130" step="1" value="'+p0+'" oninput="libBlocSet('+i+',\'p0\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
-    +'<span class="lb-at">–</span>'
-    +'<input type="number" min="30" max="130" step="1" value="'+p1+'" placeholder="max" oninput="libBlocSet('+i+',\'p1\',this.value)" title="% VMA haut (facultatif)" style="'+IS+';width:66px;text-align:center">'
-    +'<span class="lb-at">% VMA</span>'
+    +libIntensiteHTML(b,IS,'libBlocInt('+i+',',true)
     +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:110px">'
     +'<span class="lb-acts">'
       +'<button type="button" class="lb-alt" onclick="libBlocEnAlt('+i+')" title="Transformer en alternance : plusieurs allures dans la même répétition">⇄ Alterner</button>'
@@ -5878,18 +6063,19 @@ function libBlocRowAlt(b,i,IS){
     var km=(sg.d>=1000);
     var val=km?(sg.d/1000):(sg.d||0);
     return '<div class="lb-seg" data-i="'+i+'" data-j="'+j+'">'
+      +(segs.length>1?lbGrip(i,j):'')
       +'<input type="number" min="0" step="any" value="'+val+'" oninput="libSegSet('+i+','+j+',\'val\',this.value)" title="distance" style="'+IS+';width:74px;text-align:center">'
       +'<select onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
         +'<option value="m"'+(km?'':' selected')+'>m</option><option value="km"'+(km?' selected':'')+'>km</option></select>'
       +'<span class="lb-at">à</span>'
-      +'<input type="number" min="30" max="130" step="1" value="'+(sg.pct||80)+'" oninput="libSegSet('+i+','+j+',\'pct\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
-      +'<span class="lb-at">%</span>'
+      +libIntensiteHTML(sg,IS,'libSegInt('+i+','+j+',',false)
       +'<input value="'+String(sg.lbl||'').replace(/"/g,'&quot;')+'" placeholder="libellé (ex : AS42)" oninput="libSegSet('+i+','+j+',\'lbl\',this.value)" style="'+IS+';flex:1;min-width:120px">'
       +(segs.length>1?'<button type="button" class="lb-del" onclick="libSegDel('+i+','+j+')" title="Retirer ce segment">✕</button>':'')
       +'</div>';
   }).join('');
   return '<div class="lb-row lb-row--alt" data-i="'+i+'">'
     +'<div class="lb-alt-hd">'
+      +lbGrip(i,null)
       +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
       +'<span class="lb-x">× alternance</span>'
       +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup entre répétitions" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:150px">'
@@ -5902,10 +6088,109 @@ function libBlocRowAlt(b,i,IS){
       +'<button type="button" class="lb-add lb-add--seg" onclick="libSegAdd('+i+')">+ Ajouter une allure</button>'
     +'</div></div>';
 }
-function libBlocsRedraw(){
+function lbRedrawLignes(){
   var box=document.getElementById('lb-rows');
   if(box)box.innerHTML=(_libEdit&&_libEdit.blocks||[]).map(libBlocRow).join('');
+}
+function libBlocsRedraw(){ lbRedrawLignes(); libPreview(); }
+
+/* ══ DÉPLACER UNE ÉTAPE ══
+   Les blocs du corps de séance, et les allures d'un bloc en alternance, se
+   réordonnent en les faisant glisser par leur poignée.
+
+   Deux choix de mise en œuvre méritent d'être dits. On travaille en
+   « pointer events » plutôt qu'en glisser-déposer HTML5, qui reste muet au
+   doigt — or le coach construit ses séances au téléphone. Et les écouteurs
+   vivent sur le document, pas sur la poignée : chaque permutation redessine
+   les lignes, et une poignée détruite en plein geste emporterait sa capture
+   de pointeur avec elle.
+
+   Une poignée est aussi un bouton : au clavier, ↑ et ↓ déplacent l'étape. */
+var _lbDrag=null;
+function lbGrip(i,j){
+  var t=(j==null)?'Déplacer ce bloc (glisser, ou ↑ ↓ au clavier)'
+                 :'Déplacer cette allure (glisser, ou ↑ ↓ au clavier)';
+  var args=i+','+(j==null?'null':j);
+  return '<span class="lb-grip" role="button" tabindex="0" title="'+t+'" aria-label="'+t+'"'
+    +' onpointerdown="lbDragDebut(event,'+args+')" onkeydown="lbDragClavier(event,'+args+')">⠿</span>';
+}
+/* Les lignes entre lesquelles le geste en cours peut déplacer son étape. */
+function lbFratrie(){
+  if(!_lbDrag) return [];
+  var sel=(_lbDrag.j==null)?'#lb-rows > .lb-row'
+                           :'.lb-row[data-i="'+_lbDrag.i+'"] .lb-seg';
+  return [].slice.call(document.querySelectorAll(sel));
+}
+function lbMarque(){
+  document.querySelectorAll('.lb-row--drag').forEach(function(e){e.classList.remove('lb-row--drag');});
+  if(!_lbDrag) return null;
+  var sel=(_lbDrag.j==null)?'.lb-row[data-i="'+_lbDrag.i+'"]'
+                           :'.lb-seg[data-i="'+_lbDrag.i+'"][data-j="'+_lbDrag.j+'"]';
+  var e=document.querySelector(sel);
+  if(e)e.classList.add('lb-row--drag');
+  return e;
+}
+/* Déplace l'étape à la position k. Rend vrai si quelque chose a bougé. */
+function lbDeplace(k){
+  var b, liste, de;
+  if(_lbDrag.j==null){ liste=_libEdit&&_libEdit.blocks; de=_lbDrag.i; }
+  else { b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[_lbDrag.i]; liste=b&&b.segs; de=_lbDrag.j; }
+  if(!liste) return false;
+  k=Math.max(0,Math.min(liste.length-1,k));
+  if(k===de) return false;
+  liste.splice(k,0,liste.splice(de,1)[0]);
+  if(_lbDrag.j==null) _lbDrag.i=k; else _lbDrag.j=k;
+  lbRedrawLignes();
+  return true;
+}
+function lbDragDebut(ev,i,j){
+  if(!_libEdit) return;
+  if(ev.button!=null&&ev.button!==0) return;   // seul le clic gauche déplace
+  ev.preventDefault();
+  _lbDrag={i:i,j:j};
+  document.addEventListener('pointermove',lbDragBouge);
+  document.addEventListener('pointerup',lbDragFin);
+  document.addEventListener('pointercancel',lbDragFin);
+  lbMarque();
+}
+function lbDragBouge(ev){
+  if(!_lbDrag) return;
+  ev.preventDefault();
+  var lignes=lbFratrie();
+  if(!lignes.length) return;
+  // La place visée est celle de la première ligne dont le bas passe sous le
+  // pointeur : au-dessus de tout, la première ; en dessous de tout, la dernière.
+  var k=lignes.length-1;
+  for(var n=0;n<lignes.length;n++){
+    if(ev.clientY<lignes[n].getBoundingClientRect().bottom){ k=n; break; }
+  }
+  if(lbDeplace(k)) lbMarque();
+}
+function lbDragFin(){
+  document.removeEventListener('pointermove',lbDragBouge);
+  document.removeEventListener('pointerup',lbDragFin);
+  document.removeEventListener('pointercancel',lbDragFin);
+  _lbDrag=null;
+  document.querySelectorAll('.lb-row--drag').forEach(function(e){e.classList.remove('lb-row--drag');});
   libPreview();
+}
+function lbDragClavier(ev,i,j){
+  if(ev.key!=='ArrowUp'&&ev.key!=='ArrowDown') return;
+  if(!_libEdit) return;
+  ev.preventDefault();
+  _lbDrag={i:i,j:j};
+  var de=(j==null)?i:j;
+  var bouge=lbDeplace(de+(ev.key==='ArrowUp'?-1:1));
+  var pose=_lbDrag;
+  _lbDrag=null;
+  if(!bouge) return;
+  libPreview();
+  // La poignée vient d'être redessinée : on rend le focus à la nouvelle, pour
+  // pouvoir enchaîner les appuis.
+  var sel=(pose.j==null)?'.lb-row[data-i="'+pose.i+'"] .lb-grip'
+                        :'.lb-seg[data-i="'+pose.i+'"][data-j="'+pose.j+'"] .lb-grip';
+  var g=document.querySelector(sel);
+  if(g)g.focus();
 }
 /* Passage simple → alterné : le bloc devient sa propre première allure, on en
    ajoute une seconde. Les durées ne survivent pas — un segment se mesure en
@@ -5913,21 +6198,34 @@ function libBlocsRedraw(){
 function libBlocEnAlt(i){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
   var d=b.d||1000;
-  var p=Array.isArray(b.pct)?b.pct[0]:(b.pct||80);
+  var s1,s2;
+  if(b.all!=null){
+    // La seconde allure part huit secondes au km plus vite : de quoi voir
+    // tout de suite qu'il s'agit de deux allures différentes.
+    var a=Array.isArray(b.all)?b.all[0]:b.all;
+    s1={d:d,all:a,lbl:''}; s2={d:d,all:Math.max(100,a-8),lbl:''};
+  } else {
+    var p=Array.isArray(b.pct)?b.pct[0]:(b.pct||80);
+    s1={d:d,pct:p,lbl:''}; s2={d:d,pct:Math.min(130,p+8),lbl:''};
+  }
   _libEdit.blocks[i]={r:b.r||1, rec:b.rec||'', label:b.label||'Alternance', alt:true,
-    segs:[{d:d,pct:p,lbl:''},{d:d,pct:Math.min(130,p+8),lbl:''}]};
+    segs:[s1,s2]};
   libBlocsRedraw();
 }
 function libBlocEnSimple(i){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
   var sg=b.segs[0]||{};
-  _libEdit.blocks[i]={r:b.r||1, d:sg.d||1000, pct:sg.pct||80, rec:b.rec||''};
+  var simple={r:b.r||1, d:sg.d||1000, rec:b.rec||''};
+  if(sg.all!=null)simple.all=sg.all; else simple.pct=sg.pct||80;
+  _libEdit.blocks[i]=simple;
   libBlocsRedraw();
 }
 function libSegAdd(i){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
   var der=b.segs[b.segs.length-1]||{d:1000,pct:80};
-  b.segs.push({d:der.d,pct:der.pct,lbl:''});
+  var neuf={d:der.d,lbl:''};
+  if(der.all!=null)neuf.all=der.all; else neuf.pct=der.pct||80;
+  b.segs.push(neuf);
   libBlocsRedraw();
 }
 function libSegDel(i,j){
@@ -5940,7 +6238,6 @@ function libSegSet(i,j,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
   var sg=b.segs[j]; if(!sg)return;
   if(champ==='lbl'){ sg.lbl=String(v||'').slice(0,24); }
-  else if(champ==='pct'){ sg.pct=Math.max(30,Math.min(130,Math.round(+v||0))); }
   else {
     var row=document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]');
     var val=+((row&&row.querySelector('input').value)||0);
@@ -5959,11 +6256,11 @@ function libEditFormHTML(s){
       +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" placeholder="10 × 1000 m à allure 10 km" oninput="libPreview()"></div>'
       +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
     +'</div>'
-    +'<div class="lc-field"><label>Contenu de la séance</label><div id="lb-rows">'+rows+'</div>'
+    +'<div class="lc-field"><label>Contenu de la séance <span class="lc-hint">glisse ⠿ pour changer l’ordre</span></label><div id="lb-rows">'+rows+'</div>'
       +'<button type="button" class="lb-add" onclick="libBlocAdd()">+ Ajouter un bloc</button></div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" oninput="libPreview()"></div>'
-      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" placeholder="20 min · Z2" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" placeholder="10 min · Z1" oninput="libPreview()"></div>'
     +'</div>'
     +'<div class="lc-field"><label>Description</label><input id="lc-desc" value="'+esc(s.desc)+'" oninput="libPreview()"></div>'
     +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
@@ -5972,7 +6269,10 @@ function libEditFormHTML(s){
       +(creation?'Enregistrer la séance':((_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':'↓ Enregistrer dans ma banque'))
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
     +(creation
-       ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].</div>'
+       ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].'
+        +'<br>Chaque bloc se règle en <b>% VMA</b> ou en <b>min/km</b>, au choix : le fractionné se pense en pourcentage, l’allure marathon en minutes au kilomètre. Écris <b>4:05</b> (ou <b>405</b>) ; remplis le second champ pour une fourchette, laisse-le vide pour une allure ronde.'
+        +'<br>Sur la montre, l’échauffement et le retour au calme durent <b>jusqu’à l’appui sur le bouton tour</b>, avec une allure cible. '
+        +'Écris <b>Z1</b> à <b>Z5</b> (ou « 65 % », « 60-70 % ») pour la fixer ; sans rien, l’échauffement vise la <b>zone 2</b> et le retour au calme la <b>zone 1</b>.</div>'
        :((_libEdit.src==='l'||_libEdit.nouvelle)
          ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
@@ -6112,6 +6412,57 @@ function libMuscuBody(s){
   }).join('');
 }
 
+/* Bascule % VMA ↔ allure sur un bloc ou un segment. La valeur ne se perd
+   pas : on la convertit avec la VMA affichée quand il y en a une, pour que le
+   coach reparte de l'équivalent de ce qu'il venait d'écrire. Sans VMA, une
+   valeur de départ raisonnable — il la corrigera, c'est le champ qu'il
+   regarde. */
+function libIntMode(o,mode){
+  var vma=libVmaVal();
+  if(mode==='all'){
+    if(o.all!=null)return;
+    var pc=Array.isArray(o.pct)?o.pct[0]:(o.pct||80);
+    o.all=vma?Math.round(1000/(vma*pc/100/3.6)):270;
+    delete o.pct;
+  } else {
+    if(o.all==null)return;
+    var sec=Array.isArray(o.all)?o.all[0]:o.all;
+    o.pct=(vma&&sec)?Math.max(30,Math.min(130,Math.round(3600/sec/vma*100))):80;
+    delete o.all;
+  }
+}
+/* Les deux champs d'intensité d'une même ligne se lisent ensemble : le second,
+   laissé vide, veut dire « une allure ronde » et non « une fourchette ». Une
+   saisie encore incomplète — « 4: » — ne touche à rien : on attend la suite. */
+function libIntLit(o,ligne){
+  if(!ligne)return;
+  var ins=ligne.querySelectorAll('input');
+  // Une ligne de bloc commence par « répétitions × valeur », un segment par sa
+  // seule distance : les deux champs d'intensité ne tombent pas au même rang.
+  var k=ligne.classList.contains('lb-seg')?1:2;
+  var t0=(ins[k]&&ins[k].value)||'', t1=(ins[k+1]&&ins[k+1].value)||'';
+  if(o.all!=null){
+    var s0=allSec(t0), s1=t1.trim()?allSec(t1):null;
+    if(s0==null)return;
+    o.all=(s1!=null&&s1!==s0)?[Math.min(s0,s1),Math.max(s0,s1)]:s0;
+  } else {
+    var a=+(t0||0), z=t1.trim()!==''?+t1:null;
+    o.pct=(z!=null&&z>a)?[a,z]:a;
+  }
+}
+function libBlocInt(i,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
+  if(champ==='mode'){ libIntMode(b,v); return libBlocsRedraw(); }
+  libIntLit(b,document.querySelector('.lb-row[data-i="'+i+'"]'));
+  libPreview();
+}
+function libSegInt(i,j,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var sg=b.segs[j]; if(!sg)return;
+  if(champ==='mode'){ libIntMode(sg,v); return libBlocsRedraw(); }
+  libIntLit(sg,document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]'));
+  libPreview();
+}
 function libBlocSet(i,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
   if(champ==='r'){ b.r=Math.max(1,Math.round(+v||1)); }
@@ -6123,12 +6474,6 @@ function libBlocSet(i,champ,v){
     delete b.d; delete b.m; delete b.sec;
     if(u==='km')b.d=Math.round(val*1000); else if(u==='m')b.d=Math.round(val);
     else if(u==='min')b.m=val; else b.sec=Math.round(val);
-  }
-  else if(champ==='p0'||champ==='p1'){
-    var row2=document.querySelector('.lb-row[data-i="'+i+'"]');
-    var ins=row2?row2.querySelectorAll('input'):[];
-    var a=+((ins[2]&&ins[2].value)||0), z=(ins[3]&&ins[3].value!=='')?+ins[3].value:null;
-    b.pct=(z!=null&&z>a)?[a,z]:a;
   }
   libPreview();
 }
@@ -6244,12 +6589,12 @@ function renderExtrapol(){
 /* ══ EXPORT SÉANCES → JSON (schéma générique, réutilisable API Nolio) ══ */
 function libBlockText(b){
   if(b.segs){
-    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+(Array.isArray(sg.pct)?sg.pct.join('-'):sg.pct)+'% VMA)';}).join(' + ');
+    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+(sg.all!=null?allTxt(sg.all):((Array.isArray(sg.pct)?sg.pct.join('-'):sg.pct)+'% VMA'))+')';}).join(' + ');
     return (b.label?b.label+' : ':'')+(b.r>1?b.r+' × ':'')+segs+(b.rec?' — récup '+b.rec:'');
   }
   var val=b.d?(b.d>=1000?(String(b.d/1000).replace('.',','))+' km':b.d+' m'):(b.m?b.m+' min':(b.sec?b.sec+'s':''));
   var pct=Array.isArray(b.pct)?b.pct.join('-'):b.pct;
-  var core=(b.r>1?b.r+' × ':'')+val+' @ '+pct+'% VMA';
+  var core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pct+'% VMA'));
   if(b.sets)core=b.sets+' séries de '+core;
   var rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   return core+(rec.length?' ('+rec.join(' · ')+')':'');
@@ -8241,32 +8586,49 @@ function plImportApply(id){
   renderPlanif();
 
   var nb=Object.keys(s).reduce(function(n,k){return n+s[k].length;},0);
-  var msg=document.getElementById('pl-dash-msg');
-  if(!msg)return;
 
   /* Deux situations où le recalage ne peut pas être exact. Les taire
      laisserait le coach devant un calendrier faux sans savoir pourquoi. */
-  var alerte='';
+  var alerte='', texte;
   if(memes){
-    msg.style.color='#34D399';
-    msg.textContent='Plan de '+src.pseudo+' repris à l’identique — '+nb+' séance'+(nb>1?'s':'')
+    texte='Plan de '+src.pseudo+' repris à l’identique — '+nb+' séance'+(nb>1?'s':'')
       +(_plNom?', course « '+_plNom+' »':'')+(_plTime?', objectif '+_plTime:'')
       +'. Ajoute-le au tableau de bord pour le rendre actif.';
-    return;
-  }
-  if(!p.d2){
-    alerte=' Le plan d’origine n’avait pas de date de course : les séances ont gardé leurs dates telles quelles, elles sont sûrement à replacer.';
   } else {
-    var jS=new Date(p.d2+'T12:00:00').getDay(), jC=new Date(cible+'T12:00:00').getDay();
-    if(jS!==jC){
-      var nom=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-      alerte=' Les deux courses ne tombent pas le même jour ('+nom[jS]+' contre '+nom[jC]
-        +') : les séances gardent leur jour de semaine, mais vérifie la dernière semaine avant la course.';
+    if(!p.d2){
+      alerte=' Le plan d’origine n’avait pas de date de course : les séances ont gardé leurs dates telles quelles, elles sont sûrement à replacer.';
+    } else {
+      var jS=new Date(p.d2+'T12:00:00').getDay(), jC=new Date(cible+'T12:00:00').getDay();
+      if(jS!==jC){
+        var nom=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+        alerte=' Les deux courses ne tombent pas le même jour ('+nom[jS]+' contre '+nom[jC]
+          +') : les séances gardent leur jour de semaine, mais vérifie la dernière semaine avant la course.';
+      }
     }
+    texte='Plan de '+src.pseudo+' repris'+(dec?(' et décalé de '+Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')):'')
+      +' — '+nb+' séance'+(nb>1?'s':'')+'.'+(alerte||' Vérifie les dates, puis ajoute-le au tableau de bord.');
   }
-  msg.style.color=alerte?'#FBBF24':'#34D399';
-  msg.textContent='Plan de '+src.pseudo+' repris'+(dec?(' et décalé de '+Math.abs(dec/7)+' semaine'+(Math.abs(dec/7)>1?'s':'')):'')
-    +' — '+nb+' séance'+(nb>1?'s':'')+'.'+(alerte||' Vérifie les dates, puis ajoute-le au tableau de bord.');
+  plImportSignale(texte, alerte?'#FBBF24':'#34D399');
+}
+
+/* Reprendre un plan ne se voyait pas. Le bouton d'import est en haut de
+   l'écran ; le calendrier et le compte rendu, plusieurs milliers de pixels
+   plus bas. Le coach touchait un athlète, la fenêtre se fermait, et rien ne
+   bougeait sous ses yeux — le plan avait pourtant bien été repris.
+   On affiche donc le résultat contre le calendrier, et on l'amène à l'écran. */
+function plImportSignale(texte,col){
+  var msg=document.getElementById('pl-imp-msg');
+  if(msg){
+    msg.textContent=texte;
+    msg.style.display='block';
+    msg.style.color=col;
+    msg.style.borderColor=col+'66';
+    msg.style.background=col+'14';
+  }
+  var vers=msg||document.getElementById('pl-cal');
+  if(!vers||!vers.scrollIntoView)return;
+  try{ vers.scrollIntoView({behavior:'smooth',block:'start'}); }
+  catch(e){ vers.scrollIntoView(); }
 }
 
 /* Reprend le nom, le lien et le temps visé là où ils se trouvent : dans le
@@ -8371,15 +8733,17 @@ function plCalendarHTML(p,weeks,opts){
         var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
         if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\')" title="Voir le détail de la séance"><span>'+esc+'</span><span class="plw-oeil">›</span></div>';
-        return '<div class="plw-ch'+held+'" draggable="true"'
+        return '<div class="plw-ch plw-ch--act'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
           +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
           +' style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
           +'<span>'+esc+'</span>'
-          +'<button type="button" class="plw-cp" title="Adapter cette séance" onclick="event.stopPropagation();plEditSession(\''+iso+'\','+si+')">✎</button>'
-          +'<button type="button" class="plw-cp" title="Dupliquer" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
-          +'<button type="button" title="Retirer" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button></div>';
+          +'<div class="plw-acts">'
+            +'<button type="button" class="plw-cp" title="Adapter cette séance" aria-label="Adapter cette séance" onclick="event.stopPropagation();plEditSession(\''+iso+'\','+si+')">✎</button>'
+            +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
+            +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
+          +'</div></div>';
       }).join('');
       var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
@@ -8752,6 +9116,9 @@ function renderPlanif(){
     +'<div id="pl-load">'+plLoadHTML(p,weeks,{cid:'pl-vol-canvas'})+'</div>'
     +'</div>'
     // ── Cohérence ──
+    // Le compte rendu d'un plan repris s'affiche ici, collé au calendrier :
+    // c'est le calendrier que le coach vient chercher.
+    +'<div id="pl-imp-msg" style="display:none;font-size:13px;font-weight:700;line-height:1.6;border:1px solid var(--border2);border-radius:10px;padding:11px 14px;margin-bottom:14px"></div>'
     +'<div class="card" style="padding:22px;margin-bottom:14px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Calendrier de la prépa</div><div id="pl-cal">'+plCalendarHTML(p,weeks)+'</div></div>'
     +'<div style="display:flex;justify-content:center;margin-top:16px"><button onclick="plToDash()" style="display:inline-flex;align-items:center;gap:9px;background:'+p.col+';border:none;border-radius:11px;color:#fff;font-family:var(--font);font-size:14px;font-weight:800;padding:13px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.28)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Ajouter ce plan au dashboard</button></div>'
     +'<div id="pl-dash-msg" style="text-align:center;font-size:12.5px;font-weight:700;margin-top:8px;min-height:16px"></div>'
