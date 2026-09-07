@@ -65,7 +65,8 @@ drop policy if exists "coach supprime ses liens" on public.polar_links;
 create policy "coach supprime ses liens" on public.polar_links
   for delete to authenticated using (auth.uid() = coach_id);
 
--- polar_tokens : aucune politique. C'est délibéré.
+-- polar_tokens : aucune politique ici. C'est délibéré — voir le bloc de
+-- contrôle en fin de fichier, et securite-lot3.sql qui n'ouvre que le DELETE.
 
 -- Ménage des demandes jamais abouties (l'athlète a fermé l'onglet).
 create index if not exists polar_pending_created_idx on public.polar_pending(created_at);
@@ -168,22 +169,35 @@ create policy "athlete efface ses charges" on public.muscu_charges
 -- ══════════════════════════════════════════════════════════════════════════
 --  CONTRÔLE — ce qui doit s'afficher après le Run
 --
---  Cinq lignes, rls_actif = true partout, et ces nombres de règles :
+--  Cinq lignes, rls_actif = true partout, et ceci :
 --
---    muscu_charges     4   lire, noter, corriger, effacer ses charges
---    polar_exercises   2   le coach voit et supprime les séances
---    polar_links       2   le coach voit et supprime ses liens
---    polar_pending     2   le coach ouvre et voit ses demandes
---    polar_tokens      0   ← VOULU, ce n'est pas un oubli. Aucune règle =
---                          aucun accès depuis le navigateur. Les jetons Polar
---                          ne sont lus que par les Edge Functions, côté
---                          serveur. Une règle ici serait une faille.
+--    table             regles  operations
+--    muscu_charges       4     DELETE, INSERT, SELECT, UPDATE
+--    polar_exercises     2     DELETE, SELECT
+--    polar_links         2     DELETE, SELECT
+--    polar_pending       2     INSERT, SELECT
+--    polar_tokens        1     DELETE          ← et DELETE seulement
+--
+--  Ce que fait ce fichier seul donnerait ZÉRO règle à polar_tokens : un jeton
+--  d'accès Polar n'a aucune raison d'atteindre un navigateur, il n'est lu que
+--  par les Edge Functions, côté serveur.
+--
+--  securite-lot3.sql ouvre ensuite le DELETE, et lui seul, pour que la
+--  suppression d'un athlète emporte son jeton — sans quoi un identifiant
+--  vivant vers ses données chez un tiers survivrait à son effacement
+--  (RGPD, droit à l'effacement). Le coach peut donc détruire le jeton de son
+--  athlète ; il ne peut toujours pas le lire.
+--
+--  Ce qu'il faut surveiller, ce n'est donc pas le nombre mais l'opération :
+--  un SELECT ou un UPDATE qui apparaîtrait sur polar_tokens serait la faille.
 -- ══════════════════════════════════════════════════════════════════════════
 select
   c.relname        as table_name,
   c.relrowsecurity as rls_actif,
   (select count(*) from pg_policies p
-    where p.schemaname = 'public' and p.tablename = c.relname) as regles
+    where p.schemaname = 'public' and p.tablename = c.relname) as regles,
+  (select string_agg(distinct p.cmd, ', ' order by p.cmd) from pg_policies p
+    where p.schemaname = 'public' and p.tablename = c.relname) as operations
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
 where n.nspname = 'public'
