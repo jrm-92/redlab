@@ -4258,7 +4258,7 @@ function _seancePourEspace(titre,vma,ov){
       // Séance en notation libre : une suite de segments, chacun son allure.
       var parts=b.segs.map(function(sg){
         var a=(sg.all!=null)?(' → '+allTxt(sg.all))
-             :(vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'');
+             :(vma?(' → '+fAll(1000/(vma*pctMoy(sg.pct)/100/3.6))+'/km'):'');
         return fDist(sg.d)+' '+sg.lbl+a;
       });
       lignes.push({k:(b.label||('Bloc '+(i+1))),
@@ -5362,6 +5362,13 @@ function allSec(txt){
   return v;
 }
 function allMoy(a){ return Array.isArray(a)?(a[0]+a[1])/2:a; }
+/* Un pourcentage de VMA s'écrit seul — 90 — ou en fourchette — [88,92].
+   Les deux formes se croisent partout, et « [88,92] > 0 » vaut faux en
+   JavaScript : la fourchette se lit « 88,92 », donc NaN. Ces deux aides
+   évitent d'avoir à s'en souvenir à chaque usage. */
+function pctMoy(p){ return Array.isArray(p)?(p[0]+p[1])/2:p; }
+function pctPose(p){ return Array.isArray(p)?(p[0]>0):(p>0); }
+function pctTxt(p){ return Array.isArray(p)?(p[0]+'–'+p[1]+' %'):(p+' %'); }
 function allTxt(a){ return Array.isArray(a)?(fAll(a[0])+'–'+fAll(a[1])+'/km'):(fAll(a)+'/km'); }
 function allVit(a){ return 1000/allMoy(a); }   // m/s, pour les temps par répétition
 function libBlock(b,vma,lbl){
@@ -5915,7 +5922,7 @@ function libBlockSegs(b,vma){
   const parts=b.segs.map(function(sg){
     let calc='';
     if(sg.all!=null) calc=' <span class="lib-calc">→ '+allTxt(sg.all)+'</span>';
-    else if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';}
+    else if(vma){const spd=vma*pctMoy(sg.pct)/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';}
     return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>';
   });
   const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
@@ -6041,9 +6048,9 @@ function libBuildFromEditor(){
   const blocks=brut.map(function(b){
     if(!b.segs) return b;
     // Un segment sans distance ou sans allure ne veut rien dire : on l'écarte.
-    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && (sg.all!=null || sg.pct>0); })
+    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && (sg.all!=null || pctPose(sg.pct)); })
                    .map(function(sg){
-                     var o={d:sg.d, lbl:(sg.lbl||(sg.all!=null?allTxt(sg.all):(sg.pct+' %')))};
+                     var o={d:sg.d, lbl:(sg.lbl||(sg.all!=null?allTxt(sg.all):pctTxt(sg.pct)))};
                      if(sg.all!=null)o.all=sg.all; else o.pct=sg.pct;
                      return o;
                    });
