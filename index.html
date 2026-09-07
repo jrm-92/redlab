@@ -582,6 +582,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plc-grab{display:flex;align-items:center;gap:10px;margin:8px 0;padding:8px 12px;border-radius:9px;background:rgba(255,107,26,.10);border:1px solid rgba(255,107,26,.35);font-size:12.5px;font-weight:700;color:var(--orange)}
   .plc-grab button{background:none;border:1px solid rgba(255,107,26,.45);color:var(--orange);border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:800;padding:3px 10px;cursor:pointer;margin-left:auto}
   .plw-kmf,.plw-dlf{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--muted2)}
+  /* Les kilomètres réellement posés, en face de la charge visée. */
+  .plw-kms{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--muted2);padding:2px 8px;border-radius:20px;border:1px solid var(--border2)}
+  .plw-kms b{font-size:12.5px}
+  .plw-kms--ok{color:#34D399;border-color:rgba(52,211,153,.32);background:rgba(52,211,153,.08)}
+  .plw-kms--ec{color:#FBBF24;border-color:rgba(251,191,36,.32);background:rgba(251,191,36,.08)}
+  .plw-kms--vide{opacity:.6}
+  .plw-kme{opacity:.75;font-weight:800}
   .plw-kmf input{width:58px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:7px;color:var(--text);font-family:var(--font);font-weight:800;font-size:12.5px;padding:4px 6px;text-align:center}
   .plw-dlf input{width:15px;height:15px;accent-color:var(--muted2);cursor:pointer}
   .plw-man{font-size:10px;font-weight:800;color:var(--orange)}
@@ -3953,7 +3960,7 @@ function loadAthlete(id){
     plan:ath.plan||null,
     analyses:ath.analyses||[],
   });
-  _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+  plOublieAthlete();
   document.getElementById('pseudo-inp').value=ath.pseudo;
   setMode(ath.mode||'vma');
   if(ath.mode==='vma'){
@@ -8000,6 +8007,19 @@ const PL_SKEL={
 let _plD='10k',_plProf='rout',_plW=null,_plCtx='new',_plPicked=false;
 let _plDate1=null,_plDate2=null,_plDi=null,_plDatesSeeded=false,_plPhaseOverride=null,_plOrient=0,_plBase=true,_plRatio=3,_plBaseW=null,_plVolOverride={},_plRecOverride={},_plSessions={};
 let _plTime='',_plVol=null,_plSess=null,_plQual=null,_plInj=false,_plPrep=false;
+/* Changer d'athlète vide l'écran de planification. Le chrono visé, le nom de
+   la course et son lien en font partie : plSeedObjectif ne les remplit que
+   s'ils sont vides, si bien qu'un chrono laissé là restait affiché — et
+   surtout enregistré — sur l'athlète suivant.
+   Une seule fonction pour deux appelants : la liste avait déjà divergé une
+   fois. */
+function plOublieAthlete(){
+  _plPicked=false; _plW=null; _plPhaseOverride=null; _plOrient=0;
+  _plBase=true; _plRatio=3; _plBaseW=null;
+  _plVolOverride={}; _plRecOverride={}; _plSessions={};
+  _plDate1=null; _plDate2=null; _plDi=null; _plDatesSeeded=false;
+  _plTime=''; _plNom=''; _plUrl='';
+}
 /* Nom et lien de la course. L'objectif se renseigne désormais ici : le
    planificateur est l'endroit où le coach pose la course, plus le tableau
    de bord. plToDash les recopie dans S.goal. */
@@ -8911,8 +8931,95 @@ function plToDash(){
    de bord restaure les variables globales du plan juste après l'affichage —
    une commande d'édition y modifierait un état déjà remplacé. L'édition reste
    donc dans l'onglet Plan. */
+/* ══ LES KILOMÈTRES QUE LES SÉANCES REPRÉSENTENT ══
+   La charge hebdomadaire est une intention : le coach écrit 65 km. Ce qu'il
+   a réellement posé au calendrier, c'est autre chose — et rien ne le lui
+   disait. On calcule donc, semaine par semaine, la distance des séances
+   effectivement placées, pour qu'il voie l'écart plutôt que de le découvrir
+   au débriefing.
+
+   Une distance écrite compte telle quelle. Une durée se convertit à l'allure
+   de son propre bloc : 50 min à 65 % de VMA, ce n'est pas la même chose que
+   50 min au seuil. Sans VMA, il n'y a rien à convertir et seules les
+   distances écrites comptent — le total est alors annoncé comme partiel.
+
+   Les récupérations comptent aussi, au trot (zone 1) : cinq fois deux
+   minutes, cela fait près de deux kilomètres qu'on ne peut pas ignorer. Les
+   récupérations en marche, elles, ne sont pas de la course. */
+function plVitesseDe(o,vma){
+  if(o&&o.all!=null&&typeof allVit==='function') return allVit(o.all);
+  if(!vma) return null;
+  var pc=Array.isArray(o&&o.pct)?(o.pct[0]+o.pct[1])/2:(o&&o.pct);
+  return pc?vma*pc/100/3.6:null;      // m/s
+}
+function plVitesseZone(n,vma){
+  if(!vma||typeof wktZonePct!=='function') return null;
+  var z=wktZonePct(n);
+  return z?vma*(z[0]+z[1])/2/100/3.6:null;
+}
+/* Distance d'un passage décrit en texte libre — échauffement, récup. */
+function plMetresTexte(txt,vitesse){
+  if(!txt||txt==='—'||typeof wktParseDur!=='function') return 0;
+  if(/marche|debout|complèt|complet|arrêt|arret/i.test(String(txt))) return 0;
+  var d=wktParseDur(txt);
+  if(!d) return 0;
+  if(d.dur==='distance') return d.val||0;
+  if(d.dur==='time'&&vitesse) return (d.val||0)*vitesse;
+  return 0;
+}
+function plKmSeance(titre,vma,ov){
+  var s=(typeof wktFindSession==='function')?wktFindSession(titre):null;
+  if(!s||s.muscu) return {m:0,partiel:false,connue:!!s};
+  s=plSeanceAjustee(s,ov);
+  var m=0, partiel=false;
+  var vZ1=plVitesseZone(1,vma);
+  (s.blocks||[]).forEach(function(b){
+    var reps=Math.max(1,b.r||1), sets=Math.max(1,b.sets||1), un=0;
+    if(b.segs&&b.segs.length){
+      b.segs.forEach(function(sg){ un+=sg.d||0; });
+    } else if(b.d>0){
+      un=b.d;
+    } else {
+      var sec=b.m>0?b.m*60:(b.sec||0);
+      var v=plVitesseDe(b,vma);
+      if(sec&&v) un=sec*v; else if(sec) partiel=true;
+    }
+    m+=un*reps*sets;
+    // La récup revient entre chaque répétition, pas après la dernière.
+    if(b.rec&&reps>1) m+=plMetresTexte(b.rec,vZ1)*(reps-1)*sets;
+    if(b.recSet&&sets>1) m+=plMetresTexte(b.recSet,vZ1)*(sets-1);
+  });
+  m+=plMetresTexte(s.warm,plVitesseZone(typeof WKT_ZONE_WARM!=='undefined'?WKT_ZONE_WARM:2,vma));
+  m+=plMetresTexte(s.cool,plVitesseZone(typeof WKT_ZONE_COOL!=='undefined'?WKT_ZONE_COOL:1,vma));
+  return {m:m,partiel:partiel,connue:true};
+}
+/* Le total d'un jour, toutes séances posées confondues. */
+function plKmJour(iso,vma){
+  var l=(typeof _plSessions!=='undefined'&&_plSessions&&_plSessions[iso])||[];
+  var m=0, partiel=false;
+  l.forEach(function(sx){
+    var r=plKmSeance(sx.t,vma,sx);
+    m+=r.m; if(r.partiel||!r.connue) partiel=true;
+  });
+  return {m:m,partiel:partiel};
+}
+/* Ce que les séances posées pèsent, en face de la charge visée. Vert quand
+   l'écart tient dans 10 % — la précision de l'exercice ne va pas plus loin —
+   orange au-delà, gris tant que rien n'est posé. */
+function plKmSemHTML(m,vise,partiel){
+  var km=Math.round(m/1000);
+  if(!m) return '<span class="plw-kms plw-kms--vide">Séances <b>—</b></span>';
+  var ec=km-(+vise||0);
+  var ok=(!vise||Math.abs(ec)<=Math.max(3,vise*0.10));
+  var t=(!vise?'':(ec===0?' <span class="plw-kme">pile</span>'
+        :' <span class="plw-kme">'+(ec>0?('+'+ec):('\u2212'+Math.abs(ec)))+'</span>'));
+  return '<span class="plw-kms'+(ok?' plw-kms--ok':' plw-kms--ec')+'"'
+    +' title="Somme des séances posées cette semaine'+(partiel?' — partielle : une séance en minutes n’a pas pu être convertie, faute de VMA':'')+'">'
+    +'Séances <b>'+km+(partiel?'+':'')+'</b> km'+t+'</span>';
+}
 function plCalendarHTML(p,weeks,opts){
   var RO=!!(opts&&opts.ro);
+  var vmaCal=(typeof S!=='undefined'&&S&&S.vma)?S.vma:null;
   if(!_plDate1) return '<div style="font-size:13px;color:var(--muted);padding:6px 0">Renseigne une date de début (ci-dessus) pour afficher le calendrier de la prépa.</div>';
   var pha=function(h,a){h=(h||'#94A3B8').replace('#','');return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';};
   var leg=['base','dev','spe','aff'].map(function(k){return '<span class="plc-lg"><span style="background:'+PL_PHC[k]+'"></span>'+PL_PHL[k]+'</span>';}).join('');
@@ -8927,7 +9034,7 @@ function plCalendarHTML(p,weeks,opts){
     var c=PL_PHC[wk.ph]||'#94A3B8';
     var manual=(_plVolOverride&&_plVolOverride[wk.n]!=null);
     var mono=wk.d0?new Date(wk.d0.getTime()):null;
-    var days='';
+    var days='', kmSem=0, kmPartiel=false;
     for(var d=0;d<7;d++){
       var dt=mono?new Date(mono.getTime()+d*864e5):null;
       var iso=dt?[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-'):'';
@@ -8957,6 +9064,7 @@ function plCalendarHTML(p,weeks,opts){
       }).join('');
       var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
+      if(iso){ var kj=plKmJour(iso,vmaCal); kmSem+=kj.m; if(kj.partiel)kmPartiel=true; }
       days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
     }
     var meta='<div class="plw-meta">'
@@ -8964,6 +9072,7 @@ function plCalendarHTML(p,weeks,opts){
       +'<span class="plc-ph" style="color:'+c+'">'+plPhLabel(wk.ph)+'</span>'
       +(RO?'<span class="plw-kmf">Charge <b style="color:var(--text2)">'+wk.km+'</b> km</span>'
           :'<label class="plw-kmf">Charge <input type="number" min="0" step="1" value="'+wk.km+'" onchange="plVolSet('+wk.n+',this.value)"> km</label>')
+      +plKmSemHTML(kmSem,wk.km,kmPartiel)
       +(wk.ph!=='aff'?(RO?(wk.rec?'<span class="plw-dlf">Décharge</span>':'')
           :'<label class="plw-dlf"><input type="checkbox" '+(wk.rec?'checked':'')+' onchange="plRecToggle('+wk.n+','+(wk.rec?1:0)+')"> Décharge</label>'):'')
       +(manual?'<span class="plw-man">manuel</span>':'')
@@ -9610,7 +9719,7 @@ async function publishAthlete(id,btn){
   // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
   try{
     Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
-    _plPicked=false;_plW=null;_plPhaseOverride=null;_plOrient=0;_plBase=true;_plRatio=3;_plBaseW=null;_plVolOverride={};_plRecOverride={};_plSessions={};_plDate1=null;_plDate2=null;_plDi=null;_plDatesSeeded=false;
+    plOublieAthlete();
     if(typeof renderDashboard==='function')renderDashboard();
   }catch(e){ return fail('rendu du dashboard — '+e.message); }
   var doc;
