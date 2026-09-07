@@ -338,6 +338,11 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lb-add--seg{margin-top:2px;font-size:12px;padding:7px}
   .lb-acts{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
+  /* Durée libre, puis intensité au menu — et l'allure quand c'est elle. */
+  .lc-bord{display:flex;gap:7px;flex-wrap:wrap}
+  .lc-bord input{flex:1 1 130px;min-width:0}
+  .lc-bord select{flex:1 1 190px;min-width:120px}
+  .lc-bord .lc-bord-all{flex:0 0 76px;text-align:center}
   /* Poignée de déplacement. touch-action:none pour que le doigt fasse glisser
      l'étape au lieu de faire défiler la page. */
   .lb-grip{display:inline-flex;align-items:center;justify-content:center;width:24px;height:30px;flex-shrink:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted2);font-size:15px;line-height:1;border-radius:7px;border:1px solid transparent;background:transparent}
@@ -1196,7 +1201,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .lib-step--core .lib-step-v,.lib-step--core .lib-step-v b{color:var(--text)}
 .lib-step--soft .lib-step-k{color:var(--muted2)}
 .lib-step--soft .lib-step-v{color:var(--muted)}
-@media(max-width:860px){.lib-grid{grid-template-columns:1fr}.lib-step{grid-template-columns:78px 1fr}}
+@media(max-width:860px){.lib-grid{grid-template-columns:1fr}
+  .lib-step{grid-template-columns:1fr;gap:3px;align-items:start}
+  .lib-step-k{line-height:1.3}}
 @media(max-width:860px){.goal-bar{gap:8px}}
 .formula{font-size:12.5px;color:var(--text2);margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2px;line-height:1.65;white-space:pre-line;background:rgba(255,255,255,0.035);border-left:2.5px solid rgba(255,107,26,0.6);border-radius:0 8px 8px 0;padding:9px 14px}
 .csm-h{font-size:11.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
@@ -5836,6 +5843,65 @@ function toggleLibCreate(muscu){
   libPreview();
 }
 function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
+
+/* ══ ÉCHAUFFEMENT ET RETOUR AU CALME ══
+   Le coach écrit ce qu'il veut dans la durée — « 20 min + gammes » — et
+   choisit l'intensité à côté, dans un menu, plutôt que de deviner qu'il
+   fallait taper « Z2 » quelque part dans la phrase. Les deux se rejoignent
+   en une seule chaîne : c'est elle que lisent la fiche de l'athlète et
+   l'export montre, et le format de stockage ne change pas.
+
+   Relire une séance existante demande l'opération inverse : séparer la zone
+   ou l'allure du reste du texte, pour la présenter dans le menu. */
+function lcBordSplit(txt,zoneDefaut){
+  var t=(txt==='—'||txt==null)?'':String(txt);
+  var mode='z'+zoneDefaut, all='';
+  var z=t.match(/(?:[·|]\s*)?\bz(?:one)?\s*([1-5])\b/i);
+  if(z){
+    mode='z'+z[1];
+    t=t.slice(0,z.index)+t.slice(z.index+z[0].length);
+  } else {
+    var ecrite=(typeof wktBordAll==='function')?wktBordAll(t):null;
+    // Une fourchette d'allure écrite à la main reste dans le texte : le menu
+    // ne sait proposer qu'une allure ronde, et l'export la lit très bien là.
+    if(ecrite!=null&&!Array.isArray(ecrite)){
+      var m=t.match(/(?:[·|]\s*)?(?:à\s*)?\d{1,2}[:'’]\d{2}\s*(?:\/\s*km)?/);
+      if(m){ mode='all'; all=fAll(ecrite); t=t.slice(0,m.index)+t.slice(m.index+m[0].length); }
+    }
+  }
+  return {t:t.replace(/\s*[·|]\s*$/,'').replace(/\s+/g,' ').trim(), mode:mode, all:all};
+}
+function lcBordField(quoi,titre,valeur,exemple,zoneDefaut){
+  var d=lcBordSplit(valeur,zoneDefaut);
+  var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
+  var opts=(typeof ZONES_VMA!=='undefined'?ZONES_VMA:[]).map(function(z){
+    return '<option value="z'+z.z+'"'+(d.mode==='z'+z.z?' selected':'')+'>Z'+z.z+' · '+z.n+'</option>';
+  }).join('')
+  +'<option value="all"'+(d.mode==='all'?' selected':'')+'>Allure au km…</option>';
+  return '<div class="lc-field"><label>'+titre+'</label>'
+    +'<div class="lc-bord">'
+      +'<input id="lc-'+quoi+'" value="'+esc(d.t)+'" placeholder="'+esc(exemple)+'" oninput="libPreview()">'
+      +'<select id="lc-'+quoi+'-int" onchange="lcBordMode(\''+quoi+'\')">'+opts+'</select>'
+      +'<input id="lc-'+quoi+'-all" class="lc-bord-all" value="'+esc(d.all)+'" placeholder="4:05" maxlength="5"'
+        +(d.mode==='all'?'':' hidden')+' oninput="libPreview()">'
+    +'</div></div>';
+}
+function lcBordMode(quoi){
+  var sel=document.getElementById('lc-'+quoi+'-int');
+  var all=document.getElementById('lc-'+quoi+'-all');
+  if(all) all.hidden=!(sel&&sel.value==='all');
+  libPreview();
+}
+function lcBordVal(quoi){
+  var t=lcVal('lc-'+quoi).trim();
+  if(!t&&!lcVal('lc-'+quoi+'-all').trim()) return '—';
+  var mode=lcVal('lc-'+quoi+'-int');
+  if(mode==='all'){
+    var sec=allSec(lcVal('lc-'+quoi+'-all'));
+    return sec?((t?t+' · ':'')+fAll(sec)+'/km'):(t||'—');
+  }
+  return /^z[1-5]$/.test(mode)?(t+' · '+mode.toUpperCase()):t;
+}
 function libCreateFormHTML(pre){
   pre=pre||{};
   const esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
@@ -5888,10 +5954,10 @@ function libBuildFromEditor(){
     custom:true,
     theme:lcVal('lc-theme')||'vo2',
     title:(lcVal('lc-title').trim()||'Séance perso'),
-    tag:lcVal('lc-tag').trim(),
+    tag:(_libEdit&&_libEdit.tag)||'',
     desc:lcVal('lc-desc').trim(),
-    warm:lcVal('lc-warm').trim()||'—',
-    cool:lcVal('lc-cool').trim()||'—',
+    warm:lcBordVal('warm'),
+    cool:lcBordVal('cool'),
     blocks:JSON.parse(JSON.stringify(blocks))
   };
   const warnings=[];
@@ -5983,7 +6049,7 @@ function libEditOpen(kind,idx,opts){
   if(opts.titre)copie.title=opts.titre;
   _libEdit={src:kind,id:s.id||null,orig:s.title,blocks:copie.blocks||[],
             muscu:!!copie.muscu, exos:(copie.exos&&copie.exos.length)?copie.exos:[muscuExoVide()],
-            nouvelle:!!opts.nouvelle,
+            tag:copie.tag||'', nouvelle:!!opts.nouvelle,
             apres:opts.apres||null,hote:opts.modal?'lib-edit-modal':'lib-create'};
   var html=copie.muscu?libMuscuFormHTML(copie)
           :(copie.raw!=null?libCreateFormHTML(copie):libEditFormHTML(copie));
@@ -6259,11 +6325,10 @@ function libEditFormHTML(s){
     +'<div class="lc-field"><label>Contenu de la séance <span class="lc-hint">glisse ⠿ pour changer l’ordre</span></label><div id="lb-rows">'+rows+'</div>'
       +'<button type="button" class="lb-add" onclick="libBlocAdd()">+ Ajouter un bloc</button></div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" placeholder="20 min · Z2" oninput="libPreview()"></div>'
-      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" placeholder="10 min · Z1" oninput="libPreview()"></div>'
+      +lcBordField('warm','Échauffement',s.warm,'20 min + gammes',WKT_ZONE_WARM)
+      +lcBordField('cool','Retour au calme',s.cool,'10 min',WKT_ZONE_COOL)
     +'</div>'
     +'<div class="lc-field"><label>Description</label><input id="lc-desc" value="'+esc(s.desc)+'" oninput="libPreview()"></div>'
-    +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
     +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
       +(creation?'Enregistrer la séance':((_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':'↓ Enregistrer dans ma banque'))
@@ -6271,8 +6336,7 @@ function libEditFormHTML(s){
     +(creation
        ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].'
         +'<br>Chaque bloc se règle en <b>% VMA</b> ou en <b>min/km</b>, au choix : le fractionné se pense en pourcentage, l’allure marathon en minutes au kilomètre. Écris <b>4:05</b> (ou <b>405</b>) ; remplis le second champ pour une fourchette, laisse-le vide pour une allure ronde.'
-        +'<br>Sur la montre, l’échauffement et le retour au calme durent <b>jusqu’à l’appui sur le bouton tour</b>, avec une allure cible. '
-        +'Écris <b>Z1</b> à <b>Z5</b> (ou « 65 % », « 60-70 % ») pour la fixer ; sans rien, l’échauffement vise la <b>zone 2</b> et le retour au calme la <b>zone 1</b>.</div>'
+        +'<br>Sur la montre, l’échauffement et le retour au calme <b>ne sont pas minutés</b> : l’étape affiche son allure cible et dure jusqu’à l’appui sur le bouton tour. La durée que tu écris sert de repère — elle apparaît dans le nom de l’étape. Les blocs du corps de séance, eux, sont minutés ou mesurés au mètre près.</div>'
        :((_libEdit.src==='l'||_libEdit.nouvelle)
          ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
@@ -6358,7 +6422,6 @@ function libMuscuFormHTML(s){
       +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" placeholder="étirements 5 min" oninput="libPreview()"></div>'
     +'</div>'
     +'<div class="lc-field"><label>Description</label><input id="lc-desc" value="'+esc(s.desc)+'" oninput="libPreview()"></div>'
-    +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
     +'<div id="lc-preview" class="lc-preview"></div>'
     +'<div class="lc-actions"><button class="lc-save" onclick="libSaveSession()">'
       +(creation?'Enregistrer la séance':'Enregistrer les modifications')+'</button>'
@@ -6390,7 +6453,7 @@ function libMuscuBuild(){
     custom:true, muscu:true, theme:'muscu',
     mtype:lcVal('lc-mtype')||'force',
     title:(lcVal('lc-title').trim()||'Séance de musculation'),
-    tag:lcVal('lc-tag').trim(),
+    tag:(_libEdit&&_libEdit.tag)||'',
     desc:lcVal('lc-desc').trim(),
     warm:lcVal('lc-warm').trim()||'—',
     cool:lcVal('lc-cool').trim()||'—',
