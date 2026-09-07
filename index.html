@@ -338,6 +338,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lb-add--seg{margin-top:2px;font-size:12px;padding:7px}
   .lb-acts{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
+  /* Poignée de déplacement. touch-action:none pour que le doigt fasse glisser
+     l'étape au lieu de faire défiler la page. */
+  .lb-grip{display:inline-flex;align-items:center;justify-content:center;width:24px;height:30px;flex-shrink:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted2);font-size:15px;line-height:1;border-radius:7px;border:1px solid transparent;background:transparent}
+  .lb-grip:hover,.lb-grip:focus-visible{background:rgba(255,255,255,.06);border-color:var(--border2);color:var(--text);outline:none}
+  .lb-row--drag{opacity:.6;border-color:var(--orange)}
+  .lb-seg.lb-row--drag{outline:1px solid var(--orange);outline-offset:3px;border-radius:8px}
+  .lb-row--drag .lb-grip{cursor:grabbing;color:var(--orange)}
   .lb-del{width:28px;height:28px;flex-shrink:0;border-radius:7px;border:1px solid rgba(248,113,113,.25);background:transparent;color:#F87171;cursor:pointer;font-size:14px;line-height:1}
   .lb-del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
   .lb-add{margin-top:4px;padding:7px 13px;border:1px dashed var(--border2);background:transparent;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer}
@@ -6017,6 +6024,7 @@ function libBlocRow(b,i){
   var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
   var o=function(v,t){return '<option value="'+v+'"'+(unite===v?' selected':'')+'>'+t+'</option>';};
   return '<div class="lb-row" data-i="'+i+'">'
+    +lbGrip(i,null)
     +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
     +'<span class="lb-x">×</span>'
     +'<input type="number" min="0" step="any" value="'+val+'" oninput="libBlocSet('+i+',\'val\',this.value)" title="valeur" style="'+IS+';width:74px;text-align:center">'
@@ -6043,6 +6051,7 @@ function libBlocRowAlt(b,i,IS){
     var km=(sg.d>=1000);
     var val=km?(sg.d/1000):(sg.d||0);
     return '<div class="lb-seg" data-i="'+i+'" data-j="'+j+'">'
+      +(segs.length>1?lbGrip(i,j):'')
       +'<input type="number" min="0" step="any" value="'+val+'" oninput="libSegSet('+i+','+j+',\'val\',this.value)" title="distance" style="'+IS+';width:74px;text-align:center">'
       +'<select onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
         +'<option value="m"'+(km?'':' selected')+'>m</option><option value="km"'+(km?' selected':'')+'>km</option></select>'
@@ -6054,6 +6063,7 @@ function libBlocRowAlt(b,i,IS){
   }).join('');
   return '<div class="lb-row lb-row--alt" data-i="'+i+'">'
     +'<div class="lb-alt-hd">'
+      +lbGrip(i,null)
       +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
       +'<span class="lb-x">× alternance</span>'
       +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup entre répétitions" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:150px">'
@@ -6066,10 +6076,109 @@ function libBlocRowAlt(b,i,IS){
       +'<button type="button" class="lb-add lb-add--seg" onclick="libSegAdd('+i+')">+ Ajouter une allure</button>'
     +'</div></div>';
 }
-function libBlocsRedraw(){
+function lbRedrawLignes(){
   var box=document.getElementById('lb-rows');
   if(box)box.innerHTML=(_libEdit&&_libEdit.blocks||[]).map(libBlocRow).join('');
+}
+function libBlocsRedraw(){ lbRedrawLignes(); libPreview(); }
+
+/* ══ DÉPLACER UNE ÉTAPE ══
+   Les blocs du corps de séance, et les allures d'un bloc en alternance, se
+   réordonnent en les faisant glisser par leur poignée.
+
+   Deux choix de mise en œuvre méritent d'être dits. On travaille en
+   « pointer events » plutôt qu'en glisser-déposer HTML5, qui reste muet au
+   doigt — or le coach construit ses séances au téléphone. Et les écouteurs
+   vivent sur le document, pas sur la poignée : chaque permutation redessine
+   les lignes, et une poignée détruite en plein geste emporterait sa capture
+   de pointeur avec elle.
+
+   Une poignée est aussi un bouton : au clavier, ↑ et ↓ déplacent l'étape. */
+var _lbDrag=null;
+function lbGrip(i,j){
+  var t=(j==null)?'Déplacer ce bloc (glisser, ou ↑ ↓ au clavier)'
+                 :'Déplacer cette allure (glisser, ou ↑ ↓ au clavier)';
+  var args=i+','+(j==null?'null':j);
+  return '<span class="lb-grip" role="button" tabindex="0" title="'+t+'" aria-label="'+t+'"'
+    +' onpointerdown="lbDragDebut(event,'+args+')" onkeydown="lbDragClavier(event,'+args+')">⠿</span>';
+}
+/* Les lignes entre lesquelles le geste en cours peut déplacer son étape. */
+function lbFratrie(){
+  if(!_lbDrag) return [];
+  var sel=(_lbDrag.j==null)?'#lb-rows > .lb-row'
+                           :'.lb-row[data-i="'+_lbDrag.i+'"] .lb-seg';
+  return [].slice.call(document.querySelectorAll(sel));
+}
+function lbMarque(){
+  document.querySelectorAll('.lb-row--drag').forEach(function(e){e.classList.remove('lb-row--drag');});
+  if(!_lbDrag) return null;
+  var sel=(_lbDrag.j==null)?'.lb-row[data-i="'+_lbDrag.i+'"]'
+                           :'.lb-seg[data-i="'+_lbDrag.i+'"][data-j="'+_lbDrag.j+'"]';
+  var e=document.querySelector(sel);
+  if(e)e.classList.add('lb-row--drag');
+  return e;
+}
+/* Déplace l'étape à la position k. Rend vrai si quelque chose a bougé. */
+function lbDeplace(k){
+  var b, liste, de;
+  if(_lbDrag.j==null){ liste=_libEdit&&_libEdit.blocks; de=_lbDrag.i; }
+  else { b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[_lbDrag.i]; liste=b&&b.segs; de=_lbDrag.j; }
+  if(!liste) return false;
+  k=Math.max(0,Math.min(liste.length-1,k));
+  if(k===de) return false;
+  liste.splice(k,0,liste.splice(de,1)[0]);
+  if(_lbDrag.j==null) _lbDrag.i=k; else _lbDrag.j=k;
+  lbRedrawLignes();
+  return true;
+}
+function lbDragDebut(ev,i,j){
+  if(!_libEdit) return;
+  if(ev.button!=null&&ev.button!==0) return;   // seul le clic gauche déplace
+  ev.preventDefault();
+  _lbDrag={i:i,j:j};
+  document.addEventListener('pointermove',lbDragBouge);
+  document.addEventListener('pointerup',lbDragFin);
+  document.addEventListener('pointercancel',lbDragFin);
+  lbMarque();
+}
+function lbDragBouge(ev){
+  if(!_lbDrag) return;
+  ev.preventDefault();
+  var lignes=lbFratrie();
+  if(!lignes.length) return;
+  // La place visée est celle de la première ligne dont le bas passe sous le
+  // pointeur : au-dessus de tout, la première ; en dessous de tout, la dernière.
+  var k=lignes.length-1;
+  for(var n=0;n<lignes.length;n++){
+    if(ev.clientY<lignes[n].getBoundingClientRect().bottom){ k=n; break; }
+  }
+  if(lbDeplace(k)) lbMarque();
+}
+function lbDragFin(){
+  document.removeEventListener('pointermove',lbDragBouge);
+  document.removeEventListener('pointerup',lbDragFin);
+  document.removeEventListener('pointercancel',lbDragFin);
+  _lbDrag=null;
+  document.querySelectorAll('.lb-row--drag').forEach(function(e){e.classList.remove('lb-row--drag');});
   libPreview();
+}
+function lbDragClavier(ev,i,j){
+  if(ev.key!=='ArrowUp'&&ev.key!=='ArrowDown') return;
+  if(!_libEdit) return;
+  ev.preventDefault();
+  _lbDrag={i:i,j:j};
+  var de=(j==null)?i:j;
+  var bouge=lbDeplace(de+(ev.key==='ArrowUp'?-1:1));
+  var pose=_lbDrag;
+  _lbDrag=null;
+  if(!bouge) return;
+  libPreview();
+  // La poignée vient d'être redessinée : on rend le focus à la nouvelle, pour
+  // pouvoir enchaîner les appuis.
+  var sel=(pose.j==null)?'.lb-row[data-i="'+pose.i+'"] .lb-grip'
+                        :'.lb-seg[data-i="'+pose.i+'"][data-j="'+pose.j+'"] .lb-grip';
+  var g=document.querySelector(sel);
+  if(g)g.focus();
 }
 /* Passage simple → alterné : le bloc devient sa propre première allure, on en
    ajoute une seconde. Les durées ne survivent pas — un segment se mesure en
@@ -6135,7 +6244,7 @@ function libEditFormHTML(s){
       +'<div class="lc-field"><label>Titre</label><input id="lc-title" value="'+esc(s.title)+'" placeholder="10 × 1000 m à allure 10 km" oninput="libPreview()"></div>'
       +'<div class="lc-field"><label>Thème</label><select id="lc-theme" onchange="libPreview()">'+themeOpts+'</select></div>'
     +'</div>'
-    +'<div class="lc-field"><label>Contenu de la séance</label><div id="lb-rows">'+rows+'</div>'
+    +'<div class="lc-field"><label>Contenu de la séance <span class="lc-hint">glisse ⠿ pour changer l’ordre</span></label><div id="lb-rows">'+rows+'</div>'
       +'<button type="button" class="lb-add" onclick="libBlocAdd()">+ Ajouter un bloc</button></div>'
     +'<div class="lc-grid">'
       +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" placeholder="20 min · Z2" oninput="libPreview()"></div>'
