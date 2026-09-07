@@ -5394,12 +5394,56 @@ function wktSpeed(vma,pct){
 }
 function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);}
 
+/* — Échauffement et retour au calme —
+   Ce sont des étapes à part entière, avec une allure cible, et d'une durée
+   LIBRE : l'étape s'arrête quand l'athlète appuie sur le bouton tour. Celui
+   qui a besoin de vingt-cinq minutes pour se mettre en route les prend ; celui
+   à qui douze suffisent passe à la suite. Une durée figée obligeait à
+   attendre la fin du compte à rebours, ou à couper l'échauffement en cours.
+
+   La durée écrite par le coach n'est pas perdue pour autant : elle passe dans
+   le nom de l'étape — « Échauffement 20 min » — où elle reste une intention
+   plutôt qu'une contrainte. */
+const WKT_BORD_PCT=[60,70];   // zone 1 de la table de l'outil : footing très facile
+/* L'allure que le coach a écrite, s'il en a écrit une : un pourcentage en
+   toutes lettres — « 65 % », « 60-70 % » — ou le vocabulaire de l'endurance
+   facile, « EF », « footing ». Sans indication, la zone 1.
+
+   Volontairement, ni « seuil » ni « VMA » ni « AS42 » : « 20 min + 4 lignes à
+   VMA » décrit des lignes en fin d'échauffement, pas un échauffement couru à
+   VMA. Les reconnaître viserait toute l'étape beaucoup trop haut, et la
+   montre réclamerait 100 % pendant vingt minutes. */
+function wktBordPct(txt){
+  if(!txt) return null;
+  const t=String(txt).toLowerCase().replace(/[–—]/g,'-');
+  let m=t.match(/(\d{2,3})\s*-\s*(\d{2,3})\s*%/);
+  if(m) return [+m[1],+m[2]];
+  m=t.match(/(\d{2,3})\s*%/);
+  if(m) return +m[1];
+  m=t.match(/\b(ef|fond\w*|foot\w*)\b/);
+  if(m&&typeof resolvePace==='function'){
+    const r=resolvePace(m[1]);
+    if(r) return r.pct;
+  }
+  return null;
+}
+function wktBordStep(txt,vma,quoi){
+  if(!txt||txt==='—') return null;
+  if(/enchain|enchaîn|sans pause/i.test(String(txt))) return null;
+  const d=wktParseDur(txt);
+  let nom=(quoi==='warmup')?'Échauffement':'Retour au calme';
+  if(d&&d.dur==='time'&&d.val>=60)      nom+=' '+Math.round(d.val/60)+' min';
+  else if(d&&d.dur==='distance')        nom+=' '+fDist(d.val);
+  return {name:wktName(nom), dur:'open', val:null,
+          sp:wktSpeed(vma, wktBordPct(txt)||WKT_BORD_PCT), int:quoi};
+}
+
 /* Séance RedLab → liste d'étapes FIT, boucles imbriquées comprises. */
 function wktSteps(s,vma){
   const st=[];
   const add=o=>{st.push(o);return st.length-1;};
-  const warm=wktParseDur(s.warm);
-  if(warm)add({name:'Échauffement',dur:warm.dur,val:warm.val,int:'warmup'});
+  const warm=wktBordStep(s.warm,vma,'warmup');
+  if(warm)add(warm);
 
   (s.blocks||[]).forEach(function(b){
     const sets=Math.max(1,b.sets||wktLabelReps(b.label));
@@ -5429,8 +5473,8 @@ function wktSteps(s,vma){
     }
   });
 
-  const cool=wktParseDur(s.cool);
-  if(cool)add({name:'Retour au calme',dur:cool.dur,val:cool.val,int:'cooldown'});
+  const cool=wktBordStep(s.cool,vma,'cooldown');
+  if(cool)add(cool);
   return st;
 }
 
