@@ -421,6 +421,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .plw-mk{margin-left:auto;font-size:12px}
   .plw-sess{display:flex;flex-direction:column;gap:3px;margin:5px 0;flex:1}
+  /* Le jour de course. Vert comme son liseré, et sans bouton : on ne déplace
+     pas une date d'inscription. */
+  .plw-obj{display:flex;flex-direction:column;gap:1px;font-size:11px;font-weight:700;line-height:1.35;padding:5px 6px;border-radius:5px;background:rgba(52,211,153,.14);border-left:3px solid #34D399;color:#34D399}
+  .plw-obj b{font-size:11.5px;font-weight:900}
+  .plw-obj span{color:var(--text2);font-weight:700;overflow-wrap:anywhere}
+  .plw-obj .plw-obj-t{color:var(--muted2)}
+  .plw-obj--i{background:rgba(251,191,36,.13);border-left-color:#FBBF24;color:#FBBF24}
   .plw-ch{display:flex;align-items:flex-start;gap:4px;font-size:11px;font-weight:700;color:var(--text2);border-radius:5px;padding:4px 5px;line-height:1.35;cursor:grab;user-select:none;-webkit-user-select:none}
   .plw-ch:active{cursor:grabbing}
   .plw-ch--grab{outline:2px solid var(--orange);outline-offset:1px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
@@ -4362,6 +4369,7 @@ function renderDashPlan(){
      plan à l'onglet Plan. Tout ce dont il a besoin est donc figé ici, tant que
      _plSessions contient encore les séances de CE plan. */
   window._dashCal={col:p.col, race:(_plDate2||null), inter:(_plDi||null),
+    obj:p.id, nom:(_plNom||''), time:(_plTime||''),
     sessions:(function(){var o={};Object.keys(_plSessions||{}).forEach(function(k){
       o[k]=(_plSessions[k]||[]).map(function(x){return {t:x.t,th:x.th,min:x.min,dist:x.dist};});});return o;})(),
     weeks:weeks.map(function(x){return {n:x.n,ph:x.ph,km:x.km,rec:!!x.rec,dates:(x.dates||''),
@@ -4706,9 +4714,10 @@ function dbRealiseCalHTML(rows){
       var manque=(prevues.length&&!faites.length&&dt&&dt<new Date(ajd+'T00:00:00'))
         ? '<div class="db-ch-manque">non réalisée</div>' : '';
 
+      var obj=isRace?plCourseChip('race',d.obj,d.nom,d.time):(isInter?plCourseChip('inter'):'');
       jours+='<div class="plw-day" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'">'
         +'<div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
-        +'<div class="plw-sess">'+chipsP+chipsF+manque+'</div></div>';
+        +'<div class="plw-sess">'+obj+chipsP+chipsF+manque+'</div></div>';
     }
     var meta='<div class="plw-meta">'
       +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+dbEsc(wk.dates)+'</span></span>'
@@ -9017,6 +9026,27 @@ function plKmSemHTML(m,vise,partiel){
     +' title="Somme des séances posées cette semaine'+(partiel?' — partielle : une séance en minutes n’a pas pu être convertie, faute de VMA':'')+'">'
     +'Séances <b>'+km+(partiel?'+':'')+'</b> km'+t+'</span>';
 }
+/* ══ LA CASE DU JOUR DE COURSE ══
+   Elle ne portait qu'un drapeau, dans une case par ailleurs vide : de tout
+   le calendrier, le jour qui justifie la préparation était le seul à ne rien
+   dire. Il porte maintenant l'épreuve — sa distance, son nom, le chrono
+   visé — présentée comme une pastille de séance, parce que c'en est une :
+   c'est LA séance.
+   Les distances officielles plutôt que les arrondis d'affichage : un
+   marathonien lit 42,195. */
+const PL_COURSE_KM={'5k':'5 km','10k':'10 km','semi':'21,097 km','mara':'42,195 km'};
+function plCourseChip(quoi,objId,nom,chrono){
+  var e=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');};
+  if(quoi==='inter')
+    return '<div class="plw-obj plw-obj--i"><b>★ Course prépa</b>'
+      +'<span>test grandeur nature, à courir dans la préparation</span></div>';
+  var o=(typeof PLANIF!=='undefined')?PLANIF.find(function(x){return x.id===objId;}):null;
+  var d=PL_COURSE_KM[objId]||(o&&o.lbl)||'Course';
+  return '<div class="plw-obj"><b>🏁 '+e(d)+'</b>'
+    +(nom?'<span>'+e(nom)+'</span>':'')
+    +(chrono?'<span class="plw-obj-t">objectif '+e(chrono)+'</span>':'')
+    +'</div>';
+}
 function plCalendarHTML(p,weeks,opts){
   var RO=!!(opts&&opts.ro);
   var vmaCal=(typeof S!=='undefined'&&S&&S.vma)?S.vma:null;
@@ -9065,7 +9095,8 @@ function plCalendarHTML(p,weeks,opts){
       var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
       if(iso){ var kj=plKmJour(iso,vmaCal); kmSem+=kj.m; if(kj.partiel)kmPartiel=true; }
-      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
+      var obj=isRace?plCourseChip('race',_plD,_plNom,_plTime):(isInter?plCourseChip('inter'):'');
+      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+obj+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
     }
     var meta='<div class="plw-meta">'
       +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+(wk.dates||'')+'</span></span>'
