@@ -4159,7 +4159,8 @@ function _seancePourEspace(titre,vma){
     if(b.segs){
       // Séance en notation libre : une suite de segments, chacun son allure.
       var parts=b.segs.map(function(sg){
-        var a=vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'';
+        var a=(sg.all!=null)?(' → '+allTxt(sg.all))
+             :(vma?(' → '+fAll(1000/(vma*sg.pct/100/3.6))+'/km'):'');
         return fDist(sg.d)+' '+sg.lbl+a;
       });
       lignes.push({k:(b.label||('Bloc '+(i+1))),
@@ -4170,9 +4171,12 @@ function _seancePourEspace(titre,vma){
     var pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
     var val=b.d?(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m')
               :(b.m?b.m+' min':(b.sec?b.sec+'s':''));
-    var core=(b.r>1?b.r+' × ':'')+val+' @ '+pctTxt+'% VMA';
+    var core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pctTxt+'% VMA'));
     if(b.sets)core=b.sets+' séries de '+core;
-    if(vma){
+    if(b.all!=null){
+      var spdA=allVit(b.all);
+      if(b.d)core+=' · '+fHMS(b.d/spdA)+'/rép';
+    } else if(vma){
       var pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;
       var spd=vma*pc/100/3.6;
       core+=' → '+fAll(1000/spd)+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');
@@ -5227,16 +5231,43 @@ let libTheme='all';
 function libVmaVal(){const e=document.getElementById('lib-vma');let v=e?parseFloat(e.value):null;if(!v||v<6||v>35)v=null;return v;}
 function setLibTheme(t){libTheme=t;renderLibrary();}
 function updLibVma(){renderLibCards();}
+
+/* ══ ALLURE ÉCRITE ══
+   Un bloc porte soit un pourcentage de VMA — b.pct — soit une allure au
+   kilomètre exprimée en secondes — b.all : 245, c'est 4:05/km. Une fourchette
+   s'écrit du plus rapide au plus lent, [240,250] = 4:00 à 4:10/km.
+   Les deux ne se mélangent pas dans un même bloc : quand l'allure est là,
+   elle l'emporte, on ne la recalcule pas depuis la VMA. C'est le sujet même
+   du champ — un fractionné se pense en pourcentage de VMA, une sortie à
+   allure marathon se pense en minutes au kilomètre. */
+function allSec(txt){
+  if(txt==null) return null;
+  var t=String(txt).trim().replace(',','.');
+  if(!t) return null;
+  var m=t.match(/^(\d{1,2})\s*[:'’.\s]\s*(\d{1,2})$/);      // 4:05 · 4'05 · 4.05
+  if(!m) m=t.match(/^(\d{1,2})(\d{2})$/);                    // 405
+  var v=null;
+  if(m){ if(+m[2]>=60) return null; v=+m[1]*60 + +m[2]; }
+  else if(/^\d{1,2}$/.test(t)) v=+t*60;                       // 4 → 4:00
+  if(v==null||v<100||v>1800) return null;                     // 1:40 à 30:00 au km
+  return v;
+}
+function allMoy(a){ return Array.isArray(a)?(a[0]+a[1])/2:a; }
+function allTxt(a){ return Array.isArray(a)?(fAll(a[0])+'–'+fAll(a[1])+'/km'):(fAll(a)+'/km'); }
+function allVit(a){ return 1000/allMoy(a); }   // m/s, pour les temps par répétition
 function libBlock(b,vma,lbl){
   const pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
   let val='';
   if(b.d)val=(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m');
   else if(b.m)val=b.m+' min';
   else if(b.sec)val=b.sec+'s';
-  let core=(b.r>1?b.r+' × ':'')+val+' @ '+pctTxt+'% VMA';
+  let core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pctTxt+'% VMA'));
   if(b.sets)core=b.sets+' séries de '+core;
   let calc='';
-  if(vma){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
+  // Allure écrite : il n'y a rien à convertir, seul le temps par répétition
+  // reste à dire. Pourcentage : on montre ce qu'il vaut pour cet athlète.
+  if(b.all!=null){const spd=allVit(b.all);calc=b.d?fHMS(b.d/spd)+'/rép':'';}
+  else if(vma){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
   const rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   const recTxt=rec.length?' <span class="lib-rec">('+rec.join(' · ')+')</span>':'';
   return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+lbl+'</span><span class="lib-step-v"><b>'+core+'</b>'+(calc?' <span class="lib-calc">→ '+calc+'</span>':'')+recTxt+'</span></div>';
@@ -5392,6 +5423,32 @@ function wktSpeed(vma,pct){
   const v=ms(pct);
   return {lo:Math.round(v*0.985*1000),hi:Math.round(v*1.015*1000)};
 }
+/* Allure au km (secondes) → même fenêtre de vitesse en mm/s. Une fourchette
+   écrite est respectée telle quelle : l'allure la plus lente donne la vitesse
+   basse. Une allure seule s'ouvre de ±1,5 %, comme un pourcentage isolé. */
+function wktSpeedAll(a){
+  if(a==null)return null;
+  if(Array.isArray(a))return {lo:Math.round(1000/Math.max(a[0],a[1])*1000),
+                              hi:Math.round(1000/Math.min(a[0],a[1])*1000)};
+  const v=1000/a;
+  return {lo:Math.round(v*0.985*1000),hi:Math.round(v*1.015*1000)};
+}
+/* La cible d'une étape : l'allure que le coach a écrite s'il en a écrit une,
+   sinon le pourcentage de VMA. */
+function wktCible(vma,o){
+  if(o&&o.all!=null)return wktSpeedAll(o.all);
+  return wktSpeed(vma,o?o.pct:null);
+}
+/* Une séance entièrement écrite en allures se passe de VMA : il n'y a rien à
+   convertir. L'échauffement et le retour au calme restent alors sans cible —
+   sans conséquence, leur durée est libre de toute façon. */
+function wktToutEnAllure(s){
+  const bl=(s&&s.blocks)||[];
+  if(!bl.length)return false;
+  return bl.every(function(b){
+    return b.segs? b.segs.every(function(sg){return sg.all!=null;}) : b.all!=null;
+  });
+}
 function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);}
 
 /* — Échauffement et retour au calme —
@@ -5441,6 +5498,22 @@ function wktBordPct(txt){
   }
   return null;
 }
+/* Une allure écrite dans le champ — « 20 min à 5:30/km », « 5:20-5:40/km ».
+   On exige soit le marqueur /km, soit une valeur mm:ss dans la fourchette
+   plausible d'une allure de course : « 20 min + 4 lignes » ne doit rien
+   déclencher. */
+function wktBordAll(txt){
+  if(!txt)return null;
+  const t=String(txt).replace(/[–—]/g,'-');
+  let m=t.match(/(\d{1,2})[:'’](\d{2})\s*-\s*(\d{1,2})[:'’](\d{2})\s*(?:\/\s*km)?/);
+  if(m){
+    const a=allSec(m[1]+':'+m[2]), b=allSec(m[3]+':'+m[4]);
+    if(a!=null&&b!=null)return [Math.min(a,b),Math.max(a,b)];
+  }
+  m=t.match(/(\d{1,2})[:'’](\d{2})\s*\/\s*km/);
+  if(!m) m=t.match(/\b([2-9]|1[0-2])[:'’](\d{2})\b/);
+  return m?allSec(m[1]+':'+m[2]):null;
+}
 function wktBordStep(txt,vma,quoi){
   if(!txt||txt==='—') return null;
   if(/enchain|enchaîn|sans pause/i.test(String(txt))) return null;
@@ -5448,6 +5521,9 @@ function wktBordStep(txt,vma,quoi){
   let nom=(quoi==='warmup')?'Échauffement':'Retour au calme';
   if(d&&d.dur==='time'&&d.val>=60)      nom+=' '+Math.round(d.val/60)+' min';
   else if(d&&d.dur==='distance')        nom+=' '+fDist(d.val);
+  const ecrite=wktBordAll(txt);
+  if(ecrite!=null)
+    return {name:wktName(nom), dur:'open', val:null, sp:wktSpeedAll(ecrite), int:quoi};
   const zoneParDefaut=(quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL;
   return {name:wktName(nom), dur:'open', val:null,
           sp:wktSpeed(vma, wktBordPct(txt)||wktZonePct(zoneParDefaut)), int:quoi};
@@ -5467,7 +5543,7 @@ function wktSteps(s,vma){
 
     if(b.segs&&b.segs.length){
       b.segs.forEach(function(sg){
-        add({name:wktName(sg.lbl||fDist(sg.d)),dur:'distance',val:sg.d,sp:wktSpeed(vma,sg.pct),int:'interval'});
+        add({name:wktName(sg.lbl||fDist(sg.d)),dur:'distance',val:sg.d,sp:wktCible(vma,sg),int:'interval'});
       });
     } else {
       let dur='open',val=null;
@@ -5475,7 +5551,7 @@ function wktSteps(s,vma){
       else if(b.sec){dur='time';val=b.sec;}
       else if(b.m){dur='time';val=b.m*60;}
       add({name:wktName(b.label||b.lbl||(b.d?fDist(b.d):'Effort')),dur:dur,val:val,
-           sp:wktSpeed(vma,b.pct),int:(b.m&&b.m>=20)?'active':'interval'});
+           sp:wktCible(vma,b),int:(b.m&&b.m>=20)?'active':'interval'});
     }
     const rc=wktParseDur(b.rec);
     if(rc)add({name:'Récup',dur:rc.dur,val:rc.val,int:'recovery'});
@@ -5612,26 +5688,31 @@ function wktDl(bytes,name,mime){
    préfixées de leur date pour que l'athlète sache laquelle faire quand. */
 function wktExportPlan(){
   const vm=wktVma();
-  if(!vm){alert('Charge un athlète (ou renseigne une VMA dans la bibliothèque) : c’est elle qui cale les allures cibles.');return;}
-  const files=[], absents=[], muscles=[];
+  const files=[], absents=[], muscles=[], sansVma=[];
   Object.keys(_plSessions).sort().forEach(function(iso){
     (_plSessions[iso]||[]).forEach(function(sx,i){
       const s=wktFindSession(sx.t);
       if(!s){absents.push(sx.t);return;}
       if(s.muscu){muscles.push(sx.t);return;}   // le format .fit ne décrit que de la course
+      // Sans VMA, seules les séances écrites de bout en bout en allures
+      // peuvent être calées : les autres attendent.
+      if(!vm&&!wktToutEnAllure(s)){sansVma.push(sx.t);return;}
       const jm=iso.slice(8,10)+'/'+iso.slice(5,7);
       const dated=Object.assign({},s,{title:jm+' · '+s.title});
       files.push({name:iso.slice(5).replace('-','')+(i?'-'+(i+1):'')+'-'+wktSlug(s.title)+'.fit',
-                  data:wktToFit(dated,vm.v)});
+                  data:wktToFit(dated,vm?vm.v:null)});
     });
   });
-  if(!files.length){alert(muscles.length
-    ? 'Les seules séances du calendrier sont des séances de musculation : le format montre ne sait pas les décrire.'
-    : 'Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.');return;}
-  const who=vm.who?wktSlug(vm.who):'athlete';
+  if(!files.length){alert(sansVma.length
+    ? 'Charge un athlète (ou renseigne une VMA dans la bibliothèque) : c’est elle qui cale les allures cibles.'
+    : (muscles.length
+      ? 'Les seules séances du calendrier sont des séances de musculation : le format montre ne sait pas les décrire.'
+      : 'Aucune séance placée au calendrier. Ajoute-les avec « + séance » sur un jour.'));return;}
+  const who=(vm&&vm.who)?wktSlug(vm.who):'athlete';
   wktDl(zipBuild(files),'redlab-'+who+'-seances.zip','application/zip');
   if(absents.length)alert('Séances introuvables dans la bibliothèque, non exportées :\n· '+absents.join('\n· '));
   if(muscles.length)alert('Séances de musculation non exportées — le format montre ne décrit que de la course :\n· '+muscles.join('\n· '));
+  if(sansVma.length)alert('Séances non exportées, faute de VMA pour caler leurs pourcentages :\n· '+sansVma.join('\n· '));
 }
 
 function wktSlug(t){
@@ -5644,9 +5725,9 @@ function wktExport(kind,idx){
   const s=(kind==='c')?CUSTOM_SESSIONS[idx]:LIB_SESSIONS[idx];
   if(!s)return;
   const vm=wktVma();
-  if(!vm){alert('Charge un athlète (ou renseigne une VMA en haut de la bibliothèque) : c’est elle qui cale les allures cibles de la séance.');return;}
-  const nom=(vm.who?wktSlug(vm.who)+'-':'')+wktSlug(s.title)+'.fit';
-  wktDl(wktToFit(s,vm.v),nom);
+  if(!vm&&!wktToutEnAllure(s)){alert('Charge un athlète (ou renseigne une VMA en haut de la bibliothèque) : c’est elle qui cale les allures cibles de la séance.');return;}
+  const nom=((vm&&vm.who)?wktSlug(vm.who)+'-':'')+wktSlug(s.title)+'.fit';
+  wktDl(wktToFit(s,vm?vm.v:null),nom);
 }
 
 /* ══ SÉANCES PERSO — parseur de notation libre ══ */
@@ -5701,7 +5782,12 @@ function libBlockSegs(b,vma){
   // les répétitions — il doit s'afficher. Les blocs venus de la notation libre
   // gardent leur rendu d'origine.
   const multi=b.segs.length>1 && !b.alt;
-  const parts=b.segs.map(function(sg){ let calc=''; if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';} return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>'; });
+  const parts=b.segs.map(function(sg){
+    let calc='';
+    if(sg.all!=null) calc=' <span class="lib-calc">→ '+allTxt(sg.all)+'</span>';
+    else if(vma){const spd=vma*sg.pct/100/3.6; calc=' <span class="lib-calc">→ '+fAll(1000/spd)+'/km</span>';}
+    return '<span class="lib-seg"><b>'+fDist(sg.d)+' '+sg.lbl+'</b>'+calc+'</span>';
+  });
   const body=((b.r>1&&!multi)?'<b>'+b.r+' × </b>':'')+parts.join('<span class="lib-seg-plus">+</span>');
   const rec=b.rec?' <span class="lib-rec">(récup '+b.rec+')</span>':'';
   const key=multi?b.label:((b.r>1)?'Répétitions':b.label);
@@ -5766,13 +5852,17 @@ function libBuildFromEditor(){
   const blocks=brut.map(function(b){
     if(!b.segs) return b;
     // Un segment sans distance ou sans allure ne veut rien dire : on l'écarte.
-    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && sg.pct>0; })
-                   .map(function(sg){ return {d:sg.d, pct:sg.pct, lbl:(sg.lbl||(sg.pct+' %'))}; });
+    var segs=b.segs.filter(function(sg){ return sg && sg.d>0 && (sg.all!=null || sg.pct>0); })
+                   .map(function(sg){
+                     var o={d:sg.d, lbl:(sg.lbl||(sg.all!=null?allTxt(sg.all):(sg.pct+' %')))};
+                     if(sg.all!=null)o.all=sg.all; else o.pct=sg.pct;
+                     return o;
+                   });
     return segs.length?Object.assign({},b,{segs:segs}):null;
   }).filter(function(b){
     if(!b) return false;
     if(b.segs) return b.segs.length>0;
-    return (b.d>0||b.m>0||b.sec>0) && (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0);
+    return (b.d>0||b.m>0||b.sec>0) && (b.all!=null || (Array.isArray(b.pct)?b.pct[0]>0:b.pct>0));
   });
   const s={
     id:(_libEdit&&!_libEdit.nouvelle&&_libEdit.src==='c'&&_libEdit.id)?_libEdit.id:('c'+Date.now()),
@@ -5787,7 +5877,7 @@ function libBuildFromEditor(){
   };
   const warnings=[];
   if(blocks.length<brut.length)
-    warnings.push('bloc incomplet ignoré (valeur ou % manquant)');
+    warnings.push('bloc incomplet ignoré (durée, distance ou intensité manquante)');
   return {s:s,warnings:warnings,ok:blocks.length>0};
 }
 /* Le formulaire actif décide de la fonction de construction. */
@@ -5898,14 +5988,33 @@ function libEditCancel(){
   var box=document.getElementById('lib-create'); if(box){box.style.display='none';box.innerHTML='';}
 }
 
-/* Une ligne de bloc : répétitions × valeur (m, km ou min) à un pourcentage de
-   VMA — un seul, ou une fourchette — avec sa récupération. */
+/* Les deux champs d'intensité d'une ligne. Selon le sélecteur qui les suit,
+   ce sont deux pourcentages de VMA ou deux allures au kilomètre — l'un ou
+   l'autre, jamais les deux : c'est le choix du coach pour ce bloc-là.
+   Une seule valeur = une allure ronde ; les deux = une fourchette. */
+function libIntensiteHTML(o,IS,appel,large){
+  var all=(o.all!=null);
+  var v0=all?fAll(Array.isArray(o.all)?o.all[0]:o.all):(Array.isArray(o.pct)?o.pct[0]:(o.pct||70));
+  var v1=all?(Array.isArray(o.all)?fAll(o.all[1]):''):(Array.isArray(o.pct)?o.pct[1]:'');
+  var num=all
+    ? 'type="text" inputmode="numeric" maxlength="5"'
+    : 'type="number" min="30" max="130" step="1"';
+  var w0=all?'62px':'62px', w1=large?'66px':'62px';
+  return '<input '+num+' value="'+v0+'" oninput="'+appel+'\'v0\',this.value)" title="'+(all?'allure au km (4:05)':'% VMA')+'" style="'+IS+';width:'+w0+';text-align:center">'
+    +'<span class="lb-at">–</span>'
+    +'<input '+num+' value="'+v1+'" placeholder="'+(all?'à':'max')+'" oninput="'+appel+'\'v1\',this.value)" title="'+(all?'allure la plus lente (facultatif)':'% VMA haut (facultatif)')+'" style="'+IS+';width:'+w1+';text-align:center">'
+    +'<select onchange="'+appel+'\'mode\',this.value)" title="unité d’intensité" style="'+IS+';width:88px">'
+      +'<option value="pct"'+(all?'':' selected')+'>% VMA</option>'
+      +'<option value="all"'+(all?' selected':'')+'>min/km</option></select>';
+}
+
+/* Une ligne de bloc : répétitions × valeur (m, km ou min) à une intensité —
+   pourcentage de VMA ou allure — avec sa récupération. */
 function libBlocRow(b,i){
   var IS='background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 8px;outline:none';
   if(b.segs) return libBlocRowAlt(b,i,IS);
   var unite=b.m?'min':(b.sec?'sec':(b.d>=1000?'km':'m'));
   var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
-  var p0=Array.isArray(b.pct)?b.pct[0]:(b.pct||70), p1=Array.isArray(b.pct)?b.pct[1]:'';
   var o=function(v,t){return '<option value="'+v+'"'+(unite===v?' selected':'')+'>'+t+'</option>';};
   return '<div class="lb-row" data-i="'+i+'">'
     +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
@@ -5913,10 +6022,7 @@ function libBlocRow(b,i){
     +'<input type="number" min="0" step="any" value="'+val+'" oninput="libBlocSet('+i+',\'val\',this.value)" title="valeur" style="'+IS+';width:74px;text-align:center">'
     +'<select onchange="libBlocSet('+i+',\'unite\',this.value)" title="unité" style="'+IS+';width:72px">'+o('m','m')+o('km','km')+o('min','min')+o('sec','sec')+'</select>'
     +'<span class="lb-at">à</span>'
-    +'<input type="number" min="30" max="130" step="1" value="'+p0+'" oninput="libBlocSet('+i+',\'p0\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
-    +'<span class="lb-at">–</span>'
-    +'<input type="number" min="30" max="130" step="1" value="'+p1+'" placeholder="max" oninput="libBlocSet('+i+',\'p1\',this.value)" title="% VMA haut (facultatif)" style="'+IS+';width:66px;text-align:center">'
-    +'<span class="lb-at">% VMA</span>'
+    +libIntensiteHTML(b,IS,'libBlocInt('+i+',',true)
     +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:110px">'
     +'<span class="lb-acts">'
       +'<button type="button" class="lb-alt" onclick="libBlocEnAlt('+i+')" title="Transformer en alternance : plusieurs allures dans la même répétition">⇄ Alterner</button>'
@@ -5941,8 +6047,7 @@ function libBlocRowAlt(b,i,IS){
       +'<select onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
         +'<option value="m"'+(km?'':' selected')+'>m</option><option value="km"'+(km?' selected':'')+'>km</option></select>'
       +'<span class="lb-at">à</span>'
-      +'<input type="number" min="30" max="130" step="1" value="'+(sg.pct||80)+'" oninput="libSegSet('+i+','+j+',\'pct\',this.value)" title="% VMA" style="'+IS+';width:62px;text-align:center">'
-      +'<span class="lb-at">%</span>'
+      +libIntensiteHTML(sg,IS,'libSegInt('+i+','+j+',',false)
       +'<input value="'+String(sg.lbl||'').replace(/"/g,'&quot;')+'" placeholder="libellé (ex : AS42)" oninput="libSegSet('+i+','+j+',\'lbl\',this.value)" style="'+IS+';flex:1;min-width:120px">'
       +(segs.length>1?'<button type="button" class="lb-del" onclick="libSegDel('+i+','+j+')" title="Retirer ce segment">✕</button>':'')
       +'</div>';
@@ -5972,21 +6077,34 @@ function libBlocsRedraw(){
 function libBlocEnAlt(i){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
   var d=b.d||1000;
-  var p=Array.isArray(b.pct)?b.pct[0]:(b.pct||80);
+  var s1,s2;
+  if(b.all!=null){
+    // La seconde allure part huit secondes au km plus vite : de quoi voir
+    // tout de suite qu'il s'agit de deux allures différentes.
+    var a=Array.isArray(b.all)?b.all[0]:b.all;
+    s1={d:d,all:a,lbl:''}; s2={d:d,all:Math.max(100,a-8),lbl:''};
+  } else {
+    var p=Array.isArray(b.pct)?b.pct[0]:(b.pct||80);
+    s1={d:d,pct:p,lbl:''}; s2={d:d,pct:Math.min(130,p+8),lbl:''};
+  }
   _libEdit.blocks[i]={r:b.r||1, rec:b.rec||'', label:b.label||'Alternance', alt:true,
-    segs:[{d:d,pct:p,lbl:''},{d:d,pct:Math.min(130,p+8),lbl:''}]};
+    segs:[s1,s2]};
   libBlocsRedraw();
 }
 function libBlocEnSimple(i){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
   var sg=b.segs[0]||{};
-  _libEdit.blocks[i]={r:b.r||1, d:sg.d||1000, pct:sg.pct||80, rec:b.rec||''};
+  var simple={r:b.r||1, d:sg.d||1000, rec:b.rec||''};
+  if(sg.all!=null)simple.all=sg.all; else simple.pct=sg.pct||80;
+  _libEdit.blocks[i]=simple;
   libBlocsRedraw();
 }
 function libSegAdd(i){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
   var der=b.segs[b.segs.length-1]||{d:1000,pct:80};
-  b.segs.push({d:der.d,pct:der.pct,lbl:''});
+  var neuf={d:der.d,lbl:''};
+  if(der.all!=null)neuf.all=der.all; else neuf.pct=der.pct||80;
+  b.segs.push(neuf);
   libBlocsRedraw();
 }
 function libSegDel(i,j){
@@ -5999,7 +6117,6 @@ function libSegSet(i,j,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
   var sg=b.segs[j]; if(!sg)return;
   if(champ==='lbl'){ sg.lbl=String(v||'').slice(0,24); }
-  else if(champ==='pct'){ sg.pct=Math.max(30,Math.min(130,Math.round(+v||0))); }
   else {
     var row=document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]');
     var val=+((row&&row.querySelector('input').value)||0);
@@ -6032,6 +6149,7 @@ function libEditFormHTML(s){
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
     +(creation
        ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].'
+        +'<br>Chaque bloc se règle en <b>% VMA</b> ou en <b>min/km</b>, au choix : le fractionné se pense en pourcentage, l’allure marathon en minutes au kilomètre. Écris <b>4:05</b> (ou <b>405</b>) ; remplis le second champ pour une fourchette, laisse-le vide pour une allure ronde.'
         +'<br>Sur la montre, l’échauffement et le retour au calme durent <b>jusqu’à l’appui sur le bouton tour</b>, avec une allure cible. '
         +'Écris <b>Z1</b> à <b>Z5</b> (ou « 65 % », « 60-70 % ») pour la fixer ; sans rien, l’échauffement vise la <b>zone 2</b> et le retour au calme la <b>zone 1</b>.</div>'
        :((_libEdit.src==='l'||_libEdit.nouvelle)
@@ -6173,6 +6291,57 @@ function libMuscuBody(s){
   }).join('');
 }
 
+/* Bascule % VMA ↔ allure sur un bloc ou un segment. La valeur ne se perd
+   pas : on la convertit avec la VMA affichée quand il y en a une, pour que le
+   coach reparte de l'équivalent de ce qu'il venait d'écrire. Sans VMA, une
+   valeur de départ raisonnable — il la corrigera, c'est le champ qu'il
+   regarde. */
+function libIntMode(o,mode){
+  var vma=libVmaVal();
+  if(mode==='all'){
+    if(o.all!=null)return;
+    var pc=Array.isArray(o.pct)?o.pct[0]:(o.pct||80);
+    o.all=vma?Math.round(1000/(vma*pc/100/3.6)):270;
+    delete o.pct;
+  } else {
+    if(o.all==null)return;
+    var sec=Array.isArray(o.all)?o.all[0]:o.all;
+    o.pct=(vma&&sec)?Math.max(30,Math.min(130,Math.round(3600/sec/vma*100))):80;
+    delete o.all;
+  }
+}
+/* Les deux champs d'intensité d'une même ligne se lisent ensemble : le second,
+   laissé vide, veut dire « une allure ronde » et non « une fourchette ». Une
+   saisie encore incomplète — « 4: » — ne touche à rien : on attend la suite. */
+function libIntLit(o,ligne){
+  if(!ligne)return;
+  var ins=ligne.querySelectorAll('input');
+  // Une ligne de bloc commence par « répétitions × valeur », un segment par sa
+  // seule distance : les deux champs d'intensité ne tombent pas au même rang.
+  var k=ligne.classList.contains('lb-seg')?1:2;
+  var t0=(ins[k]&&ins[k].value)||'', t1=(ins[k+1]&&ins[k+1].value)||'';
+  if(o.all!=null){
+    var s0=allSec(t0), s1=t1.trim()?allSec(t1):null;
+    if(s0==null)return;
+    o.all=(s1!=null&&s1!==s0)?[Math.min(s0,s1),Math.max(s0,s1)]:s0;
+  } else {
+    var a=+(t0||0), z=t1.trim()!==''?+t1:null;
+    o.pct=(z!=null&&z>a)?[a,z]:a;
+  }
+}
+function libBlocInt(i,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
+  if(champ==='mode'){ libIntMode(b,v); return libBlocsRedraw(); }
+  libIntLit(b,document.querySelector('.lb-row[data-i="'+i+'"]'));
+  libPreview();
+}
+function libSegInt(i,j,champ,v){
+  var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b||!b.segs)return;
+  var sg=b.segs[j]; if(!sg)return;
+  if(champ==='mode'){ libIntMode(sg,v); return libBlocsRedraw(); }
+  libIntLit(sg,document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]'));
+  libPreview();
+}
 function libBlocSet(i,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
   if(champ==='r'){ b.r=Math.max(1,Math.round(+v||1)); }
@@ -6184,12 +6353,6 @@ function libBlocSet(i,champ,v){
     delete b.d; delete b.m; delete b.sec;
     if(u==='km')b.d=Math.round(val*1000); else if(u==='m')b.d=Math.round(val);
     else if(u==='min')b.m=val; else b.sec=Math.round(val);
-  }
-  else if(champ==='p0'||champ==='p1'){
-    var row2=document.querySelector('.lb-row[data-i="'+i+'"]');
-    var ins=row2?row2.querySelectorAll('input'):[];
-    var a=+((ins[2]&&ins[2].value)||0), z=(ins[3]&&ins[3].value!=='')?+ins[3].value:null;
-    b.pct=(z!=null&&z>a)?[a,z]:a;
   }
   libPreview();
 }
@@ -6305,12 +6468,12 @@ function renderExtrapol(){
 /* ══ EXPORT SÉANCES → JSON (schéma générique, réutilisable API Nolio) ══ */
 function libBlockText(b){
   if(b.segs){
-    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+(Array.isArray(sg.pct)?sg.pct.join('-'):sg.pct)+'% VMA)';}).join(' + ');
+    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+(sg.all!=null?allTxt(sg.all):((Array.isArray(sg.pct)?sg.pct.join('-'):sg.pct)+'% VMA'))+')';}).join(' + ');
     return (b.label?b.label+' : ':'')+(b.r>1?b.r+' × ':'')+segs+(b.rec?' — récup '+b.rec:'');
   }
   var val=b.d?(b.d>=1000?(String(b.d/1000).replace('.',','))+' km':b.d+' m'):(b.m?b.m+' min':(b.sec?b.sec+'s':''));
   var pct=Array.isArray(b.pct)?b.pct.join('-'):b.pct;
-  var core=(b.r>1?b.r+' × ':'')+val+' @ '+pct+'% VMA';
+  var core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pct+'% VMA'));
   if(b.sets)core=b.sets+' séries de '+core;
   var rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   return core+(rec.length?' ('+rec.join(' · ')+')':'');
