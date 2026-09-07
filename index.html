@@ -5478,8 +5478,19 @@ function wktToutEnAllure(s){
 function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);}
 
 /* — Échauffement et retour au calme —
-   Ce sont des étapes à part entière, avec une allure cible, et d'une durée
-   LIBRE : l'étape s'arrête quand l'athlète appuie sur le bouton tour. Celui
+   Ce sont des étapes à part entière, avec une allure cible et un MINUTEUR :
+   la durée écrite par le coach décompte sur la montre. Un appui sur le bouton
+   tour passe à l'étape suivante avant la fin — celui qui est chaud au bout de
+   douze minutes n'en subit pas vingt.
+
+   La réciproque n'existe pas dans le format : une étape minutée s'achève
+   d'elle-même à zéro, la montre enchaîne. Pour laisser l'athlète s'échauffer
+   plus longtemps que prévu, il faudrait une étape sans durée — ce que fait
+   RedLab quand le champ ne contient aucune durée lisible (« reste en
+   endurance ») : l'étape attend alors le bouton tour, indéfiniment.
+
+   (Ancien fonctionnement, conservé pour les champs sans durée : durée
+   LIBRE — l'étape s'arrête quand l'athlète appuie sur le bouton tour. Celui
    qui a besoin de vingt-cinq minutes pour se mettre en route les prend ; celui
    à qui douze suffisent passe à la suite. Une durée figée obligeait à
    attendre la fin du compte à rebours, ou à couper l'échauffement en cours.
@@ -5545,14 +5556,23 @@ function wktBordStep(txt,vma,quoi){
   if(/enchain|enchaîn|sans pause/i.test(String(txt))) return null;
   const d=wktParseDur(txt);
   let nom=(quoi==='warmup')?'Échauffement':'Retour au calme';
-  if(d&&d.dur==='time'&&d.val>=60)      nom+=' '+Math.round(d.val/60)+' min';
-  else if(d&&d.dur==='distance')        nom+=' '+fDist(d.val);
+  // La durée lue devient le minuteur de l'étape. Sans durée lisible, l'étape
+  // reste ouverte : elle attend le bouton tour.
+  let dur='open', val=null;
+  if(d&&d.dur==='time'&&d.val>0){      dur='time';     val=d.val;
+    // Le nom porte la durée exacte : arrondir 1'30 à « 2 min » ferait mentir
+    // l'étiquette pendant que le minuteur, lui, décompte bien 90 secondes.
+    if(d.val<60)            nom+=' '+d.val+' s';
+    else if(d.val%60===0)   nom+=' '+(d.val/60)+' min';
+    else                    nom+=' '+fHMS(d.val);
+  } else if(d&&d.dur==='distance'&&d.val>0){ dur='distance'; val=d.val;
+    nom+=' '+fDist(d.val);
+  }
   const ecrite=wktBordAll(txt);
-  if(ecrite!=null)
-    return {name:wktName(nom), dur:'open', val:null, sp:wktSpeedAll(ecrite), int:quoi};
-  const zoneParDefaut=(quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL;
-  return {name:wktName(nom), dur:'open', val:null,
-          sp:wktSpeed(vma, wktBordPct(txt)||wktZonePct(zoneParDefaut)), int:quoi};
+  const sp=(ecrite!=null)
+    ? wktSpeedAll(ecrite)
+    : wktSpeed(vma, wktBordPct(txt)||wktZonePct((quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL));
+  return {name:wktName(nom), dur:dur, val:val, sp:sp, int:quoi};
 }
 
 /* Séance RedLab → liste d'étapes FIT, boucles imbriquées comprises. */
@@ -6336,7 +6356,7 @@ function libEditFormHTML(s){
     +(creation
        ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].'
         +'<br>Chaque bloc se règle en <b>% VMA</b> ou en <b>min/km</b>, au choix : le fractionné se pense en pourcentage, l’allure marathon en minutes au kilomètre. Écris <b>4:05</b> (ou <b>405</b>) ; remplis le second champ pour une fourchette, laisse-le vide pour une allure ronde.'
-        +'<br>Sur la montre, l’échauffement et le retour au calme <b>ne sont pas minutés</b> : l’étape affiche son allure cible et dure jusqu’à l’appui sur le bouton tour. La durée que tu écris sert de repère — elle apparaît dans le nom de l’étape. Les blocs du corps de séance, eux, sont minutés ou mesurés au mètre près.</div>'
+        +'<br>Sur la montre, l’échauffement et le retour au calme sont <b>minutés</b> à la durée que tu écris, à l’allure de la zone choisie. Un appui sur le <b>bouton tour</b> passe à la suite avant la fin. Laisse la durée vide (ou écris « reste en endurance ») pour une étape <b>sans minuteur</b>, qui attend le bouton tour aussi longtemps qu’il le faut.</div>'
        :((_libEdit.src==='l'||_libEdit.nouvelle)
          ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
