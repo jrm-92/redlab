@@ -1,6 +1,14 @@
 -- ══════════════════════════════════════════════════════════════════════════
---  RedLab × Polar AccessLink — schéma
---  À exécuter dans l'éditeur SQL de Supabase.
+--  RedLab — le schéma complet, en une seule fois
+--
+--  À COLLER TEL QUEL dans Supabase → SQL Editor → New query → Run.
+--
+--  Sans danger si tu l'as déjà passé : chaque table est créée « if not
+--  exists » et chaque règle d'accès est remplacée par sa version à jour.
+--  Rien n'est effacé, aucune donnée existante n'est touchée.
+--
+--  La dernière requête du fichier affiche un tableau de contrôle : c'est lui
+--  qu'il faut lire pour savoir si tout est en place.
 -- ══════════════════════════════════════════════════════════════════════════
 
 -- Demandes d'autorisation en cours. Le « state » OAuth est un jeton aléatoire
@@ -155,3 +163,31 @@ drop policy if exists "athlete efface ses charges" on public.muscu_charges;
 create policy "athlete efface ses charges" on public.muscu_charges
   for delete to authenticated
   using (lower(email) = lower(auth.jwt() ->> 'email'));
+
+
+-- ══════════════════════════════════════════════════════════════════════════
+--  CONTRÔLE — ce qui doit s'afficher après le Run
+--
+--  Cinq lignes, rls_actif = true partout, et ces nombres de règles :
+--
+--    muscu_charges     4   lire, noter, corriger, effacer ses charges
+--    polar_exercises   2   le coach voit et supprime les séances
+--    polar_links       2   le coach voit et supprime ses liens
+--    polar_pending     2   le coach ouvre et voit ses demandes
+--    polar_tokens      0   ← VOULU, ce n'est pas un oubli. Aucune règle =
+--                          aucun accès depuis le navigateur. Les jetons Polar
+--                          ne sont lus que par les Edge Functions, côté
+--                          serveur. Une règle ici serait une faille.
+-- ══════════════════════════════════════════════════════════════════════════
+select
+  c.relname        as table_name,
+  c.relrowsecurity as rls_actif,
+  (select count(*) from pg_policies p
+    where p.schemaname = 'public' and p.tablename = c.relname) as regles
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public'
+  and c.relkind = 'r'
+  and c.relname in ('polar_pending','polar_links','polar_tokens',
+                    'polar_exercises','muscu_charges')
+order by c.relname;
