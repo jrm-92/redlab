@@ -5404,10 +5404,20 @@ function wktName(s){return String(s||'').replace(/\s+/g,' ').trim().slice(0,23);
    La durée écrite par le coach n'est pas perdue pour autant : elle passe dans
    le nom de l'étape — « Échauffement 20 min » — où elle reste une intention
    plutôt qu'une contrainte. */
-const WKT_BORD_PCT=[60,70];   // zone 1 de la table de l'outil : footing très facile
-/* L'allure que le coach a écrite, s'il en a écrit une : un pourcentage en
-   toutes lettres — « 65 % », « 60-70 % » — ou le vocabulaire de l'endurance
-   facile, « EF », « footing ». Sans indication, la zone 1.
+/* Par défaut, l'échauffement se court en endurance fondamentale — zone 2 —
+   et le retour au calme en récupération — zone 1. Les bornes ne sont pas
+   recopiées ici : elles sont lues dans ZONES_VMA, la table qui sert déjà aux
+   zones du tableau de bord et à celles de l'espace athlète. Deux jeux de
+   chiffres finiraient par diverger. */
+const WKT_ZONE_WARM=2, WKT_ZONE_COOL=1;
+function wktZonePct(n){
+  if(typeof ZONES_VMA==='undefined') return null;
+  const z=ZONES_VMA.find(function(x){return x.z===n;});
+  return z?[Math.round(z.lo*100),Math.round(z.hi*100)]:null;
+}
+/* L'allure que le coach a écrite, s'il en a écrit une : une zone — « Z2 »,
+   « zone 2 » — un pourcentage en toutes lettres — « 65 % », « 60-70 % » — ou
+   le vocabulaire de l'endurance facile, « EF », « footing ».
 
    Volontairement, ni « seuil » ni « VMA » ni « AS42 » : « 20 min + 4 lignes à
    VMA » décrit des lignes en fin d'échauffement, pas un échauffement couru à
@@ -5420,6 +5430,10 @@ function wktBordPct(txt){
   if(m) return [+m[1],+m[2]];
   m=t.match(/(\d{2,3})\s*%/);
   if(m) return +m[1];
+  // « Z2 », « zone 2 » : la zone l'emporte, c'est la façon la plus directe
+  // de le dire et elle ne laisse aucune ambiguïté.
+  m=t.match(/\bz(?:one)?\s*([1-5])\b/);
+  if(m) return wktZonePct(+m[1]);
   m=t.match(/\b(ef|fond\w*|foot\w*)\b/);
   if(m&&typeof resolvePace==='function'){
     const r=resolvePace(m[1]);
@@ -5434,8 +5448,9 @@ function wktBordStep(txt,vma,quoi){
   let nom=(quoi==='warmup')?'Échauffement':'Retour au calme';
   if(d&&d.dur==='time'&&d.val>=60)      nom+=' '+Math.round(d.val/60)+' min';
   else if(d&&d.dur==='distance')        nom+=' '+fDist(d.val);
+  const zoneParDefaut=(quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL;
   return {name:wktName(nom), dur:'open', val:null,
-          sp:wktSpeed(vma, wktBordPct(txt)||WKT_BORD_PCT), int:quoi};
+          sp:wktSpeed(vma, wktBordPct(txt)||wktZonePct(zoneParDefaut)), int:quoi};
 }
 
 /* Séance RedLab → liste d'étapes FIT, boucles imbriquées comprises. */
@@ -6006,8 +6021,8 @@ function libEditFormHTML(s){
     +'<div class="lc-field"><label>Contenu de la séance</label><div id="lb-rows">'+rows+'</div>'
       +'<button type="button" class="lb-add" onclick="libBlocAdd()">+ Ajouter un bloc</button></div>'
     +'<div class="lc-grid">'
-      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" oninput="libPreview()"></div>'
-      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Échauffement</label><input id="lc-warm" value="'+esc(s.warm==='—'?'':s.warm)+'" placeholder="20 min · Z2" oninput="libPreview()"></div>'
+      +'<div class="lc-field"><label>Retour au calme</label><input id="lc-cool" value="'+esc(s.cool==='—'?'':s.cool)+'" placeholder="10 min · Z1" oninput="libPreview()"></div>'
     +'</div>'
     +'<div class="lc-field"><label>Description</label><input id="lc-desc" value="'+esc(s.desc)+'" oninput="libPreview()"></div>'
     +'<div class="lc-field"><label>Étiquette <span class="lc-hint">option</span></label><input id="lc-tag" value="'+esc(s.tag)+'" oninput="libPreview()"></div>'
@@ -6016,7 +6031,9 @@ function libEditFormHTML(s){
       +(creation?'Enregistrer la séance':((_libEdit.src==='c'&&!_libEdit.nouvelle)?'Enregistrer les modifications':'↓ Enregistrer dans ma banque'))
       +'</button><button class="lc-cancel" onclick="libEditCancel()">Annuler</button></div>'
     +(creation
-       ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].</div>'
+       ?'<div class="lc-legend">Un bloc = une série. <b>⇄ Alterner</b> permet d’enchaîner plusieurs allures dans une même répétition — par exemple 4 × [1 km à 82 % + 1 km à 88 %].'
+        +'<br>Sur la montre, l’échauffement et le retour au calme durent <b>jusqu’à l’appui sur le bouton tour</b>, avec une allure cible. '
+        +'Écris <b>Z1</b> à <b>Z5</b> (ou « 65 % », « 60-70 % ») pour la fixer ; sans rien, l’échauffement vise la <b>zone 2</b> et le retour au calme la <b>zone 1</b>.</div>'
        :((_libEdit.src==='l'||_libEdit.nouvelle)
          ?'<div class="lc-legend">L’enregistrement crée une <b>nouvelle séance</b> dans tes séances perso. Celle dont tu es parti reste intacte, y compris dans les autres plans où elle est posée.</div>':''));
 }
