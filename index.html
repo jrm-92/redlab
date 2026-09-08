@@ -575,6 +575,14 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-ec--ok{color:#34D399}
   .fs-ec--vif{color:#60A5FA}
   .fs-ec--lent{color:#FBBF24}
+  /* Les répétitions : une case par fraction, numérotée à gauche. Empilées,
+     elles se remplissent au stylo aussi bien qu'au clavier. */
+  .fs-reps{display:flex;flex-direction:column;gap:4px;align-items:center;margin-top:6px}
+  .fs-rep{display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+  .fs-no{flex:0 0 auto;width:22px;text-align:right;font-style:normal;font-size:10.5px;
+    font-weight:800;color:var(--muted2);font-variant-numeric:tabular-nums}
+  .fs-rep .fs-in{margin:0}
+  .fs-rep .fs-ec{margin:0;flex:0 0 auto;min-width:52px;text-align:left;font-size:10.5px}
   .fs-date{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted2)}
   .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
   .fs-date input:focus{border-color:var(--orange)}
@@ -7557,13 +7565,20 @@ function fsEcart(reel,lo,hi){
   if(reel<lo) return {cls:'vif',  txt:'\u2212'+fsEcartTxt(lo-reel)};
   return {cls:'ok', txt:'dans la cible'};
 }
-function fsLire(athId,titre,i){
+/* La clé d'un effort dans la fiche : le rang de la ligne, et le numéro de la
+   répétition quand il y en a plusieurs. La première garde la clé nue —
+   « 3 » plutôt que « 3.0 » — pour que les relevés déjà enregistrés se
+   relisent tels quels. */
+function fsCle(i,k){ return k>0 ? (i+'.'+k) : String(i); }
+/* Le rang de ligne que designe une clé, dans les deux écritures. */
+function fsCleLigne(cle){ return parseInt(String(cle).split('.')[0],10); }
+function fsLire(athId,titre,i,k){
   var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
   var j=fsPerfs(a)[_fsDate]||{};
-  var v=(j[titre]||{})[String(i)];
+  var v=(j[titre]||{})[fsCle(i,k||0)];
   return (typeof v==='number'&&v>0)?v:null;
 }
-function fsNoter(athId,titre,i,champ){
+function fsNoter(athId,titre,i,k,champ){
   var sec=fsSec(champ.value);
   var liste=(typeof getAthletes==='function'?getAthletes():[]);
   var a=liste.find(function(x){return x.id===athId;});
@@ -7571,13 +7586,14 @@ function fsNoter(athId,titre,i,champ){
   a.perfs=a.perfs||{};
   a.perfs[_fsDate]=a.perfs[_fsDate]||{};
   a.perfs[_fsDate][titre]=a.perfs[_fsDate][titre]||{};
+  var cle=fsCle(i,k||0);
   if(sec==null||sec<=0){
-    delete a.perfs[_fsDate][titre][String(i)];
+    delete a.perfs[_fsDate][titre][cle];
     // On ne laisse pas de coquilles vides derrière soi.
     if(!Object.keys(a.perfs[_fsDate][titre]).length) delete a.perfs[_fsDate][titre];
     if(!Object.keys(a.perfs[_fsDate]).length) delete a.perfs[_fsDate];
   } else {
-    a.perfs[_fsDate][titre][String(i)]=sec;
+    a.perfs[_fsDate][titre][cle]=sec;
   }
   if(typeof _saveAthletes==='function') _saveAthletes(liste);
   fsEcartMaj(champ, sec);
@@ -7586,7 +7602,9 @@ function fsNoter(athId,titre,i,champ){
    enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
 function fsEcartMaj(champ,sec){
   var td=champ.closest('td'); if(!td) return;
-  var vieux=td.querySelector('.fs-ec'); if(vieux) vieux.remove();
+  // Le voisinage d'UNE case : avec plusieurs répétitions, chercher l'écart
+  // dans tout le <td> effacerait celui de la répétition précédente.
+  var vieux=champ.parentNode.querySelector('.fs-ec'); if(vieux) vieux.remove();
   if(sec==null) return;
   var lo=parseFloat(td.getAttribute('data-lo')), hi=parseFloat(td.getAttribute('data-hi'));
   if(!isFinite(lo)||!isFinite(hi)) return;
@@ -7628,10 +7646,14 @@ function plFaitBilan(iso,titre,ov){
   if(!t) return null;
   var seance=(ov&&typeof plSeanceAjustee==='function')?plSeanceAjustee(t.s,ov):t.s;
   var lignes=fsLignes(seance);
+  /* On parcourt les relevés, pas les lignes : une ligne porte autant de
+     chronos qu'elle a de répétitions, et les clés le disent. */
   var n=0, ok=0, lent=0, vif=0;
-  lignes.forEach(function(l,i){
-    var reel=notes[String(i)];
+  Object.keys(notes).forEach(function(cle){
+    var reel=notes[cle];
     if(typeof reel!=='number'||reel<=0) return;
+    var l=lignes[fsCleLigne(cle)];
+    if(!l) return;
     n++;
     var c=fsCible(l,a.vma);
     var r=c?fsEcart(reel,c.lo,c.hi):null;
@@ -7641,7 +7663,9 @@ function plFaitBilan(iso,titre,ov){
   if(!n) return null;
   // La couleur dit l'essentiel : tout dans la cible, ou bien ce qui domine.
   var cls=(ok===n)?'ok':((lent>=vif)?'lent':'vif');
-  return {n:n, total:lignes.filter(function(l){return !l.soft;}).length, cls:cls};
+  var total=0;
+  lignes.forEach(function(l){ if(!l.soft) total+=Math.max(1,l.n||1); });
+  return {n:n, total:total, cls:cls};
 }
 function plFaitChip(iso,titre,ov){
   var b=plFaitBilan(iso,titre,ov);
@@ -7656,18 +7680,27 @@ function fsLignes(s){
   var L=[];
   if(s.warm&&s.warm!=='—') L.push({soft:true,lbl:'Échauffement',val:s.warm,bord:'warmup'});
   (s.blocks||[]).forEach(function(b,i){
-    var reps=Math.max(1,b.r||1), sets=Math.max(1,b.sets||1);
+    /* Même lecture que l'export montre : certains blocs portent leur nombre
+       de séries dans le seul libellé — « 3 × (1000-600-400) ». Sans
+       wktLabelReps(), la feuille n'offrait qu'une case là où la montre
+       compte trois passages. */
+    var reps=Math.max(1,b.r||1);
+    var sets=Math.max(1,b.sets||((typeof wktLabelReps==='function')?wktLabelReps(b.label):1));
     var pre=(sets>1?sets+' × ':'')+(reps>1?reps+' × ':'');
+    /* `n` : le nombre d'efforts que porte la ligne. Un 5 × 1000 tient sur une
+       ligne — c'est ainsi qu'on le lit — mais il se chronomètre cinq fois. */
+    var nEff=reps*sets;
     if(b.segs&&b.segs.length){
       b.segs.forEach(function(sg,j){
         L.push({lbl:(j===0?pre:'')+fDist(sg.d)+(sg.lbl?' · '+sg.lbl:''),
-                d:sg.d, pct:sg.pct, all:sg.all,
+                d:sg.d, pct:sg.pct, all:sg.all, n:nEff, sets:sets, reps:reps,
                 rec:(j===b.segs.length-1?b.rec:'')});
       });
     } else {
       var lbl=pre+(b.d?fDist(b.d):(b.m?b.m+' min':(b.sec?b.sec+' s':'Effort')));
       L.push({lbl:lbl, d:b.d||0, sec:(b.m?b.m*60:(b.sec||0)),
-              pct:b.pct, all:b.all, rec:b.rec, recSet:(sets>1?b.recSet:'')});
+              pct:b.pct, all:b.all, n:nEff, sets:sets, reps:reps,
+              rec:b.rec, recSet:(sets>1?b.recSet:'')});
     }
   });
   if(s.cool&&s.cool!=='—') L.push({soft:true,lbl:'Retour au calme',val:s.cool,bord:'cooldown'});
@@ -7800,19 +7833,36 @@ function fsHTML(){
         return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)+'</td>'
           +'<td colspan="'+(pris.length+1)+'">'+e(l.val)+'</td></tr>';
       }
+      /* Une case par répétition. Un 5 × 1000 se lit sur une ligne mais se
+         chronomètre cinq fois : noter une seule valeur revenait à écraser
+         quatre fractions par une moyenne que personne n'a courue. */
+      var nEff=Math.max(1,l.n||1);
+      var numero=function(k){
+        if(nEff<2) return '';
+        // Avec des séries, on numérote « série · répétition » : c'est ainsi
+        // que le coach compte au bord de la piste.
+        if(l.sets>1&&l.reps>1) return (Math.floor(k/l.reps)+1)+'·'+((k%l.reps)+1);
+        return String(k+1);
+      };
       return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
         +pris.map(function(a){
           var c=fsCible(l,a.vma);
           if(!c) return '<td class="fs-val"><span style="color:var(--muted2)">—</span></td>';
-          var reel=fsLire(a.id,s.title,l.i);
           var bornes=(c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
-          var r=fsEcart(reel,c.lo,c.hi);
-          var ec=r?('<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>'):'';
-          return '<td class="fs-val"'+bornes+'>'+c.txt
-            +'<span><input class="fs-in" type="text" inputmode="numeric" maxlength="7"'
-            +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="réel"'
-            +' aria-label="Temps réalisé — '+e(a.nom)+', '+e(l.lbl)+'"'
-            +' onchange="fsNoter('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',this)">'+ec+'</span></td>';
+          var cases='';
+          for(var k=0;k<nEff;k++){
+            var reel=fsLire(a.id,s.title,l.i,k);
+            var r=fsEcart(reel,c.lo,c.hi);
+            var ec=r?('<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>'):'';
+            var num=numero(k);
+            cases+='<span class="fs-rep">'
+              +(num?'<i class="fs-no">'+num+'</i>':'')
+              +'<input class="fs-in" type="text" inputmode="numeric" maxlength="7"'
+              +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="réel"'
+              +' aria-label="Temps réalisé — '+e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'')+'"'
+              +' onchange="fsNoter('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k+',this)">'+ec+'</span>';
+          }
+          return '<td class="fs-val"'+bornes+'>'+c.txt+'<span class="fs-reps">'+cases+'</span></td>';
         }).join('')
         +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>';
     }).join('');
@@ -7823,8 +7873,8 @@ function fsHTML(){
       +'<div class="fs-note">Chrono à tenir sur la fraction, allure au kilomètre en dessous. '
       +'Une fourchette d’intensité donne une fourchette de temps : c’est la marge, pas une imprécision. '
       +'Les allures écrites en min/km sont absolues et valent pour tout le monde.'
-      +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — tape le chrono lu (<b>1:13</b> ou <b>73</b>, au choix) dans la case sous la cible. '
-      +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
+      +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — <b>une case par fraction</b>, numérotée : un 5 × 1000 se note cinq fois, pas en moyenne. '
+      +'Tape le chrono lu (<b>1:13</b> ou <b>73</b>, au choix) ; l’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
       +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
   }
 
