@@ -457,6 +457,36 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
 
+  /* ══ INFOBULLES PÉDAGOGIQUES ══
+     Un « i » discret à côté d'un intitulé savant. La définition tient dans
+     l'attribut, donc rien à charger et rien à câbler : le survol et le focus
+     clavier suffisent. tabindex la rend atteignable au clavier, aria-label
+     la rend lisible par un lecteur d'écran — la bulle CSS, elle, ne l'est
+     pas. */
+  .rl-info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:5px;
+    border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted2);
+    font-size:10px;font-weight:800;font-family:var(--font);cursor:help;vertical-align:middle;
+    position:relative;flex-shrink:0;padding:0;line-height:1;text-transform:none;letter-spacing:0}
+  .rl-info:hover,.rl-info:focus-visible{color:var(--orange);border-color:var(--orange);outline:none}
+  .rl-info::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
+    width:max-content;max-width:270px;padding:10px 12px;border-radius:10px;background:var(--bg2);
+    border:1px solid var(--border);box-shadow:0 8px 26px rgba(0,0,0,.5);
+    font-size:11.5px;font-weight:600;line-height:1.6;color:var(--text2);text-align:left;
+    text-transform:none;letter-spacing:0;white-space:normal;opacity:0;visibility:hidden;
+    transition:opacity .13s;z-index:70;pointer-events:none}
+  .rl-info:hover::after,.rl-info:focus-visible::after{opacity:1;visibility:visible}
+  /* Près du bord droit, la bulle se recale plutôt que de sortir de l'écran. */
+  .rl-info--g::after{left:auto;right:-6px;transform:none}
+  .rl-info--bas::after{bottom:auto;top:calc(100% + 9px)}
+  @media(max-width:600px){ .rl-info::after{max-width:min(270px,72vw)} }
+
+  /* ══ CARTES RÉTRACTABLES ══ */
+  .card-hd--pli{cursor:pointer;justify-content:space-between;user-select:none}
+  .card-chev{stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    transition:transform .18s;flex-shrink:0}
+  .card-hd--pli:hover .card-chev{stroke:var(--orange)}
+  .card-pli-l{display:flex;align-items:center;gap:10px;min-width:0}
+
   /* ══ FEUILLE DE SÉANCE TERRAIN ══
      Une séance, plusieurs athlètes, un tableau de temps de passage. Elle se
      lit sur la piste : soit sur le téléphone, soit imprimée et plastifiée.
@@ -2072,10 +2102,14 @@ table.lm-laps tbody tr{cursor:pointer}
 
           <!-- Form VMA seule -->
           <div id="form-vma" class="card">
-            <div class="card-hd">
-              <div class="card-hd-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-              Votre VMA
+            <div class="card-hd card-hd--pli" onclick="toggleOpt('vma-body','vma-chev')">
+              <span class="card-pli-l">
+                <span class="card-hd-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+                <span data-tip-cle="vma" data-tip-pos="bas">Votre VMA</span>
+              </span>
+              <svg id="vma-chev" class="card-chev" style="transform:rotate(180deg)" viewBox="0 0 24 24" width="18" height="18"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
+            <div id="vma-body">
             <!-- Sous-mode VMA -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px">
               <button class="mode-card active" id="vma-sub-direct" onclick="setVmaSubMode('direct')" style="padding:14px 16px">
@@ -2155,6 +2189,7 @@ table.lm-laps tbody tr{cursor:pointer}
               </div>
               <div id="road-result" style="margin-top:16px;display:none"></div>
             </div>
+            </div>
           </div>
 
           <!-- TMI -->
@@ -2162,7 +2197,7 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="card-hd" onclick="toggleOpt('tmi-body','tmi-chev')" style="cursor:pointer;justify-content:space-between">
               <div style="display:flex;align-items:center;gap:10px">
                 <div class="card-hd-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <span>Valider votre VMA · Test TMI</span>
+                <span data-tip-cle="tmi">Valider votre VMA · Test TMI</span>
                 <span style="font-size:11.5px;font-weight:600;color:var(--muted2);letter-spacing:1px;text-transform:uppercase">optionnel</span>
               </div>
               <svg id="tmi-chev" viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
@@ -2192,10 +2227,14 @@ table.lm-laps tbody tr{cursor:pointer}
 
           <!-- Form Vitesse Critique -->
           <div id="form-tests" class="card" style="display:none">
-            <div class="card-hd">
-              <div class="card-hd-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-              Définir la vitesse critique
+            <div class="card-hd card-hd--pli" onclick="toggleOpt('tests-body','tests-chev')">
+              <span class="card-pli-l">
+                <span class="card-hd-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                <span data-tip-cle="vc" data-tip-pos="bas">Définir la vitesse critique</span>
+              </span>
+              <svg id="tests-chev" class="card-chev" style="transform:rotate(180deg)" viewBox="0 0 24 24" width="18" height="18"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
+            <div id="tests-body">
             <div id="cs-courses-form">
               <div id="cs-assistant" style="margin-bottom:18px"></div>
               <div class="info-box" style="margin-bottom:20px">
@@ -2217,6 +2256,7 @@ table.lm-laps tbody tr{cursor:pointer}
               </div>
               <div id="csr-preview" style="display:none;margin-top:16px"></div>
             </div>
+            </div>
           </div>
 
           <!-- Données cardiaques -->
@@ -2224,7 +2264,7 @@ table.lm-laps tbody tr{cursor:pointer}
             <div class="card-hd" onclick="toggleOpt('fc-opt-body','fc-chev')" style="cursor:pointer;justify-content:space-between">
               <div style="display:flex;align-items:center;gap:10px">
                 <div class="card-hd-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-                <span>Données cardiaques</span>
+                <span data-tip-cle="fcmax">Données cardiaques</span>
                 <span style="font-size:11.5px;font-weight:600;color:var(--muted2);letter-spacing:1px;text-transform:uppercase">optionnel</span>
               </div>
               <svg id="fc-chev" viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
@@ -2232,7 +2272,7 @@ table.lm-laps tbody tr{cursor:pointer}
           <div id="fc-opt-body" style="display:none;margin-top:16px">
             <div class="g2" style="gap:14px">
               <div class="field" style="margin-bottom:0">
-                <label>FC Max mesurée (bpm)</label>
+                <label data-tip-cle="fcmax" data-tip-pos="bas">FC Max mesurée (bpm)</label>
                 <div class="iw">
                   <input type="number" id="fc-max" placeholder="185" min="100" max="230" style="padding-left:14px">
                   <span class="iu">bpm</span>
@@ -2240,7 +2280,7 @@ table.lm-laps tbody tr{cursor:pointer}
                 <div class="fhint">Test terrain ou montre GPS. Laissez vide si inconnue.</div>
               </div>
               <div class="field" style="margin-bottom:0">
-                <label>FC Repos (bpm)</label>
+                <label data-tip-cle="fcrep" data-tip-pos="g bas">FC Repos (bpm)</label>
                 <div class="iw">
                   <input type="number" id="fc-rest" placeholder="55" min="25" max="100" style="padding-left:14px">
                   <span class="iu">bpm</span>
@@ -3634,17 +3674,115 @@ function applyRoadVMA(v){
   updTMICard();
 }
 
+/* ══ INFOBULLES PÉDAGOGIQUES ══
+   Une définition unique par concept. Le texte ne peut pas diverger d'un
+   écran à l'autre, et il se corrige en un seul endroit.
+   Écrites pour un coach pressé : ce que c'est, et à quoi ça sert. Pas de
+   démonstration — le référentiel méthodologique est là pour ça. */
+const RL_TIPS={
+  vma:  "Vitesse maximale aérobie — la plus petite vitesse à laquelle la consommation d’oxygène atteint son maximum. C’est la référence de toutes les allures de l’outil : chaque séance s’exprime en pourcentage de cette vitesse.",
+  vc:   "Vitesse critique — l’allure la plus élevée qu’on peut tenir sans que la consommation d’oxygène dérive. C’est la frontière haute du domaine « lourd » : en dessous, l’effort est stabilisable ; au-dessus, l’épuisement est programmé. Modèle de Monod & Scherrer, révisé par Jones & Vanhatalo.",
+  dp:   "D′ — la réserve de travail disponible AU-DESSUS de la vitesse critique, exprimée en mètres. Elle se vide d’autant plus vite qu’on court loin au-dessus, et ne se reconstitue qu’en repassant en dessous. C’est elle qui décide de la longueur d’une fraction tenable.",
+  tmi:  "Temps de maintien à l’intensité — combien de temps l’athlète tient à sa VMA exactement. Autour de 6 minutes, la VMA est juste ; nettement plus, elle est sous-estimée ; nettement moins, surestimée. C’est le test de contrôle, pas un test de VMA.",
+  fcmax:"Fréquence cardiaque maximale, mesurée sur le terrain ou relevée par la montre en compétition. Les formules par l’âge se trompent de 10 à 20 battements chez un individu donné : mieux vaut le champ vide qu’une valeur inventée.",
+  fcrep:"Fréquence cardiaque au repos, prise allongée au réveil avant de se lever. Avec la FC max, elle donne la fréquence de réserve — la base du calcul des zones par la méthode de Karvonen, plus juste qu’un simple pourcentage de FC max.",
+  acwr: "Charge des 7 derniers jours divisée par la moyenne des 28 derniers. Zone sûre entre 0,8 et 1,3 ; au-delà de 1,5, le risque de blessure augmente nettement. C’est un indicateur de variation brutale, pas de volume absolu.",
+  sv1:  "Premier seuil ventilatoire — le moment où la ventilation s’accélère plus vite que l’effort. En pratique : la limite haute de l’endurance fondamentale, là où la conversation devient hachée.",
+  sv2:  "Second seuil ventilatoire — au-delà, le lactate s’accumule sans retour à l’équilibre. C’est l’allure du seuil, tenable de trente minutes à une heure selon le niveau.",
+  vo2:  "VO₂max — le débit maximal d’oxygène que l’organisme sait consommer. La VMA en est la traduction en vitesse : c’est elle qu’on mesure sur le terrain."
+};
+/* opts : 'g' recale la bulle vers la gauche près du bord droit,
+          'bas' la fait descendre quand la carte est haut de page. */
+function rlInfo(cle,opts){
+  var t=RL_TIPS[cle];
+  if(!t) return '';
+  var cls='rl-info'
+    +(/\bg\b/.test(opts||'')?' rl-info--g':'')
+    +(/\bbas\b/.test(opts||'')?' rl-info--bas':'');
+  var e=t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return '<span class="'+cls+'" tabindex="0" role="note" aria-label="'+e+'" data-tip="'+e+'">i</span>';
+}
+/* Pose les infobulles sur les intitulés qui les attendent. Le HTML de la
+   page est statique : plutôt que d'y répéter le balisage, on l'injecte au
+   démarrage dans les éléments qui portent data-tip-cle. */
+function rlInfoPoser(racine){
+  (racine||document).querySelectorAll('[data-tip-cle]').forEach(function(el){
+    if(el.querySelector(':scope > .rl-info')) return;   // déjà posée
+    var cle=el.getAttribute('data-tip-cle');
+    var pos=el.getAttribute('data-tip-pos')||'';
+    el.insertAdjacentHTML('beforeend', rlInfo(cle,pos));
+  });
+}
+
+/* ══ CARTES RÉTRACTABLES — MÉMOIRE PAR ATHLÈTE ══
+   Le coach n'ouvre pas une fiche pour la lire en entier : il vient corriger
+   un chiffre. Les sections qu'il replie chez un athlète le restent, et il
+   retrouve sa fiche telle qu'il l'a laissée.
+   La mémoire est par athlète, parce qu'elle n'a pas le même sens d'un
+   athlète à l'autre : les données cardiaques comptent chez l'un, jamais
+   chez l'autre. */
+const REPLI_KEY='redlab_replis_v1';
+/* La fréquence de réserve se déduit de la FC max et de la FC de repos. Elle
+   est stockée sur la fiche, mais une fiche ancienne ou importée peut ne pas
+   la porter — et l'écran affichait alors « undefined bpm réserve » et des
+   « NaN » plein la table des zones. On la recalcule quand elle manque. */
+function fcReserveDe(ath){
+  if(!ath) return null;
+  if(typeof ath.fcReserve==='number'&&isFinite(ath.fcReserve)) return ath.fcReserve;
+  var mx=+ath.fcMax, rp=+ath.fcRest;
+  return (isFinite(mx)&&isFinite(rp)&&mx>rp) ? (mx-rp) : null;
+}
+function repliCle(){
+  return (typeof S!=='undefined'&&S&&S.athId!=null)?('a'+S.athId):'_';
+}
+function repliTout(){ try{ return JSON.parse(localStorage.getItem(REPLI_KEY)||'{}'); }catch(e){ return {}; } }
+/* Trois états, pas deux : replié, déplié, et « jamais touché ». Sans le
+   troisième, une carte optionnelle fermée d'origine s'ouvrirait chez tout le
+   monde à la première visite. */
+function repliFerme(id,defaut){
+  var v=(repliTout()[repliCle()]||{})[id];
+  return (v===undefined) ? !!defaut : (v===1);
+}
+function repliNote(id,ferme){
+  var t=repliTout(), k=repliCle();
+  t[k]=t[k]||{};
+  t[k][id]=ferme?1:0;      // 0 vaut « ouvert exprès », et se distingue de l'absence
+  try{ localStorage.setItem(REPLI_KEY,JSON.stringify(t)); }catch(e){}
+}
+/* Les sections repliables de l'écran Saisie, avec leur état d'origine.
+   Les deux cartes marquées « optionnel » restent fermées tant que le coach
+   ne les a pas ouvertes lui-même : c'est ce qui garde l'écran court. */
+const REPLI_CARTES=[
+  {body:'vma-body',    chev:'vma-chev'},
+  {body:'tmi-body',    chev:'tmi-chev',  ferme:true},
+  {body:'tests-body',  chev:'tests-chev'},
+  {body:'fc-opt-body', chev:'fc-chev',   ferme:true}
+];
+/* Rend à l'écran l'état mémorisé. Appelé au démarrage et à chaque
+   changement d'athlète. */
+function repliAppliquer(){
+  REPLI_CARTES.forEach(function(c){
+    var b=document.getElementById(c.body); if(!b) return;
+    var ferme=repliFerme(c.body,c.ferme);
+    b.style.display=ferme?'none':'block';
+    var ch=document.getElementById(c.chev);
+    if(ch) ch.style.transform=ferme?'':'rotate(180deg)';
+  });
+}
 function toggleOpt(bodyId,chevId){
   const body=document.getElementById(bodyId),chev=document.getElementById(chevId);
   if(!body)return;
   const open=body.style.display!=='none';
   body.style.display=open?'none':'block';
   if(chev) chev.style.transform=open?'':'rotate(180deg)';
+  // On replie, on s'en souvient : c'est un choix, pas un accident.
+  if(REPLI_CARTES.some(function(c){return c.body===bodyId;})) repliNote(bodyId,open);
 }
 function openOpt(bodyId,chevId){
   const body=document.getElementById(bodyId),chev=document.getElementById(chevId);
   if(!body||body.style.display!=='none')return;
   body.style.display='block';
+  if(typeof REPLI_CARTES!=='undefined'&&REPLI_CARTES.some(function(c){return c.body===bodyId;})) repliNote(bodyId,false);
   if(chev) chev.style.transform='rotate(180deg)';
 }
 
@@ -4100,7 +4238,7 @@ function loadAthlete(id){
     athId:ath.id,
     pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,
     csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,
-    fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,
+    fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:fcReserveDe(ath),
     d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,
     fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,
     testDate:ath.testDate,
@@ -4114,6 +4252,9 @@ function loadAthlete(id){
   plOublieAthlete();
   document.getElementById('pseudo-inp').value=ath.pseudo;
   setMode(ath.mode||'vma');
+  // La mémoire des replis est par athlète : on rend sa fiche telle qu'il
+  // l'a laissée. Après setMode, qui décide quelle carte est à l'écran.
+  try{ repliAppliquer(); }catch(e){}
   if(ath.mode==='vma'){
     document.getElementById('vma-inp').value=ath.vma.toFixed(1);
     updTMICard();
@@ -10218,7 +10359,7 @@ function _profilPourEspace(ath){
   return {
     pseudo:ath.pseudo||'', email:ath.email||'', enregistreLe:ath.savedAt||'',
     mode:ath.mode||'vma', vma:ath.vma||null, csKmh:ath.csKmh||null, dp:ath.dp||null,
-    fcMax:ath.fcMax||null, fcRest:ath.fcRest||null, fcReserve:ath.fcReserve||null,
+    fcMax:ath.fcMax||null, fcRest:ath.fcRest||null, fcReserve:fcReserveDe(ath),
     dateDuTest:ath.testDate||'',
     records:ath.records||{}, historiqueCourses:ath.raceHistory||[],
     objectif:ath.goal||null, plan:ath.plan||null,
@@ -10361,7 +10502,7 @@ async function publishAthlete(id,btn){
   if(btn){btn.disabled=true;btn.textContent='Publication…';}
   // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
   try{
-    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:ath.fcReserve,d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
+    Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:fcReserveDe(ath),d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
     plOublieAthlete();
     if(typeof renderDashboard==='function')renderDashboard();
   }catch(e){ return fail('rendu du dashboard — '+e.message); }
@@ -10547,6 +10688,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderPerfInput(1);renderPerfInput(2);
   if(typeof csRenderAssistant==='function')csRenderAssistant();
   loadLS();
+  // Les infobulles se posent sur le balisage statique, une fois pour toutes ;
+  // les replis rendent l'écran tel que le coach l'a laissé.
+  try{ rlInfoPoser(); }catch(e){}
+  try{ repliAppliquer(); }catch(e){}
   updMhCtx(S.vma?'dashboard':'input');
   const ac0=document.getElementById('sbn-ath-count');
   if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
