@@ -182,6 +182,49 @@ a{color:var(--accent)}
 .card2{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
 .muted{color:var(--muted);font-size:13px;line-height:1.65}
 
+/* ── Infobulles ──
+   Un « i » discret à côté d'un mot de coach. C'est un vrai <button> : sur un
+   téléphone, ni :hover ni :focus-visible ne se déclenchent à la tape, et une
+   bulle qu'on ne peut pas ouvrir ne sert à rien — or cet espace se lit
+   presque toujours sur un téléphone, souvent au bord de la piste.
+   La bulle s'ouvre à la tape et se referme en touchant ailleurs. */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+  margin-left:5px;border-radius:50%;border:1px solid var(--border2);background:transparent;
+  color:var(--muted2);font-family:var(--font);font-size:10px;font-weight:800;line-height:1;
+  padding:0;cursor:help;vertical-align:middle;position:relative;flex-shrink:0;
+  text-transform:none;letter-spacing:0;-webkit-appearance:none;appearance:none;
+  -webkit-tap-highlight-color:transparent}
+.tip:hover,.tip:focus{color:var(--accent);border-color:var(--accent);outline:none}
+.tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;
+  transform:translateX(-50%);width:max-content;max-width:min(280px,74vw);padding:11px 13px;
+  border-radius:12px;background:var(--card);border:1px solid var(--border2);
+  box-shadow:0 10px 30px rgba(0,0,0,.55);font-size:12px;font-weight:600;line-height:1.6;
+  color:var(--text2);text-align:left;text-transform:none;letter-spacing:0;white-space:normal;
+  opacity:0;visibility:hidden;transition:opacity .13s;z-index:80;pointer-events:none}
+.tip:hover::after,.tip:focus::after{opacity:1;visibility:visible}
+/* Près d'un bord, la bulle se recale au lieu de sortir de l'écran. */
+.tip.g::after{left:auto;right:-6px;transform:none}
+.tip.d::after{left:-6px;right:auto;transform:none}
+.tip.bas::after{bottom:auto;top:calc(100% + 9px)}
+
+/* Le lexique : les mots d'une page réunis sur une ligne, plutôt que la même
+   bulle répétée sur chacune des cinq cartes en dessous. */
+.lex{display:flex;flex-wrap:wrap;gap:4px 15px;align-items:center;position:relative;
+  font-size:12px;color:var(--muted);line-height:1.8;margin:-4px 0 16px}
+.lex>span:first-child{font-size:10px;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted2)}
+.lex b{color:var(--text2);font-weight:700}
+/* Une bulle centrée sur son icône sort de l'écran dès que l'icône est près du
+   bord — mesuré sur un téléphone de 390 px : quatre bulles sur dix-huit
+   débordaient à gauche. Dans un lexique, une grille de repères ou un titre,
+   elle s'ancre donc sur le BLOC et non sur l'icône : elle s'ouvre en panneau
+   sous la ligne, toujours dans la page, quelle que soit sa longueur. */
+.lex,.grid,.h2,.sec-hd,.obj .row{position:relative}
+.lex .tip,.grid .tip,.h2 .tip,.sec-hd .tip,.obj .row .tip{position:static}
+.lex .tip::after,.grid .tip::after,.h2 .tip::after,.sec-hd .tip::after,.obj .row .tip::after{
+  top:calc(100% + 6px);bottom:auto;left:0;right:auto;transform:none;
+  width:auto;max-width:none}
+
 /* Compte à rebours : la première chose qu'on veut voir. */
 .obj{background:linear-gradient(135deg,rgba(255,107,26,.14),rgba(255,107,26,.03));
   border:1px solid rgba(255,107,26,.28);border-radius:18px;padding:20px}
@@ -569,13 +612,15 @@ function renderFiche(email,d){
     +'</div></div>';
   // KPIs
   h+='<div class="sec-hd"><span class="dot"></span><b>Repères</b></div><div class="grid">';
-  h+=kpi(R.lbl,nb1(v),'km/h');
-  h+=kpi('Allure '+R.lbl,fAll(3600/v),'/km');
-  if(vo2)h+=kpi('VO₂max estimé',nb1(vo2),'ml/kg/min');
-  if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
+  h+=kpi(R.lbl,nb1(v),'km/h',R.lbl==='VC'?'vc':'vma');
+  h+=kpi('Allure '+R.lbl,fAll(3600/v),'/km','allure');
+  if(vo2)h+=kpi('VO₂max estimé',nb1(vo2),'ml/kg/min','vo2');
+  if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm','fcmax');
   h+='</div>';
   // Zones
-  h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div><div class="tblwrap"><table class="tbl">'
+  h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div>'
+    +lexique([['zones','Zones'],['rpe','RPE'],['talk','Ressenti']])
+    +'<div class="tblwrap"><table class="tbl">'
     +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th>Ressenti</th><th>RPE</th></tr></thead><tbody>';
   R.zones.forEach(function(z){
     var vlo=(v*z.lo),vhi=(v*z.hi);
@@ -590,7 +635,7 @@ function renderFiche(email,d){
   h+='</tbody></table></div>';
   // Prédictions de course (si VMA connue)
   if(d.vma){
-    h+='<div class="sec-hd"><span class="dot"></span><b>Allures &amp; temps cibles</b></div><div class="cards">';
+    h+='<div class="sec-hd"><span class="dot"></span><b>Allures &amp; temps cibles</b>'+tip('cible')+'</div><div class="cards">';
     RACES.forEach(function(r){
       var tF=r.d/(r.vmaHi*vms), tS=r.d/(r.vmaLo*vms), tM=(tF+tS)/2;
       h+='<div class="rcard"><div class="nm">'+r.nm+'</div><div class="di">'+r.lbl+'</div>'
@@ -626,7 +671,46 @@ function renderFiche(email,d){
   }
   document.getElementById('content').innerHTML=h;
 }
-function kpi(l,v,s){return '<div class="kpi"><div class="l">'+esc(l)+'</div><div class="v">'+esc(v)+'</div><div class="s">'+esc(s)+'</div></div>';}
+/* ══ INFOBULLES ══
+   Les mêmes notions que côté coach, mais pas le même texte : l'athlète n'a
+   pas besoin des références bibliographiques, il a besoin de savoir quoi
+   faire de ce chiffre. Rien n'est dit ici que RedLab ne dise déjà — c'est
+   le vocabulaire qui change, pas la méthode. */
+var TIPS={
+  vma:  "Vitesse Maximale Aérobie — la vitesse à laquelle ton corps consomme le maximum d’oxygène. Tu la tiens environ six minutes. Toutes tes allures en découlent : une séance « à 90 % », c’est 90 % de cette vitesse-là.",
+  vc:   "Vitesse Critique — la vitesse la plus élevée que tu peux tenir sans t’épuiser peu à peu. En dessous, l’effort se stabilise ; au-dessus, le compte à rebours démarre. Elle se mesure sur deux efforts maximaux.",
+  allure:"Le temps qu’il te faut pour couvrir un kilomètre à cette vitesse. C’est ce que ta montre affiche, et ce qu’on écrit sur tes séances.",
+  dp:   "Ta réserve pour courir AU-DESSUS de ta vitesse critique, comptée en mètres. Plus tu montes haut au-dessus, plus elle se vide vite, et elle ne se recharge qu’en repassant en dessous. C’est elle qui décide de la longueur d’une fraction tenable.",
+  fcmax:"Ta fréquence cardiaque la plus haute, relevée en course ou sur un test. Elle ne se calcule pas avec l’âge : les formules se trompent de dix à vingt battements. Elle se mesure.",
+  vo2:  "La quantité d’oxygène que ton corps sait consommer au maximum, par minute et par kilo. C’est une estimation tirée de ta VMA, pas une mesure de laboratoire — sa valeur est de suivre son évolution, pas son chiffre exact.",
+  zones:"Cinq intensités, de la récupération au sprint. L’essentiel de ton volume se court dans les plus basses : c’est là que la base se construit. Les zones hautes coûtent cher en récupération — on y va rarement, et à propos.",
+  rpe:  "L’effort tel que TU le ressens, noté de 1 à 10. C’est le repère le plus fiable les jours où la montre ment : chaleur, nuit courte, début de rhume, jambes lourdes.",
+  talk: "Ce que tu arrives encore à dire en courant : conversation facile, puis phrases courtes, puis quelques mots, puis plus rien. Sans montre, c’est ce qui te dit dans quelle zone tu es.",
+  fc:   "Fourchette calculée à partir de ta FC max ET de ta FC de repos, pas d’un simple pourcentage de FC max — c’est nettement plus juste. Le cœur met une à deux minutes à monter : au début d’une fraction courte, fie-toi à l’allure.",
+  ef:   "Endurance fondamentale — l’allure où tu peux tenir une conversation. C’est l’allure de la plupart de tes footings. Elle paraît lente, et c’est normal : c’est elle qui construit le moteur, sans coûter de récupération.",
+  seuil:"L’allure la plus rapide que tu peux tenir sans que ça se dégrade — en gros ce que tu tiendrais trois quarts d’heure à fond. Dur mais contrôlé : tu dois finir la séance, pas la subir.",
+  sl:   "La sortie longue de la semaine. Sauf indication contraire, elle se court lentement : son intérêt est la durée, pas la vitesse.",
+  phases:"Base, Développement, Spécifique, Affûtage. On construit d’abord la capacité à encaisser l’entraînement, puis le moteur, puis l’allure exacte de ta course — et on arrive frais le jour J.",
+  allegee:"Une semaine où le volume baisse exprès. Les progrès se font pendant la récupération, pas pendant l’effort : c’est cette semaine-là qui transforme le travail des précédentes. Elle n’est pas une semaine perdue.",
+  affutage:"Les dernières semaines avant la course : beaucoup moins de volume, mais on garde de l’intensité. Tu peux te sentir bizarre, parfois lourd ou trop frais — c’est normal, et c’est bon signe.",
+  cible:"Une estimation à partir de tes repères d’aujourd’hui, pas une promesse. Le parcours, la météo, le sommeil et la façon dont tu gères le départ pèsent autant que la forme.",
+  splits:"Où tu devrais être à chaque borne pour tenir l’allure visée. Partir plus vite que ces temps coûte toujours plus cher, à la fin, que ça ne rapporte au début.",
+  volume:"Le kilométrage de la semaine. C’est un repère, pas une obligation : mieux vaut une semaine à 90 % qu’une blessure à 110 %."
+};
+function tip(cle,pos){
+  var t=TIPS[cle]; if(!t) return '';
+  var e=t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return '<button type="button" class="tip'+(pos?' '+pos:'')+'" aria-label="'+e+'" data-tip="'+e+'"'
+    +' onclick="event.stopPropagation();event.preventDefault();this.focus()">i</button>';
+}
+/* Une ligne de lexique : [clé, libellé]. */
+function lexique(paires){
+  return '<div class="lex"><span>Lexique</span>'
+    +paires.map(function(x){ return '<span><b>'+x[1]+'</b>'+tip(x[0],'bas')+'</span>'; }).join('')
+    +'</div>';
+}
+/* Le libellé d'un KPI peut porter sa bulle : c'est là que l'athlète bute. */
+function kpi(l,v,s,cle){return '<div class="kpi"><div class="l">'+esc(l)+(cle?tip(cle):'')+'</div><div class="v">'+esc(v)+'</div><div class="s">'+esc(s)+'</div></div>';}
 
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -769,7 +853,7 @@ function ecranAccueil(d){
       +(jm?'<div class="jm">'+esc(jm)+'</div>':'')+'</div>';
     if(o.t||o.allure){
       h+='<div class="row">'
-        +(o.t?'<div><div class="cl">Chrono visé</div><div class="cv" style="color:var(--accent)">'+fHMS(o.t)+'</div></div>':'')
+        +(o.t?'<div><div class="cl">Chrono visé'+tip('cible','bas d')+'</div><div class="cv" style="color:var(--accent)">'+fHMS(o.t)+'</div></div>':'')
         +(o.allure?'<div><div class="cl">Allure</div><div class="cv">'+o.allure+'/km</div></div>':'')
         +'</div>';
     }
@@ -781,11 +865,11 @@ function ecranAccueil(d){
   // Repères chiffrés, en bas : utiles, mais pas ce qu'on vient chercher.
   h+='<div class="h2">Tes repères</div><div class="grid">';
   if(R.v){
-    h+=kpi(R.lbl,nb1(R.v),'km/h');
-    h+=kpi('Allure '+R.lbl,fAll(3600/R.v),'/km');
+    h+=kpi(R.lbl,nb1(R.v),'km/h',R.lbl==='VC'?'vc':'vma');
+    h+=kpi('Allure '+R.lbl,fAll(3600/R.v),'/km','allure');
   }
-  if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm');
-  if(d.dp)h+=kpi('D′',Math.round(d.dp),'m');
+  if(d.fcMax)h+=kpi('FC max',d.fcMax,'bpm','fcmax');
+  if(d.dp)h+=kpi('D′',Math.round(d.dp),'m','dp');
   h+='</div>';
   if(d.dateDuTest)h+='<div class="muted" style="margin-top:10px">Repères établis le '+esc(d.dateDuTest)+'.</div>';
   h+=blocCalculateur(d);
@@ -893,6 +977,8 @@ function ecranPlan(d){
   var auj=isoAujourdhui(), h='';
 
   h+='<div class="h2">Charge de la préparation</div>'
+    +lexique([['phases','Phases'],['allegee','Semaine allégée'],['affutage','Affûtage'],
+              ['volume','Volume'],['ef','Endurance fondamentale'],['seuil','Seuil'],['sl','Sortie longue']])
     +'<div class="cvbox"><div class="cvt">Le volume visé semaine après semaine. La couleur donne la phase ; '
     +'une barre plus pâle est une semaine allégée, faite pour absorber ce qui précède.</div>'
     +'<div class="cvh"><canvas id="cv-vol"></canvas></div></div>';
@@ -1095,7 +1181,9 @@ function ecranZones(d){
   var fcOk=!!(d.fcMax&&d.fcRest);
   var fcRes=(d.fcReserve!=null)?d.fcReserve:((d.fcMax||0)-(d.fcRest||0));
 
-  var h='<div class="h2">Tes zones d’entraînement</div>';
+  var h='<div class="h2">Tes zones d’entraînement</div>'
+    +lexique([['zones','Zones'],['rpe','Effort /10'],['talk','Test de la parole']]
+             .concat(fcOk?[['fc','Fourchette cardiaque']]:[]));
 
   Z.forEach(function(z){
     var vlo=R.v*z.lo, vhi=R.v*z.hi;
@@ -1131,11 +1219,11 @@ function ecranAllures(d){
   var vms=R.v/3.6, h='';
 
   if(o&&o.t&&o.m){
-    h+='<div class="h2">Temps de passage — '+esc(o.nom)+'</div>'
+    h+='<div class="h2">Temps de passage — '+esc(o.nom)+tip('splits')+'</div>'
       +tableauSplits(o.m,o.t);
   }
 
-  h+='<div class="h2">Ce que tu vaux aujourd’hui</div>'
+  h+='<div class="h2">Ce que tu vaux aujourd’hui'+tip('cible')+'</div>'
     +'<div class="chips">'
     +RACES.map(function(r){
         var actif=_splitDist||((o&&o.id&&RACES.some(function(x){return x.id===o.id;}))?o.id:RACES[1].id);
