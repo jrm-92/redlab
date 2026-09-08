@@ -463,22 +463,45 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
      clavier suffisent. tabindex la rend atteignable au clavier, aria-label
      la rend lisible par un lecteur d'écran — la bulle CSS, elle, ne l'est
      pas. */
-  .rl-info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:5px;
+  /* C'est un vrai <button> : au doigt, ni :hover ni :focus-visible ne se
+     déclenchent sur un <span tabindex>, et les bulles restaient invisibles
+     sur téléphone — là où l'outil sert le plus. Un bouton, lui, prend le
+     focus à la tape, et la bulle s'ouvre sur :focus tout court. Elle se
+     referme en touchant ailleurs. */
+  .rl-info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:5px;
     border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted2);
     font-size:10px;font-weight:800;font-family:var(--font);cursor:help;vertical-align:middle;
-    position:relative;flex-shrink:0;padding:0;line-height:1;text-transform:none;letter-spacing:0}
-  .rl-info:hover,.rl-info:focus-visible{color:var(--orange);border-color:var(--orange);outline:none}
+    position:relative;flex-shrink:0;padding:0;line-height:1;text-transform:none;letter-spacing:0;
+    -webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent}
+  .rl-info:hover,.rl-info:focus{color:var(--orange);border-color:var(--orange);outline:none}
   .rl-info::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
     width:max-content;max-width:270px;padding:10px 12px;border-radius:10px;background:var(--bg2);
     border:1px solid var(--border);box-shadow:0 8px 26px rgba(0,0,0,.5);
     font-size:11.5px;font-weight:600;line-height:1.6;color:var(--text2);text-align:left;
     text-transform:none;letter-spacing:0;white-space:normal;opacity:0;visibility:hidden;
     transition:opacity .13s;z-index:70;pointer-events:none}
-  .rl-info:hover::after,.rl-info:focus-visible::after{opacity:1;visibility:visible}
+  .rl-info:hover::after,.rl-info:focus::after{opacity:1;visibility:visible}
   /* Près du bord droit, la bulle se recale plutôt que de sortir de l'écran. */
   .rl-info--g::after{left:auto;right:-6px;transform:none}
   .rl-info--bas::after{bottom:auto;top:calc(100% + 9px)}
   @media(max-width:600px){ .rl-info::after{max-width:min(270px,72vw)} }
+  /* Un lexique compact : les mots du domaine réunis sur une ligne, plutôt
+     que la même bulle répétée sur chacune des vingt cartes en dessous. */
+  .rl-lex{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;
+    font-size:11.5px;color:var(--muted2);line-height:1.7;margin:0 0 16px}
+  /* Une bulle centrée sur son icône sort de l'écran dès que l'icône est près
+     d'un bord — mesuré sur un téléphone de 390 px : six bulles sur vingt-neuf
+     débordaient. Dans une ligne de lexique, un titre de section ou une
+     légende, elle s'ancre donc sur le BLOC et non sur l'icône : elle s'ouvre
+     en panneau sous la ligne, toujours dans la page. */
+  .rl-lex,.db-section-hd,.athv-leg,.pl-vol-leg{position:relative}
+  .rl-lex .rl-info,.db-section-hd .rl-info,.athv-leg .rl-info,.pl-vol-leg .rl-info{position:static}
+  .rl-lex .rl-info::after,.db-section-hd .rl-info::after,
+  .athv-leg .rl-info::after,.pl-vol-leg .rl-info::after{
+    top:calc(100% + 6px);bottom:auto;left:0;right:auto;transform:none;
+    width:auto;max-width:none}
+  .rl-lex>span:first-child{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .rl-lex b{color:var(--text2);font-weight:700}
 
   /* ══ CARTES RÉTRACTABLES ══ */
   .card-hd--pli{cursor:pointer;justify-content:space-between;user-select:none}
@@ -2307,7 +2330,7 @@ table.lm-laps tbody tr{cursor:pointer}
             <div id="cs-courses-form">
               <div id="cs-assistant" style="margin-bottom:18px"></div>
               <div class="info-box" style="margin-bottom:20px">
-                Combine deux <strong>efforts maximaux</strong> pour estimer ta <strong>Vitesse Critique</strong> (VC) et ta réserve <strong>D′</strong>. Idéalement un effort court (~3 min) et un plus long, assez éloignés en durée. <span style="opacity:.85">Modèle 2 points (Monod &amp; Scherrer 1965 ; Jones &amp; Vanhatalo 2017).</span>
+                Combine deux <strong>efforts maximaux</strong> pour estimer ta <strong>Vitesse Critique</strong> (VC) et ta réserve <strong data-tip-cle="dp">D′</strong>. Idéalement un effort court (~3 min) et un plus long, assez éloignés en durée. <span style="opacity:.85">Modèle 2 points (Monod &amp; Scherrer 1965 ; Jones &amp; Vanhatalo 2017).</span>
               </div>
               <div class="cs-race">
                 <label>Performance 1</label>
@@ -2396,7 +2419,7 @@ table.lm-laps tbody tr{cursor:pointer}
           <div class="db-section" id="db-plan-section" style="display:none">
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-              <div class="db-section-title">Calendrier de préparation</div>
+              <div class="db-section-title" data-tip-cle="phases">Calendrier de préparation</div>
               <div class="db-vue" id="db-vue" style="display:none">
                 <button type="button" class="db-vue-b active" data-vue="prevu" onclick="dbSetVue('prevu')">Prévu</button>
                 <button type="button" class="db-vue-b" data-vue="realise" onclick="dbSetVue('realise')">Réalisé</button>
@@ -2423,7 +2446,7 @@ table.lm-laps tbody tr{cursor:pointer}
               <div class="db-section-ico">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <div class="db-section-title" id="db-pred-title">Potentiel de performance</div>
+              <div class="db-section-title" id="db-pred-title" data-tip-cle="potentiel">Potentiel de performance</div>
             </div>
             <div id="db-cs"></div>
               <div class="formula" id="pred-explain"></div>
@@ -2488,7 +2511,7 @@ table.lm-laps tbody tr{cursor:pointer}
           <div class="db-section" id="db-csmodel-section" style="display:none">
             <div class="db-section-hd">
               <div class="db-section-ico"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg></div>
-              <div class="db-section-title">Modele Vitesse Critique - calcul</div>
+              <div class="db-section-title" data-tip-cle="r2">Modele Vitesse Critique - calcul</div>
             </div>
             <div id="db-csmodel"></div>
           </div>
@@ -3225,12 +3248,8 @@ function renderZones(){
   /* Les noms de zones citent SV1, SV2 et VO₂max sans jamais les définir : la
      légende le fait ici, sous la table plutôt que dedans — .tbl-wrap défile
      horizontalement, et une bulle posée à l'intérieur serait rognée. */
-  const zLeg='<span style="display:inline-flex;flex-wrap:wrap;gap:4px 14px;align-items:center">'
-    +'<span>Repères physiologiques :</span>'
-    +'<span><b style="color:var(--text2)">SV1</b>'+rlInfo('sv1','bas')+'</span>'
-    +'<span><b style="color:var(--text2)">SV2</b>'+rlInfo('sv2','bas')+'</span>'
-    +'<span><b style="color:var(--text2)">VO₂max</b>'+rlInfo('vo2','bas g')+'</span>'
-    +'</span>';
+  const zLeg=rlLexique([['sv1','SV1'],['sv2','SV2'],['vo2','VO₂max'],
+                        ['rpe','RPE'],['talk','Talk test']]);
   document.getElementById('db-zones').innerHTML=`
     ${vcNote}
     <div class="tbl-wrap"><table>
@@ -3241,8 +3260,8 @@ function renderZones(){
       </tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
-    <div class="formula">Allure = 3600 / (Vitesse × %)  ·  FC cible = FC repos + % × (FC max − FC repos)</div><div style="font-size:11px;color:var(--muted2);margin-top:6px">${zNote}</div>
-    <div style="font-size:11px;color:var(--muted2);margin-top:5px">${zLeg}</div>`;
+    <div class="formula">Allure = 3600 / (Vitesse × %)  ·  FC cible = FC repos + % × (FC max − FC repos)</div><div style="font-size:11px;color:var(--muted2);margin-top:6px;margin-bottom:8px">${zNote}</div>
+    ${zLeg}`;
 }
 
 /* ── VC Slider ── */
@@ -3340,8 +3359,13 @@ function adjV(d){const el=document.getElementById('cs-vsl');if(!el)return;csSet(
 /* ── CS Predictions ── */
 function renderCSPredictions(){
   const box=document.getElementById('db-cs');
+  /* textContent emporterait l'infobulle posée au démarrage : on ne
+     réécrit que le libellé, et on repose la bulle. */
   const titleEl=document.getElementById('db-pred-title');
-  if(titleEl) titleEl.textContent='Potentiel de performance';
+  if(titleEl){
+    titleEl.textContent='Potentiel de performance';
+    if(typeof rlInfoPoser==='function'){ try{ rlInfoPoser(titleEl.parentNode); }catch(e){} }
+  }
   box.innerHTML='<div id="pred-cards"></div>';
   renderPredCards();
 }
@@ -3768,7 +3792,20 @@ const RL_TIPS={
   acwr: "Charge des 7 derniers jours divisée par la moyenne des 28 derniers. Zone sûre entre 0,8 et 1,3 ; au-delà de 1,5, le risque de blessure augmente nettement. C’est un indicateur de variation brutale, pas de volume absolu.",
   sv1:  "Premier seuil ventilatoire — le moment où la ventilation s’accélère plus vite que l’effort. En pratique : la limite haute de l’endurance fondamentale, là où la conversation devient hachée.",
   sv2:  "Second seuil ventilatoire — au-delà, le lactate s’accumule sans retour à l’équilibre. C’est l’allure du seuil, tenable de trente minutes à une heure selon le niveau.",
-  vo2:  "VO₂max — le débit maximal d’oxygène que l’organisme sait consommer. La VMA en est la traduction en vitesse : c’est elle qu’on mesure sur le terrain."
+  vo2:  "VO₂max — le débit maximal d’oxygène que l’organisme sait consommer. La VMA en est la traduction en vitesse : c’est elle qu’on mesure sur le terrain.",
+  rpe:  "Échelle de perception de l’effort, de 1 à 10 (échelle de Borg CR10). Elle ne remplace ni la montre ni le chrono : elle dit ce que l’athlète a vécu, et c’est la seule mesure qui intègre la fatigue, la chaleur et le sommeil.",
+  talk: "Test de la parole : jusqu’où peut-on parler en courant. Conversation fluide, phrases courtes, mots isolés, plus rien — les ruptures tombent près des seuils ventilatoires. C’est le repère de terrain quand il n’y a ni montre ni piste.",
+  r2:   "Coefficient de détermination : la part de la variation des points expliquée par le modèle, de 0 à 1. Au-dessus de 0,99, les efforts sont cohérents entre eux ; en dessous de 0,95, l’un d’eux n’a pas été couru à fond ou a été mal chronométré.",
+  riegel:"Formule de Riegel (1977) : temps₂ = temps₁ × (distance₂ / distance₁) puissance 1,06. Elle convertit une performance d’une distance à l’autre. Fiable entre distances proches, elle devient optimiste au-delà du semi — elle ignore le mur du glycogène et le volume d’entraînement.",
+  potentiel:"Ce que les repères actuels laissent espérer, pas une prédiction de résultat. Le modèle ne connaît ni le volume d’entraînement, ni le parcours, ni la météo, ni le jour J : c’est une cible de travail, à confronter au terrain.",
+  phases:"Base, Développement, Spécifique, Affûtage. On construit d’abord la capacité à encaisser, puis le moteur, puis l’allure de course elle-même, et on arrive frais. Les proportions varient avec la distance visée et le temps disponible.",
+  decharge:"Semaine allégée (− 30 % de volume) qui ferme un bloc : c’est pendant elle que l’adaptation se fait, pas pendant la charge. Calée en fin de bloc pour démarrer le suivant frais, jamais plus de trois semaines de charge d’affilée.",
+  affutage:"Les dernières semaines : le volume baisse fortement (− 41 à − 60 %) mais l’intensité se maintient. Baisser aussi l’intensité ferait perdre les qualités construites ; c’est la fatigue qu’on retire, pas l’entraînement.",
+  volume:"Le kilométrage hebdomadaire, hors qualité. C’est le premier facteur de progression sur les distances longues, et aussi le premier facteur de blessure quand il monte trop vite : la règle est de le faire varier lentement.",
+  ef:   "Endurance fondamentale — l’allure où la conversation reste fluide, sous le premier seuil. C’est la majeure partie du volume : elle construit le cœur, les capillaires et les mitochondries sans coûter de récupération.",
+  seuil:"Allure seuil — la plus rapide qu’on peut tenir sans que le lactate s’accumule, soit environ trente minutes à une heure de course. C’est l’allure qui déplace la frontière entre le tenable et l’intenable.",
+  sl:   "Sortie longue — la sortie hebdomadaire la plus longue. Elle plafonne vers 2 h 45 d’effort : au-delà, le coût de récupération dépasse le gain. Sur marathon, elle porte souvent des portions à allure course.",
+  fartlek:"Jeu d’allures : des accélérations libres dans un footing, sans piste ni chrono. Moins précis qu’un fractionné calibré, plus souple — utile quand le terrain ou la forme du jour ne se prêtent pas à des temps imposés."
 };
 /* opts : 'g' recale la bulle vers la gauche près du bord droit,
           'bas' la fait descendre quand la carte est haut de page. */
@@ -3779,7 +3816,10 @@ function rlInfo(cle,opts){
     +(/\bg\b/.test(opts||'')?' rl-info--g':'')
     +(/\bbas\b/.test(opts||'')?' rl-info--bas':'');
   var e=t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  return '<span class="'+cls+'" tabindex="0" role="note" aria-label="'+e+'" data-tip="'+e+'">i</span>';
+  /* type="button" : posée dans un <label> ou un <th> triable, elle ne doit
+     ni soumettre, ni déclencher ce qui l'entoure. */
+  return '<button type="button" class="'+cls+'" aria-label="'+e+'" data-tip="'+e+'"'
+    +' onclick="event.stopPropagation();event.preventDefault();this.focus()">i</button>';
 }
 /* Pose les infobulles sur les intitulés qui les attendent. Le HTML de la
    page est statique : plutôt que d'y répéter le balisage, on l'injecte au
@@ -3791,6 +3831,15 @@ function rlInfoPoser(racine){
     var pos=el.getAttribute('data-tip-pos')||'';
     el.insertAdjacentHTML('beforeend', rlInfo(cle,pos));
   });
+}
+
+/* Une ligne de lexique : [clé, libellé]. Posée en tête d'écran plutôt que
+   sur chaque carte — répéter la même bulle vingt fois n'apprend rien de plus
+   et alourdit la lecture. */
+function rlLexique(paires){
+  return '<div class="rl-lex"><span>Lexique</span>'
+    +paires.map(function(x){ return '<span><b>'+x[1]+'</b>'+rlInfo(x[0],'bas')+'</span>'; }).join('')
+    +'</div>';
 }
 
 /* ══ CARTES RÉTRACTABLES — MÉMOIRE PAR ATHLÈTE ══
@@ -7614,7 +7663,7 @@ function extUpd(k){
 function renderExtrapol(){
   const wrap=document.getElementById('extrapol-wrap');if(!wrap)return;
   wrap.innerHTML=
-    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Extrapolation \u2014 potentiel de course</div><div class="input-hero-sub">Estime le potentiel d\u2019un athl\u00e8te sur 5 km, 10 km, semi et marathon \u00e0 partir d\u2019une course r\u00e9cente ou de sa vitesse critique \u2014 m\u00e9thodes issues de la litt\u00e9rature scientifique, class\u00e9es par fiabilit\u00e9.</div></div>'
+    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Extrapolation \u2014 potentiel de course'+rlInfo('riegel','bas')+'</div><div class="input-hero-sub">Estime le potentiel d\u2019un athl\u00e8te sur 5 km, 10 km, semi et marathon \u00e0 partir d\u2019une course r\u00e9cente ou de sa vitesse critique \u2014 m\u00e9thodes issues de la litt\u00e9rature scientifique, class\u00e9es par fiabilit\u00e9.</div></div>'
     +toolAthleteBar()
     +libExtrapolHTML();
 }
@@ -7691,6 +7740,8 @@ function renderLibrary(){
       '<button class="lib-create-btn" onclick="exportNolioJSON()" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.1);color:#60A5FA">⬇ Exporter (JSON)</button>'+
       '<button class="lib-create-btn" onclick="openNolioDeploy()" style="border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34D399" title="Lance d\'abord node server.js dans le dossier nolio-deploy">→ Déployer vers Nolio</button>'+
     '</div>'+
+    rlLexique([['ef','Base aérobie'],['seuil','Seuil'],['vo2','VO₂max'],
+               ['sl','Sortie longue'],['fartlek','Fartlek'],['rpe','RPE']])+
     '<div id="lib-create" class="lib-create-box" style="display:none"></div>'+
     '<div id="lib-cards"></div>';
   renderLibCards();
@@ -8301,7 +8352,11 @@ function exportAthleteView(returnDoc){
   //    curseurs = input[type=range].sl / .rsl + boutons .adj
   // Les flèches de carrousel sont de la navigation, pas une commande coach :
   // elles restent, au même titre que les + / − des curseurs.
-  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.classList.contains('sl-tp-c')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
+  /* La fiche est en lecture seule : les boutons partent, sauf ceux qui font
+     partie de la lecture — les flèches de carrousel, le curseur d'allure, et
+     les infobulles. Une bulle est un <button> depuis qu'elle doit s'ouvrir au
+     doigt : sans cette exception, l'athlète recevrait une fiche muette. */
+  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.classList.contains('sl-tp-c')||b.classList.contains('rl-info')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
   // La bascule Prévu / Réalisé est un outil de coach : elle lit Supabase avec
   // la session du coach, que la fiche n'a pas. On l'enlève entière, sans quoi
   // il resterait un cadre vide une fois ses boutons retirés.
@@ -8936,7 +8991,7 @@ function plPhaseJustif(p){
 }
 function plPhaseBoxHTML(p){
   var _cb=0;plPhases(p,_plW).forEach(function(s){if(s[0]==='base')_cb=s[1];});
-  return '<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">R\u00e9partition des phases</div>'
+  return '<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">R\u00e9partition des phases'+rlInfo('phases')+'</div>'
     +'<div id="pl-justif" style="font-size:12.5px;color:var(--text2);line-height:1.65;margin-bottom:12px">'+plPhaseJustif(p)+'</div>'
     +'<label style="display:inline-flex;align-items:center;gap:9px;margin-bottom:12px;cursor:pointer;padding:8px 12px;border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,0.02)">'
     +'<input type="checkbox" id="pl-base-cb" '+(_plBase?'checked':'')+' onchange="setPlBase(this.checked)" style="width:17px;height:17px;cursor:pointer;accent-color:'+PL_PHC.base+'">'
@@ -9060,7 +9115,7 @@ function plLoadHTML(p,wk,opts){
   return '<div style="margin-top:'+(opts.noTitle?'0':'16px')+'">'+title
     +'<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:8px">'+legend+'</div>'
     +'<div class="hscroll" style="overflow-x:auto"><div class="plvol-box" style="position:relative;min-width:max(100%,'+(Math.max(1,wk.length)*42)+'px)"><canvas id="'+cid+'"></canvas></div></div>'
-    +'<div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 3 sem de charge d’affilée. Affûtage −41 à −60 % (Bosquet 2007).</div></div>';
+    +'<div class="pl-vol-leg" style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;color:var(--muted2);margin-top:8px"><i style="width:9px;height:9px;border-radius:50%;background:#94A3B8"></i>Décharge'+rlInfo('decharge','bas')+' (−30 %, barre plus claire) calée en <b>fin de bloc</b> pour démarrer le suivant frais ; jamais + de 3 sem de charge d’affilée. Affûtage'+rlInfo('affutage','bas g')+' −41 à −60 % (Bosquet 2007).</div></div>';
 }
 let _plVolCharts={};
 function plDrawVol(p,wk,cid){
@@ -9251,7 +9306,7 @@ function plPhaseEditHTML(p){
     handles+='<div id="pl-h-'+i+'" onpointerdown="plTLDown(event,'+i+')" title="Glisser pour r\u00e9partir" style="position:absolute;top:-5px;bottom:-5px;left:'+x+'%;width:20px;transform:translateX(-50%);cursor:ew-resize;touch-action:none;z-index:5;display:flex;align-items:center;justify-content:center">'
       +'<div style="width:5px;height:72%;background:#E2E8F0;border:1px solid #0B1220;border-radius:4px;box-shadow:0 1px 5px rgba(0,0,0,0.45)"></div></div>';}
   return '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">'
-    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">R\u00e9partition des phases</span>'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap"><span style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">R\u00e9partition des phases'+rlInfo('phases')+'</span>'
     +(_plPhaseOverride?'<button type="button" onclick="plPhaseAuto()" style="background:none;border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:11px;font-weight:800;padding:4px 10px;cursor:pointer">\u21ba Auto</button>':'')
     +'</div>'
     +'<div style="font-size:11.5px;color:var(--muted2);margin-bottom:10px">Glisse les <b>s\u00e9parations</b> pour donner plus ou moins de semaines \u00e0 chaque phase.</div>'
@@ -10533,7 +10588,7 @@ function renderPlanif(){
       +'<input id="pl-t-m" type="number" min="0" max="59" placeholder="min" value="'+plTP('m')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin:0 2px">min</span>'
       +'<input id="pl-t-s" type="number" min="0" max="59" placeholder="sec" value="'+plTP('s')+'" oninput="plTimeSet()" style="width:52px"><span style="font-size:11px;font-weight:700;color:var(--muted2);margin-left:2px">s</span>'
     +'</span><div id="pl-time-verdict" style="margin-top:6px;font-size:12px;line-height:1.5"></div></div>'
-    +'<div><div style="font-size:12.5px;font-weight:700;color:var(--muted2);margin-bottom:6px">Volume actuel ('+(_plD==='trail'?'h':'km')+'/sem)</div>'
+    +'<div><div style="font-size:12.5px;font-weight:700;color:var(--muted2);margin-bottom:6px">Volume actuel ('+(_plD==='trail'?'h':'km')+'/sem)'+rlInfo('volume')+'</div>'
     +'<input type="number" value="'+(_plVol||'')+'" placeholder="'+plDefaultVol(p)+'" oninput="plQ(\'vol\',this.value)" class="goal-date" style="width:96px">'
     +'<div id="pl-vol-verdict" style="margin-top:6px;font-size:11.5px;line-height:1.5"></div></div>'
     +'<div><div style="font-size:12.5px;font-weight:700;color:var(--muted2);margin-bottom:6px">Séances / sem</div>'
