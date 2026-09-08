@@ -4118,7 +4118,16 @@ function saveCurrentAthlete(silencieux){
     if(!confirm('Le profil de « '+athletes[existing].pseudo+' » est verrouillé.\n\n'
       +'OK → le déverrouiller et enregistrer par-dessus.\nAnnuler → ne rien changer.')) return;
   }
-  const ath={
+  /* On PART de la fiche existante au lieu d'en reconstruire une neuve.
+     La liste ci-dessous énumère ce que le profil de travail sait remplir ;
+     tout ce qu'elle ne cite pas vivait sur la fiche et n'a aucune raison de
+     disparaître parce qu'on a corrigé une VMA. C'est ce qui arrivait aux
+     temps relevés sur la feuille de séance (`perfs`) : ils étaient effacés
+     au premier enregistrement — y compris l'enregistrement automatique, qui
+     part à chaque frappe dans Saisie. Une fiche pouvait ainsi perdre une
+     séance entière de chronos sans que rien ne le signale. */
+  const ancien=(existing>=0)?athletes[existing]:{};
+  const ath=Object.assign({},ancien,{
     id:existing>=0?athletes[existing].id:Date.now(),
     pseudo:S.pseudo,
     email:existing>=0?(athletes[existing].email||''):'',
@@ -4134,7 +4143,7 @@ function saveCurrentAthlete(silencieux){
     csPts:S.csPts||null,
     plan:S.plan||null,
     analyses:S.analyses||[],
-  };
+  });
   // Historique de progression
   let hist=(existing>=0 && Array.isArray(athletes[existing].history))?athletes[existing].history.slice():[];
   if(existing>=0 && !hist.length){
