@@ -687,6 +687,19 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
      Sélecteur à deux classes, sinon « .plw-ch span » l'emporte : c'est une
      règle qui a déjà mangé le chevron et la loupe de cette même pastille. */
   .plw-ch .plw-ov{display:inline-block;margin-left:3px;padding:0 5px;border-radius:9px;background:rgba(255,107,26,.18);color:var(--orange);font-size:10px;font-weight:800;white-space:nowrap;overflow-wrap:normal;word-break:keep-all;flex:0 0 auto;align-self:center}
+  /* La pastille du réalisé. Sélecteur à DEUX classes comme .plw-ov : sinon
+     « .plw-ch span » (0,1,1) l'emporte et la coupe lettre par lettre — le
+     piège s'est déjà refermé trois fois sur ce fichier. */
+  .plw-ch .plw-fait{display:inline-block;margin-left:3px;padding:0 5px;border-radius:9px;
+    font-size:10px;font-weight:800;white-space:nowrap;overflow-wrap:normal;word-break:keep-all;
+    flex:0 0 auto;align-self:center;border:1px solid transparent}
+  .plw-ch .plw-fait--ok{background:rgba(16,185,129,.16);border-color:rgba(16,185,129,.4);color:#34D399}
+  .plw-ch .plw-fait--lent{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.4);color:#FBBF24}
+  .plw-ch .plw-fait--vif{background:rgba(96,165,250,.16);border-color:rgba(96,165,250,.4);color:#60A5FA}
+  /* Quatre actions dans une case de jour : elles passent sur deux rangs
+     plutôt que de se réduire à des traits de 15 px. */
+  .plw-acts{flex-wrap:wrap}
+  .plw-ch button{flex:1 1 44%}
   .db-plan-cal{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
   /* ── Calendrier « Réalisé » : le prévu s'efface derrière le couru ── */
   .db-ch-prevu{opacity:.62}
@@ -1271,6 +1284,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 }
 .btn-del:hover{border-color:#F87171;background:rgba(248,113,113,0.1)}
 .btn-del svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Le dernier relevé de temps, sous la date d'enregistrement. */
+.ath-releve{margin-top:6px;font-size:11.5px;font-weight:700;color:#34D399;
+  background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.28);
+  border-radius:20px;padding:3px 10px;display:inline-block;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ath-empty{text-align:center;padding:60px 24px;color:var(--muted2)}
 .ath-empty-ico{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .ath-empty-ico svg{width:22px;height:22px;stroke:var(--muted2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
@@ -4482,6 +4500,33 @@ function athTriSet(k){
   renderAthletes();
 }
 
+/* Le dernier jour où le coach a noté des temps pour cet athlète, et sur
+   quelle séance. Les relevés vivaient sur la fiche sans qu'elle en dise
+   jamais rien : on ne savait pas si un athlète avait été suivi ou oublié. */
+function athDernierReleve(a){
+  var perfs=(a&&a.perfs)||{};
+  var jours=Object.keys(perfs).sort();
+  if(!jours.length) return null;
+  var iso=jours[jours.length-1];
+  var titres=Object.keys(perfs[iso]||{});
+  if(!titres.length) return null;
+  var n=0;
+  titres.forEach(function(t){ n+=Object.keys(perfs[iso][t]||{}).length; });
+  return {iso:iso, titre:titres[0], seances:titres.length, temps:n};
+}
+/* La pastille reste courte : la carte fait 300 px, le titre d'une séance la
+   ferait déborder et se couper. Le détail va dans l'infobulle du survol. */
+function athRelevTxt(a){
+  var r=athDernierReleve(a);
+  if(!r) return '';
+  var d=new Date(r.iso+'T12:00:00');
+  return {court:d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})
+            +' \u00b7 '+r.temps+' temps not'+(r.temps>1?'és':'é'),
+          long:'Dernière séance relevée le '
+            +d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})
+            +' — '+r.titre+(r.seances>1?(' et '+(r.seances-1)+' autre'+(r.seances>2?'s':'')):'')
+            +', '+r.temps+' temps'};
+}
 function athvIso(d){
   return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 }
@@ -4751,6 +4796,8 @@ function renderAthletes(){
       <div class="ath-avatar">${initials}</div>
       <div class="ath-name">${a.pseudo}${a.verrouille?' <span class="ath-cad">🔒</span>':''}</div>
       <div class="ath-date">Enregistré le ${a.savedAt}${S.athId===a.id?' · <span style="color:var(--orange);font-weight:800">profil ouvert</span>':''}</div>
+      ${(function(){var t=athRelevTxt(a);
+        return t?`<div class="ath-releve" title="${t.long.replace(/"/g,'&quot;')}">✓ ${t.court}</div>`:'';})()}
       <div class="ath-metrics">
         <div class="ath-metric">
           <div class="ath-metric-lbl">${mainLbl}</div>
@@ -7469,6 +7516,8 @@ function libBlocDel(i){
    Un seul geste : le bouton « Feuille » d'une carte de bibliothèque ouvre la
    feuille avec TOUS les athlètes déjà cochés. Décocher est l'exception. */
 var _fsSel=null, _fsKind=null, _fsIdx=null, _fsDate=null;
+/* L'ajustement de durée du jour, quand la feuille vient du calendrier. */
+var _fsOv=null;
 
 /* ══ LE RÉALISÉ, SAISI À LA MAIN ══
    Le coach chronomètre au bord de la piste et note. Rien à importer, rien à
@@ -7554,6 +7603,53 @@ function fsDateSet(v){
   if(h) h.innerHTML=fsHTML();
 }
 
+/* ══ CE QUI REMONTE SUR LE CALENDRIER ══
+   Les chronos relevés vivaient sur la fiche de l'athlète sans qu'aucun écran
+   ne les réaffiche : le coach ne pouvait les relire qu'en rouvrant la même
+   feuille, à la même date, sur la même séance. La pastille du calendrier dit
+   maintenant qu'ils existent, combien, et comment ça s'est passé.
+   Le bilan porte sur l'athlète RATTACHÉ au profil ouvert : c'est son plan
+   qu'on regarde. */
+/* athRattache() relit et reparse tout le stock d'athlètes. Appelée pour
+   chacune des soixante pastilles d'un plan, elle coûterait soixante lectures
+   de localStorage par rendu : on la mémorise le temps d'un calendrier. */
+var _plFaitAth;
+function plFaitReset(){ _plFaitAth=undefined; }
+function plFaitAthlete(){
+  if(_plFaitAth===undefined) _plFaitAth=(typeof athRattache==='function')?athRattache():null;
+  return _plFaitAth;
+}
+function plFaitBilan(iso,titre,ov){
+  var a=plFaitAthlete();
+  if(!a||!a.vma) return null;
+  var notes=((a.perfs||{})[iso]||{})[titre];
+  if(!notes) return null;
+  var t=(typeof libParTitre==='function')?libParTitre(titre):null;
+  if(!t) return null;
+  var seance=(ov&&typeof plSeanceAjustee==='function')?plSeanceAjustee(t.s,ov):t.s;
+  var lignes=fsLignes(seance);
+  var n=0, ok=0, lent=0, vif=0;
+  lignes.forEach(function(l,i){
+    var reel=notes[String(i)];
+    if(typeof reel!=='number'||reel<=0) return;
+    n++;
+    var c=fsCible(l,a.vma);
+    var r=c?fsEcart(reel,c.lo,c.hi):null;
+    if(!r) return;
+    if(r.cls==='ok') ok++; else if(r.cls==='lent') lent++; else vif++;
+  });
+  if(!n) return null;
+  // La couleur dit l'essentiel : tout dans la cible, ou bien ce qui domine.
+  var cls=(ok===n)?'ok':((lent>=vif)?'lent':'vif');
+  return {n:n, total:lignes.filter(function(l){return !l.soft;}).length, cls:cls};
+}
+function plFaitChip(iso,titre,ov){
+  var b=plFaitBilan(iso,titre,ov);
+  if(!b) return '';
+  var t={ok:'Tous les temps dans la cible',lent:'Plutôt au-dessus de la cible',vif:'Plutôt en dessous de la cible'}[b.cls];
+  return '<span class="plw-fait plw-fait--'+b.cls+'" title="'+t+' — '+b.n+' temps relev'+(b.n>1?'és':'é')+'">\u2713 '+b.n+'</span>';
+}
+
 /* La séance développée en lignes d'effort. Une ligne par effort distinct :
    un 5 × 1000 tient sur une ligne, pas cinq — c'est ainsi qu'on le lit. */
 function fsLignes(s){
@@ -7617,8 +7713,29 @@ function fsAthletes(){
     return {id:a.id, nom:a.pseudo||'Sans nom', vma:(a.vma&&a.vma>=6&&a.vma<=35)?a.vma:null};
   });
 }
-function fsOuvrir(kind,idx){
+/* ══ LA FEUILLE OUVERTE DEPUIS LE PLAN ══
+   Le coach vient de poser une séance un mardi : c'est là qu'il veut noter
+   les chronos, pas en retrouvant la séance dans la Bibliothèque et en
+   réglant la date à la main. La bonne séance, le bon jour, l'athlète du plan
+   déjà coché — et il peut en cocher d'autres, un groupe court souvent la
+   même séance le même jour.
+   L'ajustement de durée du jour voyage aussi : une sortie longue portée à
+   2 h dans le plan doit se relever sur 2 h, pas sur celle de la
+   bibliothèque. */
+function fsOuvrirPlan(iso,si){
+  var it=(typeof _plSessions!=='undefined'&&_plSessions[iso]||[])[si];
+  if(!it) return;
+  var t=(typeof libParTitre==='function')?libParTitre(it.t):null;
+  if(!t){ alert('Séance introuvable dans la bibliothèque : « '+it.t+' ».'); return; }
+  _fsDate=iso;
+  _fsOv=(it.min!=null||it.dist!=null)?{min:it.min,dist:it.dist}:null;
+  var moi=(typeof S!=='undefined'&&S.athId!=null)?S.athId:null;
+  if(moi!=null&&fsAthletes().some(function(a){return a.id===moi&&a.vma;})) _fsSel=[moi];
+  fsOuvrir(t.kind,t.idx,true);
+}
+function fsOuvrir(kind,idx,depuisPlan){
   var s=libFindSession(kind,idx); if(!s) return;
+  if(!depuisPlan) _fsOv=null;
   if(s.muscu){ alert('La feuille de séance donne des temps de passage : elle ne s’applique pas à une séance de musculation.'); return; }
   _fsKind=kind; _fsIdx=idx;
   if(!_fsDate) _fsDate=fsIsoJour();
@@ -7627,7 +7744,14 @@ function fsOuvrir(kind,idx){
   if(_fsSel==null) _fsSel=tous.filter(function(a){return a.vma;}).map(function(a){return a.id;});
   rlModalOuvrir('fs-modal', fsHTML());
 }
-function fsFermer(){ rlModalFermer('fs-modal'); }
+/* Fermer la feuille redessine le calendrier : les temps qu'on vient de noter
+   doivent se voir sur la pastille sans avoir à changer d'onglet. */
+function fsFermer(){
+  rlModalFermer('fs-modal');
+  _fsOv=null;
+  try{ plFaitReset(); if(typeof plUpd==='function'&&document.getElementById('pl-cal')) plUpd(); }catch(e){}
+  try{ if(typeof renderDashPlan==='function'&&document.getElementById('db-plan')) renderDashPlan(); }catch(e){}
+}
 function fsToggle(id){
   var i=_fsSel.indexOf(id);
   if(i<0)_fsSel.push(id); else _fsSel.splice(i,1);
@@ -7637,6 +7761,7 @@ function fsToggle(id){
 function fsImprimer(){ window.print(); }
 function fsHTML(){
   var s=libFindSession(_fsKind,_fsIdx); if(!s) return '';
+  if(_fsOv&&typeof plSeanceAjustee==='function') s=plSeanceAjustee(s,_fsOv);
   var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
   var tous=fsAthletes();
   var pris=tous.filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
@@ -10164,6 +10289,7 @@ function plCourseChip(quoi,objId,nom,chrono){
     +'</div>';
 }
 function plCalendarHTML(p,weeks,opts){
+  plFaitReset();
   var RO=!!(opts&&opts.ro);
   var vmaCal=(typeof S!=='undefined'&&S&&S.vma)?S.vma:null;
   if(!_plDate1) return '<div style="font-size:13px;color:var(--muted);padding:6px 0">Renseigne une date de début (ci-dessus) pour afficher le calendrier de la prépa.</div>';
@@ -10193,7 +10319,8 @@ function plCalendarHTML(p,weeks,opts){
         var esc=String(sx.t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
         var held=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===si)?' plw-ch--grab':'';
         var ov=plOvTxt(sx);
-        var lbl=esc+(ov?' <span class="plw-ov">'+ov+'</span>':'');
+        var fait=(typeof plFaitChip==='function')?plFaitChip(iso,sx.t,sx):'';
+        var lbl=esc+(ov?' <span class="plw-ov">'+ov+'</span>':'')+fait;
         if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\','+si+')" title="Voir le détail de la séance"><span>'+lbl+'</span><span class="plw-oeil">›</span></div>';
         return '<div class="plw-ch plw-ch--act'+held+'" draggable="true"'
@@ -10204,6 +10331,7 @@ function plCalendarHTML(p,weeks,opts){
           +'<span>'+lbl+'</span>'
           +'<div class="plw-acts">'
             +'<button type="button" class="plw-cp" title="Régler la durée, ou modifier la séance" aria-label="Régler la durée, ou modifier la séance" onclick="event.stopPropagation();plDureeOuvrir(\''+iso+'\','+si+')">✎</button>'
+            +'<button type="button" class="plw-cp" title="Feuille de séance : noter les temps de ce jour-là" aria-label="Feuille de séance" onclick="event.stopPropagation();fsOuvrirPlan(\''+iso+'\','+si+')">▤</button>'
             +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
             +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
           +'</div></div>';
