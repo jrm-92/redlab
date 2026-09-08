@@ -493,6 +493,18 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-tab tr.fs-soft td{background:rgba(255,255,255,.02);color:var(--muted);font-weight:700}
   .fs-rec{font-size:11.5px;color:var(--muted2);font-weight:600;white-space:nowrap}
   .fs-note{font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:12px}
+  /* La saisie du réalisé. Une case sous la cible : a l'écran on y tape, sur
+     le papier on y écrit au stylo. Le meme balisage sert aux deux. */
+  .fs-in{display:block;width:74px;margin:5px auto 0;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:7px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:800;text-align:center;padding:5px 4px;outline:none;font-variant-numeric:tabular-nums}
+  .fs-in:focus{border-color:var(--orange)}
+  .fs-in::placeholder{font-weight:600;color:var(--muted2);font-size:11px}
+  .fs-ec{display:block;margin-top:3px;font-size:11px;font-weight:800;white-space:nowrap}
+  .fs-ec--ok{color:#34D399}
+  .fs-ec--vif{color:#60A5FA}
+  .fs-ec--lent{color:#FBBF24}
+  .fs-date{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted2)}
+  .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
+  .fs-date input:focus{border-color:var(--orange)}
   .fs-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 
   @media(max-width:640px){
@@ -511,7 +523,9 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
       background:#fff!important;padding:0!important;overflow:visible!important}
     #fs-modal .pl-modal-box{max-width:none!important;width:auto!important;border:none!important;
       box-shadow:none!important;background:#fff!important;padding:0!important;max-height:none!important;overflow:visible!important}
-    #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act{display:none!important}
+    /* Le sélecteur de date ne sert qu'à l'écran : sur le papier, la date est
+       déjà écrite en toutes lettres sous le titre. */
+    #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act,#fs-modal .fs-date{display:none!important}
     #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #fs-modal .fs-t{font-size:17pt}
     #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
@@ -523,6 +537,12 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     #fs-modal .fs-tab td{border-bottom:1px solid #ddd!important}
     #fs-modal .fs-tab td.fs-val{color:#000!important;font-size:12pt}
     #fs-modal .fs-tab td.fs-val small{color:#666!important}
+    /* Sur le papier, la case de saisie devient une case a remplir. */
+    #fs-modal .fs-in{border:none!important;border-bottom:1px solid #999!important;border-radius:0!important;
+      background:transparent!important;color:#000!important;width:62px!important;padding:2px 0!important;
+      font-size:11pt!important;margin-top:6px!important}
+    #fs-modal .fs-in::placeholder{color:transparent!important}
+    #fs-modal .fs-ec{color:#555!important}
     #fs-modal .fs-tab tr.fs-soft td{background:#fafafa!important;color:#555!important}
     #fs-modal tr{break-inside:avoid}
   }
@@ -6802,7 +6822,91 @@ function libBlocDel(i){
 
    Un seul geste : le bouton « Feuille » d'une carte de bibliothèque ouvre la
    feuille avec TOUS les athlètes déjà cochés. Décocher est l'exception. */
-var _fsSel=null, _fsKind=null, _fsIdx=null;
+var _fsSel=null, _fsKind=null, _fsIdx=null, _fsDate=null;
+
+/* ══ LE RÉALISÉ, SAISI À LA MAIN ══
+   Le coach chronomètre au bord de la piste et note. Rien à importer, rien à
+   apparier : il tape ce qu'il a lu. Les résultats vivent sur la fiche de
+   l'athlète — donc ils partent avec la synchro cloud existante, sans table
+   supplémentaire — et sont rangés par date puis par séance : la même séance
+   se recourt, et chaque passage garde ses chronos.
+
+     athlete.perfs = { '2026-09-08': { 'Titre de séance': { '0': 74, '1': 233 } } }
+*/
+function fsIsoJour(d){
+  d=d||new Date();
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+/* « 1:13 », « 1'13 » ou « 73 » donnent tous 73 secondes : le coach tape ce
+   qu'affiche son chrono, sans avoir à choisir un format. */
+function fsSec(txt){
+  if(txt==null) return null;
+  var t=String(txt).trim().replace(',','.');
+  if(!t) return null;
+  var m=t.match(/^(\d{1,3})\s*[:'’.]\s*(\d{1,2})$/);
+  if(m){ var sc=+m[2]; return sc<60 ? (+m[1]*60+sc) : null; }
+  if(/^\d{1,5}(\.\d+)?$/.test(t)) return Math.round(parseFloat(t));
+  return null;
+}
+function fsPerfs(a){ return (a&&a.perfs)||{}; }
+/* Un écart se lit en secondes tant qu'il en reste sous la minute : « +3 s »
+   se saisit d'un coup d'œil là où « +0'03" » demande un décodage. */
+function fsEcartTxt(d){
+  d=Math.round(Math.abs(d));
+  return d<60 ? (d+' s') : fHMS(d);
+}
+/* Où se situe le chrono par rapport à la fenêtre visée. */
+function fsEcart(reel,lo,hi){
+  if(reel==null||lo==null||hi==null) return null;
+  if(reel>hi) return {cls:'lent', txt:'+'+fsEcartTxt(reel-hi)};
+  if(reel<lo) return {cls:'vif',  txt:'\u2212'+fsEcartTxt(lo-reel)};
+  return {cls:'ok', txt:'dans la cible'};
+}
+function fsLire(athId,titre,i){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  var j=fsPerfs(a)[_fsDate]||{};
+  var v=(j[titre]||{})[String(i)];
+  return (typeof v==='number'&&v>0)?v:null;
+}
+function fsNoter(athId,titre,i,champ){
+  var sec=fsSec(champ.value);
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===athId;});
+  if(!a) return;
+  a.perfs=a.perfs||{};
+  a.perfs[_fsDate]=a.perfs[_fsDate]||{};
+  a.perfs[_fsDate][titre]=a.perfs[_fsDate][titre]||{};
+  if(sec==null||sec<=0){
+    delete a.perfs[_fsDate][titre][String(i)];
+    // On ne laisse pas de coquilles vides derrière soi.
+    if(!Object.keys(a.perfs[_fsDate][titre]).length) delete a.perfs[_fsDate][titre];
+    if(!Object.keys(a.perfs[_fsDate]).length) delete a.perfs[_fsDate];
+  } else {
+    a.perfs[_fsDate][titre][String(i)]=sec;
+  }
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  fsEcartMaj(champ, sec);
+}
+/* L'écart s'affiche à côté de la case, sans redessiner le tableau : le coach
+   enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
+function fsEcartMaj(champ,sec){
+  var td=champ.closest('td'); if(!td) return;
+  var vieux=td.querySelector('.fs-ec'); if(vieux) vieux.remove();
+  if(sec==null) return;
+  var lo=parseFloat(td.getAttribute('data-lo')), hi=parseFloat(td.getAttribute('data-hi'));
+  if(!isFinite(lo)||!isFinite(hi)) return;
+  var r=fsEcart(sec,lo,hi); if(!r) return;
+  var e=document.createElement('span');
+  e.className='fs-ec fs-ec--'+r.cls;
+  e.textContent=r.txt;
+  champ.parentNode.appendChild(e);
+}
+function fsDateSet(v){
+  if(!v) return;
+  _fsDate=v;
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
 
 /* La séance développée en lignes d'effort. Une ligne par effort distinct :
    un 5 × 1000 tient sur une ligne, pas cinq — c'est ainsi qu'on le lit. */
@@ -6840,20 +6944,24 @@ function fsVit(l,vma){
 /* Ce qu'on écrit dans la case. Sur une distance : le chrono à tenir, avec
    l'allure en dessous. Sur une durée : l'allure seule — il n'y a pas de
    temps de passage à donner sur « 20 min ». */
-function fsCase(l,vma){
+/* La cible d'une case : le texte affiché, et la fenêtre en secondes quand
+   l'effort a une durée mesurable — c'est elle qui permettra de situer le
+   chrono saisi. */
+function fsCible(l,vma){
   var v=fsVit(l,vma);
-  if(!v) return '<span style="color:var(--muted2)">—</span>';
+  if(!v) return null;
   var all=function(x){ return fAll(1000/x); };
+  var aTxt=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
   if(l.d>0){
     var tLent=l.d/v.lo, tVif=l.d/v.hi;
-    var chrono=(Math.abs(tLent-tVif)<1.5)
-      ? fHMS(Math.round((tLent+tVif)/2))
-      : fHMS(Math.round(tVif))+'–'+fHMS(Math.round(tLent));
-    var aTxt=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
-    return chrono+'<small>'+aTxt+'</small>';
+    return {txt:((Math.abs(tLent-tVif)<1.5)
+             ? fHMS(Math.round((tLent+tVif)/2))
+             : fHMS(Math.round(tVif))+'–'+fHMS(Math.round(tLent)))+'<small>'+aTxt+'</small>',
+            lo:tVif, hi:tLent};
   }
-  var a=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
-  return a+(l.sec>0?'<small>'+fHMS(l.sec)+'</small>':'');
+  // Un bloc en durée n'a pas de temps de passage : sa durée EST la consigne.
+  return {txt:aTxt+(l.sec>0?'<small>'+fHMS(l.sec)+'</small>':''),
+          lo:(l.sec>0?l.sec:null), hi:(l.sec>0?l.sec:null)};
 }
 /* Les athlètes utilisables : il faut une VMA pour convertir un pourcentage.
    Ceux qui n'en ont pas sont montrés quand même, grisés, avec la raison —
@@ -6867,6 +6975,7 @@ function fsOuvrir(kind,idx){
   var s=libFindSession(kind,idx); if(!s) return;
   if(s.muscu){ alert('La feuille de séance donne des temps de passage : elle ne s’applique pas à une séance de musculation.'); return; }
   _fsKind=kind; _fsIdx=idx;
+  if(!_fsDate) _fsDate=fsIsoJour();
   var tous=fsAthletes();
   // Tous cochés d'emblée : le coach imprime pour son groupe, pas pour un.
   if(_fsSel==null) _fsSel=tous.filter(function(a){return a.vma;}).map(function(a){return a.id;});
@@ -6899,13 +7008,26 @@ function fsHTML(){
     corps='<div class="fs-note" style="padding:18px 2px;font-size:13px">Choisis au moins un athlète pour calculer les temps de passage.</div>';
   } else {
     var lignes=fsLignes(s);
+    lignes.forEach(function(l,i){ l.i=i; });   // rang stable = clé de stockage
     var rows=lignes.map(function(l){
       if(l.soft){
         return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)+'</td>'
           +'<td colspan="'+(pris.length+1)+'">'+e(l.val)+'</td></tr>';
       }
       return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
-        +pris.map(function(a){ return '<td class="fs-val">'+fsCase(l,a.vma)+'</td>'; }).join('')
+        +pris.map(function(a){
+          var c=fsCible(l,a.vma);
+          if(!c) return '<td class="fs-val"><span style="color:var(--muted2)">—</span></td>';
+          var reel=fsLire(a.id,s.title,l.i);
+          var bornes=(c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
+          var r=fsEcart(reel,c.lo,c.hi);
+          var ec=r?('<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>'):'';
+          return '<td class="fs-val"'+bornes+'>'+c.txt
+            +'<span><input class="fs-in" type="text" inputmode="numeric" maxlength="7"'
+            +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="réel"'
+            +' aria-label="Temps réalisé — '+e(a.nom)+', '+e(l.lbl)+'"'
+            +' onchange="fsNoter('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',this)">'+ec+'</span></td>';
+        }).join('')
         +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>';
     }).join('');
     corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
@@ -6914,14 +7036,19 @@ function fsHTML(){
       +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
       +'<div class="fs-note">Chrono à tenir sur la fraction, allure au kilomètre en dessous. '
       +'Une fourchette d’intensité donne une fourchette de temps : c’est la marge, pas une imprécision. '
-      +'Les allures écrites en min/km sont absolues et valent pour tout le monde.</div>';
+      +'Les allures écrites en min/km sont absolues et valent pour tout le monde.'
+      +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — tape le chrono lu (<b>1:13</b> ou <b>73</b>, au choix) dans la case sous la cible. '
+      +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
+      +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
   }
 
   return '<div class="pl-modal-box fs-box">'
     +'<div class="pl-modal-top"><b>Feuille de séance</b><span style="flex:1"></span>'
       +'<button type="button" class="pl-modal-x" onclick="fsFermer()">×</button></div>'
-    +'<div class="fs-hd"><div><div class="fs-t">'+e(s.title)+'</div>'
-      +'<div class="fs-s">'+(th?e(th.lbl)+' · ':'')+new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div></div></div>'
+    +'<div class="fs-hd"><div style="flex:1;min-width:200px"><div class="fs-t">'+e(s.title)+'</div>'
+      +'<div class="fs-s">'+(th?e(th.lbl)+' · ':'')
+      +new Date(_fsDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+      +'<label class="fs-date">Séance du <input type="date" value="'+_fsDate+'" onchange="fsDateSet(this.value)"></label></div>'
     +'<div class="fs-pick">'+pick+'</div>'
     +corps
     +'<div class="fs-act">'
