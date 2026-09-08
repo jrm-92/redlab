@@ -343,6 +343,26 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lc-bord input{flex:1 1 130px;min-width:0}
   .lc-bord select{flex:1 1 190px;min-width:120px}
   .lc-bord .lc-bord-all{flex:0 0 76px;text-align:center}
+  /* La case « fourchette d'allure ». Décochée, l'étape part sans cible et le
+     sélecteur de zone n'a plus rien à dire : il se grise plutôt que de
+     disparaître, pour que le réglage se retrouve en recochant. */
+  /* Sélecteur à DEUX classes : `.lc-field label` (0,1,1) l'emporterait sinon
+     et repasserait la case en display:block, majuscules et interlettrage — le
+     même piège de spécificité que .plw-ch span a déjà tendu trois fois. */
+  .lc-bord label.lc-bord-sp{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;
+    margin:0;padding:0 2px;font-size:12.5px;font-weight:700;color:var(--muted2);
+    text-transform:none;letter-spacing:0;cursor:pointer;user-select:none;white-space:nowrap}
+  .lc-bord label.lc-bord-sp input{flex:0 0 auto;width:17px;height:17px;min-width:0;margin:0;
+    padding:0;accent-color:var(--orange);cursor:pointer}
+  .lc-bord label.lc-bord-sp:hover{color:var(--text2)}
+  .lc-bord select:disabled,.lc-bord input:disabled{opacity:.45;cursor:not-allowed}
+  .lc-bord-vu{flex:1 1 100%;font-size:12px;color:var(--muted2);padding:1px 2px 0}
+  .lc-bord-vu b{color:var(--orange);font-weight:800}
+  .fs-soft-v{display:block;font-weight:600;color:var(--muted2);font-size:12px;margin-top:2px}
+  /* L'allure des bords sur la carte de séance : discrète, à droite du texte. */
+  .lib-step-all{margin-left:8px;padding:1px 7px;border-radius:20px;
+    background:rgba(255,107,26,.10);border:1px solid rgba(255,107,26,.22);
+    color:var(--orange);font-size:11.5px;font-weight:800;white-space:nowrap}
   /* Poignée de déplacement. touch-action:none pour que le doigt fasse glisser
      l'étape au lieu de faire défiler la page. */
   .lb-grip{display:inline-flex;align-items:center;justify-content:center;width:24px;height:30px;flex-shrink:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted2);font-size:15px;line-height:1;border-radius:7px;border:1px solid transparent;background:transparent}
@@ -4927,7 +4947,11 @@ function _seancePourEspace(titre,vma,ov){
   if(s&&ov) s=plSeanceAjustee(s,ov);
   var th=s?(LIB_THEMES.find(function(x){return x.id===s.theme;})||LIB_THEMES[0]):null;
   var lignes=[];
-  if(s&&s.warm&&s.warm!=='—') lignes.push({k:'Échauffement',v:s.warm});
+  var bordEsp=function(txt,quoi){
+    var c=(vma&&typeof wktBordCibleTxt==='function')?wktBordCibleTxt(txt,vma,quoi):'';
+    return txt+(c?(' → '+c):'');
+  };
+  if(s&&s.warm&&s.warm!=='—') lignes.push({k:'Échauffement',v:bordEsp(s.warm,'warmup')});
   /* Une séance de musculation : un exercice par ligne, avec sa vidéo. Le lien
      part avec la fiche — l'athlète doit pouvoir revoir le mouvement au moment
      de le faire, pas seulement quand son coach le lui montre. */
@@ -4970,7 +4994,7 @@ function _seancePourEspace(titre,vma,ov){
     if(rec.length)core+=' ('+rec.join(' · ')+')';
     lignes.push({k:((s.blocks.length>1)?('Bloc '+(i+1)):'Corps'),v:core});
   });
-  if(s&&s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:s.cool});
+  if(s&&s.cool&&s.cool!=='—') lignes.push({k:'Retour au calme',v:bordEsp(s.cool,'cooldown')});
   return {titre:titre, theme:th?th.lbl:'', col:th?th.col:'#94A3B8',
           desc:s?(s.desc||''):'', lignes:lignes,
           // Une séance absente de la bibliothèque n'est pas une erreur : le
@@ -6097,8 +6121,14 @@ function libCard(s,vma,opts){
   const blocks=s.muscu
     ? libMuscuBody(s)
     : (s.blocks||[]).map((b,i)=> b.segs? libBlockSegs(b,vma) : libBlock(b,vma,s.blocks.length>1?('Bloc '+(i+1)):'Corps')).join('');
-  const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+s.warm+'</span></div>':'';
-  const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+s.cool+'</span></div>':'';
+  /* L'allure des bords était calculée pour la montre et n'apparaissait nulle
+     part : le coach envoyait la séance sans savoir ce qu'il envoyait. */
+  const bordV=function(txt,quoi){
+    var c=(vma&&typeof wktBordCibleTxt==='function')?wktBordCibleTxt(txt,vma,quoi):'';
+    return txt+(c?'<span class="lib-step-all">'+c+'</span>':'');
+  };
+  const warm=(s.warm&&s.warm!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Échauffement</span><span class="lib-step-v">'+bordV(s.warm,'warmup')+'</span></div>':'';
+  const cool=(s.cool&&s.cool!=='—')?'<div class="lib-step lib-step--soft"><span class="lib-step-k">Retour calme</span><span class="lib-step-v">'+bordV(s.cool,'cooldown')+'</span></div>':'';
   return '<div class="lib-card" style="border-top:3px solid '+t.col+';position:relative">'+delBtn+
     '<div class="lib-card-top"><div><div class="lib-badge" style="background:'+t.col+'22;color:'+t.col+'">'+t.lbl+'</div>'
     +(mt?'<div class="lib-badge" style="background:'+mt.col+'22;color:'+mt.col+'">'+mt.lbl+'</div>':'')
@@ -6290,6 +6320,26 @@ function wktZonePct(n){
   const z=ZONES_VMA.find(function(x){return x.z===n;});
   return z?[Math.round(z.lo*100),Math.round(z.hi*100)]:null;
 }
+/* Le MILIEU d'une zone — la cible qu'on vise dedans.
+   Envoyer la largeur entière d'une zone à la montre donnait, sur une VMA de
+   16, un échauffement « entre 5:00 et 5:46/km » : 46 secondes au kilomètre.
+   Aucune autre étape de la séance n'est cadrée comme ça — un bloc à 87 %
+   part avec ±1,5 % de vitesse — et l'écart se voyait : deux façons d'écrire
+   le même échauffement, « 20 min » et « 20 min footing », sortaient deux
+   cibles sans rapport (5:00–5:46 contre 5:41–5:51).
+   On vise donc le milieu de la zone, ouvert comme partout ailleurs. C'est
+   aussi la vitesse que plVitesseZone() utilise déjà pour compter les
+   kilomètres : l'outil cesse de se contredire. */
+function wktZoneMid(n){
+  const z=wktZonePct(n);
+  return z?Math.round((z[0]+z[1])/2):null;
+}
+/* « allure libre » : l'étape part sans cible, avec son seul minuteur. C'est
+   la case décochée dans l'éditeur, écrite dans le texte pour qu'elle survive
+   à l'enregistrement, à la duplication et à la fiche de l'athlète — qui lit
+   « allure libre » et comprend. */
+const WKT_LIBRE=/(?:[·|]\s*)?\ballures?\s+libres?\b/i;
+function wktBordLibre(txt){ return WKT_LIBRE.test(String(txt||'')); }
 /* L'allure que le coach a écrite, s'il en a écrit une : une zone — « Z2 »,
    « zone 2 » — un pourcentage en toutes lettres — « 65 % », « 60-70 % » — ou
    le vocabulaire de l'endurance facile, « EF », « footing ».
@@ -6308,12 +6358,15 @@ function wktBordPct(txt){
   // « Z2 », « zone 2 » : la zone l'emporte, c'est la façon la plus directe
   // de le dire et elle ne laisse aucune ambiguïté.
   m=t.match(/\bz(?:one)?\s*([1-5])\b/);
-  if(m) return wktZonePct(+m[1]);
-  m=t.match(/\b(ef|fond\w*|foot\w*)\b/);
-  if(m&&typeof resolvePace==='function'){
-    const r=resolvePace(m[1]);
-    if(r) return r.pct;
-  }
+  if(m) return wktZoneMid(+m[1]);
+  /* « footing », « EF », « endurance » ne sont plus interceptés ici. Ils
+     renvoyaient 65 % via resolvePace(), pendant qu'un échauffement écrit
+     « 20 min » tout court prenait le milieu de la zone 2, soit 70 % : deux
+     façons d'écrire le même échauffement sortaient deux allures différentes
+     (5:41–5:51 contre 5:17–5:26 sur une VMA de 16). Or la zone par défaut
+     d'un échauffement EST l'endurance fondamentale, et celle d'un retour au
+     calme la récupération — le mot ne dit rien que le défaut ne dise déjà.
+     Une zone ou un pourcentage écrits noir sur blanc, eux, priment toujours. */
   return null;
 }
 /* Une allure écrite dans le champ — « 20 min à 5:30/km », « 5:20-5:40/km ».
@@ -6350,10 +6403,22 @@ function wktBordStep(txt,vma,quoi){
     nom+=' '+fDist(d.val);
   }
   const ecrite=wktBordAll(txt);
-  const sp=(ecrite!=null)
-    ? wktSpeedAll(ecrite)
-    : wktSpeed(vma, wktBordPct(txt)||wktZonePct((quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL));
+  const sp=wktBordLibre(txt) ? null
+    : (ecrite!=null)
+      ? wktSpeedAll(ecrite)
+      : wktSpeed(vma, wktBordPct(txt)||wktZoneMid((quoi==='warmup')?WKT_ZONE_WARM:WKT_ZONE_COOL));
   return {name:wktName(nom), dur:dur, val:val, sp:sp, int:quoi};
+}
+/* L'allure que la montre recevra pour cette étape, en toutes lettres.
+   Elle était calculée et jamais montrée : le coach envoyait la séance sans
+   savoir ce qu'il envoyait. Elle s'affiche maintenant sur la carte, sur la
+   fiche de l'athlète et sur la feuille de séance. */
+function wktBordCibleTxt(txt,vma,quoi){
+  const st=wktBordStep(txt,vma,quoi);
+  if(!st) return '';
+  if(!st.sp) return 'allure libre';
+  const lent=Math.round(1e6/st.sp.lo), vif=Math.round(1e6/st.sp.hi);
+  return (vif===lent) ? (fAll(vif)+'/km') : (fAll(vif)+'–'+fAll(lent)+'/km');
 }
 
 /* Séance RedLab → liste d'étapes FIT, boucles imbriquées comprises. */
@@ -6658,6 +6723,12 @@ function lcVal(id){const e=document.getElementById(id);return e?e.value:'';}
 function lcBordSplit(txt,zoneDefaut){
   var t=(txt==='—'||txt==null)?'':String(txt);
   var mode='z'+zoneDefaut, all='';
+  // « allure libre » : la case est décochée. On la retire du texte, elle est
+  // portée par la case et réécrite à l'enregistrement.
+  var sp=true;
+  if(typeof wktBordLibre==='function'&&wktBordLibre(t)){
+    sp=false; t=t.replace(WKT_LIBRE,'');
+  }
   var z=t.match(/(?:[·|]\s*)?\bz(?:one)?\s*([1-5])\b/i);
   if(z){
     mode='z'+z[1];
@@ -6671,7 +6742,7 @@ function lcBordSplit(txt,zoneDefaut){
       if(m){ mode='all'; all=fAll(ecrite); t=t.slice(0,m.index)+t.slice(m.index+m[0].length); }
     }
   }
-  return {t:t.replace(/\s*[·|]\s*$/,'').replace(/\s+/g,' ').trim(), mode:mode, all:all};
+  return {t:t.replace(/\s*[·|]\s*$/,'').replace(/\s+/g,' ').trim(), mode:mode, all:all, sp:sp};
 }
 function lcBordField(quoi,titre,valeur,exemple,zoneDefaut){
   var d=lcBordSplit(valeur,zoneDefaut);
@@ -6683,19 +6754,41 @@ function lcBordField(quoi,titre,valeur,exemple,zoneDefaut){
   return '<div class="lc-field"><label>'+titre+'</label>'
     +'<div class="lc-bord">'
       +'<input id="lc-'+quoi+'" value="'+esc(d.t)+'" placeholder="'+esc(exemple)+'" oninput="libPreview()">'
-      +'<select id="lc-'+quoi+'-int" onchange="lcBordMode(\''+quoi+'\')">'+opts+'</select>'
+      +'<select id="lc-'+quoi+'-int" onchange="lcBordMode(\''+quoi+'\')"'+(d.sp?'':' disabled')+'>'+opts+'</select>'
       +'<input id="lc-'+quoi+'-all" class="lc-bord-all" value="'+esc(d.all)+'" placeholder="4:05" maxlength="5"'
-        +(d.mode==='all'?'':' hidden')+' oninput="libPreview()">'
+        +((d.mode==='all'&&d.sp)?'':' hidden')+(d.sp?'':' disabled')+' oninput="libPreview()">'
+      +'<label class="lc-bord-sp" title="Décochée, l\u2019étape part sur la montre avec son minuteur mais sans allure imposée">'
+        +'<input type="checkbox" id="lc-'+quoi+'-sp"'+(d.sp?' checked':'')+' onchange="lcBordMode(\''+quoi+'\')">'
+        +'Fourchette d\u2019allure</label>'
+      +'<div class="lc-bord-vu" id="lc-'+quoi+'-vu"></div>'
     +'</div></div>';
+}
+/* Ce que la montre recevra, écrit sous le champ. Recalculé à chaque frappe :
+   c'est ce qui manquait — l'allure était calculée et jamais montrée. */
+function lcBordVu(quoi){
+  var out=document.getElementById('lc-'+quoi+'-vu'); if(!out) return;
+  var v=lcBordVal(quoi);
+  var vm=(typeof wktVma==='function')?wktVma():null;
+  var vma=vm?vm.v:null;
+  if(!v||v==='—'){ out.innerHTML=''; return; }
+  if(!vma){ out.innerHTML='Renseigne une VMA pour voir l\u2019allure envoyée à la montre.'; return; }
+  var c=wktBordCibleTxt(v,vma,quoi==='warm'?'warmup':'cooldown');
+  out.innerHTML=c?('Sur la montre : <b>'+c+'</b>'):'';
 }
 function lcBordMode(quoi){
   var sel=document.getElementById('lc-'+quoi+'-int');
   var all=document.getElementById('lc-'+quoi+'-all');
-  if(all) all.hidden=!(sel&&sel.value==='all');
+  var cb=document.getElementById('lc-'+quoi+'-sp');
+  var on=!cb||cb.checked;
+  if(sel) sel.disabled=!on;
+  if(all){ all.hidden=!(on&&sel&&sel.value==='all'); all.disabled=!on; }
   libPreview();
 }
 function lcBordVal(quoi){
   var t=lcVal('lc-'+quoi).trim();
+  var cb=document.getElementById('lc-'+quoi+'-sp');
+  var libre=!!(cb&&!cb.checked);
+  if(libre) return t?(t+' · allure libre'):'—';
   if(!t&&!lcVal('lc-'+quoi+'-all').trim()) return '—';
   var mode=lcVal('lc-'+quoi+'-int');
   if(mode==='all'){
@@ -6773,6 +6866,7 @@ function libBuildActive(){
   return document.getElementById('lb-rows')?libBuildFromEditor():libBuildFromForm();
 }
 function libPreview(){
+  try{ lcBordVu('warm'); lcBordVu('cool'); }catch(e){}
   const box=document.getElementById('lc-preview'); if(!box)return;
   const b=libBuildActive(); const vma=libVmaVal(); let html='';
   if(b.warnings.length) html+='<div class="lc-warn">⚠ '+b.warnings.join(' · ')+'</div>';
@@ -7455,7 +7549,7 @@ function fsDateSet(v){
    un 5 × 1000 tient sur une ligne, pas cinq — c'est ainsi qu'on le lit. */
 function fsLignes(s){
   var L=[];
-  if(s.warm&&s.warm!=='—') L.push({soft:true,lbl:'Échauffement',val:s.warm});
+  if(s.warm&&s.warm!=='—') L.push({soft:true,lbl:'Échauffement',val:s.warm,bord:'warmup'});
   (s.blocks||[]).forEach(function(b,i){
     var reps=Math.max(1,b.r||1), sets=Math.max(1,b.sets||1);
     var pre=(sets>1?sets+' × ':'')+(reps>1?reps+' × ':'');
@@ -7471,7 +7565,7 @@ function fsLignes(s){
               pct:b.pct, all:b.all, rec:b.rec, recSet:(sets>1?b.recSet:'')});
     }
   });
-  if(s.cool&&s.cool!=='—') L.push({soft:true,lbl:'Retour au calme',val:s.cool});
+  if(s.cool&&s.cool!=='—') L.push({soft:true,lbl:'Retour au calme',val:s.cool,bord:'cooldown'});
   return L;
 }
 /* La vitesse visée d'un athlète sur une ligne, en m/s. Une allure écrite est
@@ -7554,6 +7648,21 @@ function fsHTML(){
     lignes.forEach(function(l,i){ l.i=i; });   // rang stable = clé de stockage
     var rows=lignes.map(function(l){
       if(l.soft){
+        /* Échauffement et retour au calme portent une allure, différente d'un
+           athlète à l'autre : elle se lit dans SA colonne, comme le reste. */
+        if(l.bord&&typeof wktBordCibleTxt==='function'){
+          /* Le libellé ET le texte tiennent dans la colonne « Effort » : une
+             cellule de plus décalerait toutes les allures d'une colonne, et
+             chaque athlète lirait celle du voisin. La colonne Récup reste,
+             vide, pour que la ligne compte autant de cellules que l'en-tête. */
+          return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)
+            +'<span class="fs-soft-v">'+e(l.val)+'</span></td>'
+            +pris.map(function(a){
+               var c=a.vma?wktBordCibleTxt(l.val,a.vma,l.bord):'';
+               return '<td class="fs-val">'+(c?e(c):'<span style="color:var(--muted2)">—</span>')+'</td>';
+             }).join('')
+            +'<td class="fs-rec">—</td></tr>';
+        }
         return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)+'</td>'
           +'<td colspan="'+(pris.length+1)+'">'+e(l.val)+'</td></tr>';
       }
@@ -9960,9 +10069,9 @@ function plVitesseDe(o,vma){
   return pc?vma*pc/100/3.6:null;      // m/s
 }
 function plVitesseZone(n,vma){
-  if(!vma||typeof wktZonePct!=='function') return null;
-  var z=wktZonePct(n);
-  return z?vma*(z[0]+z[1])/2/100/3.6:null;
+  if(!vma||typeof wktZoneMid!=='function') return null;
+  var p=wktZoneMid(n);
+  return p?vma*p/100/3.6:null;
 }
 /* Distance d'un passage décrit en texte libre — échauffement, récup. */
 function plMetresTexte(txt,vitesse){
