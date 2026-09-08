@@ -519,18 +519,27 @@ function fHMS(s){s=Math.round(s);var h=Math.floor(s/3600),m=Math.floor((s%3600)/
 function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ── Référentiels (identiques à RedLab) ──
+/* Recopie EXACTE du référentiel de RedLab. Les bandes sont en % de VMA et
+   les fourchettes cardiaques en % de FC MAX — alors que ZONES_VC, juste en
+   dessous, donne des % de FC de RÉSERVE (Karvonen). fcBornes() fait la
+   distinction : ne calculez jamais une FC directement depuis fcLo. */
 var ZONES_VMA=[
- {z:1,n:'Récupération',lo:.60,hi:.70,col:'#94A3B8',talk:'Je peux parler sans aucune difficulté',rpe:'2–3',fcLo:55,fcHi:65,
-  use:'Footing très facile, récupération entre séances, décrassage'},
- {z:2,n:'Endurance fondamentale',lo:.70,hi:.80,col:'#60A5FA',talk:'Je peux tenir une conversation normale',rpe:'3–4',fcLo:65,fcHi:75,
-  use:'Footings quotidiens, sorties longues, développement de la base aérobie'},
- {z:3,n:'Endurance active / Tempo',lo:.80,hi:.88,col:'#34D399',talk:'Je peux parler mais je dois faire des pauses',rpe:'5–6',fcLo:75,fcHi:83,
-  use:'Footings soutenus, blocs d’endurance active, travail d’allure marathon'},
- {z:4,n:'Seuil',lo:.88,hi:.94,col:'#FB923C',talk:'Je peux dire seulement quelques mots',rpe:'7–8',fcLo:83,fcHi:90,
-  use:'Intervalles longs, tempo soutenu, travail au seuil lactique'},
- {z:5,n:'VO₂max',lo:.94,hi:1.05,col:'#F87171',talk:'Je ne peux plus parler',rpe:'9–10',fcLo:90,fcHi:100,
-  use:'Intervalles courts à moyens, répétitions VMA, développement VO₂max'}
+ {z:1,n:'Récupération',lo:.55,hi:.65,col:'#94A3B8',talk:'Très facile, conversation aisée',rpe:'2–3',fcLo:60,fcHi:70,
+  dur:'Plus de 2 h', use:'Récupération active, lendemain de course'},
+ {z:2,n:'Endurance fondamentale',lo:.65,hi:.75,col:'#60A5FA',talk:'Confortable, phrases complètes',rpe:'3–4',fcLo:70,fcHi:80,
+  dur:'1 à 3 h', use:'Footings, sorties longues — 70 à 80 % du volume'},
+ {z:3,n:'Tempo / allure marathon',lo:.75,hi:.85,col:'#34D399',talk:'Soutenu, phrases courtes',rpe:'5–6',fcLo:80,fcHi:88,
+  dur:'30 min à 1 h 30', use:'Allure marathon et semi, tempo'},
+ {z:4,n:'Seuil / allure 10 km',lo:.85,hi:.95,col:'#FB923C',talk:'Difficile, quelques mots',rpe:'7–8',fcLo:88,fcHi:95,
+  dur:'10 à 40 min', use:'Fractionné long, allure 10 km et 5 km'},
+ {z:5,n:'VMA',lo:.95,hi:1.05,col:'#F87171',talk:'Maximal, impossible de parler',rpe:'9–10',fcLo:95,fcHi:100,
+  dur:'2 à 8 min par répétition', use:'Fractionné court (30/30, 200 à 400 m)'}
 ];
+/* Les bornes cardiaques d'une zone, dans l'unité de SA table. */
+function fcBornes(z,estVC,fcMax,fcRest,fcReserve){
+  if(estVC) return [Math.round(fcRest+z.fcLo/100*fcReserve), Math.round(fcRest+z.fcHi/100*fcReserve)];
+  return [Math.round(fcMax*z.fcLo/100), Math.round(fcMax*z.fcHi/100)];
+}
 var ZONES_VC=[
  {z:1,n:'Modéré',lo:.60,hi:.81,col:'#94A3B8',talk:'Conversation fluide',rpe:'2–3',fcLo:45,fcHi:65,
   use:'Récupération active, footing facile — base aérobie'},
@@ -621,7 +630,7 @@ function renderFiche(email,d){
   h+='<div class="sec-hd"><span class="dot"></span><b>Zones d\'entraînement</b></div>'
     +lexique([['zones','Zones'],['rpe','RPE'],['talk','Ressenti']])
     +'<div class="tblwrap"><table class="tbl">'
-    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th>Ressenti</th><th>RPE</th></tr></thead><tbody>';
+    +'<thead><tr><th>Zone</th><th>Intensité</th><th>Vitesse</th><th>Allure</th><th>Sensation</th><th>Durée possible</th><th>RPE</th></tr></thead><tbody>';
   R.zones.forEach(function(z){
     var vlo=(v*z.lo),vhi=(v*z.hi);
     h+='<tr>'
@@ -630,6 +639,7 @@ function renderFiche(email,d){
       +'<td style="color:'+z.col+';font-weight:800">'+nb1(vlo)+'–'+nb1(vhi)+'</td>'
       +'<td>'+fAll(3600/vhi)+'–'+fAll(3600/vlo)+'/km</td>'
       +'<td style="font-size:12.5px;color:var(--muted)">'+esc(z.talk)+'</td>'
+      +'<td style="font-size:12.5px;color:var(--muted)">'+esc(z.dur||'—')+'</td>'
       +'<td>'+z.rpe+'</td></tr>';
   });
   h+='</tbody></table></div>';
@@ -1177,8 +1187,10 @@ function ecranZones(d){
   var R=refDe(d);
   if(!R.v) return '<div class="card2 muted">Tes zones apparaîtront dès que ton coach aura renseigné ta VMA ou ta vitesse critique.</div>';
   var Z=R.zones, lo0=Z[0].lo, hi0=Z[Z.length-1].hi, etendue=(hi0-lo0)||1;
-  // Karvonen, comme dans RedLab : FC cible = FC repos + % × (FC max − FC repos).
-  var fcOk=!!(d.fcMax&&d.fcRest);
+  /* Zones VMA : % de FC max — la FC de repos n'est pas nécessaire.
+     Zones VC : Karvonen, il faut les deux. */
+  var estVC=(R.lbl==='VC');
+  var fcOk=estVC?!!(d.fcMax&&d.fcRest):!!d.fcMax;
   var fcRes=(d.fcReserve!=null)?d.fcReserve:((d.fcMax||0)-(d.fcRest||0));
 
   var h='<div class="h2">Tes zones d’entraînement</div>'
@@ -1193,9 +1205,10 @@ function ecranZones(d){
     var meta=['<span><b>'+vitesse+'</b> km/h</span>',
               '<span>effort <b>'+z.rpe+'</b>/10</span>'];
     if(fcOk&&z.fcLo!=null){
-      meta.push('<span><b>'+Math.round(d.fcRest+z.fcLo/100*fcRes)+'–'
-        +Math.round(d.fcRest+z.fcHi/100*fcRes)+'</b> bpm</span>');
+      var fb=fcBornes(z,estVC,d.fcMax,d.fcRest,fcRes);
+      meta.push('<span><b>'+fb[0]+'–'+fb[1]+'</b> bpm</span>');
     }
+    if(z.dur) meta.push('<span>tenable <b>'+esc(z.dur).toLowerCase()+'</b></span>');
     h+='<div class="zcard" id="z-'+z.z+'" style="border-left-color:'+z.col+'">'
       +'<div class="zt"><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span>'
       +'<span class="zn">'+esc(z.n)+'</span>'
@@ -1206,7 +1219,7 @@ function ecranZones(d){
       +(z.use?'<div class="zuse"><b>Quand</b> '+esc(z.use)+'</div>':'')
       +'</div>';
   });
-  if(!fcOk) h+='<div class="muted" style="margin-top:4px">Les fourchettes de fréquence cardiaque apparaîtront dès que ton coach aura renseigné ta FC max et ta FC de repos.</div>';
+  if(!fcOk) h+='<div class="muted" style="margin-top:4px">Les fourchettes de fréquence cardiaque apparaîtront dès que ton coach aura renseigné ta FC max'+(estVC?' et ta FC de repos':'')+'.</div>';
   return h;
 }
 

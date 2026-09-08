@@ -3081,13 +3081,33 @@ const ZONES_VC=[
   {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min (1000-1600 m), allure 10 km — puissance aérobie'},
   {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m — vitesse neuromusculaire, capacité anaérobie'},
 ];
+/* ══ ZONES VMA — LE RÉFÉRENTIEL DU COACH ══
+   Cette table EST la référence de Jérémy : bandes en % de VMA, fourchettes
+   cardiaques en % de FC MAX, sensation, durée tenable et usage. Tout le reste
+   de l'outil la lit — le tableau de bord, l'espace athlète, la couleur d'une
+   sortie relevée par la montre, et les fenêtres de vitesse envoyées à la
+   montre pour l'échauffement et le retour au calme. Un seul endroit à
+   corriger le jour où elle bouge.
+
+   ATTENTION : `fcLo`/`fcHi` s'y lisent en % de FC MAX. Dans ZONES_VC, juste
+   en dessous, les mêmes noms de champs se lisent en % de FC de RÉSERVE
+   (Karvonen) — c'est ainsi que la littérature du modèle Vitesse Critique les
+   donne, et on ne réécrit pas des bornes qu'on n'a pas mesurées. fcBornes()
+   fait la distinction ; ne calculez jamais une FC directement depuis fcLo. */
 const ZONES_VMA=[
-  {z:1,n:'Récupération',             pct:'60–70%', lo:0.60,hi:0.70, fcLo:55, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Je peux parler sans aucune difficulté',     rpe:'2–3',  use:'Footing très facile, récupération entre séances, décrassage'},
-  {z:2,n:'Endurance fondamentale',   pct:'70–80%', lo:0.70,hi:0.80, fcLo:65, fcHi:75,  cls:'z2',col:'#60A5FA', talk:'Je peux tenir une conversation normale',     rpe:'3–4',  use:'Footings quotidiens, sorties longues, développement de la base aérobie'},
-  {z:3,n:'Endurance active / Tempo', pct:'80–88%', lo:0.80,hi:0.88, fcLo:75, fcHi:83,  cls:'z3',col:'#34D399', talk:'Je peux parler mais je dois faire des pauses', rpe:'5–6',  use:'Footings soutenus, blocs d’endurance active, travail d’allure marathon'},
-  {z:4,n:'Seuil',                    pct:'88–93%', lo:0.88,hi:0.94, fcLo:83, fcHi:90,  cls:'z4',col:'#FB923C', talk:'Je peux dire seulement quelques mots',       rpe:'7–8',  use:'Intervalles longs, tempo soutenu, travail au seuil lactique'},
-  {z:5,n:'VO₂max',                   pct:'95–105%',lo:0.94,hi:1.05, fcLo:90, fcHi:100, cls:'z5',col:'#F87171', talk:'Je ne peux plus parler',                    rpe:'9–10', use:'Intervalles courts à moyens, répétitions VMA, développement VO₂max'},
+  {z:1,n:'Récupération',            pct:'55–65%', lo:0.55,hi:0.65, fcLo:60, fcHi:70,  cls:'z1',col:'#94A3B8', talk:'Très facile, conversation aisée', rpe:'2–3',  dur:'Plus de 2 h',             use:'Récupération active, lendemain de course'},
+  {z:2,n:'Endurance fondamentale',  pct:'65–75%', lo:0.65,hi:0.75, fcLo:70, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Confortable, phrases complètes',  rpe:'3–4',  dur:'1 à 3 h',                 use:'Footings, sorties longues — 70 à 80 % du volume'},
+  {z:3,n:'Tempo / allure marathon', pct:'75–85%', lo:0.75,hi:0.85, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Soutenu, phrases courtes',        rpe:'5–6',  dur:'30 min à 1 h 30',         use:'Allure marathon et semi, tempo'},
+  {z:4,n:'Seuil / allure 10 km',    pct:'85–95%', lo:0.85,hi:0.95, fcLo:88, fcHi:95,  cls:'z4',col:'#FB923C', talk:'Difficile, quelques mots',        rpe:'7–8',  dur:'10 à 40 min',             use:'Fractionné long, allure 10 km et 5 km'},
+  {z:5,n:'VMA',                     pct:'95–105%',lo:0.95,hi:1.05, fcLo:95, fcHi:100, cls:'z5',col:'#F87171', talk:'Maximal, impossible de parler',   rpe:'9–10', dur:'2 à 8 min par répétition', use:'Fractionné court (30/30, 200 à 400 m)'},
 ];
+/* Les bornes cardiaques d'une zone, dans l'unité de SA table.
+   VMA → % de FC max, la référence du coach : il suffit de la FC max.
+   VC  → Karvonen, % de FC de réserve : il faut aussi la FC de repos. */
+function fcBornes(z,estVC,fcMax,fcRest,fcReserve){
+  if(estVC) return [Math.round(fcRest+z.fcLo/100*fcReserve), Math.round(fcRest+z.fcHi/100*fcReserve)];
+  return [Math.round(fcMax*z.fcLo/100), Math.round(fcMax*z.fcHi/100)];
+}
 
 /* ══ RENDER DASHBOARD ══ */
 function renderDashboard(){
@@ -3203,24 +3223,26 @@ function renderProfile(){
 /* ── Zones Table ── */
 function renderZones(){
   const {csKmh,vma,fcMax,fcRest,fcReserve}=S;
-  const hasFc=!!(fcMax&&fcRest);
   const isReal=!!csKmh;
+  /* En mode VMA les fourchettes sont en % de FC max : la FC de repos n'est
+     plus nécessaire pour les afficher, et bien des fiches n'en ont pas. */
+  const hasFc=isReal?!!(fcMax&&fcRest):!!fcMax;
   const vc=csKmh||(vma*0.87);
   const zones=isReal?ZONES_VC:ZONES_VMA;
   const ref=isReal?vc:vma;
-  const fcH=hasFc?'<th class="hide-mob">% FC Rés.</th><th>FC bpm</th>':'';
+  const fcH=hasFc?`<th class="hide-mob">${isReal?'% FC Rés.':'% FC max'}</th><th>FC bpm</th>`:'';
 
-  function fcC(loP,hiP,col){
+  function fcC(z,col){
     if(!hasFc) return '';
-    const flo=Math.round(fcRest+loP/100*fcReserve);
-    const fhi=Math.round(fcRest+hiP/100*fcReserve);
-    return `<td class="hide-mob" style="color:var(--muted2)">${loP}–${hiP}%</td><td><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
+    const [flo,fhi]=fcBornes(z,isReal,fcMax,fcRest,fcReserve);
+    return `<td class="hide-mob" style="color:var(--muted2)">${z.fcLo}–${z.fcHi}%</td><td><span style="font-weight:700;color:${col}">${flo}–${fhi}</span> <span style="font-size:11.5px;color:var(--muted2)">bpm</span></td>`;
   }
 
   const vcBadge=`<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--orange)"><span class="hide-mob">VC${isReal?'':' est.'} = ${vc.toFixed(2)} km/h · ${fAll(3600/vc)}/km</span><span class="show-mob" style="display:none">VC ${fAll(3600/vc)}/km</span></span>`;
 
   const pctCol=isReal?'% VC':'% VMA';
 
+  const aDuree=zones.some(z=>z.dur);
   let rows='';
   zones.forEach(z=>{
     const vlo=ref*z.lo, vhi=ref*z.hi;
@@ -3235,8 +3257,9 @@ function renderZones(){
       <td class="col-num" style="font-weight:600;color:${z.col}">${vStr}</td>
       <td style="color:var(--text2)">${aStr}</td>
       <td style="color:var(--muted2);font-size:12px">${z.talk}</td>
+      ${aDuree?`<td style="color:var(--text2);font-size:12px">${z.dur||'—'}</td>`:''}
       <td style="color:var(--muted2);font-size:12px;font-weight:600">${z.rpe}</td>
-      ${fcC(z.fcLo,z.fcHi,z.col)}
+      ${fcC(z,z.col)}
     </tr>`;
   });
 
@@ -3244,23 +3267,27 @@ function renderZones(){
 
   const zNote=isReal
     ? 'Zones <b>Vitesse Critique</b> — 5 domaines physiologiques (SV1 ≈ 82-85 % VC · SV2 = 100 % VC = seuil). Allures calculées sur la VC réelle, pas sur la VMA. Modèle distance-temps (Nixon et al. 2021).'
-    : 'Zones <b>VMA</b> (Talk test / RPE) — référentiel croisé FFA (secteurs aérobie, seuil) &amp; INSEP (VMA 95-105 %).';
+    : 'Zones <b>VMA</b> — référentiel Reding Running. Allures en % de VMA, fourchettes cardiaques en <b>% de FC max</b> (et non de FC de réserve). La durée possible indique ce qu\'on peut tenir dans la zone, pas ce qu\'il faut y faire.';
   /* Les noms de zones citent SV1, SV2 et VO₂max sans jamais les définir : la
      légende le fait ici, sous la table plutôt que dedans — .tbl-wrap défile
      horizontalement, et une bulle posée à l'intérieur serait rognée. */
-  const zLeg=rlLexique([['sv1','SV1'],['sv2','SV2'],['vo2','VO₂max'],
-                        ['rpe','RPE'],['talk','Talk test']]);
+  /* Le lexique suit la table affichée : SV1 et SV2 nomment les zones du
+     modèle Vitesse Critique, pas celles de la table VMA. */
+  const zLeg=rlLexique(isReal
+    ? [['sv1','SV1'],['sv2','SV2'],['vo2','VO₂max'],['rpe','RPE'],['talk','Sensation']]
+    : [['ef','Endurance fondamentale'],['seuil','Seuil'],['vo2','VO₂max'],
+       ['rpe','RPE'],['talk','Sensation']]);
   document.getElementById('db-zones').innerHTML=`
     ${vcNote}
     <div class="tbl-wrap"><table>
       <thead><tr>
         <th>Zone</th><th>Domaine d'intensité</th><th class="col-num">${pctCol}</th><th class="col-num">Vitesse</th><th>Allure /km</th>
-        <th>Talk test</th><th>RPE</th>
+        <th>Sensation</th>${aDuree?'<th>Durée possible</th>':''}<th>RPE</th>
         ${fcH}
       </tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
-    <div class="formula">Allure = 3600 / (Vitesse × %)  ·  FC cible = FC repos + % × (FC max − FC repos)</div><div style="font-size:11px;color:var(--muted2);margin-top:6px;margin-bottom:8px">${zNote}</div>
+    <div class="formula">Allure = 3600 / (Vitesse × %)  ·  FC cible = ${isReal?'FC repos + % × (FC max − FC repos)':'% × FC max'}</div><div style="font-size:11px;color:var(--muted2);margin-top:6px;margin-bottom:8px">${zNote}</div>
     ${zLeg}`;
 }
 
@@ -3788,7 +3815,7 @@ const RL_TIPS={
   dp:   "D′ — la réserve de travail disponible AU-DESSUS de la vitesse critique, exprimée en mètres. Elle se vide d’autant plus vite qu’on court loin au-dessus, et ne se reconstitue qu’en repassant en dessous. C’est elle qui décide de la longueur d’une fraction tenable.",
   tmi:  "Temps de maintien à l’intensité — combien de temps l’athlète tient à sa VMA exactement. Autour de 6 minutes, la VMA est juste ; nettement plus, elle est sous-estimée ; nettement moins, surestimée. C’est le test de contrôle, pas un test de VMA.",
   fcmax:"Fréquence cardiaque maximale, mesurée sur le terrain ou relevée par la montre en compétition. Les formules par l’âge se trompent de 10 à 20 battements chez un individu donné : mieux vaut le champ vide qu’une valeur inventée.",
-  fcrep:"Fréquence cardiaque au repos, prise allongée au réveil avant de se lever. Avec la FC max, elle donne la fréquence de réserve — la base du calcul des zones par la méthode de Karvonen, plus juste qu’un simple pourcentage de FC max.",
+  fcrep:"Fréquence cardiaque au repos, prise allongée au réveil avant de se lever. Avec la FC max, elle donne la fréquence de réserve, sur laquelle reposent les zones du mode Vitesse Critique (méthode de Karvonen). Les zones VMA, elles, se lisent en % de FC max et n’en ont pas besoin — mais c’est un bon indicateur de forme à suivre dans le temps.",
   acwr: "Charge des 7 derniers jours divisée par la moyenne des 28 derniers. Zone sûre entre 0,8 et 1,3 ; au-delà de 1,5, le risque de blessure augmente nettement. C’est un indicateur de variation brutale, pas de volume absolu.",
   sv1:  "Premier seuil ventilatoire — le moment où la ventilation s’accélère plus vite que l’effort. En pratique : la limite haute de l’endurance fondamentale, là où la conversation devient hachée.",
   sv2:  "Second seuil ventilatoire — au-delà, le lactate s’accumule sans retour à l’équilibre. C’est l’allure du seuil, tenable de trente minutes à une heure selon le niveau.",
@@ -8384,7 +8411,7 @@ function exportAthleteView(returnDoc){
   // Fiche épurée : retirer les notes sous le graphe de périodisation et sous les zones + resserrer la card
   Array.from(clone.querySelectorAll('div')).forEach(function(d){
     var t=(d.textContent||'');
-    if((t.indexOf('calée en fin de bloc')>-1||t.indexOf('référentiel croisé')>-1)&&!d.querySelector('canvas,table,img,input')) d.remove();
+    if((t.indexOf('calée en fin de bloc')>-1||t.indexOf('référentiel Reding Running')>-1||t.indexOf('5 domaines physiologiques')>-1)&&!d.querySelector('canvas,table,img,input')) d.remove();
   });
   var _pcard=clone.querySelector('#db-plan');
   if(_pcard){ if(_pcard.parentNode&&_pcard.parentNode.classList&&_pcard.parentNode.classList.contains('card')) _pcard.parentNode.style.padding='12px 16px';
