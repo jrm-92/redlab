@@ -457,6 +457,76 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
 
+  /* ══ FEUILLE DE SÉANCE TERRAIN ══
+     Une séance, plusieurs athlètes, un tableau de temps de passage. Elle se
+     lit sur la piste : soit sur le téléphone, soit imprimée et plastifiée.
+     Les deux usages sont servis par la même vue. */
+  .fs-box{max-width:min(1100px,96vw)}
+  .fs-hd{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .fs-t{font-size:19px;font-weight:900;color:var(--text);line-height:1.25}
+  .fs-s{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .fs-pick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+  .fs-a{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--border2);border-radius:20px;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;padding:7px 13px;cursor:pointer;transition:all .15s}
+  .fs-a:hover{color:var(--text2);border-color:var(--muted2)}
+  .fs-a.on{background:rgba(255,107,26,.14);border-color:var(--orange);color:var(--orange)}
+  .fs-a small{font-weight:600;opacity:.75}
+  .fs-a--off{opacity:.45;cursor:not-allowed}
+  /* La boîte du modal est une colonne flex bornée à 82vh : sans min-height:0
+     le tableau s'y fait écraser au lieu de défiler. Il défile donc dans les
+     deux sens, pendant que l'en-tête, le sélecteur et les boutons ne bougent
+     pas — on garde « Imprimer » sous la main. */
+  .fs-t-wrap{overflow:auto;min-height:0;flex:1 1 auto;border:1px solid var(--border);border-radius:12px;-webkit-overflow-scrolling:touch}
+  /* La colonne des efforts reste à l'écran quand on fait défiler les
+     athlètes : sans elle, on lit un chrono sans savoir de quelle fraction. */
+  .fs-tab th:first-child,.fs-tab td.fs-eff{position:sticky;left:0;z-index:2;background:var(--bg2)}
+  .fs-tab thead th{position:sticky;top:0;z-index:3;background:var(--bg2)}
+  .fs-tab thead th:first-child{z-index:4}
+  .fs-tab tr.fs-soft td.fs-eff{background:#1b2436}
+  .fs-tab{width:100%;border-collapse:collapse;font-size:13px}
+  .fs-tab th{padding:9px 11px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(255,255,255,.02)}
+  .fs-tab th.fs-ath{color:var(--text);font-size:12px;letter-spacing:0;text-transform:none;text-align:center}
+  .fs-tab td{padding:10px 11px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+  .fs-tab tr:last-child td{border-bottom:none}
+  .fs-tab td.fs-eff{font-weight:800;color:var(--text);white-space:nowrap}
+  .fs-tab td.fs-val{text-align:center;font-variant-numeric:tabular-nums;font-weight:900;font-size:15px;color:var(--orange);white-space:nowrap}
+  .fs-tab td.fs-val small{display:block;font-size:10.5px;font-weight:700;color:var(--muted2)}
+  .fs-tab tr.fs-soft td{background:rgba(255,255,255,.02);color:var(--muted);font-weight:700}
+  .fs-rec{font-size:11.5px;color:var(--muted2);font-weight:600;white-space:nowrap}
+  .fs-note{font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:12px}
+  .fs-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+  @media(max-width:640px){
+    .fs-tab td.fs-val{font-size:14px}
+    .fs-tab th,.fs-tab td{padding:8px 8px}
+  }
+
+  /* L'impression : fond blanc, encre économe, une page A4 paysage.
+     On sort la feuille du modal et on efface tout le reste — la barre
+     latérale et la navigation n'ont rien à faire sur une feuille de piste. */
+  @media print{
+    @page{size:A4 landscape;margin:11mm}
+    body{background:#fff!important}
+    body>*{display:none!important}
+    #fs-modal{display:block!important;position:static!important;inset:auto!important;
+      background:#fff!important;padding:0!important;overflow:visible!important}
+    #fs-modal .pl-modal-box{max-width:none!important;width:auto!important;border:none!important;
+      box-shadow:none!important;background:#fff!important;padding:0!important;max-height:none!important;overflow:visible!important}
+    #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act{display:none!important}
+    #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #fs-modal .fs-t{font-size:17pt}
+    #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
+    #fs-modal .fs-t-wrap{overflow:visible!important;border:1px solid #bbb!important;border-radius:0!important;max-height:none!important}
+    #fs-modal .fs-tab th,#fs-modal .fs-tab td.fs-eff{position:static!important;background:transparent!important}
+    #fs-modal .fs-tab thead th{background:#f2f2f2!important}
+    #fs-modal .fs-tab{font-size:10.5pt}
+    #fs-modal .fs-tab th{background:#f2f2f2!important;border-bottom:1px solid #bbb!important;color:#333!important}
+    #fs-modal .fs-tab td{border-bottom:1px solid #ddd!important}
+    #fs-modal .fs-tab td.fs-val{color:#000!important;font-size:12pt}
+    #fs-modal .fs-tab td.fs-val small{color:#666!important}
+    #fs-modal .fs-tab tr.fs-soft td{background:#fafafa!important;color:#555!important}
+    #fs-modal tr{break-inside:avoid}
+  }
+
   /* ══ RÉFÉRENTIEL MÉTHODOLOGIQUE ══
      Un entraîneur consulte cet écran entre deux séries, sur un téléphone,
      pour trancher une question précise : « il a couru un semi dimanche, je
@@ -5456,6 +5526,10 @@ function libCard(s,vma,opts){
   const editBtn='<button type="button" class="lib-wkt lib-edit" onclick="libEditOpen(\''+_kind+'\','+_idx+')" title="'
     +(_kind==='c'?'Modifier cette séance':'Modifier et enregistrer une copie dans ta banque')+'">'
     +'<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Modifier</button>';
+  /* La feuille n'a de sens que pour de la course : une séance de muscu n'a
+     pas de temps de passage. */
+  const fsBtn=s.muscu?'':'<button type="button" class="lib-wkt" onclick="fsOuvrir(\''+_kind+'\','+_idx+')" title="Feuille de séance : les temps de passage de chaque athlète, imprimable">'
+    +'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Feuille</button>';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
   const blocks=s.muscu
     ? libMuscuBody(s)
@@ -5468,7 +5542,7 @@ function libCard(s,vma,opts){
     +persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
-    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+editBtn+'</div>'+
+    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+fsBtn+editBtn+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
     (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
@@ -6718,6 +6792,142 @@ function libBlocDel(i){
   var box=document.getElementById('lb-rows');
   if(box)box.innerHTML=_libEdit.blocks.map(libBlocRow).join('');
   libPreview();
+}
+
+/* ══ FEUILLE DE SÉANCE TERRAIN ══
+   Le croisement qui manquait : une séance × N athlètes → un tableau de temps
+   de passage. Toutes les briques existaient — la séance sait ce qu'elle
+   demande, chaque athlète a sa VMA — mais rien ne les mettait face à face,
+   et le coach recalculait ses temps à la main au bord de la piste.
+
+   Un seul geste : le bouton « Feuille » d'une carte de bibliothèque ouvre la
+   feuille avec TOUS les athlètes déjà cochés. Décocher est l'exception. */
+var _fsSel=null, _fsKind=null, _fsIdx=null;
+
+/* La séance développée en lignes d'effort. Une ligne par effort distinct :
+   un 5 × 1000 tient sur une ligne, pas cinq — c'est ainsi qu'on le lit. */
+function fsLignes(s){
+  var L=[];
+  if(s.warm&&s.warm!=='—') L.push({soft:true,lbl:'Échauffement',val:s.warm});
+  (s.blocks||[]).forEach(function(b,i){
+    var reps=Math.max(1,b.r||1), sets=Math.max(1,b.sets||1);
+    var pre=(sets>1?sets+' × ':'')+(reps>1?reps+' × ':'');
+    if(b.segs&&b.segs.length){
+      b.segs.forEach(function(sg,j){
+        L.push({lbl:(j===0?pre:'')+fDist(sg.d)+(sg.lbl?' · '+sg.lbl:''),
+                d:sg.d, pct:sg.pct, all:sg.all,
+                rec:(j===b.segs.length-1?b.rec:'')});
+      });
+    } else {
+      var lbl=pre+(b.d?fDist(b.d):(b.m?b.m+' min':(b.sec?b.sec+' s':'Effort')));
+      L.push({lbl:lbl, d:b.d||0, sec:(b.m?b.m*60:(b.sec||0)),
+              pct:b.pct, all:b.all, rec:b.rec, recSet:(sets>1?b.recSet:'')});
+    }
+  });
+  if(s.cool&&s.cool!=='—') L.push({soft:true,lbl:'Retour au calme',val:s.cool});
+  return L;
+}
+/* La vitesse visée d'un athlète sur une ligne, en m/s. Une allure écrite est
+   absolue : elle vaut pour tout le monde. Un pourcentage se rapporte à la
+   VMA, donc il change d'un athlète à l'autre — c'est tout l'intérêt. */
+function fsVit(l,vma){
+  if(l.all!=null&&typeof allVit==='function') return {lo:allVit(l.all),hi:allVit(l.all),abs:true};
+  if(!vma||l.pct==null) return null;
+  var p=l.pct;
+  if(Array.isArray(p)) return {lo:vma*p[0]/100/3.6, hi:vma*p[1]/100/3.6};
+  return {lo:vma*p/100/3.6, hi:vma*p/100/3.6};
+}
+/* Ce qu'on écrit dans la case. Sur une distance : le chrono à tenir, avec
+   l'allure en dessous. Sur une durée : l'allure seule — il n'y a pas de
+   temps de passage à donner sur « 20 min ». */
+function fsCase(l,vma){
+  var v=fsVit(l,vma);
+  if(!v) return '<span style="color:var(--muted2)">—</span>';
+  var all=function(x){ return fAll(1000/x); };
+  if(l.d>0){
+    var tLent=l.d/v.lo, tVif=l.d/v.hi;
+    var chrono=(Math.abs(tLent-tVif)<1.5)
+      ? fHMS(Math.round((tLent+tVif)/2))
+      : fHMS(Math.round(tVif))+'–'+fHMS(Math.round(tLent));
+    var aTxt=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
+    return chrono+'<small>'+aTxt+'</small>';
+  }
+  var a=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
+  return a+(l.sec>0?'<small>'+fHMS(l.sec)+'</small>':'');
+}
+/* Les athlètes utilisables : il faut une VMA pour convertir un pourcentage.
+   Ceux qui n'en ont pas sont montrés quand même, grisés, avec la raison —
+   les taire laisserait le coach chercher pourquoi il en manque un. */
+function fsAthletes(){
+  return (typeof getAthletes==='function'?getAthletes():[]).map(function(a){
+    return {id:a.id, nom:a.pseudo||'Sans nom', vma:(a.vma&&a.vma>=6&&a.vma<=35)?a.vma:null};
+  });
+}
+function fsOuvrir(kind,idx){
+  var s=libFindSession(kind,idx); if(!s) return;
+  if(s.muscu){ alert('La feuille de séance donne des temps de passage : elle ne s’applique pas à une séance de musculation.'); return; }
+  _fsKind=kind; _fsIdx=idx;
+  var tous=fsAthletes();
+  // Tous cochés d'emblée : le coach imprime pour son groupe, pas pour un.
+  if(_fsSel==null) _fsSel=tous.filter(function(a){return a.vma;}).map(function(a){return a.id;});
+  rlModalOuvrir('fs-modal', fsHTML());
+}
+function fsFermer(){ rlModalFermer('fs-modal'); }
+function fsToggle(id){
+  var i=_fsSel.indexOf(id);
+  if(i<0)_fsSel.push(id); else _fsSel.splice(i,1);
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
+function fsImprimer(){ window.print(); }
+function fsHTML(){
+  var s=libFindSession(_fsKind,_fsIdx); if(!s) return '';
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var tous=fsAthletes();
+  var pris=tous.filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
+  var th=(typeof LIB_THEMES!=='undefined'&&LIB_THEMES.find(function(x){return x.id===s.theme;}))||null;
+
+  var pick=tous.map(function(a){
+    if(!a.vma) return '<span class="fs-a fs-a--off" title="Pas de VMA renseignée : les allures ne peuvent pas être calculées">'+e(a.nom)+' <small>sans VMA</small></span>';
+    var on=_fsSel.indexOf(a.id)>=0;
+    return '<button type="button" class="fs-a'+(on?' on':'')+'" onclick="fsToggle('+a.id+')">'
+      +(on?'✓ ':'')+e(a.nom)+' <small>'+a.vma.toFixed(1)+'</small></button>';
+  }).join('');
+
+  var corps;
+  if(!pris.length){
+    corps='<div class="fs-note" style="padding:18px 2px;font-size:13px">Choisis au moins un athlète pour calculer les temps de passage.</div>';
+  } else {
+    var lignes=fsLignes(s);
+    var rows=lignes.map(function(l){
+      if(l.soft){
+        return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)+'</td>'
+          +'<td colspan="'+(pris.length+1)+'">'+e(l.val)+'</td></tr>';
+      }
+      return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
+        +pris.map(function(a){ return '<td class="fs-val">'+fsCase(l,a.vma)+'</td>'; }).join('')
+        +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>';
+    }).join('');
+    corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
+      +'<th>Effort</th>'
+      +pris.map(function(a){ return '<th class="fs-ath">'+e(a.nom)+'<br><span style="font-size:10px;font-weight:700;color:var(--muted2)">VMA '+a.vma.toFixed(1)+'</span></th>'; }).join('')
+      +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'<div class="fs-note">Chrono à tenir sur la fraction, allure au kilomètre en dessous. '
+      +'Une fourchette d’intensité donne une fourchette de temps : c’est la marge, pas une imprécision. '
+      +'Les allures écrites en min/km sont absolues et valent pour tout le monde.</div>';
+  }
+
+  return '<div class="pl-modal-box fs-box">'
+    +'<div class="pl-modal-top"><b>Feuille de séance</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="fsFermer()">×</button></div>'
+    +'<div class="fs-hd"><div><div class="fs-t">'+e(s.title)+'</div>'
+      +'<div class="fs-s">'+(th?e(th.lbl)+' · ':'')+new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div></div></div>'
+    +'<div class="fs-pick">'+pick+'</div>'
+    +corps
+    +'<div class="fs-act">'
+      +'<button type="button" class="lc-save" onclick="fsImprimer()">⎙ Imprimer la feuille</button>'
+      +'<button type="button" class="lc-cancel" onclick="fsFermer()">Fermer</button>'
+    +'</div></div>';
 }
 
 function libDeleteSession(id){
