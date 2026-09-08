@@ -456,6 +456,150 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
+
+  /* ══ FEUILLE DE SÉANCE TERRAIN ══
+     Une séance, plusieurs athlètes, un tableau de temps de passage. Elle se
+     lit sur la piste : soit sur le téléphone, soit imprimée et plastifiée.
+     Les deux usages sont servis par la même vue. */
+  .fs-box{max-width:min(1100px,96vw)}
+  .fs-hd{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .fs-t{font-size:19px;font-weight:900;color:var(--text);line-height:1.25}
+  .fs-s{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .fs-pick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+  .fs-a{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--border2);border-radius:20px;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;padding:7px 13px;cursor:pointer;transition:all .15s}
+  .fs-a:hover{color:var(--text2);border-color:var(--muted2)}
+  .fs-a.on{background:rgba(255,107,26,.14);border-color:var(--orange);color:var(--orange)}
+  .fs-a small{font-weight:600;opacity:.75}
+  .fs-a--off{opacity:.45;cursor:not-allowed}
+  /* La boîte du modal est une colonne flex bornée à 82vh : sans min-height:0
+     le tableau s'y fait écraser au lieu de défiler. Il défile donc dans les
+     deux sens, pendant que l'en-tête, le sélecteur et les boutons ne bougent
+     pas — on garde « Imprimer » sous la main. */
+  .fs-t-wrap{overflow:auto;min-height:0;flex:1 1 auto;border:1px solid var(--border);border-radius:12px;-webkit-overflow-scrolling:touch}
+  /* La colonne des efforts reste à l'écran quand on fait défiler les
+     athlètes : sans elle, on lit un chrono sans savoir de quelle fraction. */
+  .fs-tab th:first-child,.fs-tab td.fs-eff{position:sticky;left:0;z-index:2;background:var(--bg2)}
+  .fs-tab thead th{position:sticky;top:0;z-index:3;background:var(--bg2)}
+  .fs-tab thead th:first-child{z-index:4}
+  .fs-tab tr.fs-soft td.fs-eff{background:#1b2436}
+  .fs-tab{width:100%;border-collapse:collapse;font-size:13px}
+  .fs-tab th{padding:9px 11px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(255,255,255,.02)}
+  .fs-tab th.fs-ath{color:var(--text);font-size:12px;letter-spacing:0;text-transform:none;text-align:center}
+  .fs-tab td{padding:10px 11px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+  .fs-tab tr:last-child td{border-bottom:none}
+  .fs-tab td.fs-eff{font-weight:800;color:var(--text);white-space:nowrap}
+  .fs-tab td.fs-val{text-align:center;font-variant-numeric:tabular-nums;font-weight:900;font-size:15px;color:var(--orange);white-space:nowrap}
+  .fs-tab td.fs-val small{display:block;font-size:10.5px;font-weight:700;color:var(--muted2)}
+  .fs-tab tr.fs-soft td{background:rgba(255,255,255,.02);color:var(--muted);font-weight:700}
+  .fs-rec{font-size:11.5px;color:var(--muted2);font-weight:600;white-space:nowrap}
+  .fs-note{font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:12px}
+  /* La saisie du réalisé. Une case sous la cible : a l'écran on y tape, sur
+     le papier on y écrit au stylo. Le meme balisage sert aux deux. */
+  .fs-in{display:block;width:74px;margin:5px auto 0;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:7px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:800;text-align:center;padding:5px 4px;outline:none;font-variant-numeric:tabular-nums}
+  .fs-in:focus{border-color:var(--orange)}
+  .fs-in::placeholder{font-weight:600;color:var(--muted2);font-size:11px}
+  .fs-ec{display:block;margin-top:3px;font-size:11px;font-weight:800;white-space:nowrap}
+  .fs-ec--ok{color:#34D399}
+  .fs-ec--vif{color:#60A5FA}
+  .fs-ec--lent{color:#FBBF24}
+  .fs-date{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted2)}
+  .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
+  .fs-date input:focus{border-color:var(--orange)}
+  .fs-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+  @media(max-width:640px){
+    .fs-tab td.fs-val{font-size:14px}
+    .fs-tab th,.fs-tab td{padding:8px 8px}
+  }
+
+  /* L'impression : fond blanc, encre économe, une page A4 paysage.
+     On sort la feuille du modal et on efface tout le reste — la barre
+     latérale et la navigation n'ont rien à faire sur une feuille de piste. */
+  @media print{
+    @page{size:A4 landscape;margin:11mm}
+    body{background:#fff!important}
+    body>*{display:none!important}
+    #fs-modal{display:block!important;position:static!important;inset:auto!important;
+      background:#fff!important;padding:0!important;overflow:visible!important}
+    #fs-modal .pl-modal-box{max-width:none!important;width:auto!important;border:none!important;
+      box-shadow:none!important;background:#fff!important;padding:0!important;max-height:none!important;overflow:visible!important}
+    /* Le sélecteur de date ne sert qu'à l'écran : sur le papier, la date est
+       déjà écrite en toutes lettres sous le titre. */
+    #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act,#fs-modal .fs-date{display:none!important}
+    #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #fs-modal .fs-t{font-size:17pt}
+    #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
+    #fs-modal .fs-t-wrap{overflow:visible!important;border:1px solid #bbb!important;border-radius:0!important;max-height:none!important}
+    #fs-modal .fs-tab th,#fs-modal .fs-tab td.fs-eff{position:static!important;background:transparent!important}
+    #fs-modal .fs-tab thead th{background:#f2f2f2!important}
+    #fs-modal .fs-tab{font-size:10.5pt}
+    #fs-modal .fs-tab th{background:#f2f2f2!important;border-bottom:1px solid #bbb!important;color:#333!important}
+    #fs-modal .fs-tab td{border-bottom:1px solid #ddd!important}
+    #fs-modal .fs-tab td.fs-val{color:#000!important;font-size:12pt}
+    #fs-modal .fs-tab td.fs-val small{color:#666!important}
+    /* Sur le papier, la case de saisie devient une case a remplir. */
+    #fs-modal .fs-in{border:none!important;border-bottom:1px solid #999!important;border-radius:0!important;
+      background:transparent!important;color:#000!important;width:62px!important;padding:2px 0!important;
+      font-size:11pt!important;margin-top:6px!important}
+    #fs-modal .fs-in::placeholder{color:transparent!important}
+    #fs-modal .fs-ec{color:#555!important}
+    #fs-modal .fs-tab tr.fs-soft td{background:#fafafa!important;color:#555!important}
+    #fs-modal tr{break-inside:avoid}
+  }
+
+  /* ══ RÉFÉRENTIEL MÉTHODOLOGIQUE ══
+     Un entraîneur consulte cet écran entre deux séries, sur un téléphone,
+     pour trancher une question précise : « il a couru un semi dimanche, je
+     le relance quand ? ». Le défilement infini et les tableaux qui débordent
+     ne répondent pas à ça. D'où quatre onglets, une recherche, et des
+     tableaux qui deviennent des fiches sous 700 px. */
+  .kw-bar{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 0 12px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+  .kw-search{position:relative;margin-bottom:10px}
+  .kw-search input{width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:11px;color:var(--text);font-family:var(--font);font-size:14px;font-weight:600;padding:11px 38px 11px 38px;outline:none}
+  .kw-search input:focus{border-color:var(--orange)}
+  .kw-search .kw-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:14px;line-height:1;pointer-events:none}
+  .kw-search .kw-clr{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;background:transparent;color:var(--muted2);font-size:17px;line-height:1;cursor:pointer;border-radius:8px}
+  .kw-search .kw-clr:hover{color:var(--text);background:rgba(255,255,255,.07)}
+  .kw-tabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  .kw-tabs::-webkit-scrollbar{display:none}
+  .kw-tab{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border2);border-radius:20px;color:var(--muted);font-family:var(--font);font-size:12.5px;font-weight:700;padding:8px 14px;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s,background .15s}
+  .kw-tab:hover{color:var(--text2);border-color:var(--muted2)}
+  .kw-tab.on{background:var(--orange);border-color:var(--orange);color:#fff}
+  .kw-cnt{font-size:12px;color:var(--muted2);margin:10px 2px 0}
+  .kw-vide{padding:26px 4px;text-align:center;font-size:13px;color:var(--muted);line-height:1.7}
+
+  /* Le repli des développements théoriques : on garde la thèse, on ne
+     l'impose plus entre le coach et son chiffre. */
+  .kw-dt{border-top:1px solid var(--border);margin-top:12px;padding-top:10px}
+  .kw-dt>summary{display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;font-size:11.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);padding:2px 0}
+  .kw-dt>summary::-webkit-details-marker{display:none}
+  .kw-dt>summary:hover{color:var(--orange)}
+  .kw-dt>summary::before{content:'▸';font-size:11px;transition:transform .15s}
+  .kw-dt[open]>summary::before{transform:rotate(90deg)}
+  .kw-dt-in{font-size:12px;color:var(--muted2);line-height:1.7;padding:8px 0 2px}
+  .kw-dt-in b{color:var(--text2)}
+
+  /* La valeur qu'on vient chercher : lisible d'un coup d'œil. */
+  .kw-b{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:800;white-space:nowrap;background:rgba(255,107,26,.15);color:var(--orange)}
+  .kw-b--v{background:rgba(52,211,153,.15);color:#34D399}
+  .kw-b--r{background:rgba(248,113,113,.15);color:#F87171}
+  .kw-b--n{background:rgba(148,163,184,.15);color:var(--muted2)}
+  .kw-b--b{background:rgba(96,165,250,.15);color:#60A5FA}
+  .kw-hl{background:rgba(255,107,26,.28);border-radius:3px;color:var(--text)}
+
+  @media(max-width:700px){
+    /* Le tableau devient une pile de fiches : chaque cellule porte son
+       intitulé, le scroll horizontal disparaît. */
+    .kw-t{overflow-x:visible!important}
+    .kw-t table{min-width:0!important;display:block}
+    .kw-t thead{display:none}
+    .kw-t tbody,.kw-t tr{display:block;width:auto}
+    .kw-t tr{border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:9px;background:rgba(255,255,255,.02)}
+    .kw-t td{display:flex!important;gap:10px;align-items:baseline;border:none!important;padding:4px 0!important;font-size:12.5px}
+    .kw-t td::before{content:attr(data-lbl);flex:0 0 40%;min-width:0;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);line-height:1.5}
+    .kw-t td.kw-k{display:block!important;font-size:14px;font-weight:900;color:var(--text);padding:0 0 7px!important;margin-bottom:5px;border-bottom:1px solid var(--border)!important}
+    .kw-t td.kw-k::before{display:none}
+  }
   .pd-l{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px}
   .pd-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
   .pd-r input{width:110px;text-align:center;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:20px;font-weight:800;padding:10px 12px;outline:none}
@@ -5402,6 +5546,10 @@ function libCard(s,vma,opts){
   const editBtn='<button type="button" class="lib-wkt lib-edit" onclick="libEditOpen(\''+_kind+'\','+_idx+')" title="'
     +(_kind==='c'?'Modifier cette séance':'Modifier et enregistrer une copie dans ta banque')+'">'
     +'<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Modifier</button>';
+  /* La feuille n'a de sens que pour de la course : une séance de muscu n'a
+     pas de temps de passage. */
+  const fsBtn=s.muscu?'':'<button type="button" class="lib-wkt" onclick="fsOuvrir(\''+_kind+'\','+_idx+')" title="Feuille de séance : les temps de passage de chaque athlète, imprimable">'
+    +'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Feuille</button>';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
   const blocks=s.muscu
     ? libMuscuBody(s)
@@ -5414,7 +5562,7 @@ function libCard(s,vma,opts){
     +persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
-    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+editBtn+'</div>'+
+    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+fsBtn+editBtn+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
     (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
@@ -6664,6 +6812,249 @@ function libBlocDel(i){
   var box=document.getElementById('lb-rows');
   if(box)box.innerHTML=_libEdit.blocks.map(libBlocRow).join('');
   libPreview();
+}
+
+/* ══ FEUILLE DE SÉANCE TERRAIN ══
+   Le croisement qui manquait : une séance × N athlètes → un tableau de temps
+   de passage. Toutes les briques existaient — la séance sait ce qu'elle
+   demande, chaque athlète a sa VMA — mais rien ne les mettait face à face,
+   et le coach recalculait ses temps à la main au bord de la piste.
+
+   Un seul geste : le bouton « Feuille » d'une carte de bibliothèque ouvre la
+   feuille avec TOUS les athlètes déjà cochés. Décocher est l'exception. */
+var _fsSel=null, _fsKind=null, _fsIdx=null, _fsDate=null;
+
+/* ══ LE RÉALISÉ, SAISI À LA MAIN ══
+   Le coach chronomètre au bord de la piste et note. Rien à importer, rien à
+   apparier : il tape ce qu'il a lu. Les résultats vivent sur la fiche de
+   l'athlète — donc ils partent avec la synchro cloud existante, sans table
+   supplémentaire — et sont rangés par date puis par séance : la même séance
+   se recourt, et chaque passage garde ses chronos.
+
+     athlete.perfs = { '2026-09-08': { 'Titre de séance': { '0': 74, '1': 233 } } }
+*/
+function fsIsoJour(d){
+  d=d||new Date();
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+/* « 1:13 », « 1'13 » ou « 73 » donnent tous 73 secondes : le coach tape ce
+   qu'affiche son chrono, sans avoir à choisir un format. */
+function fsSec(txt){
+  if(txt==null) return null;
+  var t=String(txt).trim().replace(',','.');
+  if(!t) return null;
+  var m=t.match(/^(\d{1,3})\s*[:'’.]\s*(\d{1,2})$/);
+  if(m){ var sc=+m[2]; return sc<60 ? (+m[1]*60+sc) : null; }
+  if(/^\d{1,5}(\.\d+)?$/.test(t)) return Math.round(parseFloat(t));
+  return null;
+}
+function fsPerfs(a){ return (a&&a.perfs)||{}; }
+/* Un écart se lit en secondes tant qu'il en reste sous la minute : « +3 s »
+   se saisit d'un coup d'œil là où « +0'03" » demande un décodage. */
+function fsEcartTxt(d){
+  d=Math.round(Math.abs(d));
+  return d<60 ? (d+' s') : fHMS(d);
+}
+/* Où se situe le chrono par rapport à la fenêtre visée. */
+function fsEcart(reel,lo,hi){
+  if(reel==null||lo==null||hi==null) return null;
+  if(reel>hi) return {cls:'lent', txt:'+'+fsEcartTxt(reel-hi)};
+  if(reel<lo) return {cls:'vif',  txt:'\u2212'+fsEcartTxt(lo-reel)};
+  return {cls:'ok', txt:'dans la cible'};
+}
+function fsLire(athId,titre,i){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  var j=fsPerfs(a)[_fsDate]||{};
+  var v=(j[titre]||{})[String(i)];
+  return (typeof v==='number'&&v>0)?v:null;
+}
+function fsNoter(athId,titre,i,champ){
+  var sec=fsSec(champ.value);
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===athId;});
+  if(!a) return;
+  a.perfs=a.perfs||{};
+  a.perfs[_fsDate]=a.perfs[_fsDate]||{};
+  a.perfs[_fsDate][titre]=a.perfs[_fsDate][titre]||{};
+  if(sec==null||sec<=0){
+    delete a.perfs[_fsDate][titre][String(i)];
+    // On ne laisse pas de coquilles vides derrière soi.
+    if(!Object.keys(a.perfs[_fsDate][titre]).length) delete a.perfs[_fsDate][titre];
+    if(!Object.keys(a.perfs[_fsDate]).length) delete a.perfs[_fsDate];
+  } else {
+    a.perfs[_fsDate][titre][String(i)]=sec;
+  }
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  fsEcartMaj(champ, sec);
+}
+/* L'écart s'affiche à côté de la case, sans redessiner le tableau : le coach
+   enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
+function fsEcartMaj(champ,sec){
+  var td=champ.closest('td'); if(!td) return;
+  var vieux=td.querySelector('.fs-ec'); if(vieux) vieux.remove();
+  if(sec==null) return;
+  var lo=parseFloat(td.getAttribute('data-lo')), hi=parseFloat(td.getAttribute('data-hi'));
+  if(!isFinite(lo)||!isFinite(hi)) return;
+  var r=fsEcart(sec,lo,hi); if(!r) return;
+  var e=document.createElement('span');
+  e.className='fs-ec fs-ec--'+r.cls;
+  e.textContent=r.txt;
+  champ.parentNode.appendChild(e);
+}
+function fsDateSet(v){
+  if(!v) return;
+  _fsDate=v;
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
+
+/* La séance développée en lignes d'effort. Une ligne par effort distinct :
+   un 5 × 1000 tient sur une ligne, pas cinq — c'est ainsi qu'on le lit. */
+function fsLignes(s){
+  var L=[];
+  if(s.warm&&s.warm!=='—') L.push({soft:true,lbl:'Échauffement',val:s.warm});
+  (s.blocks||[]).forEach(function(b,i){
+    var reps=Math.max(1,b.r||1), sets=Math.max(1,b.sets||1);
+    var pre=(sets>1?sets+' × ':'')+(reps>1?reps+' × ':'');
+    if(b.segs&&b.segs.length){
+      b.segs.forEach(function(sg,j){
+        L.push({lbl:(j===0?pre:'')+fDist(sg.d)+(sg.lbl?' · '+sg.lbl:''),
+                d:sg.d, pct:sg.pct, all:sg.all,
+                rec:(j===b.segs.length-1?b.rec:'')});
+      });
+    } else {
+      var lbl=pre+(b.d?fDist(b.d):(b.m?b.m+' min':(b.sec?b.sec+' s':'Effort')));
+      L.push({lbl:lbl, d:b.d||0, sec:(b.m?b.m*60:(b.sec||0)),
+              pct:b.pct, all:b.all, rec:b.rec, recSet:(sets>1?b.recSet:'')});
+    }
+  });
+  if(s.cool&&s.cool!=='—') L.push({soft:true,lbl:'Retour au calme',val:s.cool});
+  return L;
+}
+/* La vitesse visée d'un athlète sur une ligne, en m/s. Une allure écrite est
+   absolue : elle vaut pour tout le monde. Un pourcentage se rapporte à la
+   VMA, donc il change d'un athlète à l'autre — c'est tout l'intérêt. */
+function fsVit(l,vma){
+  if(l.all!=null&&typeof allVit==='function') return {lo:allVit(l.all),hi:allVit(l.all),abs:true};
+  if(!vma||l.pct==null) return null;
+  var p=l.pct;
+  if(Array.isArray(p)) return {lo:vma*p[0]/100/3.6, hi:vma*p[1]/100/3.6};
+  return {lo:vma*p/100/3.6, hi:vma*p/100/3.6};
+}
+/* Ce qu'on écrit dans la case. Sur une distance : le chrono à tenir, avec
+   l'allure en dessous. Sur une durée : l'allure seule — il n'y a pas de
+   temps de passage à donner sur « 20 min ». */
+/* La cible d'une case : le texte affiché, et la fenêtre en secondes quand
+   l'effort a une durée mesurable — c'est elle qui permettra de situer le
+   chrono saisi. */
+function fsCible(l,vma){
+  var v=fsVit(l,vma);
+  if(!v) return null;
+  var all=function(x){ return fAll(1000/x); };
+  var aTxt=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
+  if(l.d>0){
+    var tLent=l.d/v.lo, tVif=l.d/v.hi;
+    return {txt:((Math.abs(tLent-tVif)<1.5)
+             ? fHMS(Math.round((tLent+tVif)/2))
+             : fHMS(Math.round(tVif))+'–'+fHMS(Math.round(tLent)))+'<small>'+aTxt+'</small>',
+            lo:tVif, hi:tLent};
+  }
+  // Un bloc en durée n'a pas de temps de passage : sa durée EST la consigne.
+  return {txt:aTxt+(l.sec>0?'<small>'+fHMS(l.sec)+'</small>':''),
+          lo:(l.sec>0?l.sec:null), hi:(l.sec>0?l.sec:null)};
+}
+/* Les athlètes utilisables : il faut une VMA pour convertir un pourcentage.
+   Ceux qui n'en ont pas sont montrés quand même, grisés, avec la raison —
+   les taire laisserait le coach chercher pourquoi il en manque un. */
+function fsAthletes(){
+  return (typeof getAthletes==='function'?getAthletes():[]).map(function(a){
+    return {id:a.id, nom:a.pseudo||'Sans nom', vma:(a.vma&&a.vma>=6&&a.vma<=35)?a.vma:null};
+  });
+}
+function fsOuvrir(kind,idx){
+  var s=libFindSession(kind,idx); if(!s) return;
+  if(s.muscu){ alert('La feuille de séance donne des temps de passage : elle ne s’applique pas à une séance de musculation.'); return; }
+  _fsKind=kind; _fsIdx=idx;
+  if(!_fsDate) _fsDate=fsIsoJour();
+  var tous=fsAthletes();
+  // Tous cochés d'emblée : le coach imprime pour son groupe, pas pour un.
+  if(_fsSel==null) _fsSel=tous.filter(function(a){return a.vma;}).map(function(a){return a.id;});
+  rlModalOuvrir('fs-modal', fsHTML());
+}
+function fsFermer(){ rlModalFermer('fs-modal'); }
+function fsToggle(id){
+  var i=_fsSel.indexOf(id);
+  if(i<0)_fsSel.push(id); else _fsSel.splice(i,1);
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
+function fsImprimer(){ window.print(); }
+function fsHTML(){
+  var s=libFindSession(_fsKind,_fsIdx); if(!s) return '';
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var tous=fsAthletes();
+  var pris=tous.filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
+  var th=(typeof LIB_THEMES!=='undefined'&&LIB_THEMES.find(function(x){return x.id===s.theme;}))||null;
+
+  var pick=tous.map(function(a){
+    if(!a.vma) return '<span class="fs-a fs-a--off" title="Pas de VMA renseignée : les allures ne peuvent pas être calculées">'+e(a.nom)+' <small>sans VMA</small></span>';
+    var on=_fsSel.indexOf(a.id)>=0;
+    return '<button type="button" class="fs-a'+(on?' on':'')+'" onclick="fsToggle('+a.id+')">'
+      +(on?'✓ ':'')+e(a.nom)+' <small>'+a.vma.toFixed(1)+'</small></button>';
+  }).join('');
+
+  var corps;
+  if(!pris.length){
+    corps='<div class="fs-note" style="padding:18px 2px;font-size:13px">Choisis au moins un athlète pour calculer les temps de passage.</div>';
+  } else {
+    var lignes=fsLignes(s);
+    lignes.forEach(function(l,i){ l.i=i; });   // rang stable = clé de stockage
+    var rows=lignes.map(function(l){
+      if(l.soft){
+        return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)+'</td>'
+          +'<td colspan="'+(pris.length+1)+'">'+e(l.val)+'</td></tr>';
+      }
+      return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
+        +pris.map(function(a){
+          var c=fsCible(l,a.vma);
+          if(!c) return '<td class="fs-val"><span style="color:var(--muted2)">—</span></td>';
+          var reel=fsLire(a.id,s.title,l.i);
+          var bornes=(c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
+          var r=fsEcart(reel,c.lo,c.hi);
+          var ec=r?('<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>'):'';
+          return '<td class="fs-val"'+bornes+'>'+c.txt
+            +'<span><input class="fs-in" type="text" inputmode="numeric" maxlength="7"'
+            +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="réel"'
+            +' aria-label="Temps réalisé — '+e(a.nom)+', '+e(l.lbl)+'"'
+            +' onchange="fsNoter('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',this)">'+ec+'</span></td>';
+        }).join('')
+        +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>';
+    }).join('');
+    corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
+      +'<th>Effort</th>'
+      +pris.map(function(a){ return '<th class="fs-ath">'+e(a.nom)+'<br><span style="font-size:10px;font-weight:700;color:var(--muted2)">VMA '+a.vma.toFixed(1)+'</span></th>'; }).join('')
+      +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'<div class="fs-note">Chrono à tenir sur la fraction, allure au kilomètre en dessous. '
+      +'Une fourchette d’intensité donne une fourchette de temps : c’est la marge, pas une imprécision. '
+      +'Les allures écrites en min/km sont absolues et valent pour tout le monde.'
+      +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — tape le chrono lu (<b>1:13</b> ou <b>73</b>, au choix) dans la case sous la cible. '
+      +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
+      +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
+  }
+
+  return '<div class="pl-modal-box fs-box">'
+    +'<div class="pl-modal-top"><b>Feuille de séance</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="fsFermer()">×</button></div>'
+    +'<div class="fs-hd"><div style="flex:1;min-width:200px"><div class="fs-t">'+e(s.title)+'</div>'
+      +'<div class="fs-s">'+(th?e(th.lbl)+' · ':'')
+      +new Date(_fsDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+      +'<label class="fs-date">Séance du <input type="date" value="'+_fsDate+'" onchange="fsDateSet(this.value)"></label></div>'
+    +'<div class="fs-pick">'+pick+'</div>'
+    +corps
+    +'<div class="fs-act">'
+      +'<button type="button" class="lc-save" onclick="fsImprimer()">⎙ Imprimer la feuille</button>'
+      +'<button type="button" class="lc-cancel" onclick="fsFermer()">Fermer</button>'
+    +'</div></div>';
 }
 
 function libDeleteSession(id){
@@ -8265,23 +8656,66 @@ const PL_RECOV_SESS=[
  ['Vitesse / sprint','48–72 h','Stress neuromusculaire (le plus long à dissiper)'],
  ['Compétition','voir tableau reprise','Selon la distance']
 ];
+/* Les trois briques que partagent tous les tableaux du référentiel : l'en-tête,
+   la cellule, et le repli de la théorie. Chaque cellule porte l'intitulé de sa
+   colonne, ce qui permet au tableau de devenir une pile de fiches sous 700 px
+   sans dupliquer le balisage. */
+function kwTh(t){ return '<th style="padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap">'+t+'</th>'; }
+function kwTd(v,lbl,opt){
+  opt=opt||{};
+  var st='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:'+(opt.top?'top':'middle')+(opt.st?(';'+opt.st):'');
+  return '<td class="'+(opt.cls||'')+'" data-lbl="'+String(lbl||'').replace(/"/g,'&quot;')+'" style="'+st+'">'+v+'</td>';
+}
+function kwCle(v,lbl){ return kwTd(v,lbl,{cls:'kw-k',st:'font-weight:800;color:var(--text)'}); }
+function kwBadge(v,ton){ return '<span class="kw-b'+(ton?' kw-b--'+ton:'')+'">'+v+'</span>'; }
+function kwTable(cols,corps,minw){
+  return '<div class="kw-t" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse'+(minw?(';min-width:'+minw+'px'):'')+'">'
+    +'<thead><tr>'+cols.map(function(c){return typeof c==='string'?kwTh(c):c;}).join('')+'</tr></thead>'
+    +'<tbody>'+corps+'</tbody></table></div>';
+}
+function kwDetails(titre,corps){
+  return '<details class="kw-dt"><summary>'+titre+'</summary><div class="kw-dt-in">'+corps+'</div></details>';
+}
+function kwTitre(t,sous){
+  return '<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:'+(sous?'4px':'12px')+'">'+t+'</div>'
+    +(sous?'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">'+sous+'</div>':'');
+}
+
 function plRecovHTML(){
-  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
-  const rows=PL_RECOV.map(r=>'<tr><td style="'+td+';font-weight:700;color:var(--text)">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td><td style="'+td+';color:var(--muted)">'+r[2]+'</td></tr>').join('');
-  const prows=PL_POSTRACE.map(r=>{const on=(r[0].indexOf('10 km')===0&&_plD==='10k')||(r[0].indexOf('Semi')===0&&_plD==='semi')||(r[0].indexOf('Marathon')===0&&_plD==='mara');return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'"><td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td></tr>';}).join('');
+  var rows=PL_RECOV.map(function(r){
+    return '<tr>'+kwCle(r[0],'Système')+kwTd(kwBadge(r[1],'b'),'Durée')+kwTd(r[2],'Remarque',{st:'color:var(--muted)'})+'</tr>';
+  }).join('');
+  var prows=PL_POSTRACE.map(function(r){
+    var on=(r[0].indexOf('10 km')===0&&_plD==='10k')||(r[0].indexOf('Semi')===0&&_plD==='semi')||(r[0].indexOf('Marathon')===0&&_plD==='mara');
+    return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'">'
+      +kwCle(r[0]+(on?' <span style="font-size:10px;color:var(--orange)">· objectif en cours</span>':''),'Épreuve')
+      +kwTd(kwBadge(r[1]),'Repos conseillé')+'</tr>';
+  }).join('');
+  var srows=PL_RECOV_SESS.map(function(r){
+    var ton=/aucun/i.test(r[1])?'v':(/72/.test(r[1])?'r':'');
+    return '<tr>'+kwCle(r[0],'Type de séance')
+      +kwTd(kwBadge(r[1],ton),'Avant la prochaine séance dure')
+      +kwTd(r[2],'Remarque',{st:'color:var(--muted)'})+'</tr>';
+  }).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Délais de récupération</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">'
-    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Restauration métabolique (après effort max)</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Système</th><th style="'+th+'">Durée</th><th style="'+th+'">Remarque</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'
-    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Reprise post-compétition</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Épreuve</th><th style="'+th+'">Repos conseillé</th></tr></thead><tbody>'+prows+'</tbody></table></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Règle <b>60/30/10</b> : 60 % de la récupération se fait dans le 1<sup>er</sup> tiers du temps, 30 % dans le 2<sup>e</sup> → <b>90 % acquis aux 2/3</b>. Étirements réintroduits en S2 après un marathon. Source : Livret CQP FFA.</div></div>'
-    +'<div><div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Récup après chaque type de séance</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+th+'">Type de séance</th><th style="'+th+'">Avant la prochaine séance dure</th><th style="'+th+'">Remarque</th></tr></thead><tbody>'+PL_RECOV_SESS.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text)">'+r[0]+'</td><td style="'+td+';font-weight:800;white-space:nowrap">'+r[1]+'</td><td style="'+td+';color:var(--muted)">'+r[2]+'</td></tr>';}).join('')+'</tbody></table></div>'
-    +'<div style="font-size:11px;color:var(--muted2);margin-top:8px">Repères dérivés des délais métaboliques FFA (glycogène musculaire 24-48 h) et de la hiérarchie des stress (le neuromusculaire est le plus long).</div></div>'
-    +'</div></div>';
+    +kwTitre('Reprise après compétition','Combien de jours avant de relancer, selon la distance courue.')
+    +kwTable(['Épreuve','Repos conseillé'],prows)
+    +kwDetails('La règle 60/30/10',
+       '<b>60 %</b> de la récupération se fait dans le premier tiers du temps, <b>30 %</b> dans le deuxième : '
+      +'<b>90 % est acquis aux deux tiers</b>. C\u2019est ce qui justifie de reprendre progressivement plutôt que d\u2019attendre le délai complet à l\u2019arrêt. '
+      +'Étirements réintroduits en semaine 2 après un marathon. <i>Source : Livret CQP FFA.</i>')
+    +'</div>'
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('Récupération entre deux séances','Délai à respecter avant la prochaine séance dure.')
+    +kwTable(['Type de séance','Avant la prochaine séance dure','Remarque'],srows)
+    +kwDetails('D\u2019où viennent ces délais',
+       'Dérivés des délais métaboliques FFA — le glycogène musculaire demande 24 à 48 h — et de la hiérarchie des stress : '
+      +'<b>le neuromusculaire est le plus long à dissiper</b>, d\u2019où les 48 à 72 h après un travail de vitesse, alors même que la fatigue ressentie a disparu.')
+    +'</div>'
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('Restauration métabolique','Ce que le corps reconstitue après un effort maximal, et en combien de temps.')
+    +kwTable(['Système','Durée','Remarque'],rows)
+    +'</div>';
 }
 const PL_DOMTIME=[
  ['Endurance fondamentale','50-65 %','Course continue (footing, récup)','45′ à 1h10','—'],
@@ -8303,37 +8737,36 @@ const PL_COMBINE=[
  ['Aérobie HI + muscu → meilleure perte de masse grasse','Synergie confirmée en méta-analyse (Wilson 2012).','pos']
 ];
 function plDomainTimeHTML(){
-  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
-  const rows=PL_DOMTIME.map(function(r){return '<tr>'
-    +'<td style="'+td+';font-weight:800;color:var(--text)">'+r[0]+'</td>'
-    +'<td style="'+td+';white-space:nowrap">'+r[1]+'</td>'
-    +'<td style="'+td+'">'+r[2]+'</td>'
-    +'<td style="'+td+';font-weight:800;white-space:nowrap;color:var(--orange)">'+r[3]+'</td>'
-    +'<td style="'+td+';white-space:nowrap">'+r[4]+'</td></tr>';}).join('');
+  var rows=PL_DOMTIME.map(function(r){
+    return '<tr>'+kwCle(r[0],'Domaine')
+      +kwTd(kwBadge(r[1]),'Intensité (% VMA)')
+      +kwTd(r[2],'Format d\u2019effort')
+      +kwTd(kwBadge(r[3],'v'),'Temps de travail effectif')
+      +kwTd(r[4],'Récup',{st:'white-space:nowrap'})+'</tr>';
+  }).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Temps de travail par domaine</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Durée de travail effectif dans la zone (échauffement/récup exclus), par séance.</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px">'
-    +'<thead><tr><th style="'+th+'">Domaine</th><th style="'+th+'">Intensité (% VMA)</th><th style="'+th+'">Format d’effort</th><th style="'+th+'">Temps de travail effectif</th><th style="'+th+'">Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Secteurs d’intensité (aérobie bas/intermédiaire/haut), modalités VMA intensive/extensive/mixte et formats de seuil. Source : Livret CQP FFA (S2-S3).</div>'
+    +kwTitre('Temps de travail par domaine','Durée de travail effectif dans la zone, par séance — échauffement et récup exclus.')
+    +kwTable(['Domaine','Intensité (% VMA)','Format d\u2019effort','Temps de travail effectif','Récup'],rows,600)
+    +kwDetails('Secteurs d\u2019intensité et modalités',
+       'Secteurs aérobie bas / intermédiaire / haut, modalités VMA intensive, extensive et mixte, formats de seuil. <i>Source : Livret CQP FFA (S2-S3).</i>')
     +'</div>';
 }
 function plSpeSessHTML(){
-  const th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  const td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:middle';
-  const rows=PL_SPE.map(r=>{const on=r.id===_plD;const bg=on?'background:rgba(255,107,26,0.08)':'';return '<tr style="'+bg+'">'
-    +'<td style="'+td+';font-weight:800;color:'+(on?'var(--orange)':'var(--text)')+'">'+r.ep+'</td>'
-    +'<td style="'+td+'">'+r.int+'</td>'
-    +'<td style="'+td+';font-weight:800">'+r.vol+'</td>'
-    +'<td style="'+td+'">'+r.frac+'</td>'
-    +'<td style="'+td+';white-space:nowrap">'+r.rec+'</td></tr>';}).join('');
+  var rows=PL_SPE.map(function(r){
+    var on=r.id===_plD;
+    return '<tr style="'+(on?'background:rgba(255,107,26,0.08)':'')+'">'
+      +kwCle(r.ep+(on?' <span style="font-size:10px;color:var(--orange)">· objectif en cours</span>':''),'Épreuve')
+      +kwTd(kwBadge(r.int),'Intensité (% VMA)')
+      +kwTd(kwBadge(r.vol,'v'),'Volume global')
+      +kwTd(r.frac,'Fractions types')
+      +kwTd(r.rec,'Récup',{st:'white-space:nowrap'})+'</tr>';
+  }).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Séance spécifique</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Volume à l\u2019allure de course dans la séance pivot (échauffement/récup exclus).</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:560px">'
-    +'<thead><tr><th style="'+th+'">Épreuve</th><th style="'+th+'">Intensité (% VMA)</th><th style="'+th+'">Volume global</th><th style="'+th+'">Fractions types</th><th style="'+th+'">Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    +'<div style="font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:10px">Progression (« jeu subtil ») : allonger les fractions · augmenter le volume · réduire les récups. Ex. semi 1h30 : 3×2000 (r1′30) → 5000+3000+2000 (récup dégressive). Source : Livret CQP FFA.</div>'
+    +kwTitre('Séance spécifique','Volume à l\u2019allure de course dans la séance pivot (échauffement et récup exclus).')
+    +kwTable(['Épreuve','Intensité (% VMA)','Volume global','Fractions types','Récup'],rows,560)
+    +kwDetails('Comment faire progresser la séance',
+       'Le « jeu subtil » : <b>allonger les fractions</b>, puis <b>augmenter le volume</b>, puis <b>réduire les récups</b> — un levier à la fois. '
+      +'Exemple sur un semi en 1 h 30 : 3×2000 (r 1\u203230) → 5000 + 3000 + 2000 en récup dégressive. <i>Source : Livret CQP FFA.</i>')
     +'</div>';
 }
 function plPhaseEditHTML(p){
@@ -9240,65 +9673,94 @@ function plDates(){
   plUpd();plAvailRender();
 }
 const PL_DJOURS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+/* La fiche marathon. Les chiffres qu'on vient chercher restent à l'écran ;
+   le raisonnement qui les justifie passe derrière un repli. */
 function plPeriodHTML(){
-  var h='font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin:0 0 8px';
-  var li='font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:8px';
+  var li='font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:8px';
+  var tuile=function(v,lbl,ton){
+    return '<div style="flex:1 1 130px;min-width:0;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:rgba(255,255,255,.02)">'
+      +'<div style="font-size:18px;font-weight:900;color:'+(ton==='v'?'#34D399':(ton==='r'?'#F87171':'var(--orange)'))+';line-height:1.2">'+v+'</div>'
+      +'<div style="font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2);margin-top:3px">'+lbl+'</div></div>';
+  };
+  var tapRows=[['S-3','J-21 → J-15','−20 à −30 %',''],
+               ['S-2','J-14 → J-8','−40 à −50 %',''],
+               ['S-1','J-7 → J-0','−60 à −70 %','Fraîcheur maximale, on garde de courts rappels d\u2019allure']]
+    .map(function(r){
+      return '<tr>'+kwCle(r[0],'Semaine')+kwTd(r[1],'Période')
+        +kwTd(kwBadge(r[2],'r'),'Volume')+kwTd(r[3]||'—','Note',{st:'color:var(--muted)'})+'</tr>';
+    }).join('');
+
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Fiche méthodologique : la prépa marathon</div>'
-    +'<div style="'+h+'">1. Volumes &amp; repères de charge</div>'
-    +'<ul style="margin:0 0 18px;padding-left:18px">'
-    +'<li style="'+li+'"><b>Repères hebdomadaires :</b> minimum 40 km/sem (finir sereinement) · cible 60–80 km/sem (performance amateur) · élite 90–130 km/sem.</li>'
-    +'<li style="'+li+'"><b>Sortie longue (SL) :</b> 30–32 km maximum (ou 2 h 45 maximum d’effort). La régularité et la SL priment sur le pic ponctuel, même si la plus grosse semaine reste un fort prédicteur de performance (<i>Vickers &amp; Vertosick, 2016</i>).</li>'
-    +'<li style="'+li+'"><b>Ratio ACWR (Aiguë/Chronique) :</b> mesure de la fatigue.</li>'
-    +'</ul>'
-    +'<div style="margin:4px auto 16px;max-width:300px;text-align:center;font-family:Georgia,serif;font-size:17px;color:var(--text)">ACWR = <span style="display:inline-block;vertical-align:middle;margin-left:6px"><span style="display:block;border-bottom:1px solid var(--text);padding:0 8px">Volume sur 7 jours</span><span style="display:block;padding:0 8px">Moyenne volume sur 28 jours</span></span></div>'
-    +'<ul style="margin:0 0 18px;padding-left:18px">'
-    +'<li style="'+li+'"><i>Zone sûre :</i> <b>0,8–1,3</b> (progression optimale).</li>'
-    +'<li style="'+li+'"><i>Zone danger :</i> <b>&gt; 1,5</b> (risque de blessure décuplé).</li>'
-    +'</ul>'
-    +'<div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">'
-    +'<div style="'+h+'">2. Périodisation &amp; cycles</div>'
-    +'<ul style="margin:0 0 18px;padding-left:18px">'
-    +'<li style="'+li+'"><b>Logique Canova :</b> Du général au spécifique → <i>Base</i> → <i>Développement (seuil)</i> → <i>Spécifique (AS42)</i> → <i>Affûtage</i>.</li>'
-    +'<li style="'+li+'"><b>Progression :</b> +10 %/sem maximum.</li>'
-    +'<li style="'+li+'"><b>Cycle 3:1 (Deload) :</b> 3 semaines de charge / 1 semaine de décharge (-30 à -40 % de volume) pour assimiler.</li>'
-    +'<li style="'+li+'"><b>Ajustement des zones :</b> pas de tests VMA en cours de prépa. On ajuste les allures selon le ressenti et la réussite des séances spécifiques.</li>'
-    +'</ul></div>'
-    +'<div style="border-top:1px solid var(--border);padding-top:16px">'
-    +'<div style="'+h+'">3. Épreuves préparatoires &amp; affûtage</div>'
-    +'<ul style="margin:0 0 18px;padding-left:18px">'
-    +'<li style="'+li+'"><b>Compétition test :</b> semi-marathon placé à <b>J-21</b> (avec portions jouées à allure marathon).</li>'
-    +'<li style="'+li+'"><b>Affûtage progressif (par rapport à la plus grosse semaine) :</b></li>'
-    +'<li style="'+li+';margin-left:18px">S-3 (J-21 à J-15) : -20 à -30 %</li>'
-    +'<li style="'+li+';margin-left:18px">S-2 (J-14 à J-8) : -40 à -50 %</li>'
-    +'<li style="'+li+';margin-left:18px">S-1 (J-7 à J-0) : -60 à -70 % <i>(fraîcheur maximale, maintien de courts rappels d’allure)</i></li>'
-    +'</ul></div>'
-    +'<div style="border-top:1px solid var(--border);padding-top:16px">'
-    +'<div style="'+h+'">4. La séquence finale (J-10 à J-0)</div>'
+    +kwTitre('Marathon — repères de charge')
+    +'<div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px">'
+      +tuile('40 km/sem','Minimum pour finir')
+      +tuile('60–80 km/sem','Cible amateur','v')
+      +tuile('90–130 km/sem','Élite')
+      +tuile('30–32 km','Sortie longue max')
+    +'</div>'
+    +kwDetails('Sur quoi reposent ces repères',
+       'La sortie longue plafonne à <b>30–32 km</b>, ou <b>2 h 45 d\u2019effort</b> : au-delà, le coût de récupération dépasse le gain. '
+      +'La régularité et la sortie longue priment sur le pic ponctuel — même si la plus grosse semaine reste un fort prédicteur de performance '
+      +'(<i>Vickers &amp; Vertosick, 2016</i>).')
+    +'</div>'
+
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('ACWR — le ratio de fatigue','Rapport entre la charge de la semaine et la charge moyenne du mois.')
+    +'<div style="margin:2px auto 16px;max-width:320px;text-align:center;font-family:Georgia,serif;font-size:17px;color:var(--text)">ACWR = <span style="display:inline-block;vertical-align:middle;margin-left:6px"><span style="display:block;border-bottom:1px solid var(--text);padding:0 8px">Volume sur 7 jours</span><span style="display:block;padding:0 8px">Moyenne volume sur 28 jours</span></span></div>'
+    +'<div style="display:flex;gap:9px;flex-wrap:wrap">'
+      +tuile('0,8 – 1,3','Zone sûre · progression optimale','v')
+      +tuile('&gt; 1,5','Zone danger · risque décuplé','r')
+    +'</div>'
+    +'</div>'
+
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('Affûtage','Réduction de volume par rapport à la plus grosse semaine.')
+    +kwTable(['Semaine','Période','Volume','Note'],tapRows)
+    +kwDetails('Compétition test',
+       'Un <b>semi-marathon à J-21</b>, avec des portions jouées à allure marathon. Il valide l\u2019allure, l\u2019équipement et la nutrition '
+      +'assez tôt pour qu\u2019il reste le temps de corriger.')
+    +'</div>'
+
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('La séquence finale — J-10 à J-0')
     +'<ul style="margin:0;padding-left:18px">'
-    +'<li style="'+li+'"><b>J-10 :</b> dernière séance spécifique courte (ex. 6 à 8 km cumulés à allure marathon).</li>'
-    +'<li style="'+li+'"><b>J-7 :</b> dernier footing long léger (1 h 15 maximum dont 15 min à allure marathon).</li>'
-    +'<li style="'+li+'"><b>Semaine finale (J-6 à J-1) :</b> repos maximal. Seulement 2 footings de 30 min max (ex. J-4 et J-2 avec 3–4 lignes droites).</li>'
-    +'</ul></div>'
+    +'<li style="'+li+'"><b>J-10</b> — dernière séance spécifique courte : 6 à 8 km cumulés à allure marathon.</li>'
+    +'<li style="'+li+'"><b>J-7</b> — dernier footing long léger : 1 h 15 maximum, dont 15 min à allure marathon.</li>'
+    +'<li style="'+li+'"><b>J-6 à J-1</b> — repos maximal. Deux footings de 30 min au plus, par exemple J-4 et J-2 avec 3 à 4 lignes droites.</li>'
+    +'</ul>'
+    +'</div>'
+
+    +'<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('Périodisation &amp; cycles')
+    +'<ul style="margin:0;padding-left:18px">'
+    +'<li style="'+li+'"><b>Logique Canova</b> — du général au spécifique : base → développement (seuil) → spécifique (AS42) → affûtage.</li>'
+    +'<li style="'+li+'"><b>Progression</b> — '+kwBadge('+10 %/sem maximum','r')+'</li>'
+    +'<li style="'+li+'"><b>Cycle 3:1</b> — trois semaines de charge, une de décharge à −30/−40 % de volume, pour assimiler.</li>'
+    +'<li style="'+li+'"><b>Ajustement des zones</b> — pas de test VMA en cours de prépa. On ajuste les allures au ressenti et à la réussite des séances spécifiques.</li>'
+    +'</ul>'
     +'</div>';
 }
 function plVO2HTML(){
-  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  var td='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
   var FR=[
    ['Objectif','Max. de temps &gt; 90 % VO₂max','Max. de temps &gt; 90 % VO₂max'],
    ['Durée des répétitions','<b>&gt; 2 min</b> · idéal 4-6 min','<b>&lt; 2 min</b>'],
    ['Intensité','95-100 % VMA · &gt; 90 % VO₂max · 90-95 % FCmax','<b>100-120 % VMA</b>'],
-   ['Formats types','3-5 × 3′ · 1000-1200 m','30/30 · 15/15 · 200-400 m'],
-   ['Récup entre répétitions','&lt; temps d’effort · passive ou ~40 % VMA','&lt; temps d’effort · <b>50-70 % VMA</b>'],
+   ['Formats types','3-5 × 3\u2032 · 1000-1200 m','30/30 · 15/15 · 200-400 m'],
+   ['Récup entre répétitions','&lt; temps d\u2019effort · passive ou ~40 % VMA','&lt; temps d\u2019effort · <b>50-70 % VMA</b>'],
    ['Mode de contrôle','Essentiellement <b>FC</b> (+ vitesse)','<b>Puissance / vitesse</b>'],
    ['Temps passé à VO₂max','4 à 10 min','6 à 8 min'],
    ['Nombre de rép. / séries','À calculer pour tenir <b>≥ 10 min &gt; 90 % VO₂max</b> (latence incluse) · condenser les séries','idem']
   ];
-  var rows=FR.map(function(r){return '<tr><td style="'+td+';font-weight:800;color:var(--text);white-space:nowrap">'+r[0]+'</td><td style="'+td+';background:rgba(52,211,153,0.06)">'+r[1]+'</td><td style="'+td+';background:rgba(96,165,250,0.06)">'+r[2]+'</td></tr>';}).join('');
+  var rows=FR.map(function(r){
+    return '<tr>'+kwCle(r[0],'Paramètre')
+      +kwTd(r[1],'Fractionné long',{top:true,st:'background:rgba(52,211,153,0.06)'})
+      +kwTd(r[2],'Fractionné court',{top:true,st:'background:rgba(96,165,250,0.06)'})+'</tr>';
+  }).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">VMA / VO₂max — fractionné long vs court</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th style="'+th+'">Paramètre</th><th style="'+th+';color:#34D399">Fractionné long</th><th style="'+th+';color:#60A5FA">Fractionné court</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +kwTitre('VMA / VO₂max — fractionné long ou court','Deux façons d\u2019atteindre le même objectif : accumuler du temps au-dessus de 90 % de VO₂max.')
+    +kwTable(['Paramètre',
+              kwTh('<span style="color:#34D399">Fractionné long</span>'),
+              kwTh('<span style="color:#60A5FA">Fractionné court</span>')],rows,600)
     +'</div>';
 }
 var PL_STUDIES_UPD='23/07/2026';
@@ -9320,39 +9782,49 @@ var PL_STUDIES=[
  {cat:'Récupération',title:'The impact of sleep interventions on athletic performance: a systematic review',au:'Sports Med - Open',yr:2023,url:'https://pubmed.ncbi.nlm.nih.gov/37462808/',sum:'Allonger le sommeil et faire des siestes sont les interventions les plus efficaces sur la performance ; la privation dégrade coordination, récupération et augmente le risque de blessure.'},
  {cat:'Chaleur & altitude',title:'Short-term heat acclimation training improves physical performance: systematic review',au:'J Sci Med Sport',yr:2015,url:'https://pubmed.ncbi.nlm.nih.gov/24817609/',sum:'L’acclimatation à la chaleur, même courte (≤ 7 expositions), améliore les déterminants de l’endurance et la performance sur 5 km à la chaleur.'}
 ];
+/* La matrice force × distance. Les phases communes à toutes les distances
+   tiennent sur une seule cellule ; les autres se déclinent en quatre. */
+const PL_RENFO=[
+ {ph:'Reprise / Général', tout:'Conditionnement — poids de corps &amp; pliométrie légère'},
+ {ph:'Foncier', cols:['Hypertrophie (+ puissance-explosivité en demi-fond)',
+                      'Hypertrophie (semi) → puissance-explosivité (marathon)',
+                      'Puissance-explosivité','Puissance-explosivité']},
+ {ph:'Spécifique', cols:['Puissance-explosivité',
+                         'Endurance de force + puissance-explosivité',
+                         'Endurance de force + puissance-explosivité <b>(excentrique ++)</b>',
+                         'Endurance de force + puissance-explosivité <b>(excentrique ++)</b>']},
+ {ph:'Période de compétition', cols:['Puissance-explosivité, poids de corps &amp; pliométrie légère',
+                                     'Poids de corps &amp; pliométrie légère',
+                                     'Poids de corps &amp; pliométrie légère',
+                                     'Poids de corps &amp; pliométrie légère']},
+ {ph:'Affûtage (2 sem. pré-compét.)', cols:['S-2 : puissance-explosivité + poids de corps/pliométrie · <b>semaine de course → OFF</b>',
+                                            'S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b>',
+                                            'S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b>',
+                                            'S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b>']},
+ {ph:'Récup / assimilation', tout:'Conditionnement — poids de corps &amp; pliométrie légère'},
+ {ph:'Récup / génération (post-compétition)', tout:'OFF'}
+];
+const PL_RENFO_COL=['Demi-fond · 10 km','Semi · Marathon','Trail','Ultra (route &amp; trail)'];
 function plRenfoHTML(){
-  var th='padding:8px 10px;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap';
-  var td='padding:9px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:top';
-  var ph='padding:9px 10px;font-size:12px;font-weight:800;color:var(--text);border-bottom:1px solid var(--border);vertical-align:top;white-space:nowrap';
-  function full(txt){return '<td colspan="4" style="'+td+';font-style:italic;color:var(--muted2)">'+txt+'</td>';}
-  var rows=''
-   +'<tr><td style="'+ph+'">Reprise / Général</td>'+full('Conditionnement — travail au poids de corps &amp; pliométrie légère (toutes distances)')+'</tr>'
-   +'<tr><td style="'+ph+'">Foncier</td>'
-     +'<td style="'+td+'">Hypertrophie (+ puissance-explosivité en demi-fond)</td>'
-     +'<td style="'+td+'">Hypertrophie (semi) → puissance-explosivité (marathon)</td>'
-     +'<td style="'+td+'">Puissance-explosivité</td>'
-     +'<td style="'+td+'">Puissance-explosivité</td></tr>'
-   +'<tr><td style="'+ph+'">Spécifique</td>'
-     +'<td style="'+td+'">Puissance-explosivité</td>'
-     +'<td style="'+td+'">Endurance de force + puissance-explosivité</td>'
-     +'<td style="'+td+'">Endurance de force + puissance-explosivité <b>(excentrique ++)</b></td>'
-     +'<td style="'+td+'">Endurance de force + puissance-explosivité <b>(excentrique ++)</b></td></tr>'
-   +'<tr><td style="'+ph+'">Période de compétition</td>'
-     +'<td style="'+td+'">Puissance-explosivité, poids de corps &amp; pliométrie légère</td>'
-     +'<td style="'+td+'">Travail au poids de corps &amp; pliométrie légère</td>'
-     +'<td style="'+td+'">Travail au poids de corps &amp; pliométrie légère</td>'
-     +'<td style="'+td+'">Travail au poids de corps &amp; pliométrie légère</td></tr>'
-   +'<tr><td style="'+ph+'">Affûtage (2 sem. pré-compét.)</td>'
-     +'<td style="'+td+'">S-2 : puissance-explosivité + poids de corps/pliométrie légère · <b>semaine de course → OFF</b></td>'
-     +'<td style="'+td+'">S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b></td>'
-     +'<td style="'+td+'">S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b></td>'
-     +'<td style="'+td+'">S-2 : poids de corps &amp; pliométrie légère · <b>semaine de course → OFF</b></td></tr>'
-   +'<tr><td style="'+ph+'">Récup / assimilation (intra &amp; inter-cycles)</td>'+full('Conditionnement — travail au poids de corps &amp; pliométrie légère')+'</tr>'
-   +'<tr><td style="'+ph+'">Récup / génération (post-compétition)</td>'+full('OFF')+'</tr>';
+  var rows=PL_RENFO.map(function(r){
+    var cells=r.tout
+      ? '<td colspan="4" data-lbl="Toutes distances" style="padding:9px 10px;font-size:12px;color:var(--muted2);border-bottom:1px solid var(--border);vertical-align:top;font-style:italic">'+r.tout+'</td>'
+      : r.cols.map(function(c,i){ return kwTd(c,PL_RENFO_COL[i],{top:true,st:'font-size:12px'}); }).join('');
+    return '<tr>'+kwCle(r.ph,'Phase')+cells+'</tr>';
+  }).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Renforcement / musculation — périodisation par distance</div>'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Type de travail de force selon la phase et la distance objectif. Plus la distance est longue, plus l’endurance de force et l’excentrique dominent.</div>'
-    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr><th style="'+th+'">Phase</th><th style="'+th+'">Demi-fond · 10 km</th><th style="'+th+'">Semi · Marathon</th><th style="'+th+'">Trail</th><th style="'+th+'">Ultra (route &amp; trail)</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+    +kwTitre('Renforcement — périodisation par distance','Type de travail de force selon la phase et la distance objectif.')
+    +kwTable(['Phase'].concat(PL_RENFO_COL),rows,760)
+    +kwDetails('Pourquoi ça change avec la distance',
+       'Plus la distance est longue, plus <b>l\u2019endurance de force</b> et <b>l\u2019excentrique</b> dominent : c\u2019est la capacité à encaisser des milliers d\u2019impacts, pas à en produire un très puissant, qui décide de la fin de course.')
+    +kwDetails('Combiner course et musculation — les 8 repères',
+       '<ul style="margin:0;padding-left:16px">'
+      +PL_COMBINE.map(function(c){
+         var pastille=c[2]==='pos'?kwBadge('utile','v'):(c[2]==='warn'?kwBadge('attention','r'):kwBadge('à séparer','n'));
+         return '<li style="margin-bottom:9px;line-height:1.65"><b>'+c[0]+'</b> '+pastille+'<br>'+c[1]+'</li>';
+       }).join('')
+      +'</ul>')
+    +'</div>';
 }
 
 /* ══ VEILLE PUBMED LIVE — API NCBI E-utilities + traduction FR ══ */
@@ -9411,17 +9883,141 @@ async function fetchPubmedLive(){
       +'<a href="'+pubmedSearchURL()+'" target="_blank" rel="noopener">Ouvrir la recherche PubMed →</a></div>';
   }
 }
+/* ══ RÉFÉRENTIEL MÉTHODOLOGIQUE ══
+   Quatre familles de questions, quatre onglets. Chaque section déclare la
+   sienne, et la recherche traverse tout — parce qu'un coach qui tape
+   « lactate » ne sait pas, et n'a pas à savoir, dans quel onglet ça vit. */
+const KW_TABS=[
+ {id:'recup', ico:'⏱', lbl:'Récupération'},
+ {id:'zones', ico:'📊', lbl:'Zones & intensités'},
+ {id:'renfo', ico:'🏋', lbl:'Renforcement'},
+ {id:'fiches',ico:'📖', lbl:'Fiches & méthodes'}
+];
+var _kwTab='recup', _kwQ='';
 function renderKnowledge(){
   var w=document.getElementById('knowledge-wrap');if(!w)return;
-  w.innerHTML='<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Connaissances</div><div class="input-hero-sub">Référentiels d\u2019entra\u00eenement : s\u00e9ance sp\u00e9cifique, planification &amp; p\u00e9riodisation, temps de travail par domaine, VMA/VO2max, r\u00e9cup\u00e9ration et \u00e9tudes cliniques. Sources FFA (Livret CQP), INSEP et litt\u00e9rature scientifique.</div></div>'
-    +plSpeSessHTML()
-    +plDomainTimeHTML()
-    +plPeriodHTML()
-    +plVO2HTML()
-    +plRecovHTML()
-    +plRenfoHTML()
-    +pubmedLiveHTML();
+  var tabs=KW_TABS.map(function(t){
+    return '<button type="button" class="kw-tab'+(t.id===_kwTab?' on':'')+'" data-kw-tab="'+t.id+'"'
+      +' onclick="kwTab(\''+t.id+'\')">'+t.ico+' '+t.lbl+'</button>';
+  }).join('');
+  w.innerHTML='<div class="input-hero" style="margin-bottom:16px"><div class="tool-eyebrow">Outils</div>'
+      +'<div class="input-hero-title">Référentiel méthodologique</div>'
+      +'<div class="input-hero-sub">Les repères pour trancher vite : délais de récupération, intensités par domaine, périodisation du renforcement, fiches de méthode. Sources FFA (Livret CQP), INSEP et littérature scientifique.</div></div>'
+    +'<div class="kw-bar">'
+      +'<div class="kw-search"><span class="kw-ico">⌕</span>'
+        +'<input id="kw-q" type="search" autocomplete="off" placeholder="Chercher : 10 km, lactate, ACWR, affûtage…" value="'+String(_kwQ).replace(/"/g,'&quot;')+'" oninput="kwCherche(this.value)">'
+        +'<button type="button" class="kw-clr" title="Effacer" aria-label="Effacer la recherche" onclick="kwCherche(\'\',true)">×</button></div>'
+      +'<div class="kw-tabs">'+tabs+'</div>'
+      +'<div class="kw-cnt" id="kw-cnt"></div>'
+    +'</div>'
+    +'<div id="kw-body">'
+      +'<div class="kw-sec" data-kw="recup">'+plRecovHTML()+'</div>'
+      +'<div class="kw-sec" data-kw="zones">'+plSpeSessHTML()+plDomainTimeHTML()+plVO2HTML()+'</div>'
+      +'<div class="kw-sec" data-kw="renfo">'+plRenfoHTML()+'</div>'
+      +'<div class="kw-sec" data-kw="fiches">'+plPeriodHTML()+pubmedLiveHTML()+'</div>'
+      +'<div class="kw-vide" id="kw-vide" hidden>Rien ne correspond à cette recherche.<br>Essaie « seuil », « glycogène », « affûtage », « 10 km »…</div>'
+    +'</div>';
+  kwApplique();
   fetchPubmedLive();
+}
+function kwTab(id){
+  _kwTab=id;
+  document.querySelectorAll('.kw-tab').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-kw-tab')===id);
+  });
+  kwApplique();
+  /* On remonte sur la barre, pas sur le contenu : elle est collante, et
+     viser le contenu le glisserait dessous. */
+  var b=document.querySelector('.kw-bar');
+  if(b&&b.scrollIntoView) try{ b.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+function kwCherche(v,vide){
+  _kwQ=String(v||'');
+  if(vide){ var i=document.getElementById('kw-q'); if(i){ i.value=''; i.focus(); } }
+  kwApplique();
+}
+/* Une recherche sans accent ni casse trouve « affûtage » en tapant
+   « affutage » : personne ne pose l'accent circonflexe sur un clavier de
+   téléphone entre deux séries. */
+function kwNorm(t){
+  // Ni trim ni collapse : la longueur doit rester celle du texte d'origine,
+  // c'est elle qui aligne les indices du surlignage.
+  return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function kwApplique(){
+  var q=kwNorm(_kwQ).trim();
+  var enRech=q.length>=2;
+  var trouves=0;
+  document.querySelectorAll('#kw-body .kw-sec').forEach(function(sec){
+    var cartes=sec.querySelectorAll(':scope > .card, :scope > .db-section');
+    if(!enRech){
+      sec.hidden=(sec.getAttribute('data-kw')!==_kwTab);
+      cartes.forEach(function(c){ c.hidden=false; });
+      sec.querySelectorAll('tbody tr, ul li').forEach(function(e){ e.hidden=false; });
+      kwSurligne(sec,'');
+      return;
+    }
+    /* En recherche on traverse les quatre onglets — le coach cherche une
+       réponse, pas une rubrique — et on descend à la carte plutôt qu'à la
+       section : « ACWR » doit ramener la fiche ACWR, pas les cinq fiches
+       de l'onglet. */
+    var vives=0;
+    cartes.forEach(function(carte){
+      var lignes=carte.querySelectorAll('tbody tr, ul li');
+      var vus=0;
+      lignes.forEach(function(l){
+        var ok=kwNorm(l.textContent).indexOf(q)>=0;
+        l.hidden=!ok; if(ok)vus++;
+      });
+      // Le titre de la carte vaut réponse : il ramène alors tout son contenu.
+      var titre=carte.querySelector(':scope > div:first-child, .pl-live-hd');
+      var parTitre=!!(titre && kwNorm(titre.textContent).indexOf(q)>=0);
+      // Une carte en prose, sans lignes, se juge sur son texte entier.
+      var parTexte=(!lignes.length && kwNorm(carte.textContent).indexOf(q)>=0);
+      if(parTitre||parTexte){
+        lignes.forEach(function(l){ l.hidden=false; });
+        vus=Math.max(vus,lignes.length||1);
+      }
+      carte.hidden=!vus;
+      if(vus){ vives++; trouves+=vus; }
+    });
+    sec.hidden=!vives;
+    kwSurligne(sec,q);
+  });
+  var vide=document.getElementById('kw-vide');
+  if(vide) vide.hidden=!(enRech&&!trouves);
+  var cnt=document.getElementById('kw-cnt');
+  if(cnt) cnt.textContent=enRech
+    ? (trouves?(trouves+' résultat'+(trouves>1?'s':'')+' dans tout le référentiel'):'')
+    : '';
+}
+/* Le surlignage se pose et se retire sur les seuls nœuds de texte : réécrire
+   le HTML ferait sauter les replis ouverts et les écouteurs de la veille. */
+function kwSurligne(sec,q){
+  sec.querySelectorAll('mark.kw-hl').forEach(function(m){
+    var p=m.parentNode; p.replaceChild(document.createTextNode(m.textContent),m); p.normalize();
+  });
+  if(!q||q.length<2) return;
+  var it=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+    if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+    var p=n.parentNode;
+    if(!p||p.hidden||/^(SCRIPT|STYLE|MARK)$/.test(p.tagName)) return NodeFilter.FILTER_REJECT;
+    return NodeFilter.FILTER_ACCEPT;
+  }});
+  var cibles=[], n;
+  while((n=it.nextNode())) if(kwNorm(n.nodeValue).indexOf(q)>=0) cibles.push(n);
+  cibles.slice(0,400).forEach(function(node){
+    var brut=node.nodeValue, i=kwNorm(brut).indexOf(q);
+    if(i<0) return;
+    var av=brut.slice(0,i), mi=brut.slice(i,i+q.length), ap=brut.slice(i+q.length);
+    if(kwNorm(mi)!==q) return;   // indices désalignés : on ne découpe pas
+    var m=document.createElement('mark'); m.className='kw-hl'; m.textContent=mi;
+    var f=document.createDocumentFragment();
+    if(av) f.appendChild(document.createTextNode(av));
+    f.appendChild(m);
+    if(ap) f.appendChild(document.createTextNode(ap));
+    node.parentNode.replaceChild(f,node);
+  });
 }
 function renderPlanif(){
   const wrap=document.getElementById('planif-wrap');if(!wrap)return;
