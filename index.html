@@ -9338,19 +9338,6 @@ function plVolForTime(id,sec){
   for(const r of T){ if(sec<=r[0]) return r[1]; }
   return T[T.length-1][1];
 }
-/* Repères de course — allure de référence et stratégie, par distance.
-   Ce tableau alimentait le bloc « À retenir pour ta course » de l'ancienne
-   fiche HTML, qui n'atteignait plus personne depuis que l'espace athlète se
-   rend à partir du profil structuré. Il repart maintenant dans la charge
-   utile, via _courseReperePourEspace, et s'affiche sur l'écran Accueil de
-   l'athlète, sous sa course. */
-const RACE_KEY={
- '5k':{d:5000,lbl:'5 km',vma:'90–95 % VMA',vc:'≈ 105 % VC (au-dessus, via le D′)',strat:'Départ et fin les plus rapides, milieu régulier — ne pas céder aux à-coups du peloton.'},
- '10k':{d:10000,lbl:'10 km',vma:'85–90 % VMA',vc:'≈ 96–100 % VC',strat:'Allure au métronome : départ maîtrisé, long milieu régulier, accélération sur le dernier km.'},
- 'semi':{d:21097.5,lbl:'Semi-marathon',vma:'80–85 % VMA',vc:'92–96 % VC',strat:'Allure constante du 5e au 15e km. Courir en groupe protège de la baisse d’allure.'},
- 'mara':{d:42195,lbl:'Marathon',vma:'75–80 % VMA',vc:'84–91 % VC (84,8 % en moyenne)',strat:'Partir à ≤ 88 % de sa VC (ou ~80 % VMA) protège de l’effondrement après 30 km. Ravitaillement toutes les 30–40 min.'},
- 'trail':{d:0,lbl:'Trail',vma:'variable selon le D+',vc:'variable selon le D+',strat:'Marcher les côtes raides, gérer les descentes, tester nutrition et matériel à l’entraînement.'}
-};
 const PL_RAD_LBL=['VO₂max','Vitesse','Seuil','EF','Endurance','Force'];
 const PL_RAD_KEYS=['vo2','vit','seuil','ef','end','force'];
 const PL_ERR={
@@ -11172,28 +11159,6 @@ function _graphesPourEspace(ath){
   return g;
 }
 
-/* « À retenir pour ta course » — allure de référence, stratégie et volume
-   conseillé pour la distance visée. Ce bloc vivait dans l'ancienne fiche HTML
-   et n'a jamais atteint l'espace athlète. On le calcule ici, côté coach :
-   l'espace ne connaît ni RACE_KEY ni les tables de volume, et n'a pas à les
-   connaître — il reçoit des phrases, pas des barèmes. */
-function _courseReperePourEspace(ath){
-  var g=ath&&ath.goal;
-  if(!g||!g.id||typeof RACE_KEY==='undefined'||!RACE_KEY[g.id]) return null;
-  var rk=RACE_KEY[g.id];
-  var r={ allure:(ath.csKmh?rk.vc:rk.vma), strategie:rk.strat };
-  var vr=(typeof PL_VOLREF!=='undefined')?PL_VOLREF[g.id]:null;
-  if(vr){
-    // Avec un chrono visé, le volume se resserre autour de cet objectif ;
-    // sans chrono, on donne la fourchette de la distance.
-    var vt=(g.t&&typeof plVolForTime==='function')?plVolForTime(g.id,g.t):null;
-    r.volume = vt ? (vt+' '+vr.unit) : (vr.lo+'–'+vr.hi+' '+vr.unit);
-    r.volumePourChrono = vt?(g.t||null):null;
-    r.volumeMini = vt?null:(vr.min+' '+vr.unit);
-    r.volumeNote = vr.note||'';
-  }
-  return r;
-}
 function _profilPourEspace(ath){
   if(!ath) return null;
   return {
@@ -11203,7 +11168,6 @@ function _profilPourEspace(ath){
     dateDuTest:ath.testDate||'',
     records:ath.records||{}, historiqueCourses:ath.raceHistory||[],
     objectif:ath.goal||null, plan:ath.plan||null,
-    courseRepere:_courseReperePourEspace(ath),
     // Le plan développé — semaines et séances avec leurs allures — calculé
     // par renderDashPlan. L'espace athlète ne sait pas le recalculer.
     planDetail:(window._espacePlan||null),
