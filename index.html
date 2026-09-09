@@ -1105,6 +1105,30 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 #db-profile{padding-left:20px;padding-right:20px}
 .db-section-hd{padding-left:20px;padding-right:20px}
 .db-grid{display:grid;grid-template-columns:1fr;gap:0}
+
+/* ══ L'ATELIER — le profil calculé, sous le formulaire de Saisie ══
+   Ces sections occupaient un onglet à part. Le coach y allait, revenait
+   corriger une valeur, y retournait. Elles sont maintenant à la suite du
+   formulaire : on saisit en haut, on lit et on corrige juste en dessous. */
+#fiche-travail{padding-top:0}
+.ft-sep{display:flex;align-items:center;gap:14px;margin:0 0 32px;padding:0 20px}
+.ft-sep::before,.ft-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+.ft-sep span{font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted2);white-space:nowrap}
+/* Le formulaire garde sa grande marge basse quand l'atelier est masqué :
+   elle dégage la barre de navigation du téléphone. */
+#p-input.avec-fiche .input-wrap{padding-bottom:6px}
+
+/* ══ APERÇU DE L'ESPACE ATHLÈTE ══
+   Un cadre à hauteur d'écran, qui défile tout seul : la barre d'onglets de
+   l'espace athlète est en position fixe, elle doit rester au bas du cadre
+   comme elle reste au bas du téléphone. */
+.fa-note{margin:0 20px 16px;padding:12px 15px;border:1px solid var(--border);border-radius:12px;
+  background:rgba(255,255,255,0.02);color:var(--muted);font-size:13px;line-height:1.6}
+.fa-note strong{color:var(--text)}
+.fa-cadre{margin:0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  background:#0B1220;height:calc(100vh - 260px);min-height:520px}
+.fa-cadre iframe{display:block;width:100%;height:100%;border:0}
 @media(min-width:1200px){.db-grid{grid-template-columns:1fr 1fr;gap:0 44px;align-items:start}}
 
 /* ══ HIDE ON MOBILE ══ */
@@ -1181,6 +1205,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   .input-wrap{padding:20px 16px calc(150px + env(safe-area-inset-bottom,0px))}
   .tool-layout{padding:20px 0 calc(150px + env(safe-area-inset-bottom,0px))}
   #db-profile{padding-left:16px;padding-right:16px}
+  .ft-sep{padding:0 16px;margin-bottom:24px}
+  .fa-note,.fa-cadre{margin-left:16px;margin-right:16px}
+  /* Sur téléphone, la place est comptée : c'est la mesure qui décide, pas un
+     plancher qui ferait passer le bas du cadre sous la barre d'outils. */
+  .fa-cadre{height:calc(100vh - 330px);min-height:340px}
   .db-section-hd{padding-left:16px;padding-right:16px}
   .mode-toggle{gap:10px}
   .mode-card{padding:16px 14px}
@@ -1438,6 +1467,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   .input-wrap{padding:44px 32px 100px}
   .tool-layout{padding:44px 0 100px}
   #db-profile{padding-left:28px;padding-right:28px}
+  .ft-sep{padding:0 28px}
+  .fa-note,.fa-cadre{margin-left:28px;margin-right:28px}
   .db-section-hd{padding-left:28px;padding-right:28px}
   .input-hero-title{font-size:34px}
   .card{padding:34px}
@@ -2147,7 +2178,7 @@ table.lm-laps tbody tr{cursor:pointer}
   </div>
   <div class="mh-menu">
     <button class="mh-btn active" id="mbn-input" onclick="go('input')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Saisie</span></button>
-    <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Dashboard</span></button>
+    <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Fiche</span></button>
     <button class="mh-btn" id="mbn-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Séances</span></button>
     <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Extrapo</span></button>
     <button class="mh-btn" id="mbn-planif" onclick="go('planif')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Plan</span></button>
@@ -2177,7 +2208,7 @@ table.lm-laps tbody tr{cursor:pointer}
       </button>
       <button class="nav-btn" id="sbn-dashboard" onclick="go('dashboard')">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
+        Fiche athlète
       </button>
       <div class="nav-section">Outils</div>
       <button class="nav-btn" id="sbn-library" onclick="go('library')">
@@ -2475,16 +2506,14 @@ table.lm-laps tbody tr{cursor:pointer}
               Réinitialiser
             </button>
           </div>
-
         </div>
-      </div>
 
-      <!-- ══════════ PANEL DASHBOARD ══════════ -->
-      <div id="p-dashboard" class="panel">
-        <div class="tool-layout">
-          <div data-athbar class="db-athbar"></div>
-
-          <!-- Profil -->
+        <!-- ══════════ LE PROFIL CALCULÉ ══════════
+             Ces sections vivaient dans le Dashboard. Elles sont l’atelier du
+             coach : il saisit au-dessus, il lit et corrige juste en dessous,
+             sans changer d’onglet. -->
+        <div class="tool-layout" id="fiche-travail" style="display:none">
+          <div class="ft-sep"><span>Profil calculé</span></div>
           <div id="db-profile" class="db-section"></div>
                     <!-- Course a venir -->
           <div class="db-section" id="db-goal-section">
@@ -2604,7 +2633,27 @@ table.lm-laps tbody tr{cursor:pointer}
             </div>
             <div id="db-analyses"></div>
           </div>
+        </div>
 
+      </div>
+
+      <!-- ══════════ PANEL FICHE ATHLÈTE ══════════
+           Ce panneau ne rend rien lui-même : il affiche espace.html, la vraie
+           page de l'athlète, en mode aperçu. Le coach relit donc exactement ce
+           que son athlète verra — pas une copie qui finirait par diverger. -->
+      <div id="p-dashboard" class="panel">
+        <div class="tool-layout">
+          <div data-athbar class="db-athbar"></div>
+          <div class="fa-note" id="fa-note"></div>
+          <div class="fa-cadre" id="fa-cadre">
+            <!-- Chargé dès le départ, pendant que le coach travaille ailleurs :
+                 l'onglet s'ouvre alors sur une fiche déjà prête. Le surcoût est
+                 mince — espace.html vient de la même origine, et ses deux
+                 bibliothèques sont déjà dans le cache, RedLab tirant les mêmes.
+                 « loading=lazy » ne servirait à rien ici : un panneau masqué
+                 n'entre jamais dans le champ de vision. -->
+            <iframe id="fa-frame" title="Aperçu de l’espace athlète" src="espace.html#apercu"></iframe>
+          </div>
         </div>
       </div>
 
@@ -2763,7 +2812,9 @@ function fHMS(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor((s%3600
    ses huit onglets sur deux rangées, tous visibles. Le fondu des bords et le
    recentrage de l'onglet actif n'ont plus d'objet. */
 function go(id){
-  if(id==='dashboard'&&!S.vma){id='input';}
+  // Sans repère, l'aperçu n'aurait rien à montrer. Le mode Vitesse Critique
+  // compte autant que la VMA : on teste les deux.
+  if(id==='dashboard'&&!S.vma&&!S.csKmh){id='input';}
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('p-'+id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -2771,6 +2822,10 @@ function go(id){
   const sb=document.getElementById('sbn-'+id);if(sb)sb.classList.add('active');
   const mb=document.getElementById('mbn-'+id);if(mb)mb.classList.add('active');
   if(id==='dashboard'&&S.vma&&typeof renderCsModel==='function')renderCsModel();if(id==='dashboard'&&typeof renderDashPlan==='function')renderDashPlan();
+  // L'aperçu se rebâtit à chaque visite : le coach vient de corriger quelque
+  // chose dans Saisie, il veut voir l'effet, pas la fiche d'il y a dix minutes.
+  if(id==='dashboard'&&typeof ficheApercu==='function') ficheApercu();
+  if(id==='input'&&typeof majAtelier==='function') majAtelier();
   if(id==='athletes') renderAthletes();
   const ac=document.getElementById('sbn-ath-count');
   if(ac){const n=getAthletes().length;ac.textContent=n>0?n:'';ac.style.display=n>0?'':'none';}
@@ -3021,7 +3076,7 @@ if((window._csSub||'terrain')==='courses'){
   updPseudo();
   renderDashboard();
   saveLS();
-  go('dashboard');
+  allerAtelier();
 }
 
 let tmiSec=null; // null = pas encore fait
@@ -3139,7 +3194,7 @@ function loadLS(){
     if(!_ath) S.athId=null;
     if(_ath&&Array.isArray(_ath.analyses))S.analyses=_ath.analyses;
     renderDashboard();
-    go('dashboard');
+    go('input');
   }catch(e){}
 }
 function resetAll(){
@@ -3196,6 +3251,7 @@ function fcBornes(z,estVC,fcMax,fcRest,fcReserve){
 /* ══ RENDER DASHBOARD ══ */
 function renderDashboard(){
   if(typeof athBarPoser==='function') athBarPoser();
+  majAtelier();
   renderProfile();
   renderZones();
   renderSlider();
@@ -3207,6 +3263,109 @@ function renderDashboard(){
   renderDashAnalyses();
   buildRaces();
   renderRaceHistory();
+}
+
+/* ══ L'ATELIER ET L'APERÇU ══════════════════════════════════════════════
+   Le profil calculé se lit désormais sous le formulaire de Saisie : le coach
+   saisit une VMA et voit ses zones bouger sans changer d'onglet.
+   L'onglet « Fiche athlète » n'affiche plus rien de son cru — il montre
+   espace.html, la vraie page de l'athlète, dans un cadre. Une seule
+   implémentation des cinq écrans : ce que le coach relit est ce qu'il
+   publie, à la lettre. L'ancienne fiche HTML clonée depuis le dashboard
+   pouvait diverger de l'espace ; elle n'existe plus. */
+function majAtelier(){
+  var pret=!!(S.vma||S.csKmh);
+  var el=document.getElementById('fiche-travail');
+  if(el) el.style.display=pret?'':'none';
+  var p=document.getElementById('p-input');
+  if(p) p.classList.toggle('avec-fiche',pret);
+}
+/* Amène le coach à l'atelier sans le renvoyer en haut de page : après
+   « Générer », ce qu'il veut voir est le profil, pas le champ Prénom. */
+function allerAtelier(ancre){
+  go('input');
+  setTimeout(function(){
+    var el=document.getElementById(ancre||'fiche-travail');
+    if(el&&el.offsetParent!==null) el.scrollIntoView({behavior:'smooth',block:'start'});
+  },140);
+}
+
+var _faPret=false;        // le cadre a répondu « prêt »
+var _faEnAttente=null;    // profil à poster dès qu'il le sera
+window.addEventListener('message',function(ev){
+  if(ev.origin!==location.origin) return;
+  var d=ev.data;
+  if(!d||d.type!=='rl-apercu-pret') return;
+  _faPret=true;
+  if(_faEnAttente){ var m=_faEnAttente; _faEnAttente=null; _faPoster(m); }
+},false);
+/* La barre d'onglets de l'espace athlète est en position fixe : elle se pose
+   au bas du CADRE. Le cadre doit donc s'arrêter là où l'écran s'arrête — au
+   ras de la barre d'outils du bas sur téléphone — sinon la barre de l'athlète
+   tombe hors de vue et l'aperçu ampute ce qu'il est censé montrer. */
+function faHauteur(){
+  var c=document.getElementById('fa-cadre'); if(!c) return;
+  var d=document.getElementById('p-dashboard');
+  if(!d||!d.classList.contains('active')) return;
+  var nav=document.querySelector('.mh-menu');
+  var basse=nav?nav.getBoundingClientRect().height:0;   // 0 sur grand écran : la barre y est masquée
+  var haut=c.getBoundingClientRect().top;
+  var h=Math.round(window.innerHeight-haut-basse-14);
+  c.style.height=Math.max(340,h)+'px';
+}
+window.addEventListener('resize',function(){ faHauteur(); },false);
+/* La barre athlète et la note se posent après coup : mesurer une seule fois
+   donnait un cadre trop haut, dont le bas — et donc les onglets de l'athlète —
+   passait sous la barre d'outils. On remesure quand elles bougent. */
+var _faObs=null;
+function faSurveille(){
+  if(_faObs||typeof ResizeObserver==='undefined') return;
+  _faObs=new ResizeObserver(function(){ faHauteur(); });
+  var n=document.getElementById('fa-note'); if(n)_faObs.observe(n);
+  var b=document.querySelector('#p-dashboard [data-athbar]'); if(b)_faObs.observe(b);
+}
+
+function _faPoster(msg){
+  var f=document.getElementById('fa-frame');
+  if(!f||!f.contentWindow) return;
+  try{ f.contentWindow.postMessage(msg,location.origin); }catch(e){}
+}
+/* Le profil tel qu'il partirait maintenant vers l'espace : celui de S, la
+   session de travail, complété par la fiche enregistrée pour ce qu'elle
+   seule connaît (email, date d'enregistrement, progression). */
+function _profilCourantPourEspace(){
+  var ath=(S.athId!=null)?getAthletes().find(function(a){return a.id===S.athId;}):null;
+  var base=Object.assign({},ath||{},{
+    pseudo:S.pseudo, mode:S.mode, vma:S.vma, csKmh:S.csKmh, dp:S.dp,
+    fcMax:S.fcMax, fcRest:S.fcRest, fcReserve:S.fcReserve,
+    testDate:S.testDate, records:S.records||{},
+    raceHistory:S.raceHistory||(ath&&ath.raceHistory)||[],
+    goal:S.goal||null, plan:S.plan||null,
+    analyses:S.analyses||(ath&&ath.analyses)||[]
+  });
+  return _profilPourEspace(base);
+}
+function ficheApercu(){
+  var note=document.getElementById('fa-note');
+  var ech=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;');};
+  if(!S.vma&&!S.csKmh){
+    if(note) note.innerHTML="Aucun profil chargé : va dans <strong>Athlètes</strong> pour en ouvrir un, ou renseigne une VMA dans <strong>Saisie</strong>.";
+    return;
+  }
+  var ath=(S.athId!=null)?getAthletes().find(function(a){return a.id===S.athId;}):null;
+  if(note){
+    note.innerHTML=(S.pseudo?('<strong>Voici exactement ce que voit '+ech(S.pseudo)+'.</strong> '):'<strong>L’espace athlète, tel qu’il s’affiche.</strong> ')
+      +((ath&&ath.email&&ath.email.indexOf('@')>0)
+          ? 'Publie pour que sa version en ligne rattrape celle-ci.'
+          : 'Renseigne son email dans <strong>Athlètes</strong> pour pouvoir la publier.');
+  }
+  var profil=null;
+  try{ profil=_profilCourantPourEspace(); }catch(e){}
+  if(!profil) return;
+  var msg={type:'rl-apercu', profil:profil, email:(ath&&ath.email)||''};
+  if(_faPret) _faPoster(msg); else _faEnAttente=msg;
+  // go() remonte la page juste après : on mesure une fois qu'elle est en haut.
+  faSurveille(); setTimeout(faHauteur,80); setTimeout(faHauteur,350);
 }
 
 /* ── Profile ── */
@@ -3607,6 +3766,10 @@ function applyVMA(val){
   v=Math.min(Math.max(Math.round(v*10)/10,6),35);
   S.vma=v;
   const si=document.getElementById('vma-inp'); if(si) si.value=v.toFixed(1);
+  // Le formulaire et le profil calculé se lisent maintenant sur le même
+  // écran : l'allure rappelée sous le champ ne peut plus rester sur la
+  // valeur d'avant pendant que les zones, dix centimètres plus bas, ont bougé.
+  try{ updTMICard(); }catch(e){}
   renderDashboard(); saveLS();
 }
 
@@ -4066,7 +4229,10 @@ const SAISIE_CTX=`<div class="mh-slogan mh-slogan-ctx"><span class="mhs-o">Coach
 function updMhCtx(id){
   const el=document.getElementById('mh-ctx');
   if(!el)return;
-  el.innerHTML=(id==='input')?SAISIE_CTX:mhDashCtx();
+  // Saisie contient désormais le profil calculé : son bandeau annonce
+  // l'athlète, comme celui de la fiche. Le slogan ne reste que sur une
+  // Saisie vide, quand il n'y a encore personne à annoncer.
+  el.innerHTML=(id==='input'&&!S.vma&&!S.csKmh)?SAISIE_CTX:mhDashCtx();
 }
 
 function mhDashCtx(){
@@ -4519,7 +4685,7 @@ function loadAthlete(id){
   updPseudo();
   renderDashboard();
   saveLS();
-  go('dashboard');
+  allerAtelier();
 }
 
 /* ══ ATHLÈTES — LA VUE GROUPE ══
@@ -8664,249 +8830,11 @@ function goalReadout(){
 }
 
 
-/* ══ EXPORT VUE ATHLÈTE (fichier HTML autonome, calculateurs interactifs) ══ */
-function exportAthleteView(returnDoc){
-  if((!S.vma&&!S.csKmh)||!S.pseudo){ if(!returnDoc)alert("Génère d'abord un profil athlète avant de le partager."); return; }
-  const src=document.getElementById('p-dashboard');
-  if(!src){alert('Dashboard introuvable.');return;}
-  const clone=src.cloneNode(true);
-
-  // 0) Figer les valeurs saisies (la propriété .value n'est pas sérialisée par cloneNode)
-  clone.querySelectorAll('input').forEach(el=>{
-    if(!el.id)return;
-    const orig=document.getElementById(el.id);
-    if(orig&&orig.value!=null&&el.type!=='file')el.setAttribute('value',orig.value);
-  });
-
-  // 1) Modèle CS : conservé jusqu'au simulateur inclus (tableau des tests / analyse coach retirés)
-  const csmCard=clone.querySelector('#db-csmodel .card');
-  if(csmCard){
-    let after=false;
-    Array.from(csmCard.children).forEach(ch=>{ if(after) ch.remove(); if(ch.classList&&ch.classList.contains('csm-sim')) after=true; });
-  }
-  const csmBox=clone.querySelector('#db-csmodel');
-  if(csmBox){ Array.from(csmBox.children).forEach((ch,i)=>{ if(i>0) ch.remove(); }); }
-  const gEdit=clone.querySelector('#goal-edit-bar'); if(gEdit) gEdit.style.display='none';
-  const gLink=clone.querySelector('#goal-link-bar'); if(gLink) gLink.style.display='none';
-  const phAct=clone.querySelector('.ph-actions'); if(phAct) phAct.remove();
-  // Retirer toutes les formules (fiche athlète épurée)
-  clone.querySelectorAll('.formula,.csm-formula-bar,.csm-formula-exp,.csm-detail,.ph-b-calc,.sim-formula,.csm-toggle').forEach(el=>el.remove());
-  // Retrait des sous-textes / précisions explicatives (fiche épurée)
-  clone.querySelectorAll('.fhint,.input-hero-sub,.ph-b-desc,.calc-exp,.rh-sub,.pred-pct,.sc-sub,.lib-src,.mode-card-desc,.opt-body,.db-section-badge,.info-box').forEach(el=>el.remove());
-  // Retirer les invites coach (test TMI / données cardiaques) si non renseignés
-  clone.querySelectorAll('#db-profile .ph-b-desc').forEach(el=>{
-    const h=el.innerHTML||'';
-    if(h.indexOf('tmi-body')>-1||h.indexOf('fc-opt-body')>-1){
-      const blk=el.closest('.ph-block'); if(blk) blk.remove(); else el.remove();
-    }
-  });
-  // Réinitialiser les canvas : Chart.js y a écrit les dimensions de l'écran du coach
-  clone.querySelectorAll('canvas').forEach(cv=>{cv.removeAttribute('width');cv.removeAttribute('height');cv.removeAttribute('style');});
-  // Images de secours : les visionneuses sans JavaScript (aperçu WhatsApp/iOS) affichent
-  // un instantané des graphiques ; dans un vrai navigateur, le JS les remplace par les
-  // graphiques interactifs.
-  const STATIC_CV={'pl-vol-canvas':1};
-  clone.querySelectorAll('canvas').forEach(cv=>{
-    const orig=cv.id?document.getElementById(cv.id):null;
-    let snapped=false;
-    if(orig&&orig.width){
-      try{
-        const img=document.createElement('img');
-        img.src=orig.toDataURL('image/png');
-        img.className='cv-fallback';
-        var _ph=(cv.parentNode&&cv.parentNode.style&&cv.parentNode.style.height)||'';
-        img.style.cssText=(/px$/.test(_ph))?'width:100%;height:'+_ph+';object-fit:contain;display:block':'width:100%;height:auto;display:block';
-        cv.parentNode.insertBefore(img,cv);
-        snapped=true;
-      }catch(e){}
-    }
-    if(STATIC_CV[cv.id]){ // graphique figé : on garde l'image, on retire le canvas
-      if(snapped)cv.parentNode.removeChild(cv);
-      else cv.setAttribute('data-live','1'),cv.style.display='none';
-    } else {
-      cv.setAttribute('data-live','1');
-      cv.style.display='none';
-    }
-  });
-
-  // 2) Neutraliser les données (lecture seule) MAIS garder les calculateurs vivants
-  //    curseurs = input[type=range].sl / .rsl + boutons .adj
-  // Les flèches de carrousel sont de la navigation, pas une commande coach :
-  // elles restent, au même titre que les + / − des curseurs.
-  /* La fiche est en lecture seule : les boutons partent, sauf ceux qui font
-     partie de la lecture — les flèches de carrousel, le curseur d'allure, et
-     les infobulles. Une bulle est un <button> depuis qu'elle doit s'ouvrir au
-     doigt : sans cette exception, l'athlète recevrait une fiche muette. */
-  clone.querySelectorAll('button').forEach(b=>{ if(b.classList.contains('adj')||b.classList.contains('crsl-arrow')||b.classList.contains('sl-tp-c')||b.classList.contains('rl-info')||b.id==='su-kmh'||b.id==='su-pace') return; b.remove(); });
-  // La bascule Prévu / Réalisé est un outil de coach : elle lit Supabase avec
-  // la session du coach, que la fiche n'a pas. On l'enlève entière, sans quoi
-  // il resterait un cadre vide une fois ses boutons retirés.
-  clone.querySelectorAll('#db-vue,#db-realise,[data-athbar]').forEach(el=>el.remove());
-  // Le détail d'une séance prévue s'ouvre par un onclick, que la fiche retire
-  // plus bas : on enlève aussi ce qui le promettait, plutôt que de laisser un
-  // chevron mort et un curseur de lien.
-  clone.querySelectorAll('.plw-oeil').forEach(el=>el.remove());
-  clone.querySelectorAll('.plw-ch--ouvre').forEach(el=>el.classList.remove('plw-ch--ouvre'));
-  clone.querySelectorAll('input,select,textarea').forEach(el=>{
-    if(el.type==='range'||el.id==='sl-d') return;
-    el.setAttribute('disabled','');
-    el.setAttribute('readonly','');
-    el.style.pointerEvents='none';
-  });
-  const ATTRS=['onclick','oninput','onchange','onmouseover','onmouseout','onmousedown','onmouseup','onkeydown','onkeyup','onfocus','onblur'];
-  clone.querySelectorAll('*').forEach(el=>{
-    if(el.classList.contains('adj')||el.classList.contains('sl')||el.classList.contains('rsl')) return;
-    if(el.id==='sim-v'||el.id==='su-kmh'||el.id==='su-pace'||el.id==='sl-d'
-       ||(el.classList&&(el.classList.contains('csm-toggle')||el.classList.contains('sl-tp-c')))) return;
-    ATTRS.forEach(a=>el.removeAttribute(a));
-  });
-  clone.classList.add('active');
-
-  // Fiche épurée : retirer les notes sous le graphe de périodisation et sous les zones + resserrer la card
-  Array.from(clone.querySelectorAll('div')).forEach(function(d){
-    var t=(d.textContent||'');
-    if((t.indexOf('calée en fin de bloc')>-1||t.indexOf('référentiel Reding Running')>-1||t.indexOf('5 domaines physiologiques')>-1)&&!d.querySelector('canvas,table,img,input')) d.remove();
-  });
-  var _pcard=clone.querySelector('#db-plan');
-  if(_pcard){ if(_pcard.parentNode&&_pcard.parentNode.classList&&_pcard.parentNode.classList.contains('card')) _pcard.parentNode.style.padding='12px 16px';
-    var _leg=_pcard.querySelector('div>div'); if(_leg&&_leg.style)_leg.style.marginBottom='2px';
-    var _inner=_pcard.firstElementChild; if(_inner&&_inner.style)_inner.style.marginTop='0'; }
-
-  // 3) JS embarqué : réutilise les fonctions EXACTES de l'app (zéro divergence)
-  const embedJS=[
-    'var S='+JSON.stringify({vma:S.vma,csKmh:S.csKmh||null,dp:S.dp||0,pseudo:S.pseudo,records:S.records||{},raceHistory:S.raceHistory||[],csPts:S.csPts||null,testDate:S.testDate||null})+';',
-    'var CS_C='+JSON.stringify(CS_C)+';',
-    'var csModelChart=null;window._csM=null;',
-    'var ZONES_VC='+JSON.stringify(ZONES_VC)+';',
-    'var ZONES_VMA='+JSON.stringify(ZONES_VMA)+';',
-    'var RACES='+JSON.stringify(RACES)+';',
-    'var DIST_M='+JSON.stringify(DIST_M)+';',
-    'var HIST_COL='+JSON.stringify(HIST_COL)+';',
-    'var HIST_LBL='+JSON.stringify(HIST_LBL)+';',
-    'var histChart=null;',
-    'function saveLS(){}','function delManualRace(){}',
-    fAll.toString(), fHMS.toString(),
-    updSl.toString(), adjV.toString(), updR.toString(), adjR.toString(),
-    'var _slDist='+_slDist+';', 'var SL_DIST='+JSON.stringify(SL_DIST)+';',
-    slDistSet.toString(), slTemps.toString(),
-    csRender.toString(), csSet.toString(), csInit.toString(), crslInit.toString(),
-    renderRaceHistory.toString(),
-    'var PL_PHC='+JSON.stringify(PL_PHC)+';',
-    'var _fVol='+JSON.stringify(window._dashVolData||null)+';',
-    'function _drawFVol(){if(!_fVol||typeof Chart===\'undefined\')return;var cv=document.getElementById(\'db-vol-canvas\');if(!cv)return;var wk=_fVol.weeks,col=_fVol.col,u=_fVol.unit;var labels=wk.map(function(x){return x.dt;});var data=wk.map(function(x){return x.km;});var _ymax=Math.max.apply(null,data.length?data:[1])*1.08;var _pha=function(hh,a){hh=hh.replace(\'#\',\'\');return \'rgba(\'+parseInt(hh.slice(0,2),16)+\',\'+parseInt(hh.slice(2,4),16)+\',\'+parseInt(hh.slice(4,6),16)+\',\'+a+\')\';};var ptc=wk.map(function(x){return x.rec?_pha(PL_PHC[x.ph],0.42):PL_PHC[x.ph];});try{if(window.Chart&&Chart.getChart){var _ex=Chart.getChart(cv);if(_ex)_ex.destroy();}}catch(e){}new Chart(cv,{type:\'bar\',data:{labels:labels,datasets:[{label:\'Volume\',data:data,backgroundColor:ptc,borderColor:ptc,borderWidth:0,borderRadius:5,maxBarThickness:34,categoryPercentage:0.8,barPercentage:0.72}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){var x=wk[it[0].dataIndex];return \'S\'+x.n+\' · \'+x.dt;},label:function(c){var x=wk[c.dataIndex];return x.km+\' \'+(u||\'\')+(x.rec?\' · décharge\':\'\')+(x.race?\' · course\':\'\')+(x.inter?\' · course prépa\':\'\');}}}},scales:{y:{title:{display:true,text:(u?\'Volume (\'+u+\'/sem)\':\'Volume\'),color:\'#94A3B8\',font:{size:11}},ticks:{color:\'#94A3B8\'},grid:{color:\'rgba(255,255,255,0.06)\'},suggestedMax:_ymax},x:{ticks:{color:\'#94A3B8\',maxRotation:0,autoSkip:true},grid:{color:\'rgba(255,255,255,0.04)\'}}}},plugins:[{id:\'volLbl\',afterDatasetsDraw:function(ch){var g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.textAlign=\'center\';g.textBaseline=\'bottom\';m.data.forEach(function(pt,i){g.font=\'800 12px Manrope,sans-serif\';g.fillStyle=\'#E2E8F0\';g.fillText(ch.data.datasets[0].data[i]+(u?\' \'+u:\'\'),pt.x,pt.y-11);var w=wk[i];if(w&&w.inter){g.font=\'800 9px Manrope,sans-serif\';g.fillStyle=\'#FBBF24\';g.fillText(\'PR\\u00c9PA\',pt.x,pt.y-26);}});g.restore();}}]});}',
-    csmToggle.toString(), csmSim.toString(), simUnit.toString(),
-    drawSimCurve.toString(), drawDCurve.toString(), drawCsModelChart.toString(),
-    'function initCsm(){if(!S.csKmh||!Array.isArray(S.csPts))return;var pts=S.csPts.filter(function(p){return p&&p.t>0&&p.d>0}).sort(function(a,b){return a.t-b.t});if(pts.length<2)return;window._csM={cs:S.csKmh,dp:S.dp};try{drawCsModelChart(pts,S.csKmh/3.6,S.dp,S.testDate);}catch(e){}try{csmSim();}catch(e){}}',
-    'document.addEventListener("DOMContentLoaded",function(){try{csInit();}catch(e){}'
-    // Les flèches des carrousels sont clonées avec le DOM, mais leurs gestionnaires
-    // ne le sont pas : on remet le drapeau à zéro et on recâble dans la fiche.
-    +'try{document.querySelectorAll(".race-grid,.pred-grid,.rec-grid,.ath-grid").forEach(function(g){g.dataset.crsl="";crslInit(g);});}catch(e){}'
-    +'document.querySelectorAll("canvas[data-live]").forEach(function(c){var pv=c.previousElementSibling;if(pv&&pv.className==="cv-fallback"&&pv.parentNode)pv.parentNode.removeChild(pv);c.style.display="block"});var v=document.getElementById("cs-vsl");if(v)csSet(v,+v.dataset.val);RACES.forEach(function(r){var s=document.getElementById("cs-"+r.id);if(s)csSet(s,+s.dataset.val);});try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}setTimeout(function(){try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},120);});',
-    'window.addEventListener("load",function(){setTimeout(function(){try{renderRaceHistory();}catch(e){}try{initCsm();}catch(e){}try{_drawFVol();}catch(e){}try{window.dispatchEvent(new Event(\'resize\'));}catch(e){}},250);});'
-  ].join('\n');
-
-  // 4) CSS de l'app + surcouche autonome
-  const baseCSS=(document.querySelector('style')||{}).innerHTML||'';
-  const today=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  const initials=S.pseudo.slice(0,2).toUpperCase();
-  const extraCSS='html,body{height:auto!important;overflow:auto!important;background:var(--bg)!important}'
-    +'body{padding:0;margin:0}'
-    +'.panel{display:block!important}'
-    +'.export-wrap{max-width:1120px;margin:0 auto}'
-    +'.export-head{display:flex;align-items:center;gap:14px;padding:22px 28px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}'
-    +'.export-av{width:46px;height:46px;border-radius:50%;background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--orange);flex-shrink:0}'
-    +'.export-h-name{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.3px}'
-    +'.export-h-sub{font-size:13px;color:var(--muted2);margin-top:2px}'
-    +'.export-badge{margin-left:auto;background:rgba(255,107,26,0.12);border:1px solid rgba(255,107,26,0.25);color:var(--orange);font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}'
-    +'.export-foot{text-align:center;padding:26px 20px 44px;color:var(--muted2);font-size:12px;line-height:1.8}'
-    +'.export-foot b{color:var(--orange)}'
-    +'#hist-add-form,.hist-del{display:none!important}'
-    +'.export-brand{display:flex;justify-content:center;padding:24px 16px 18px;background:radial-gradient(ellipse at 50% 0%,rgba(255,107,26,0.16),transparent 70%);border-bottom:1px solid var(--border)}'
-    +'.export-brand img{height:96px;width:auto;display:block;filter:drop-shadow(0 6px 24px rgba(255,107,26,0.5))}'
-    +'.export-brand .ss{font-size:16.5px;letter-spacing:1.6px}'
-    /* Wordmark texte auto-suffisant (aucune image externe → s’affiche toujours) */
-    +'.rr-logo{display:flex;flex-direction:column;line-height:.92;font-family:var(--font-display),\'Barlow Condensed\',sans-serif;font-style:italic;font-weight:900;text-transform:uppercase}'
-    +'.rr-logo .rr-logo-a{font-size:44px;color:var(--accent);letter-spacing:1px;text-shadow:0 6px 22px rgba(255,107,26,0.45)}'
-    +'.rr-logo .rr-logo-b{font-size:21px;color:var(--text);letter-spacing:7px}'
-    +'.rotate-hint{display:none!important}'
-    /* Overflow horizontal interdit + médias qui s’adaptent */
-    +'html,body{max-width:100%;overflow-x:hidden}'
-    +'.export-wrap img,.export-wrap canvas,.export-wrap .cv-fallback{max-width:100%!important}'
-    +'.export-wrap table{max-width:100%}'
-    +'@media(max-width:860px){.export-badge{display:none}.export-head{padding:14px 16px;gap:10px}.export-head img{height:30px!important}.export-sep{margin:0 6px 0 0!important}.export-av{width:38px;height:38px;font-size:14px}}'
-    /* ── Portrait téléphone : mise en page verticale confortable ── */
-    +'@media(max-width:760px){'
-      +'.export-wrap{padding:0}'
-      +'.export-brand{padding:16px 12px;gap:14px!important}'
-      +'.rr-logo .rr-logo-a{font-size:34px}.rr-logo .rr-logo-b{font-size:16px;letter-spacing:5px}.export-brand .ss{font-size:12px;letter-spacing:1px}'
-      +'.tool-layout,.input-wrap{padding-left:12px;padding-right:12px}'
-      +'.card,.lib-card,.race-card,.rec-card,.pred-c,.sc,.sl-card{padding:16px!important}'
-      /* Grilles empilées en une colonne */
-      +'.db-grid,.race-grid,.pred-grid,.rec-grid,.stats-row,.lib-grid{grid-template-columns:1fr!important;gap:12px!important}'
-      /* Tables larges : scroll horizontal interne, jamais de débordement de page */
-      +'.tbl-wrap,.export-wrap [style*="overflow-x"]{-webkit-overflow-scrolling:touch}'
-      +'.export-wrap table{display:block;overflow-x:auto;white-space:nowrap;min-width:0!important;width:100%}'
-      +'.export-wrap thead,.export-wrap tbody,.export-wrap tr{width:max-content;min-width:100%}'
-    +'}';
-
-  // Infos clés sur la course préparée (fin de fiche)
-  let raceKeyHTML='';
-  if(S.goal&&S.goal.id&&typeof RACE_KEY!=='undefined'&&RACE_KEY[S.goal.id]){
-    const g=S.goal, rk=RACE_KEY[g.id], vr=(typeof PL_VOLREF!=='undefined')?PL_VOLREF[g.id]:null;
-    const nm=g.name?g.name:rk.lbl;
-    let daysTxt='';
-    if(g.date){const dd=new Date(g.date+'T00:00:00'),now=new Date();now.setHours(0,0,0,0);const n=Math.round((dd-now)/86400000);if(n>0)daysTxt='J-'+n+(n>=7?' · '+Math.floor(n/7)+' sem':'');else if(n===0)daysTxt='Jour J';}
-    const paceTxt=(g.t&&rk.d)?fAll(g.t/rk.d*1000)+'/km':'';
-    const chip=(l,v)=>v?'<div style="flex:1;min-width:120px"><div style="font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)">'+l+'</div><div style="font-size:15px;font-weight:800;color:var(--text);margin-top:2px">'+v+'</div></div>':'';
-    const line=(l,v)=>'<div style="margin-top:12px"><div style="font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--orange);margin-bottom:3px">'+l+'</div><div style="font-size:13px;color:var(--text2);line-height:1.6">'+v+'</div></div>';
-    raceKeyHTML='<div class="db-section" style="margin:8px 0 0"><div class="card" style="padding:22px;border-top:3px solid var(--orange)">'
-      +'<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);margin-bottom:14px">À retenir pour ta course</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:16px">'+chip('Course',nm)+chip('Objectif',g.t?fHMS(g.t)+(paceTxt?' · '+paceTxt:''):'—')+chip('Échéance',daysTxt||(g.date||'—'))+'</div>'
-      +line('Allure de référence',(S.csKmh?rk.vc:rk.vma))
-      +line('Stratégie de course',rk.strat)
-      +(vr?(function(){var vt=(g.t&&typeof plVolForTime==='function')?plVolForTime(g.id,g.t):null;var txt=vt?('Volume conseillé pour viser <b>'+fHMS(g.t)+'</b> : <b style="color:var(--orange)">'+vt+' '+vr.unit+'</b>'):('Volume conseillé : minimum <b>'+vr.min+' '+vr.unit+'</b> · cible '+vr.lo+'–'+vr.hi+' · perf '+vr.perf);return '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:13.5px;color:var(--text2);line-height:1.6">'+txt+'</div>';})():'')
-      +'</div></div>';
-  }
-  const doc='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
-    +'<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-    +'<title>RedLab — '+S.pseudo+'</title>'
-    +'<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">'
-    +'<style>'+baseCSS+extraCSS+'</style></head><body>'
-    +'<div class="export-wrap">'
-    +'<div class="export-brand" style="position:relative;align-items:center;gap:22px">'
-    +'<a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" title="Reding Running" class="rr-logo" style="flex-shrink:0;text-decoration:none"><span class="rr-logo-a">Reding</span><span class="rr-logo-b">Running</span></a>'
-    +'<div class="side-slogan" style="margin:0;gap:4px"><div class="ss">Coach running</div><div class="ss">Tous niveaux</div><div class="ss">Courir encadré</div></div>'
-    +'<div class="export-badge" style="position:absolute;top:14px;right:16px">Lecture seule</div>'
-    +'</div>'
-    +clone.outerHTML
-    +'<div class="export-foot">Généré avec <b>RedLab</b> · <a href="https://reding-running.fr" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-weight:700;text-decoration:none">Reding Running</a><br>Profil transmis le '+today+'.</div>'
-    +'</div>'
-    +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>'
-    +'<script>'+embedJS+'<\/script>'
-    +'</body></html>';
-
-  if(returnDoc) return doc;   // pour l'espace client (pas de téléchargement)
-
-  const d=new Date();
-  const stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  const slug=S.pseudo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-  // T\u00e9l\u00e9chargement local du fichier .html (\u00e0 envoyer \u00e0 l'athl\u00e8te par mail/message).
-  // L'athl\u00e8te l'ouvre \u2192 la fiche s'affiche. (Supabase sert les HTML en text/plain,
-  // impossible d'en faire un lien rendu sur le plan gratuit \u2014 voir historique.)
-  const blob=new Blob([doc],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download='redlab-'+(slug||'athlete')+'-'+stamp+'.html';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1500);
-
-  const btn=document.getElementById('btn-share-ath');
-  if(btn){
-    const orig=btn.innerHTML;
-    btn.innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg><span>Fichier prêt !</span>';
-    setTimeout(()=>{btn.innerHTML=orig;},2200);
-  }
-}
+/* La fiche HTML autonome — un clone du dashboard, épuré à coups de remove() —
+   a été retirée. L'espace athlète se rend maintenant à partir du profil
+   structuré (versionEspace 2), et le coach relit ce même rendu dans l'onglet
+   Fiche athlète. Deux implémentations du même écran finissaient toujours par
+   diverger : c'est l'aperçu qui faisait foi, jamais le clone. */
 
 /* ══ IMPORT FICHE FFA / LEPISTARD (par collage) ══ */
 const FFA_DISTS=[
@@ -9319,6 +9247,12 @@ function plVolForTime(id,sec){
   for(const r of T){ if(sec<=r[0]) return r[1]; }
   return T[T.length-1][1];
 }
+/* Repères de course — allure de référence et stratégie, par distance.
+   Ce tableau alimentait le bloc « À retenir pour ta course » de l'ancienne
+   fiche HTML. Depuis que l'espace athlète se rend à partir du profil
+   structuré, ce bloc n'atteignait déjà plus personne : plus aucun code ne
+   lit RACE_KEY. On garde le contenu — il est juste, et il a sa place dans
+   l'écran Accueil de l'espace athlète le jour où on l'y remettra. */
 const RACE_KEY={
  '5k':{d:5000,lbl:'5 km',vma:'90–95 % VMA',vc:'≈ 105 % VC (au-dessus, via le D′)',strat:'Départ et fin les plus rapides, milieu régulier — ne pas céder aux à-coups du peloton.'},
  '10k':{d:10000,lbl:'10 km',vma:'85–90 % VMA',vc:'≈ 96–100 % VC',strat:'Allure au métronome : départ maîtrisé, long milieu régulier, accélération sur le dernier km.'},
@@ -10313,7 +10247,7 @@ function plToDash(){
   if(typeof renderPredCards==='function')renderPredCards();
   if(typeof goalReadout==='function')goalReadout();
   if(typeof renderDashPlan==='function')renderDashPlan();
-  go('dashboard');
+  allerAtelier('db-plan-section');
 }
 /* opts.ro : calendrier en lecture seule, pour le tableau de bord. Le tableau
    de bord restaure les variables globales du plan juste après l'affichage —
@@ -11188,9 +11122,9 @@ async function cloudPushSpaces(){
   var cur=getAthletes().find(function(a){return a.pseudo===S.pseudo;});
   if(!cur||!cur.email||cur.email.indexOf('@')<0)return;
   try{ if(typeof renderDashboard==='function')renderDashboard(); }catch(e){}
-  var doc; try{ doc=exportAthleteView(true); }catch(e){ return; }
-  if(!doc)return;
-  try{ await _spacesUpsert(cur.email,doc,S.pseudo,_profilPourEspace(cur)); }catch(e){}
+  var profil; try{ profil=_profilPourEspace(cur); }catch(e){ return; }
+  if(!profil)return;
+  try{ await _spacesUpsert(cur.email,null,S.pseudo,profil); }catch(e){}
 }
 function setAthleteEmail(id,val){
   var list=getAthletes(); var a=list.find(function(x){return x.id===id;}); if(!a)return;
@@ -11293,22 +11227,27 @@ async function publishAthlete(id,btn){
   if(!ath)return {ok:false,msg:'athlète introuvable'};
   if(!ath.email||ath.email.indexOf('@')<0){return fail('email manquant');}
   if(btn){btn.disabled=true;btn.textContent='Publication…';}
-  // Charge les données de l'athlète dans S et rend le dashboard (panneau caché) pour bâtir sa fiche.
+  // Charge les données de l'athlète dans S et rend son profil : c'est ce rendu
+  // qui développe le plan (window._espacePlan) que la charge utile emporte.
   try{
     Object.assign(S,{pseudo:ath.pseudo,mode:ath.mode||'vma',vma:ath.vma,csKmh:ath.csKmh,dp:ath.dp,csMethod:ath.csMethod,csR2:ath.csR2,fcMax:ath.fcMax,fcRest:ath.fcRest,fcReserve:fcReserveDe(ath),d3:ath.d3||0,d6:ath.d6||0,d12:ath.d12||0,fc3:ath.fc3||null,fc6:ath.fc6||null,fc12:ath.fc12||null,testDate:ath.testDate,records:ath.records||{},raceHistory:ath.raceHistory||[],goal:ath.goal||{id:'',t:null,date:''},csPts:ath.csPts||null,plan:ath.plan||null});
     plOublieAthlete();
     if(typeof renderDashboard==='function')renderDashboard();
-  }catch(e){ return fail('rendu du dashboard — '+e.message); }
-  var doc;
-  try{ doc=exportAthleteView(true); }catch(e){ return fail('génération de la fiche — '+e.message); }
-  if(!doc){ return fail('fiche vide (VMA/VC manquante pour cet athlète ?)'); }
+  }catch(e){ return fail('rendu du profil — '+e.message); }
+  var profil;
+  try{ profil=_profilPourEspace(ath); }catch(e){ return fail('préparation du profil — '+e.message); }
+  if(!profil||(!profil.vma&&!profil.csKmh)){ return fail('profil vide (VMA/VC manquante pour cet athlète ?)'); }
+  // Une charge utile structurée pèse quelques kilo-octets là où la fiche HTML
+  // en pesait deux cents : sous 1 Ko, on affiche les octets plutôt qu'un « 0 Ko ».
+  var octets=JSON.stringify(profil).length;
+  var taille=(octets<1024)?(octets+' o'):(Math.round(octets/1024)+' Ko');
   try{ saveLS(); }catch(e){}
   var r;
-  try{ r=await _spacesUpsert(ath.email,doc,ath.pseudo,_profilPourEspace(ath)); }
+  try{ r=await _spacesUpsert(ath.email,null,ath.pseudo,profil); }
   catch(e){ return fail(e.message); }
   if(r&&r.error){ return fail(r.error.message); }
-  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+Math.round(doc.length/1024)+' Ko)';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
-  return {ok:true,ko:Math.round(doc.length/1024)};
+  if(btn){btn.disabled=false;btn.textContent='Publié ✓ ('+taille+')';setTimeout(function(){btn.textContent=o||'↑ Publier l\'espace';},2600);}
+  return {ok:true,octets:octets};
 }
 
 /* Republie tous les athlètes qui ont un email. Utile après une évolution de
@@ -11332,8 +11271,8 @@ async function publishAllSpaces(btn){
     if(r&&r.ok)ok.push(list[i].pseudo); else echecs.push({nom:list[i].pseudo,msg:(r&&r.msg)||'erreur'});
   }
   // Remise en place du profil sur lequel le coach travaillait. loadAthlete()
-  // bascule sur le dashboard : on revient aussitôt sur l'onglet Athlètes,
-  // sinon le compte rendu disparaît avant d'avoir été lu.
+  // ouvre sa fiche de travail dans Saisie : on revient aussitôt sur l'onglet
+  // Athlètes, sinon le compte rendu disparaît avant d'avoir été lu.
   try{ if(courant!=null&&typeof loadAthlete==='function')loadAthlete(courant); }catch(e){}
   try{ go('athletes'); }catch(e){}
   try{ renderAthletes(); }catch(e){}
@@ -11448,9 +11387,9 @@ async function cloudInit(){
 /* ══ SÉLECTEUR D'ATHLÈTE RAPIDE (partout) ══ */
 function switchAthlete(id){
   var cur=document.querySelector('.panel.active');
-  var tab=cur?cur.id.replace(/^p-/,''):'dashboard';
-  loadAthlete(id);                 // charge le profil (redirige vers dashboard)
-  if(tab&&tab!=='dashboard')go(tab); // revient sur l'onglet où tu étais
+  var tab=cur?cur.id.replace(/^p-/,''):'input';
+  loadAthlete(id);                 // charge le profil (et ouvre sa fiche de travail)
+  if(tab&&tab!=='input')go(tab);   // revient sur l'onglet où tu étais
   if(typeof athFabUpdate==='function')athFabUpdate();
 }
 function athSwitcherOpen(){
@@ -11486,7 +11425,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   try{ rlInfoPoser(); }catch(e){}
   try{ athBarPoser(); }catch(e){}
   try{ repliAppliquer(); }catch(e){}
-  updMhCtx(S.vma?'dashboard':'input');
+  updMhCtx('input');
   const ac0=document.getElementById('sbn-ath-count');
   if(ac0){const n0=getAthletes().length;ac0.textContent=n0>0?n0:'';ac0.style.display=n0>0?'':'none';}
   if(typeof cloudInit==='function')cloudInit();
