@@ -8275,10 +8275,16 @@ function perfRange(r,m){ return m.csKmh ? csRange(r,m.csKmh,m.dp) : vmaRange(r,m
 const CS_ITEMS=[
   {id:'t3',   kind:'test', lbl:'Test 3 min',    t:180},
   {id:'t6',   kind:'test', lbl:'Test 6 min',    t:360},
+  {id:'t7',   kind:'test', lbl:'Test 7 min',    t:420},
   {id:'t9',   kind:'test', lbl:'Test 9 min',    t:540},
   {id:'t12',  kind:'test', lbl:'Test 12 min',   t:720},
+  /* 1000 m et 2000 m sont les courses qui tombent sur les durées des tests
+     3 min et 7 min pour un coureur autour de 15–17 km/h. Sans elles, le
+     protocole en course n'avait rien à mettre en face du 3 min. */
+  {id:'1000', kind:'race', lbl:'1000 m',        d:1000},
   {id:'1500', kind:'race', lbl:'1500 m',        d:1500},
   {id:'mile', kind:'race', lbl:'Mile (1609 m)', d:1609.34},
+  {id:'2000', kind:'race', lbl:'2000 m',        d:2000},
   {id:'3000', kind:'race', lbl:'3000 m',        d:3000},
   {id:'5000', kind:'race', lbl:'5 km',          d:5000},
   {id:'10000',kind:'race', lbl:'10 km',         d:10000},
@@ -8469,41 +8475,77 @@ function updCsRaces(){
 /* ══ ASSISTANT VC : reco de protocole + estimation auto ══ */
 let _csObj='10k',_csObjTouched=false;
 const CS_OBJS=[['5k','5 km'],['10k','10 km'],['semi','Semi'],['mara','Marathon']];
+/* Les protocoles conseillés, par objectif. « reco » / « alt » servent le
+   modèle 2 points ; « reco3 » / « alt3 » le modèle 3 points — un couple ne
+   remplirait que deux cases sur trois, et laisserait le coach inventer la
+   troisième, qui est justement celle qui décide de la qualité de la droite.
+   Le protocole 3 points ne dépend pas de l'objectif : 3, 7 et 12 minutes
+   couvrent la fenêtre utile quelle que soit la distance préparée, et la
+   Vitesse Critique se mesure sur des efforts courts même quand on prépare
+   long. Les triplets sont donnés du plus court au plus long, dans l'ordre où
+   les cases se remplissent. */
 const CS_RECO={
-  '5k':{reco:[['3000','t3'],['5000','t3']], alt:[['t3','t9'],['t3','t12']], why:'Le 3000 m / 5 km reflète une intensité proche de VO₂max ; le test 3 min estime la réserve anaérobie D′. Deux efforts assez éloignés en durée = VC plus fiable.'},
-  '10k':{reco:[['5000','t3']], alt:[['10000','t3'],['t3','t12']], why:'Le 5 km est proche de la zone VO₂max ; le test 3 min estime la réserve D′. Alternative robuste : Test 3′ + Test 12′ (toujours dans la fenêtre idéale).'},
-  'semi':{reco:[['10000','t3']], alt:[['semi','t3'],['t3','t12']], why:'Le 10 km ancre l’endurance de haute intensité ; le test 3 min estime D′. Effort long > 15 min : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.'},
-  'mara':{reco:[['semi','t3']], alt:[['mara','t3'],['t3','t12']], why:'Le semi ancre l’allure longue ; le test 3 min estime D′. Effort long : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.'}
+  '5k':{reco:[['3000','t3'],['5000','t3']], alt:[['t3','t9'],['t3','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
+    why:'Le 3000 m / 5 km reflète une intensité proche de VO₂max ; le test 3 min estime la réserve anaérobie D′. Deux efforts assez éloignés en durée = VC plus fiable.',
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'},
+  '10k':{reco:[['5000','t3']], alt:[['10000','t3'],['t3','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
+    why:'Le 5 km est proche de la zone VO₂max ; le test 3 min estime la réserve D′. Alternative robuste : Test 3′ + Test 12′ (toujours dans la fenêtre idéale).',
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'},
+  'semi':{reco:[['10000','t3']], alt:[['semi','t3'],['t3','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
+    why:'Le 10 km ancre l’endurance de haute intensité ; le test 3 min estime D′. Effort long > 15 min : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.',
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'},
+  'mara':{reco:[['semi','t3']], alt:[['mara','t3'],['t3','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
+    why:'Le semi ancre l’allure longue ; le test 3 min estime D′. Effort long : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.',
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'}
 };
 function csObjSet(id){_csObj=id;_csObjTouched=true;csRenderAssistant();}
-function csComboLabel(c){var a=csItem(c[0]),b=csItem(c[1]);return (a?a.lbl:c[0])+'  +  '+(b?b.lbl:c[1]);}
-function csApplyReco(a,b){cddPick('cdd-1',a);cddPick('cdd-2',b);csRenderAssistant();var box=document.getElementById('csr-preview');}
+function csComboLabel(c){return c.map(function(id){var it=csItem(id);return it?it.lbl:id;}).join('  +  ');}
+/* Reçoit « t3,t12,5000 » : autant de cases que le modèle en demande. */
+function csApplyReco(liste){
+  liste.split(',').forEach(function(id,k){ cddPick('cdd-'+(k+1),id); });
+  csRenderAssistant();
+}
 function csWhyToggle(){var e=document.getElementById('cs-why');if(e)e.style.display=(e.style.display==='none'||!e.style.display)?'block':'none';}
 function csRenderAssistant(){
   var box=document.getElementById('cs-assistant'); if(!box)return;
   if(!_csObjTouched && S.goal && ['5k','10k','semi','mara'].indexOf(S.goal.id)>=0){ _csObj=S.goal.id; _csObjTouched=true; }
   var r=CS_RECO[_csObj]||CS_RECO['10k'];
-  var cur1=(document.getElementById('csr-type-1')||{}).value, cur2=(document.getElementById('csr-type-2')||{}).value;
-  function chip(c,primary){var on=(c[0]===cur1&&c[1]===cur2);var bg=primary?(on?'#34D399':'rgba(52,211,153,0.10)'):(on?'var(--orange)':'var(--input-bg)');var bd=primary?'#34D399':(on?'var(--orange)':'var(--border2)');var col=on?'#fff':'var(--text)';return '<button type="button" onclick="csApplyReco(\''+c[0]+'\',\''+c[1]+'\')" style="padding:9px 14px;border-radius:10px;border:1.5px solid '+bd+';background:'+bg+';color:'+col+';font-family:var(--font);font-size:12.5px;font-weight:800;cursor:pointer">'+csComboLabel(c)+'</button>';}
+  // Le modèle décide de la longueur des protocoles proposés : trois efforts
+  // quand il en faut trois, sans quoi la dernière case resterait à deviner.
+  var trois=(typeof _csNb!=='undefined'&&_csNb===3);
+  var reco=(trois&&r.reco3)?r.reco3:r.reco, alt=(trois&&r.alt3)?r.alt3:r.alt;
+  var pourquoi=(trois&&r.why3)?r.why3:r.why;
+  var cur=csIdx().map(function(i){return (document.getElementById('csr-type-'+i)||{}).value;});
+  function chip(c,primary){
+    var on=c.length===cur.length&&c.every(function(id,k){return id===cur[k];});
+    var bg=primary?(on?'#34D399':'rgba(52,211,153,0.10)'):(on?'var(--orange)':'var(--input-bg)');
+    var bd=primary?'#34D399':(on?'var(--orange)':'var(--border2)');
+    var col=on?'#fff':'var(--text)';
+    return '<button type="button" onclick="csApplyReco(\''+c.join(',')+'\')" style="padding:9px 14px;border-radius:10px;border:1.5px solid '+bd+';background:'+bg+';color:'+col+';font-family:var(--font);font-size:12.5px;font-weight:800;cursor:pointer">'+csComboLabel(c)+'</button>';}
   var objChips=CS_OBJS.map(function(o){var on=o[0]===_csObj;return '<button type="button" onclick="csObjSet(\''+o[0]+'\')" style="padding:7px 15px;border-radius:9px;border:1px solid '+(on?'var(--orange)':'var(--border2)')+';background:'+(on?'var(--orange)':'var(--input-bg)')+';color:'+(on?'#fff':'var(--text2)')+';font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer">'+o[1]+'</button>';}).join('');
   box.innerHTML=
     '<div style="border:1px solid var(--border2);border-radius:12px;padding:16px 16px;background:rgba(255,255,255,0.02)">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">Données recommandées pour ton objectif</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">'+objChips+'</div>'
     +'<div style="font-size:11.5px;font-weight:800;color:#34D399;margin-bottom:6px">Recommandé</div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+r.reco.map(function(c){return chip(c,true);}).join('')+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+reco.map(function(c){return chip(c,true);}).join('')+'</div>'
     +'<div style="font-size:11.5px;font-weight:800;color:var(--muted2);margin-bottom:6px">Alternatives</div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:8px">'+r.alt.map(function(c){return chip(c,false);}).join('')+'</div>'
-    +((typeof _csNb!=='undefined'&&_csNb===3)?'<div style="margin-top:12px;font-size:11.5px;color:var(--muted2);line-height:1.5">Ces couples remplissent les deux premières performances — la troisième reste à toi. Un test long (9 ou 12 min) étale bien les durées.</div>':'')
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px">'+alt.map(function(c){return chip(c,false);}).join('')+'</div>'
     +'<div style="margin-top:12px"><span onclick="csWhyToggle()" style="cursor:pointer;font-size:12px;font-weight:700;color:var(--orange)">Pourquoi ce choix ? ▾</span>'
-    +'<div id="cs-why" style="display:none;font-size:12px;color:var(--muted2);line-height:1.6;margin-top:8px;padding:10px 12px;border-left:3px solid var(--orange);background:rgba(255,107,26,0.05);border-radius:0 8px 8px 0">'+r.why+'</div></div>'
+    +'<div id="cs-why" style="display:none;font-size:12px;color:var(--muted2);line-height:1.6;margin-top:8px;padding:10px 12px;border-left:3px solid var(--orange);background:rgba(255,107,26,0.05);border-radius:0 8px 8px 0">'+pourquoi+'</div></div>'
     +'</div>';
 }
 function csEstimate(present,targetId){
   var it=csItem(targetId); if(!it||!present||!present.d||!present.t)return null;
   if(it.kind==='test'){
     var d;
-    var k3={360:0.95,540:0.915,720:0.885};
+    // Fraction de la vitesse du 3 min tenable sur une durée plus longue.
+    // 420 s s'intercale entre 360 et 540, dans la même pente.
+    var k3={360:0.95,420:0.938,540:0.915,720:0.885};
     if(present.kind==='test' && Math.abs(present.t-180)<1 && k3[it.t]){ d=(present.d/180)*k3[it.t]*it.t; }
     else { d=present.d*Math.pow(it.t/present.t,1/1.06); }
     return {kind:'test',d:Math.round(d/5)*5};
