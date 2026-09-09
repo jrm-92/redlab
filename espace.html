@@ -180,7 +180,32 @@ a{color:var(--accent)}
 .h2{font-size:11.5px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin:24px 0 12px}
 .h2:first-child{margin-top:0}
 .card2{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+/* ── À retenir pour ta course ──
+   Trois choses qu'on relit la veille : à quelle allure on court, comment on
+   la gère, et quel volume la prépare. Le liseré orange en haut les distingue
+   d'une carte d'information ordinaire. */
+.ret{border-top:3px solid var(--accent)}
+.ret-l{font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:3px}
+.ret-l:not(:first-child){margin-top:14px}
+.ret-v{font-size:13.5px;color:var(--text2);line-height:1.6}
+.ret-v b{color:var(--text);font-weight:800}
+.ret-n{margin-top:12px;padding-top:11px;border-top:1px solid var(--border);
+  font-size:12.5px;color:var(--muted);line-height:1.6}
 .muted{color:var(--muted);font-size:13px;line-height:1.65}
+
+/* ── Mode aperçu ──
+   Le coach regarde la fiche de son athlète dans un cadre de RedLab. Le cadre
+   a une hauteur d'écran et défile tout seul : la barre d'onglets, en position
+   fixe, reste au bas du cadre comme elle reste au bas du téléphone.
+   On ne masque que ce qui n'appartient pas à l'athlète : l'invite « ajoute à
+   ton écran d'accueil » et le menu de compte (actualiser rechargerait le
+   cadre, se déconnecter n'aurait aucun sens ici). Le léger retrait en haut
+   remplace la barre du navigateur, que le cadre n'a pas. Tout le reste — la
+   fiche elle-même — s'affiche à l'identique : c'est tout l'intérêt. */
+html.apercu #savetip,
+html.apercu .menu{display:none!important}
+html.apercu .wrap{padding-top:14px}
 
 /* ── Infobulles ──
    Un « i » discret à côté d'un mot de coach. C'est un vrai <button> : sur un
@@ -872,6 +897,25 @@ function ecranAccueil(d){
     h+='<div class="card2 muted">Aucun objectif renseigné pour l’instant. Ton coach le fixera avec toi.</div>';
   }
 
+  /* Les repères de la course, calculés par RedLab et transmis avec le profil.
+     Absents des fiches publiées avant cette version : on ne montre rien
+     plutôt que d'inventer une allure ou une stratégie. */
+  var cr=d.courseRepere;
+  if(o&&cr){
+    h+='<div class="h2">À retenir pour ta course</div><div class="card2 ret">';
+    if(cr.allure)   h+='<div class="ret-l">Allure de référence</div><div class="ret-v"><b>'+esc(cr.allure)+'</b></div>';
+    if(cr.strategie)h+='<div class="ret-l">Stratégie de course</div><div class="ret-v">'+esc(cr.strategie)+'</div>';
+    if(cr.volume){
+      h+='<div class="ret-l">Volume d’entraînement</div><div class="ret-v">'
+        +(cr.volumePourChrono
+            ? 'Pour viser <b>'+fHMS(cr.volumePourChrono)+'</b> : <b>'+esc(cr.volume)+'</b>.'
+            : '<b>'+esc(cr.volume)+'</b>'+(cr.volumeMini?' — minimum '+esc(cr.volumeMini)+'.':'.'))
+        +'</div>';
+      if(cr.volumeNote) h+='<div class="ret-n">'+esc(cr.volumeNote)+'</div>';
+    }
+    h+='</div>';
+  }
+
   // Repères chiffrés, en bas : utiles, mais pas ce qu'on vient chercher.
   h+='<div class="h2">Tes repères</div><div class="grid">';
   if(R.v){
@@ -1360,6 +1404,11 @@ function ecranRecords(d){
 function rendreApp(email,row){
   var d=row&&row.profil; if(!d)return false;
   P=d;
+  // La bannière de marque n'a plus lieu d'être une fois la fiche ouverte :
+  // l'en-tête de l'application porte déjà le nom de l'athlète. C'est ici
+  // qu'on la masque, et nulle part ailleurs — sinon l'aperçu du coach
+  // montrerait un écran que l'athlète ne voit pas.
+  var _br=document.querySelector('.brand'); if(_br)_br.style.display='none';
   var ini=(d.pseudo||'?').slice(0,2).toUpperCase();
   var R=refDe(d);
   document.getElementById('ap-av').textContent=ini;
@@ -1455,7 +1504,6 @@ async function boot(){
   // séance de musculation s'ouvrirait sans les repères de la dernière fois.
   try{ await chargesCharger(); }catch(e){}
   if(row&&row.profil&&(row.profil.versionEspace||0)>=2){
-    var br2=document.querySelector('.brand'); if(br2)br2.style.display='none';
     if(rendreApp(email,row)){ show('fiche'); return; }
   }
   if(row&&row.html){
@@ -1474,6 +1522,44 @@ async function boot(){
 }
 _sb&&_sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_IN'){ history.replaceState(null,'',location.pathname); boot(); } });
 try{ if(localStorage.getItem('rl_savetip_hidden')){ var _st0=document.getElementById('savetip'); if(_st0)_st0.style.display='none'; } }catch(_){ }
-boot();
+
+/* ══ MODE APERÇU ══
+   RedLab affiche cette page dans un cadre pour montrer au coach ce que son
+   athlète voit. Une seule implémentation des cinq écrans : deux copies du
+   même rendu finiraient par diverger, et le coach publierait une fiche
+   différente de celle qu'il vient de relire.
+   Ici, ni connexion ni lecture Supabase : le profil arrive du parent, par
+   message. On n'accepte que les messages de la MÊME ORIGINE — une page tierce
+   ne doit pas pouvoir injecter une fiche dans ce cadre. */
+/* Hors d'un cadre, l'aperçu n'a personne pour lui envoyer un profil : on
+   ouvre la page normalement plutôt que de rester sur un écran vide. */
+var APERCU = (window.parent!==window)
+  && (location.hash==='#apercu' || /(?:^|[?&])apercu=1(?:&|$)/.test(location.search));
+if(APERCU){
+  document.documentElement.classList.add('apercu');
+  window.addEventListener('message', function(ev){
+    if(ev.origin!==location.origin) return;
+    var d=ev.data;
+    if(!d||d.type!=='rl-apercu'||!d.profil) return;
+    try{
+      // Le carnet de charges alimente les repères de musculation. Sans session
+      // athlète il revient vide : l'aperçu montre alors la fiche telle qu'elle
+      // s'ouvre pour quelqu'un qui n'a encore rien noté.
+      if(rendreApp(d.email||'aperçu',{profil:d.profil})){
+        show('fiche');
+        if(d.ecran) go(d.ecran);
+      }
+    }catch(e){
+      document.getElementById('content').innerHTML=
+        '<div class="spin">Aperçu impossible : '+esc(e.message||String(e))+'</div>';
+      show('fiche');
+    }
+  }, false);
+  /* Le cadre est prêt : RedLab peut envoyer le profil. Il peut aussi l'avoir
+     déjà envoyé — c'est pourquoi le parent garde son message en attente. */
+  try{ parent.postMessage({type:'rl-apercu-pret'}, location.origin); }catch(e){}
+} else {
+  boot();
+}
 </script>
 </body></html>
