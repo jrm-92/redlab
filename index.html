@@ -8275,10 +8275,16 @@ function perfRange(r,m){ return m.csKmh ? csRange(r,m.csKmh,m.dp) : vmaRange(r,m
 const CS_ITEMS=[
   {id:'t3',   kind:'test', lbl:'Test 3 min',    t:180},
   {id:'t6',   kind:'test', lbl:'Test 6 min',    t:360},
+  {id:'t7',   kind:'test', lbl:'Test 7 min',    t:420},
   {id:'t9',   kind:'test', lbl:'Test 9 min',    t:540},
   {id:'t12',  kind:'test', lbl:'Test 12 min',   t:720},
+  /* 1000 m et 2000 m sont les courses qui tombent sur les durées des tests
+     3 min et 7 min pour un coureur autour de 15–17 km/h. Sans elles, le
+     protocole en course n'avait rien à mettre en face du 3 min. */
+  {id:'1000', kind:'race', lbl:'1000 m',        d:1000},
   {id:'1500', kind:'race', lbl:'1500 m',        d:1500},
   {id:'mile', kind:'race', lbl:'Mile (1609 m)', d:1609.34},
+  {id:'2000', kind:'race', lbl:'2000 m',        d:2000},
   {id:'3000', kind:'race', lbl:'3000 m',        d:3000},
   {id:'5000', kind:'race', lbl:'5 km',          d:5000},
   {id:'10000',kind:'race', lbl:'10 km',         d:10000},
@@ -8473,25 +8479,28 @@ const CS_OBJS=[['5k','5 km'],['10k','10 km'],['semi','Semi'],['mara','Marathon']
    modèle 2 points ; « reco3 » / « alt3 » le modèle 3 points — un couple ne
    remplirait que deux cases sur trois, et laisserait le coach inventer la
    troisième, qui est justement celle qui décide de la qualité de la droite.
-   Les triplets sont donnés du plus court au plus long, dans l'ordre où les
-   cases se remplissent. */
+   Le protocole 3 points ne dépend pas de l'objectif : 3, 7 et 12 minutes
+   couvrent la fenêtre utile quelle que soit la distance préparée, et la
+   Vitesse Critique se mesure sur des efforts courts même quand on prépare
+   long. Les triplets sont donnés du plus court au plus long, dans l'ordre où
+   les cases se remplissent. */
 const CS_RECO={
   '5k':{reco:[['3000','t3'],['5000','t3']], alt:[['t3','t9'],['t3','t12']],
-    reco3:[['t3','t9','t12']], alt3:[['t3','3000','5000'],['t3','t6','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
     why:'Le 3000 m / 5 km reflète une intensité proche de VO₂max ; le test 3 min estime la réserve anaérobie D′. Deux efforts assez éloignés en durée = VC plus fiable.',
-    why3:'Trois tests chronométrés (3′ / 9′ / 12′) restent tous dans la fenêtre 2–15 min et s’étalent d’un facteur 4 : c’est la configuration où la droite est la mieux tenue. En version course, 3000 m et 5 km encadrent le test 3 min — le 5 km sort un peu de la fenêtre, mais reste exploitable.'},
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'},
   '10k':{reco:[['5000','t3']], alt:[['10000','t3'],['t3','t12']],
-    reco3:[['t3','t12','5000']], alt3:[['t3','t9','t12'],['t3','3000','10000']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
     why:'Le 5 km est proche de la zone VO₂max ; le test 3 min estime la réserve D′. Alternative robuste : Test 3′ + Test 12′ (toujours dans la fenêtre idéale).',
-    why3:'Le test 3 min ancre le D′, le test 12 min tient le milieu de la fenêtre, le 5 km prolonge vers l’allure de course. Si tu préfères ne pas mobiliser de course, les trois tests 3′ / 9′ / 12′ font le même travail sans sortir de la fenêtre.'},
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'},
   'semi':{reco:[['10000','t3']], alt:[['semi','t3'],['t3','t12']],
-    reco3:[['t3','t12','10000']], alt3:[['t3','5000','10000'],['t3','t9','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
     why:'Le 10 km ancre l’endurance de haute intensité ; le test 3 min estime D′. Effort long > 15 min : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.',
-    why3:'Le 10 km sort de la fenêtre idéale : le test 12 min sert de relais entre lui et le test 3 min, et empêche l’écart de porter à lui seul toute la pente. Version tout-test 3′ / 9′ / 12′ si tu veux rester dans la fenêtre.'},
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'},
   'mara':{reco:[['semi','t3']], alt:[['mara','t3'],['t3','t12']],
-    reco3:[['t3','t12','10000']], alt3:[['t3','10000','semi'],['t3','t9','t12']],
+    reco3:[['t3','t7','t12']], alt3:[['1000','2000','3000']],
     why:'Le semi ancre l’allure longue ; le test 3 min estime D′. Effort long : estimation « terrain », fiabilité réduite — sinon préférer Test 3′ + Test 12′.',
-    why3:'La Vitesse Critique se mesure sur des efforts courts, même quand on prépare long : 3 min, 12 min et 10 km suffisent à la fixer, et l’allure marathon s’en déduit. Le semi peut remplacer le 10 km, au prix d’un effort très hors fenêtre.'}
+    why3:'Trois efforts maximaux à 3, 7 et 12 minutes : tous dans la fenêtre 2–15 min, étalés d’un facteur 4. Le 3 min fixe la réserve D′, le 12 min tire la pente vers la Vitesse Critique, et le 7 min tient le milieu — c’est lui qui révèle si les deux autres décrivent bien la même droite. En version course, 1000 m, 2000 m et 3000 m tombent sur ces durées pour un coureur autour de 15–17 km/h : mêmes repères, chronométrés en compétition.'}
 };
 function csObjSet(id){_csObj=id;_csObjTouched=true;csRenderAssistant();}
 function csComboLabel(c){return c.map(function(id){var it=csItem(id);return it?it.lbl:id;}).join('  +  ');}
@@ -8534,7 +8543,9 @@ function csEstimate(present,targetId){
   var it=csItem(targetId); if(!it||!present||!present.d||!present.t)return null;
   if(it.kind==='test'){
     var d;
-    var k3={360:0.95,540:0.915,720:0.885};
+    // Fraction de la vitesse du 3 min tenable sur une durée plus longue.
+    // 420 s s'intercale entre 360 et 540, dans la même pente.
+    var k3={360:0.95,420:0.938,540:0.915,720:0.885};
     if(present.kind==='test' && Math.abs(present.t-180)<1 && k3[it.t]){ d=(present.d/180)*k3[it.t]*it.t; }
     else { d=present.d*Math.pow(it.t/present.t,1/1.06); }
     return {kind:'test',d:Math.round(d/5)*5};
