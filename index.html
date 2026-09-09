@@ -1655,6 +1655,21 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 @media(max-width:720px){.csm-analyse{grid-template-columns:1fr}}
 
 .cs-race label{margin-bottom:6px}
+/* ── Choix du modèle de Vitesse Critique ──
+   Deux pavés côte à côte, empilés sous 560 px. Le sous-titre porte la vraie
+   information : ce n'est pas « deux ou trois cases » mais « avec ou sans
+   moyen de vérifier ». */
+.cs-nb{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.cs-nb-b{display:flex;flex-direction:column;gap:5px;text-align:left;
+  padding:13px 15px;border-radius:12px;border:1.5px solid var(--border2);
+  background:var(--input-bg);color:var(--text2);font-family:var(--font);
+  cursor:pointer;transition:border-color .18s,background .18s}
+.cs-nb-b:hover{border-color:rgba(255,107,26,0.4)}
+.cs-nb-b.active{border-color:var(--orange);background:rgba(255,107,26,0.07)}
+.cs-nb-t{font-size:14.5px;font-weight:800;color:var(--text)}
+.cs-nb-b.active .cs-nb-t{color:var(--orange)}
+.cs-nb-s{font-size:11.5px;font-weight:500;color:var(--muted2);line-height:1.5}
+@media(max-width:560px){ .cs-nb{grid-template-columns:1fr} }
 
 .iw select option{background:#2A3852;color:#F1F5F9;font-weight:600;padding:8px}
 .cdd{position:relative;width:100%}
@@ -2432,23 +2447,43 @@ table.lm-laps tbody tr{cursor:pointer}
             </div>
             <div id="tests-body">
             <div id="cs-courses-form">
-              <div id="cs-assistant" style="margin-bottom:18px"></div>
-              <div class="info-box" style="margin-bottom:20px">
-                Combine deux <strong>efforts maximaux</strong> pour estimer ta <strong>Vitesse Critique</strong> (VC) et ta réserve <strong data-tip-cle="dp">D′</strong>. Idéalement un effort court (~3 min) et un plus long, assez éloignés en durée. <span style="opacity:.85">Modèle 2 points (Monod &amp; Scherrer 1965 ; Jones &amp; Vanhatalo 2017).</span>
+              <!-- Le choix du modèle. Deux points suffisent — la droite passe
+                   exactement par eux — mais on n'a alors aucun moyen de savoir
+                   si elle tient. Un troisième effort donne une régression et
+                   son R², donc un avis sur la qualité de l'ajustement. -->
+              <div class="slabel" style="margin-top:0;margin-bottom:12px">Modèle</div>
+              <div class="cs-nb" id="cs-nb">
+                <button type="button" class="cs-nb-b active" data-nb="2" onclick="csNbSet(2)">
+                  <span class="cs-nb-t">2 points</span>
+                  <span class="cs-nb-s">Deux efforts maximaux. La droite passe par les deux : pas de résidu, donc pas de contrôle.</span>
+                </button>
+                <button type="button" class="cs-nb-b" data-nb="3" onclick="csNbSet(3)">
+                  <span class="cs-nb-t">3 points</span>
+                  <span class="cs-nb-s">Trois efforts, régression des moindres carrés. L’écart de chacun à la droite dit lequel n’était pas maximal.</span>
+                </button>
               </div>
-              <div class="cs-race">
+              <div id="cs-assistant" style="margin-bottom:18px"></div>
+              <div class="info-box" id="cs-modele-note" style="margin-bottom:20px"></div>
+              <div class="cs-race" id="cs-race-1">
                 <label>Performance 1</label>
                 <input type="hidden" id="csr-type-1" value="t3"><div class="cdd" id="cdd-1" style="margin-bottom:8px"></div>
                 <div id="csr-input-1"></div>
                 <div class="iw" style="margin-top:8px"><input type="number" id="csr-fc-1" placeholder="FC fin (bpm) - optionnel" min="100" max="230" oninput="updCsRaces()" style="padding-left:14px"><span class="iu">bpm</span></div>
                 <div id="csr-badge-1" class="fhint" style="margin-top:6px;font-weight:700"></div><div id="cs-sug-1" style="margin-top:8px"></div>
               </div>
-              <div class="cs-race" style="margin-top:16px">
+              <div class="cs-race" id="cs-race-2" style="margin-top:16px">
                 <label>Performance 2</label>
                 <input type="hidden" id="csr-type-2" value="5000"><div class="cdd" id="cdd-2" style="margin-bottom:8px"></div>
                 <div id="csr-input-2"></div>
                 <div class="iw" style="margin-top:8px"><input type="number" id="csr-fc-2" placeholder="FC fin (bpm) - optionnel" min="100" max="230" oninput="updCsRaces()" style="padding-left:14px"><span class="iu">bpm</span></div>
                 <div id="csr-badge-2" class="fhint" style="margin-top:6px;font-weight:700"></div><div id="cs-sug-2" style="margin-top:8px"></div>
+              </div>
+              <div class="cs-race" id="cs-race-3" style="margin-top:16px;display:none">
+                <label>Performance 3</label>
+                <input type="hidden" id="csr-type-3" value="t12"><div class="cdd" id="cdd-3" style="margin-bottom:8px"></div>
+                <div id="csr-input-3"></div>
+                <div class="iw" style="margin-top:8px"><input type="number" id="csr-fc-3" placeholder="FC fin (bpm) - optionnel" min="100" max="230" oninput="updCsRaces()" style="padding-left:14px"><span class="iu">bpm</span></div>
+                <div id="csr-badge-3" class="fhint" style="margin-top:6px;font-weight:700"></div><div id="cs-sug-3" style="margin-top:8px"></div>
               </div>
               <div id="csr-preview" style="display:none;margin-top:16px"></div>
             </div>
@@ -2865,78 +2900,11 @@ function setVmaSubMode(m){
 }
 
 
-/* ══ TESTS FORM ══ */
-const TEST_CFG=[
-  {dur:3,sec:180,col:'#3B82F6',hint:'~700 m'},
-  {dur:12,sec:720,col:'#10B981',hint:'~2100 m'},
-];
-function buildTestsForm(){
-  const el=document.getElementById('tests-rows');
-  if(!el)return;
-  el.innerHTML=TEST_CFG.map(t=>`
-    <div class="test-row">
-      <div class="test-badge" style="background:${t.col}">
-        <span>${t.dur}'</span>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Distance — ${t.dur} min</label>
-        <div class="iw">
-          <input type="number" id="t${t.dur}" placeholder="${t.hint}" min="100" step="5" oninput="liveTests()">
-          <span class="iu">m</span>
-        </div>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>FC fin de test</label>
-        <div class="iw">
-          <input type="number" id="fc${t.dur}" placeholder="170" min="100" max="230" step="1" style="padding-left:14px">
-          <span class="iu">bpm</span>
-        </div>
-      </div>
-      <div class="test-live" id="tl${t.dur}">—</div>
-    </div>`).join('');
-}
-
-function liveTests(){
-  TEST_CFG.forEach(t=>{
-    const d=+((document.getElementById('t'+t.dur)||{}).value)||0;
-    const el=document.getElementById('tl'+t.dur);
-    if(el) el.textContent=d>0?fAll(1000/d*t.sec)+'/km':'—';
-  });
-  const d3=+((document.getElementById('t3')||{}).value)||0;
-  const d12=+((document.getElementById('t12')||{}).value)||0;
-  const v3=d3>=200, v12=d12>=600;
-  const prev=document.getElementById('tests-preview'); if(!prev)return;
-  if(!(v3||v12)){prev.style.display='none';return;}
-  const vmaEst=estimateVMA(d3,0,d12);
-  let txt='<div class="info-box">';
-  if(vmaEst) txt+='<strong>VMA</strong> : '+vmaEst.toFixed(1)+' km/h';
-  if(v3&&v12){
-    const cs=computeCS([{d:d3,t:180},{d:d12,t:720}]);
-    if(cs&&!cs.tooFew){
-      txt+=' &nbsp;·&nbsp; <strong>VC</strong> : '+cs.csKmh.toFixed(2)+' km/h &nbsp;·&nbsp; D′ : '+Math.round(cs.dp)+' m';
-      txt+='<div class="formula">VC = (D₁₂ − D₃) / (t₁₂ − t₃)  ·  D′ = D₃ − VC × t₃</div>';
-    }
-  } else {
-    txt+='<br><span style="font-size:12px;color:var(--muted2)">Renseignez les tests <strong>3 min</strong> et <strong>12 min</strong>.</span>';
-  }
-  txt+='</div>';
-  prev.style.display='block'; prev.innerHTML=txt;
-}
-
-/* ══ VMA ESTIMATION ══ */
-function estimateVMA(d3,d6,d12){
-  // Coefficients par défaut (milieu de plage physiologique)
-  const K3=1.08, K6=0.985, K12=0.965;
-  // Poids de fiabilité : 6' le plus fiable, 3' le plus bruité
-  const W3=0.2, W6=0.5, W12=0.3;
-
-  let sumW=0, sumVW=0;
-  if(d3>=200){const v=(d3/180)*3.6/K3; sumVW+=v*W3; sumW+=W3;}
-  if(d6>=300){const v=(d6/360)*3.6/K6; sumVW+=v*W6; sumW+=W6;}
-  if(d12>=600){const v=(d12/720)*3.6/K12; sumVW+=v*W12; sumW+=W12;}
-  if(!sumW) return null;
-  return sumVW/sumW;
-}
+/* Le formulaire « terrain » — trois lignes 3′ / 6′ / 12′ et son aperçu — a
+   disparu de la page il y a longtemps ; buildTestsForm ne trouvait plus son
+   conteneur, liveTests plus ses champs, et estimateVMA n'avait plus d'appelant.
+   La Vitesse Critique se saisit désormais en performances, deux ou trois, dans
+   la carte « Définir la vitesse critique ». */
 
 /* ══ COHERENCE CHECK ══ */
 function checkCoherence(vma,csKmh,dp,r2){
@@ -3032,29 +3000,30 @@ function generate(){
     }
     S.vma=v;S.csKmh=null;S.dp=null;
   } else {
-if((window._csSub||'terrain')==='courses'){
-      const r1=csReadPerf(1), r2=csReadPerf(2);
-      const v=csRacesValidate(r1,r2);
-      if(!v.ok){ err.innerHTML='<strong>Erreur :</strong> '+v.msg; err.style.display='block'; return; }
-      const cs=computeCS([{d:r1.d,t:r1.t},{d:r2.d,t:r2.t}]);
-      if(!cs||cs.tooFew){ err.innerHTML='<strong>Erreur :</strong> données incohérentes.'; err.style.display='block'; return; }
-      const short=r1.t<r2.t?r1:r2;
-      const vmaEst=short.d/(100*Math.pow(short.t/360,1/1.06));
-      if(!vmaEst||vmaEst<6||vmaEst>35){ err.innerHTML='<strong>Erreur :</strong> valeurs invalides.'; err.style.display='block'; return; }
-      S.vma=vmaEst; S.d3=0;S.d6=0;S.d12=0; S.fc3=(r1.fc||null);S.fc6=null;S.fc12=(r2.fc||null);
-      S.csKmh=cs.csKmh;S.dp=cs.dp;S.csMethod='2 perfs ('+r1.lbl+' + '+r2.lbl+')';S.csR2=null;S.csPts=[{d:r1.d,t:r1.t,kind:r1.kind,lbl:r1.lbl},{d:r2.d,t:r2.t,kind:r2.kind,lbl:r2.lbl}];
-    } else {
-      const d3=+((document.getElementById('t3')||{}).value)||0;
-      const d12=+((document.getElementById('t12')||{}).value)||0;
-      if(!(d3>=200)||!(d12>=600)){ err.innerHTML='<strong>Erreur :</strong> renseignez les tests <strong>3 min</strong> et <strong>12 min</strong>.'; err.style.display='block'; return; }
-      const vmaEst=estimateVMA(d3,0,d12);
-      if(!vmaEst||vmaEst<6||vmaEst>35){ err.innerHTML='<strong>Erreur :</strong> distances invalides.'; err.style.display='block'; return; }
-      S.vma=vmaEst; S.d3=d3;S.d6=0;S.d12=d12;
-      S.fc3=+((document.getElementById('fc3')||{}).value)||null; S.fc6=null; S.fc12=+((document.getElementById('fc12')||{}).value)||null;
-      S.csKmh=null;S.dp=null;S.csMethod=null;S.csR2=null;
-      const cs=computeCS([{d:d3,t:180},{d:d12,t:720}]);
-      if(cs&&!cs.tooFew){S.csKmh=cs.csKmh;S.dp=cs.dp;S.csMethod=cs.method;S.csR2=cs.r2;}
-    }
+    /* Deux ou trois performances, même chemin : computeCS trace la droite par
+       les deux points, ou l'ajuste par moindres carrés au-delà — et ne rend un
+       R² que dans ce second cas, là où il veut dire quelque chose. */
+    const list=csPerfsLues();
+    const v=csPerfsValidate(list);
+    if(!v.ok){ err.innerHTML='<strong>Erreur :</strong> '+v.msg; err.style.display='block'; return; }
+    const cs=computeCS(list.map(p=>({d:p.d,t:p.t})));
+    if(!cs||cs.tooFew){ err.innerHTML='<strong>Erreur :</strong> données incohérentes.'; err.style.display='block'; return; }
+    const vmaEst=csVmaEst(list);
+    if(!vmaEst||vmaEst<6||vmaEst>35){ err.innerHTML='<strong>Erreur :</strong> valeurs invalides.'; err.style.display='block'; return; }
+    const parT=list.slice().sort((a,b)=>a.t-b.t);
+    S.vma=vmaEst; S.d3=0;S.d6=0;S.d12=0;
+    // Les FC de fin d'effort suivent l'ordre des durées : la plus courte en
+    // premier. Trois emplacements, on en remplit autant qu'on en a.
+    S.fc3=(parT[0]&&parT[0].fc)||null;
+    S.fc6=(parT.length>2&&parT[1].fc)||null;
+    S.fc12=(parT[parT.length-1]&&parT[parT.length-1].fc)||null;
+    S.csKmh=cs.csKmh; S.dp=cs.dp; S.csR2=(cs.r2!=null)?cs.r2:null;
+    S.csMethod=(list.length>2)
+      ? ('Régression '+list.length+' points ('+list.map(p=>p.lbl).join(' + ')+')')
+      : ('2 perfs ('+list[0].lbl+' + '+list[1].lbl+')');
+    // L'identifiant part avec le point : c'est lui qui permet de remettre le
+    // formulaire dans l'état où le coach l'a laissé quand il rouvre la fiche.
+    S.csPts=list.map(p=>({d:p.d,t:p.t,kind:p.kind,lbl:p.lbl,id:p.id}));
   }
 
   // FC
@@ -3168,12 +3137,8 @@ function loadLS(){
     const i=d.inputs||{};
     if(i.pseudo){document.getElementById('pseudo-inp').value=i.pseudo;S.pseudo=i.pseudo;updPseudo();}
     if(i.vma){document.getElementById('vma-inp').value=i.vma;updTMICard();}
-    if(i.t3)document.getElementById('t3').value=i.t3;
-    {const _e6=document.getElementById('t6');if(i.t6&&_e6)_e6.value=i.t6;}
-    if(i.t12)document.getElementById('t12').value=i.t12;
-    if(i.fc3){const e=document.getElementById('fc3');if(e)e.value=i.fc3;}
-    if(i.fc6){const e=document.getElementById('fc6');if(e)e.value=i.fc6;}
-    if(i.fc12){const e=document.getElementById('fc12');if(e)e.value=i.fc12;}
+    // Le profil en Vitesse Critique retrouve ses performances et son modèle.
+    if(S.mode==='tests'&&typeof csFormRestore==='function') csFormRestore(S);
     if(i.fcMax){document.getElementById('fc-max').value=i.fcMax;}
     if(i.fcRest){document.getElementById('fc-rest').value=i.fcRest;}
     if(i.fcMax&&i.fcRest){toggleOpt('fc-opt-body','fc-chev');}
@@ -4666,12 +4631,10 @@ function loadAthlete(id){
     document.getElementById('vma-inp').value=ath.vma.toFixed(1);
     updTMICard();
   } else {
-    const t3=document.getElementById('t3');if(t3)t3.value=ath.d3||'';
-    const t6=document.getElementById('t6');if(t6)t6.value=ath.d6||'';
-    const t12=document.getElementById('t12');if(t12)t12.value=ath.d12||'';
-    const fc3=document.getElementById('fc3');if(fc3)fc3.value=ath.fc3||'';
-    const fc6=document.getElementById('fc6');if(fc6)fc6.value=ath.fc6||'';
-    const fc12=document.getElementById('fc12');if(fc12)fc12.value=ath.fc12||'';
+    // Les champs t3 / t6 / t12 visés ici appartenaient au formulaire « terrain »,
+    // retiré de la page depuis longtemps : ouvrir une fiche en Vitesse Critique
+    // laissait donc les performances vides. On restaure les vraies.
+    csFormRestore(ath);
   }
   if(ath.fcMax){document.getElementById('fc-max').value=ath.fcMax;document.getElementById('fc-rest').value=ath.fcRest||'';}
   updPseudo();
@@ -8323,6 +8286,43 @@ const CS_ITEMS=[
   {id:'mara', kind:'race', lbl:'Marathon',      d:42195},
 ];
 function csItem(id){return CS_ITEMS.find(x=>x.id===id);}
+/* Retrouve l'entrée du catalogue correspondant à un point enregistré. Les
+   fiches d'avant cette version ne portent pas d'identifiant : on les
+   reconnaît alors à leur libellé, puis à leur durée ou leur distance. */
+function csItemDuPoint(p){
+  if(!p) return null;
+  return (p.id&&csItem(p.id))
+    || CS_ITEMS.find(function(x){return x.lbl===p.lbl;})
+    || CS_ITEMS.find(function(x){return x.kind==='test'&&Math.abs(x.t-p.t)<1;})
+    || CS_ITEMS.find(function(x){return x.kind==='race'&&Math.abs(x.d-p.d)<1;})
+    || null;
+}
+/* Recharge les performances d'un athlète dans le formulaire. Sans cela, ouvrir
+   la fiche de quelqu'un en Vitesse Critique montrait deux cases vides, et
+   « Générer » refusait de repartir sur ce qu'on venait pourtant d'afficher. */
+function csFormRestore(ath){
+  var pts=(ath&&Array.isArray(ath.csPts))?ath.csPts.filter(Boolean):[];
+  csNbSet(pts.length>2?3:2);
+  csIdx().forEach(function(i){
+    var p=pts[i-1], it=csItemDuPoint(p);
+    var hid=document.getElementById('csr-type-'+i);
+    if(it&&hid){ hid.value=it.id; var c=document.getElementById('cdd-'+i); if(c&&c._render)c._render(); }
+    renderPerfInput(i);
+    if(!p||!it) return;
+    if(it.kind==='test'){ var e=document.getElementById('csr-val-'+i); if(e)e.value=Math.round(p.d); }
+    else { var mm=document.getElementById('csr-mm-'+i), ss=document.getElementById('csr-ss-'+i);
+           if(mm)mm.value=Math.floor(p.t/60); if(ss)ss.value=Math.round(p.t%60); }
+  });
+  // Les FC de fin d'effort ont été rangées par durée croissante à la saisie.
+  var fcs=[ath&&ath.fc3, ath&&ath.fc6, ath&&ath.fc12].filter(function(x){return x;});
+  var parT=csIdx().map(function(i){return {i:i,p:pts[i-1]};}).filter(function(x){return x.p;})
+    .sort(function(a,b){return a.p.t-b.p.t;});
+  parT.forEach(function(x,k){
+    var e=document.getElementById('csr-fc-'+x.i);
+    if(e&&fcs[k]) e.value=fcs[k];
+  });
+  updCsRaces();
+}
 function csTimeState(t){
   if(!t||t<=0) return null;
   if(t<90||t>1200) return {c:'#F87171',lbl:'hors domaine (2–15 min)'};
@@ -8353,44 +8353,118 @@ function csReadPerf(i){
   const t=mm*60+ss;
   return t>0?{d:it.d,t:t,id:it.id,lbl:it.lbl,kind:'race',fc:fc}:null;
 }
-function csRacesValidate(r1,r2){
-  if(!r1||!r2) return {ok:false,msg:'Renseignez deux performances.'};
-  if(r1.id===r2.id) return {ok:false,msg:'Choisissez deux performances différentes.'};
-  const s=[r1,r2].sort((a,b)=>a.t-b.t); const sc=s[0],lg=s[1];
-  if(lg.t-sc.t<120) return {ok:false,msg:'Durées trop proches (< 2 min d’écart) : la Vitesse Critique serait très imprécise.'};
-  if(sc.d/sc.t<=lg.d/lg.t) return {ok:false,msg:'Vitesses incohérentes (plus rapide sur l’effort le plus long).'};
-  let warn='';
-  const a=csTimeState(sc.t), b=csTimeState(lg.t);
+/* Combien de performances le coach a demandées : deux (la droite passe par
+   les deux) ou trois (régression, et un R² qui dit si le modèle tient). */
+var _csNb=2;
+function csIdx(){ return _csNb===3?[1,2,3]:[1,2]; }
+
+/* Vaut pour deux comme pour trois : chaque paire doit être cohérente, et
+   c'est l'écart entre le plus court et le plus long qui porte la précision. */
+function csPerfsValidate(list){
+  var n=csIdx().length;
+  if(!list||list.length<n) return {ok:false,msg:'Renseignez '+(n===3?'trois':'deux')+' performances.'};
+  var ids={};
+  for(var k=0;k<list.length;k++){
+    if(ids[list[k].id]) return {ok:false,msg:'Choisissez des performances différentes : « '+list[k].lbl+' » revient deux fois.'};
+    ids[list[k].id]=1;
+  }
+  var s=list.slice().sort(function(a,b){return a.t-b.t;});
+  for(var j=1;j<s.length;j++){
+    if(s[j].t-s[j-1].t<120) return {ok:false,msg:'Durées trop proches entre « '+s[j-1].lbl+' » et « '+s[j].lbl+' » (< 2 min d’écart) : la Vitesse Critique serait très imprécise.'};
+    if(s[j-1].d/s[j-1].t<=s[j].d/s[j].t) return {ok:false,msg:'Vitesses incohérentes : « '+s[j].lbl+' » est plus rapide que « '+s[j-1].lbl+' », plus court.'};
+  }
+  var sc=s[0], lg=s[s.length-1], warn='';
+  var horsFenetre=s.filter(function(p){var st=csTimeState(p.t);return st&&st.lbl!=='dans la fenêtre idéale';});
   if(lg.t>1200) warn='Effort long > 15 min : hors de la fenêtre idéale (2–15 min) → estimation « terrain », fiabilité réduite.';
-  else if((a&&a.lbl!=='dans la fenêtre idéale')||(b&&b.lbl!=='dans la fenêtre idéale')) warn='Un effort est en limite de la fenêtre 2–15 min : fiabilité réduite.';
+  else if(horsFenetre.length) warn=(horsFenetre.length>1?'Des efforts sont':'Un effort est')+' en limite de la fenêtre 2–15 min : fiabilité réduite.';
   else if(lg.t/sc.t<1.5) warn='Écart de durée un peu faible : idéalement le long ≥ 1,5× le court.';
   return {ok:true,warn:warn};
 }
+/* L'ancien nom, gardé pour les deux appels qui passaient deux performances. */
+function csRacesValidate(r1,r2){ return csPerfsValidate([r1,r2].filter(Boolean)); }
+
+/* Bascule 2 / 3 points. Le troisième bloc apparaît, la note explique ce que
+   le modèle choisi sait et ne sait pas faire, et l'aperçu se recalcule. */
+function csNbSet(n){
+  _csNb=(n===3)?3:2;
+  var b3=document.getElementById('cs-race-3');
+  if(b3) b3.style.display=(_csNb===3)?'':'none';
+  document.querySelectorAll('#cs-nb .cs-nb-b').forEach(function(b){
+    b.classList.toggle('active',+b.getAttribute('data-nb')===_csNb);
+  });
+  csModeleNote();
+  if(typeof csRenderAssistant==='function') csRenderAssistant();
+  updCsRaces();
+}
+function csModeleNote(){
+  var el=document.getElementById('cs-modele-note'); if(!el)return;
+  el.innerHTML=(_csNb===3)
+    ? 'Trois <strong>efforts maximaux</strong> de durées bien étalées. La droite est ajustée par <strong>moindres carrés</strong> : elle ne passe plus exactement par les points, et ce qui reste se lit. <span style="opacity:.85">L’écart de chaque effort à la droite, en mètres, désigne celui qui n’était pas tout à fait maximal — plus sûrement que le R², qui frôle 1 dès que les durées sont bien étalées.</span>'
+    : 'Combine deux <strong>efforts maximaux</strong> pour estimer ta <strong>Vitesse Critique</strong> (VC) et ta réserve <strong data-tip-cle="dp">D′</strong>. Idéalement un effort court (~3 min) et un plus long, assez éloignés en durée. <span style="opacity:.85">Modèle 2 points (Monod &amp; Scherrer 1965 ; Jones &amp; Vanhatalo 2017) — la droite passe par les deux points, il n’y a donc rien à vérifier.</span>';
+  // La note est réécrite à chaque bascule : rlInfoPoser ne passe qu'une fois
+  // au démarrage, sur le balisage statique. Sans ce rappel, l'infobulle du D′
+  // disparaîtrait dès le premier aller-retour entre les deux modèles.
+  try{ rlInfoPoser(el); }catch(e){}
+}
+/* Les performances effectivement demandées et remplies. */
+function csPerfsLues(){
+  return csIdx().map(csReadPerf).filter(Boolean);
+}
+/* La VMA estimée vient toujours de l'effort le plus court : c'est celui qui
+   approche le mieux la vitesse maximale aérobie. */
+function csVmaEst(list){
+  var c=list.slice().sort(function(a,b){return a.t-b.t;})[0];
+  return c?c.d/(100*Math.pow(c.t/360,1/1.06)):null;
+}
 function updCsRaces(){
   if(typeof csAutoEstimate==='function')csAutoEstimate();
-  [1,2].forEach(i=>{
-    const r=csReadPerf(i); const b=document.getElementById('csr-badge-'+i); if(!b)return;
+  csIdx().forEach(function(i){
+    var r=csReadPerf(i), b=document.getElementById('csr-badge-'+i); if(!b)return;
     if(!r){b.innerHTML='';return;}
-    const st=csTimeState(r.t);
+    var st=csTimeState(r.t);
     b.innerHTML='<span style="color:'+st.c+'">● '+fHMS(r.t)+' · '+st.lbl+'</span> &nbsp;·&nbsp; <b style="color:var(--orange)">'+fAll(r.t/r.d*1000)+' /km</b>';
   });
-  const box=document.getElementById('csr-preview'); if(!box)return;
-  const r1=csReadPerf(1), r2=csReadPerf(2);
-  if(!r1||!r2){box.style.display='none';box.innerHTML='';return;}
+  var box=document.getElementById('csr-preview'); if(!box)return;
+  var list=csPerfsLues();
+  if(list.length<csIdx().length){box.style.display='none';box.innerHTML='';return;}
   box.style.display='block';
-  const v=csRacesValidate(r1,r2);
+  var v=csPerfsValidate(list);
   if(!v.ok){box.innerHTML='<div class="info-box error"><strong>Combinaison refusée :</strong> '+v.msg+'</div>';return;}
-  const cs=computeCS([{d:r1.d,t:r1.t},{d:r2.d,t:r2.t}]);
+  var cs=computeCS(list.map(function(p){return {d:p.d,t:p.t};}));
   if(!cs||cs.tooFew){box.innerHTML='<div class="info-box error">Données incohérentes.</div>';return;}
-  const short=r1.t<r2.t?r1:r2;
-  const vmaEst=short.d/(100*Math.pow(short.t/360,1/1.06));
-  let plaus='';
-  if(cs.dp>500) plaus='D′ anormalement élevé ('+Math.round(cs.dp)+' m) : un des deux efforts n’était probablement pas maximal, ou les durées sont trop proches. Résultat peu fiable.';
-  else if(cs.csKmh<9) plaus='VC très basse : vérifiez que les deux efforts sont bien maximaux.';
-  const warns=[v.warn,plaus].filter(Boolean).map(w=>'<span style="color:#FB923C;font-size:12px">⚠ '+w+'</span>').join('<br>');
-  box.innerHTML='<div class="info-box'+(plaus?' error':'')+'"><strong>VC</strong> : '+cs.csKmh.toFixed(2)+' km/h ('+fAll(3600/cs.csKmh)+' /km) &nbsp;·&nbsp; <strong>D′</strong> : '+Math.round(cs.dp)+' m &nbsp;·&nbsp; VMA est. : '+vmaEst.toFixed(1)+' km/h'+
+  var vmaEst=csVmaEst(list);
+  var plaus='';
+  if(cs.dp>500) plaus='D′ anormalement élevé ('+Math.round(cs.dp)+' m) : un des efforts n’était probablement pas maximal, ou les durées sont trop proches. Résultat peu fiable.';
+  else if(cs.csKmh<9) plaus='VC très basse : vérifiez que les efforts sont bien maximaux.';
+  // Le R² n'existe qu'à partir de trois points : avec deux, la droite passe
+  // par eux et vaudrait 1 sans rien prouver.
+  var r2txt='', ecarts='';
+  if(cs.r2!=null){
+    var col=cs.r2>=0.99?'#34D399':(cs.r2>=0.95?'#FB923C':'#F87171');
+    r2txt=' &nbsp;·&nbsp; <strong>R²</strong> : <span style="color:'+col+'">'+cs.r2.toFixed(4)+'</span>';
+    if(cs.r2<0.95) plaus=plaus||'Ajustement médiocre (R² < 0,95) : les efforts ne décrivent pas la même droite. Reprenez celui qui vous paraît le moins maximal.';
+    /* Le R² se lit mal sur trois points très étalés : il frôle 1 même quand un
+       effort est franchement à côté. L'écart en mètres, lui, se lit tout seul —
+       « le 12 min tombe 130 m au-dessus de la droite » — et désigne le coupable. */
+    var pires=0;
+    ecarts='<div style="margin-top:8px;font-size:12px;color:var(--muted2);line-height:1.7">Écart de chaque effort à la droite :<br>'
+      + list.slice().sort(function(a,b){return a.t-b.t;}).map(function(p){
+          var e=Math.round(p.d-(cs.csMs*p.t+cs.dp));
+          var gros=Math.abs(e)>=60; if(gros)pires++;
+          return '<span style="color:'+(gros?'#FB923C':'var(--muted2)')+'">'+p.lbl+' : '
+            +(e>0?'+':'')+e+' m</span>';
+        }).join(' &nbsp;·&nbsp; ')
+      + '</div>';
+    if(pires&&!plaus) plaus='Un effort s’écarte de plus de 60 m de la droite : c’est souvent celui qui n’était pas tout à fait maximal. La VC et le D′ s’en ressentent.';
+  }
+  var warns=[v.warn,plaus].filter(Boolean).map(function(w){return '<span style="color:#FB923C;font-size:12px">⚠ '+w+'</span>';}).join('<br>');
+  box.innerHTML='<div class="info-box'+(plaus?' error':'')+'"><strong>VC</strong> : '+cs.csKmh.toFixed(2)+' km/h ('+fAll(3600/cs.csKmh)+' /km) &nbsp;·&nbsp; <strong>D′</strong> : '+Math.round(cs.dp)+' m'+r2txt+' &nbsp;·&nbsp; VMA est. : '+vmaEst.toFixed(1)+' km/h'+
+    ecarts+
     (warns?'<br>'+warns:'')+
-    '<div class="formula">VC = (D_long − D_court) / (t_long − t_court)  ·  D′ = D_court − VC × t_court</div></div>';
+    '<div class="formula">'+(cs.nPts>2
+      ? 'Régression des moindres carrés sur '+cs.nPts+' points : D = VC × t + D′'
+      : 'VC = (D_long − D_court) / (t_long − t_court)  ·  D′ = D_court − VC × t_court')
+    +'</div></div>';
 }
 /* ══ ASSISTANT VC : reco de protocole + estimation auto ══ */
 let _csObj='10k',_csObjTouched=false;
@@ -8420,6 +8494,7 @@ function csRenderAssistant(){
     +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+r.reco.map(function(c){return chip(c,true);}).join('')+'</div>'
     +'<div style="font-size:11.5px;font-weight:800;color:var(--muted2);margin-bottom:6px">Alternatives</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:8px">'+r.alt.map(function(c){return chip(c,false);}).join('')+'</div>'
+    +((typeof _csNb!=='undefined'&&_csNb===3)?'<div style="margin-top:12px;font-size:11.5px;color:var(--muted2);line-height:1.5">Ces couples remplissent les deux premières performances — la troisième reste à toi. Un test long (9 ou 12 min) étale bien les durées.</div>':'')
     +'<div style="margin-top:12px"><span onclick="csWhyToggle()" style="cursor:pointer;font-size:12px;font-weight:700;color:var(--orange)">Pourquoi ce choix ? ▾</span>'
     +'<div id="cs-why" style="display:none;font-size:12px;color:var(--muted2);line-height:1.6;margin-top:8px;padding:10px 12px;border-left:3px solid var(--orange);background:rgba(255,107,26,0.05);border-radius:0 8px 8px 0">'+r.why+'</div></div>'
     +'</div>';
@@ -8440,7 +8515,7 @@ function csEstimate(present,targetId){
 function csShowSug(i,e){
   var el=document.getElementById('cs-sug-'+i); if(!el)return;
   var disp=e.kind==='test'?(e.d+' m'):fHMS(e.t), val=e.kind==='test'?e.d:e.t;
-  el.innerHTML='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted2)"><span>Valeur estimée pour ton 2e effort : <b style="color:var(--orange)">'+disp+'</b></span>'
+  el.innerHTML='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted2)"><span>Valeur estimée pour cet effort : <b style="color:var(--orange)">'+disp+'</b></span>'
     +'<button type="button" onclick="csUseEst('+i+','+val+',\''+e.kind+'\')" style="padding:3px 11px;border-radius:7px;border:1px solid var(--border2);background:var(--input-bg);color:var(--text2);font-family:var(--font);font-size:11.5px;font-weight:800;cursor:pointer">Utiliser</button>'
     +'<span style="font-size:11px">(modifiable)</span></div>';
 }
@@ -8449,15 +8524,20 @@ function csUseEst(i,val,kind){
   else {var mm=Math.floor(val/60),ss=val%60,em=document.getElementById('csr-mm-'+i),es=document.getElementById('csr-ss-'+i);if(em)em.value=mm;if(es)es.value=ss;}
   updCsRaces();
 }
+/* On ne propose une valeur que s'il ne manque qu'une case : avec deux trous,
+   on extrapolerait une extrapolation. */
 function csAutoEstimate(){
-  var s1=document.getElementById('cs-sug-1'), s2=document.getElementById('cs-sug-2');
-  if(s1)s1.innerHTML=''; if(s2)s2.innerHTML='';
-  var r1=csReadPerf(1), r2=csReadPerf(2);
-  var t1=(document.getElementById('csr-type-1')||{}).value, t2=(document.getElementById('csr-type-2')||{}).value;
-  if(r1&&!r2&&t2){var e=csEstimate(r1,t2);if(e)csShowSug(2,e);}
-  else if(r2&&!r1&&t1){var e=csEstimate(r2,t1);if(e)csShowSug(1,e);}
+  [1,2,3].forEach(function(i){var e=document.getElementById('cs-sug-'+i);if(e)e.innerHTML='';});
+  var idx=csIdx();
+  var vides=idx.filter(function(i){return !csReadPerf(i);});
+  if(vides.length!==1) return;
+  var cible=vides[0];
+  var source=idx.filter(function(i){return i!==cible;}).map(csReadPerf).filter(Boolean)
+    .sort(function(a,b){return a.t-b.t;})[0];      // le plus court : la meilleure ancre
+  var type=(document.getElementById('csr-type-'+cible)||{}).value;
+  if(!source||!type) return;
+  var e=csEstimate(source,type); if(e)csShowSug(cible,e);
 }
-let csSub='terrain';
 /* ══ MENU DÉROULANT PERSONNALISÉ (dark) ══ */
 const CS_OPTS=CS_ITEMS.map(x=>({v:x.id,l:x.lbl}));
 function cddBuild(hiddenId,containerId,items,cb){
@@ -11447,11 +11527,11 @@ function athFabUpdate(){
   else { b.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'; }
 }
 document.addEventListener('DOMContentLoaded',()=>{
-  buildTestsForm();
-  window._csSub='courses';
   cddBuild('csr-type-1','cdd-1',CS_OPTS,()=>renderPerfInput(1));
   cddBuild('csr-type-2','cdd-2',CS_OPTS,()=>renderPerfInput(2));
-  renderPerfInput(1);renderPerfInput(2);
+  cddBuild('csr-type-3','cdd-3',CS_OPTS,()=>renderPerfInput(3));
+  renderPerfInput(1);renderPerfInput(2);renderPerfInput(3);
+  csNbSet(2);
   if(typeof csRenderAssistant==='function')csRenderAssistant();
   loadLS();
   // Les infobulles se posent sur le balisage statique, une fois pour toutes ;
