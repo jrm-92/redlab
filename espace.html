@@ -180,6 +180,18 @@ a{color:var(--accent)}
 .h2{font-size:11.5px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin:24px 0 12px}
 .h2:first-child{margin-top:0}
 .card2{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+/* ── À retenir pour ta course ──
+   Trois choses qu'on relit la veille : à quelle allure on court, comment on
+   la gère, et quel volume la prépare. Le liseré orange en haut les distingue
+   d'une carte d'information ordinaire. */
+.ret{border-top:3px solid var(--accent)}
+.ret-l{font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:3px}
+.ret-l:not(:first-child){margin-top:14px}
+.ret-v{font-size:13.5px;color:var(--text2);line-height:1.6}
+.ret-v b{color:var(--text);font-weight:800}
+.ret-n{margin-top:12px;padding-top:11px;border-top:1px solid var(--border);
+  font-size:12.5px;color:var(--muted);line-height:1.6}
 .muted{color:var(--muted);font-size:13px;line-height:1.65}
 
 /* ── Mode aperçu ──
@@ -883,6 +895,25 @@ function ecranAccueil(d){
     h+='</div>';
   } else {
     h+='<div class="card2 muted">Aucun objectif renseigné pour l’instant. Ton coach le fixera avec toi.</div>';
+  }
+
+  /* Les repères de la course, calculés par RedLab et transmis avec le profil.
+     Absents des fiches publiées avant cette version : on ne montre rien
+     plutôt que d'inventer une allure ou une stratégie. */
+  var cr=d.courseRepere;
+  if(o&&cr){
+    h+='<div class="h2">À retenir pour ta course</div><div class="card2 ret">';
+    if(cr.allure)   h+='<div class="ret-l">Allure de référence</div><div class="ret-v"><b>'+esc(cr.allure)+'</b></div>';
+    if(cr.strategie)h+='<div class="ret-l">Stratégie de course</div><div class="ret-v">'+esc(cr.strategie)+'</div>';
+    if(cr.volume){
+      h+='<div class="ret-l">Volume d’entraînement</div><div class="ret-v">'
+        +(cr.volumePourChrono
+            ? 'Pour viser <b>'+fHMS(cr.volumePourChrono)+'</b> : <b>'+esc(cr.volume)+'</b>.'
+            : '<b>'+esc(cr.volume)+'</b>'+(cr.volumeMini?' — minimum '+esc(cr.volumeMini)+'.':'.'))
+        +'</div>';
+      if(cr.volumeNote) h+='<div class="ret-n">'+esc(cr.volumeNote)+'</div>';
+    }
+    h+='</div>';
   }
 
   // Repères chiffrés, en bas : utiles, mais pas ce qu'on vient chercher.

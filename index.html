@@ -1341,6 +1341,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .tab-ref{font-size:12.5px;font-weight:700;color:var(--orange)}
 .tab-date{font-size:11.5px;color:var(--muted2)}
 .tab-fin{display:flex;align-items:center;gap:9px;margin-left:auto;flex-wrap:wrap}
+.tab-go{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .tab-chev{width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .tab-chg{font-size:11px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px}
@@ -1349,14 +1350,27 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s}
 .tab-pub:hover{background:rgba(255,107,26,0.2);border-color:var(--orange)}
 .tab-pub:disabled{opacity:.6;cursor:default}
+/* Enregistrer (local) et Publier (en ligne) se lisent comme une paire, mais
+   ne se confondent pas : le trait plein est celui qui part chez l'athlète. */
+.tab-save{display:inline-flex;align-items:center;gap:7px;
+  padding:7px 13px;border-radius:8px;border:1px solid var(--border2);
+  background:rgba(255,255,255,0.03);color:var(--text2);font-family:var(--font);
+  font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab-save svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tab-save:hover{background:rgba(255,255,255,0.07);border-color:var(--muted2);color:var(--text)}
 /* Le Dashboard est bord à bord, chaque bloc posant son propre retrait :
    la barre suit le même que les en-têtes de section. */
 .db-athbar{padding-left:20px;padding-right:20px}
 @media(min-width:1400px){ .db-athbar{padding-left:28px;padding-right:28px} }
 @media(max-width:640px){
   .tool-ath-bar{gap:9px}
-  .tab-date{width:100%;margin-left:46px}
-  .tab-fin{width:100%;margin-left:0;justify-content:space-between}
+  /* Trois lignes : identité et « changer », puis la date, puis les actions —
+     chacune sur toute la largeur, aucune ne se coupe en deux. */
+  .tab-go{order:1;margin-left:auto}
+  .tab-date{order:2;width:100%;margin-left:46px}
+  .tab-fin{order:3;width:100%;margin-left:0;gap:8px}
+  .tab-fin>button{flex:1 1 0;justify-content:center;text-align:center}
 }
 .ath-empty{text-align:center;padding:60px 24px;color:var(--muted2)}
 .ath-empty-ico{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -1382,15 +1396,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 @media(max-width:860px){
   .ath-barre .btn-save-athlete{width:100%;justify-content:center;padding:12px 16px;font-size:13.5px}
 }
-/* Bouton « Enregistrer » de la carte profil : à droite du nom quand la place
-   le permet, sur sa propre ligne en dessous de 640 px. Le garder à côté y
-   rognait le nom de l'athlète à « Alice … », pour gagner cent trente pixels
-   dont on n'a pas besoin. */
-.ph-full .ph-actions{margin-left:auto;flex-shrink:0}
-@media(max-width:640px){
-  .ph-full{flex-wrap:wrap}
-  .ph-full .ph-actions{margin-left:0;width:100%;justify-content:center;margin-top:12px}
-}
+@media(max-width:640px){ .ph-full{flex-wrap:wrap} }
 
 /* ══ ATHLÈTES — VUE TABLEAU ══
    Les cartes montrent un athlète à la fois, et c'est très bien pour en
@@ -1773,42 +1779,30 @@ body.rl-locked .app,body.rl-locked .mobile-header{display:none}
 
 /* ── Grand écran : le profil sort de sa carte ──
    Au-delà de 860 px, la bannière abandonne fond, bordure et ombre pour se
-   poser à même la page : l'identité et son bouton Enregistrer en haut de la
-   colonne de gauche, la VMA juste dessous, le calculateur d'allure à droite
-   sur les deux rangées. Les blocs surnuméraires (D′, FC) se placent d'eux-
-   mêmes sur la rangée suivante. Ce bloc est en fin de feuille pour passer
-   devant le padding de la media query ≥1250 px et l'ombre ci-dessus. */
+   poser à même la page : la VMA en haut de la colonne de gauche, le
+   calculateur d'allure à droite. Les blocs surnuméraires (D′, FC) se placent
+   d'eux-mêmes sur la rangée suivante. Ce bloc est en fin de feuille pour
+   passer devant le padding de la media query ≥1250 px et l'ombre ci-dessus. */
 @media(min-width:861px){
   .profile-hero{
     background:none;border:none;border-radius:0;box-shadow:none;padding:0;
     grid-template-columns:minmax(220px,.85fr) minmax(290px,1.15fr);
     /* Sans rangées explicites, le calculateur — qui en couvre deux — répartit
-       sa hauteur entre elles et creuse un trou sous l'identité. */
+       sa hauteur entre elles et creuse un trou sous la VMA. */
     grid-template-rows:max-content 1fr;
     column-gap:30px;row-gap:20px;margin-bottom:30px;
   }
   .profile-hero .ph-block{padding:0;margin-right:0;border-right:none}
-  .profile-hero .ph-ident{
-    grid-column:1;grid-row:1;align-self:start;
-    border-bottom:1px solid var(--border);padding-bottom:18px;
-  }
-  .profile-hero .ph-vma{grid-column:1;grid-row:2;align-self:start}
+  .profile-hero .ph-vma{grid-column:1;grid-row:1;align-self:start}
   /* D′ et fréquence cardiaque, quand ils existent, se placent seuls sur la
      rangée suivante : un filet les rattache au reste. */
-  .profile-hero .ph-block:not(.ph-ident):not(.ph-vma):not(.ph-calc){
+  .profile-hero .ph-block:not(.ph-vma):not(.ph-calc){
     border-top:1px solid var(--border);padding-top:18px;
   }
   .profile-hero .ph-calc{
     grid-column:2;grid-row:1/span 2;align-self:start;
     border-left:1px solid var(--border);padding-left:30px;
   }
-}
-/* Entre 861 et 1249 px la colonne de gauche ne loge plus le nom, la date et
-   le bouton sur une ligne : le prénom se réduisait à « A… ». Le bouton passe
-   donc sous l'identité plutôt que de la comprimer. */
-@media(min-width:861px) and (max-width:1249px){
-  .profile-hero .ph-ident{flex-direction:column;align-items:stretch;gap:12px}
-  .profile-hero .ph-ident .ph-actions{margin-left:0;justify-content:center}
 }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -3441,25 +3435,13 @@ function renderProfile(){
     }
   }
 
-  const _ini=(S.pseudo||'?').slice(0,2).toUpperCase();
-  const b0=`
-    <div class="ph-block ph-full ph-ident" style="display:flex;align-items:center;gap:14px">
-      <div onclick="athSwitcherOpen()" title="Changer d’athlète" style="display:flex;align-items:center;gap:14px;cursor:pointer;flex:1;min-width:0">
-        <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--orange);flex-shrink:0">${_ini}</div>
-        <div style="min-width:0">
-          <div class="ph-b-lbl" style="display:inline-flex;align-items:center;gap:6px">Athlète <span style="font-size:9px;font-weight:800;color:var(--orange);border:1px solid rgba(255,107,26,0.4);border-radius:4px;padding:1px 5px;letter-spacing:.3px">CHANGER</span></div>
-          <div style="font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.4px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${S.pseudo||'—'}</div>
-          ${S.testDate?`<div style="font-size:12.5px;color:var(--muted2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Profil édité le ${S.testDate}</div>`:''}
-        </div>
-      </div>
-      <button class="btn-save-athlete ph-actions" id="btn-save-ath" onclick="saveCurrentAthlete()">
-        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      <span>Enregistrer</span>
-      </button>
-    </div>`;
+  /* Le bloc identité — avatar, prénom, date, « changer », « Enregistrer » —
+     a rejoint la barre athlète, qui en portait déjà tout sauf le bouton.
+     Depuis que la carte et la barre sont sur le même écran, le garder ici
+     revenait à afficher deux fois le prénom et deux fois « changer ». */
   document.getElementById('db-profile').innerHTML=`
     <div class="profile-hero${(vcMode&&dp)?' ph-3col':''}">
-      ${b0}${b2}${b2c}${b3vma}${b3}
+      ${b2}${b2c}${b3vma}${b3}
     </div>
     ${warnHtml}`;
 }
@@ -4398,10 +4380,20 @@ function saveCurrentAthlete(silencieux){
   // clignote à chaque frappe est plus agaçant qu'informatif.
   const btn=silencieux?null:document.getElementById('btn-save-ath');
   if(btn){
-    const orig=btn.innerHTML;
-    btn.innerHTML='<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg><span>Sauvegardé !</span>';
+    // Le drapeau protège l'accusé de réception : athBarPoser() ne redessine
+    // pas une barre qui est en train de dire « Sauvegardé ! ».
+    btn.setAttribute('data-ok','1');
+    btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Sauvegardé !</span>';
     btn.style.cssText+='background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.4);color:#34D399;';
-    setTimeout(()=>{btn.innerHTML=orig;btn.style.background='';btn.style.borderColor='';btn.style.color='';},2000);
+    setTimeout(function(){
+      btn.removeAttribute('data-ok');
+      /* On efface la mémoire de la barre avant de la reposer. Sans cela, le
+         ré-enregistrement d'un athlète déjà rattaché — même barre, même
+         libellé — ne déclencherait aucune réécriture, et le bouton resterait
+         vert « Sauvegardé ! » indéfiniment. */
+      document.querySelectorAll('[data-athbar]').forEach(function(el){ el.__athbar=null; });
+      if(typeof athBarPoser==='function') athBarPoser();
+    },2000);
   }
 }
 
@@ -9056,12 +9048,28 @@ function toolAthleteBar(){
     ? '<button type="button" class="tab-pub" onclick="event.stopPropagation();publishAthlete('+S.athId+',this)"'
       +' title="Envoyer ou mettre à jour la fiche dans l’espace de l’athlète">\u2191 Publier l’espace</button>'
     : '';
+  /* Enregistrer vivait dans la carte Profil, qui répétait déjà l'avatar, le
+     prénom, la date et un second « changer ». Depuis que la carte est sur le
+     même écran que cette barre, la répétition sautait aux yeux — et deux
+     « changer » sur un écran, c'est un de trop. L'identité et ses actions
+     tiennent ici, en un seul endroit : enregistrer en local, publier au loin. */
+  const enr='<button type="button" class="tab-save" id="btn-save-ath"'
+    +' onclick="event.stopPropagation();saveCurrentAthlete()"'
+    +' title="Enregistrer ce profil dans la liste des athlètes">'
+    +'<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>'
+    +'<polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>'
+    +'<span>Enregistrer</span></button>';
   return '<div class="tool-ath-bar" onclick="athSwitcherOpen()" title="Changer d’athlète">'
     +'<div class="tab-ini">'+ini+'</div>'
     +'<div class="tab-nom">'+(S.pseudo||'Athlète')+'</div>'
     +'<div class="tab-ref">'+vc+'</div>'
     +(S.testDate?'<div class="tab-date">Profil édité le '+S.testDate+'</div>':'')
-    +'<div class="tab-fin">'+pub
+    +'<div class="tab-fin">'+enr+pub+'</div>'
+    /* « changer » sort du groupe de boutons : sur un téléphone il se retrouvait
+       seul sur une quatrième ligne, sous le chevron. Séparé, il remonte au bout
+       de la ligne du prénom — là où on le cherche — et les deux boutons
+       prennent la largeur en dessous. */
+    +'<div class="tab-go">'
       +'<svg viewBox="0 0 24 24" class="tab-chev"><polyline points="6 9 12 15 18 9"/></svg>'
       +'<span class="tab-chg">changer</span></div>'
     +'</div>';
@@ -9077,6 +9085,9 @@ function athBarPoser(){
          passage — ce qui repasserait ici et détacherait ce bouton. La barre
          repasserait « prête à publier » pendant que l'envoi continue. */
       if(el.querySelector('.tab-pub:disabled')) return;
+      /* Même chose pour « Sauvegardé ! » : deux secondes d'accusé de
+         réception que le moindre saveLS() effacerait sans cela. */
+      if(el.querySelector('.tab-save[data-ok]')) return;
       /* Et on ne réécrit que si quelque chose a bougé : saveLS() part à
          chaque frappe dans Saisie, inutile de reconstruire la barre à
          chaque lettre. */
@@ -9249,10 +9260,10 @@ function plVolForTime(id,sec){
 }
 /* Repères de course — allure de référence et stratégie, par distance.
    Ce tableau alimentait le bloc « À retenir pour ta course » de l'ancienne
-   fiche HTML. Depuis que l'espace athlète se rend à partir du profil
-   structuré, ce bloc n'atteignait déjà plus personne : plus aucun code ne
-   lit RACE_KEY. On garde le contenu — il est juste, et il a sa place dans
-   l'écran Accueil de l'espace athlète le jour où on l'y remettra. */
+   fiche HTML, qui n'atteignait plus personne depuis que l'espace athlète se
+   rend à partir du profil structuré. Il repart maintenant dans la charge
+   utile, via _courseReperePourEspace, et s'affiche sur l'écran Accueil de
+   l'athlète, sous sa course. */
 const RACE_KEY={
  '5k':{d:5000,lbl:'5 km',vma:'90–95 % VMA',vc:'≈ 105 % VC (au-dessus, via le D′)',strat:'Départ et fin les plus rapides, milieu régulier — ne pas céder aux à-coups du peloton.'},
  '10k':{d:10000,lbl:'10 km',vma:'85–90 % VMA',vc:'≈ 96–100 % VC',strat:'Allure au métronome : départ maîtrisé, long milieu régulier, accélération sur le dernier km.'},
@@ -11081,6 +11092,28 @@ function _graphesPourEspace(ath){
   return g;
 }
 
+/* « À retenir pour ta course » — allure de référence, stratégie et volume
+   conseillé pour la distance visée. Ce bloc vivait dans l'ancienne fiche HTML
+   et n'a jamais atteint l'espace athlète. On le calcule ici, côté coach :
+   l'espace ne connaît ni RACE_KEY ni les tables de volume, et n'a pas à les
+   connaître — il reçoit des phrases, pas des barèmes. */
+function _courseReperePourEspace(ath){
+  var g=ath&&ath.goal;
+  if(!g||!g.id||typeof RACE_KEY==='undefined'||!RACE_KEY[g.id]) return null;
+  var rk=RACE_KEY[g.id];
+  var r={ allure:(ath.csKmh?rk.vc:rk.vma), strategie:rk.strat };
+  var vr=(typeof PL_VOLREF!=='undefined')?PL_VOLREF[g.id]:null;
+  if(vr){
+    // Avec un chrono visé, le volume se resserre autour de cet objectif ;
+    // sans chrono, on donne la fourchette de la distance.
+    var vt=(g.t&&typeof plVolForTime==='function')?plVolForTime(g.id,g.t):null;
+    r.volume = vt ? (vt+' '+vr.unit) : (vr.lo+'–'+vr.hi+' '+vr.unit);
+    r.volumePourChrono = vt?(g.t||null):null;
+    r.volumeMini = vt?null:(vr.min+' '+vr.unit);
+    r.volumeNote = vr.note||'';
+  }
+  return r;
+}
 function _profilPourEspace(ath){
   if(!ath) return null;
   return {
@@ -11090,6 +11123,7 @@ function _profilPourEspace(ath){
     dateDuTest:ath.testDate||'',
     records:ath.records||{}, historiqueCourses:ath.raceHistory||[],
     objectif:ath.goal||null, plan:ath.plan||null,
+    courseRepere:_courseReperePourEspace(ath),
     // Le plan développé — semaines et séances avec leurs allures — calculé
     // par renderDashPlan. L'espace athlète ne sait pas le recalculer.
     planDetail:(window._espacePlan||null),
