@@ -704,10 +704,10 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-ch .plw-fait--ok{background:rgba(16,185,129,.16);border-color:rgba(16,185,129,.4);color:#34D399}
   .plw-ch .plw-fait--lent{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.4);color:#FBBF24}
   .plw-ch .plw-fait--vif{background:rgba(96,165,250,.16);border-color:rgba(96,165,250,.4);color:#60A5FA}
-  /* Quatre actions dans une case de jour : elles passent sur deux rangs
-     plutôt que de se réduire à des traits de 15 px. */
+  /* Cinq actions dans une case de jour : trois par rang plutôt que deux,
+     sinon la dernière reste seule sur sa ligne. */
   .plw-acts{flex-wrap:wrap}
-  .plw-ch button{flex:1 1 44%}
+  .plw-ch button{flex:1 1 28%}
   .db-plan-cal{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
   /* ── Calendrier « Réalisé » : le prévu s'efface derrière le couru ── */
   .db-ch-prevu{opacity:.62}
@@ -1297,6 +1297,38 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.28);
   border-radius:20px;padding:3px 10px;display:inline-block;max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ══ LA BARRE DE L'ATHLÈTE COURANT ══
+   Elle n'était que sur trois écrans sur huit : sur Saisie on éditait un
+   profil sans savoir lequel, et pour en changer il fallait partir. Elle est
+   maintenant sur tous les écrans dont le contenu dépend d'un athlète. */
+.tool-ath-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;
+  padding:11px 16px;border:1px solid rgba(255,107,26,0.25);border-radius:10px;
+  background:rgba(255,107,26,0.05);cursor:pointer}
+.tool-ath-bar:hover{background:rgba(255,107,26,0.09);border-color:rgba(255,107,26,0.4)}
+.tab-ini{width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,0.14);
+  border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:900;color:var(--orange);flex-shrink:0}
+.tab-nom{font-size:13.5px;font-weight:800;color:var(--text)}
+.tab-ref{font-size:12.5px;font-weight:700;color:var(--orange)}
+.tab-date{font-size:11.5px;color:var(--muted2)}
+.tab-fin{display:flex;align-items:center;gap:9px;margin-left:auto;flex-wrap:wrap}
+.tab-chev{width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tab-chg{font-size:11px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px}
+.tab-pub{padding:7px 13px;border-radius:8px;border:1px solid rgba(255,107,26,0.4);
+  background:rgba(255,107,26,0.10);color:var(--orange);font-family:var(--font);
+  font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab-pub:hover{background:rgba(255,107,26,0.2);border-color:var(--orange)}
+.tab-pub:disabled{opacity:.6;cursor:default}
+/* Le Dashboard est bord à bord, chaque bloc posant son propre retrait :
+   la barre suit le même que les en-têtes de section. */
+.db-athbar{padding-left:20px;padding-right:20px}
+@media(min-width:1400px){ .db-athbar{padding-left:28px;padding-right:28px} }
+@media(max-width:640px){
+  .tool-ath-bar{gap:9px}
+  .tab-date{width:100%;margin-left:46px}
+  .tab-fin{width:100%;margin-left:0;justify-content:space-between}
+}
 .ath-empty{text-align:center;padding:60px 24px;color:var(--muted2)}
 .ath-empty-ico{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .ath-empty-ico svg{width:22px;height:22px;stroke:var(--muted2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
@@ -2201,6 +2233,7 @@ table.lm-laps tbody tr{cursor:pointer}
       <!-- ══════════ PANEL SAISIE ══════════ -->
       <div id="p-input" class="panel active">
         <div class="input-wrap">
+          <div data-athbar></div>
 
           <div class="input-hero">
             <div class="input-hero-title">Définir le profil d'endurance</div>
@@ -2449,6 +2482,7 @@ table.lm-laps tbody tr{cursor:pointer}
       <!-- ══════════ PANEL DASHBOARD ══════════ -->
       <div id="p-dashboard" class="panel">
         <div class="tool-layout">
+          <div data-athbar class="db-athbar"></div>
 
           <!-- Profil -->
           <div id="db-profile" class="db-section"></div>
@@ -2745,6 +2779,7 @@ function go(id){
   if(id==='planif') renderPlanif();
   if(id==='knowledge') renderKnowledge();
   if(id==='watch'&&window.__lmResize)window.__lmResize();
+  if(typeof athBarPoser==='function') athBarPoser();
   updMhCtx(id);
   const sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;
   window.scrollTo({top:0,behavior:'smooth'});
@@ -3050,6 +3085,9 @@ function renderPredCards(){
 /* ══ LOCAL STORAGE ══ */
 const LS_KEY='redlab_v1';
 function saveLS(){
+  /* Le point de passage de toute modification du profil : la barre de
+     l'athlète s'y raccroche pour rester juste pendant qu'on tape. */
+  if(typeof athBarPoser==='function') athBarPoser();
   try{
     localStorage.setItem(LS_KEY,JSON.stringify({
       S:{...S},
@@ -3157,6 +3195,7 @@ function fcBornes(z,estVC,fcMax,fcRest,fcReserve){
 
 /* ══ RENDER DASHBOARD ══ */
 function renderDashboard(){
+  if(typeof athBarPoser==='function') athBarPoser();
   renderProfile();
   renderZones();
   renderSlider();
@@ -6676,6 +6715,28 @@ function wktSlug(t){
   return String(t||'seance').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'seance';
 }
+/* La séance d'un jour donné, envoyée à la montre depuis le calendrier.
+   Elle n'y partait que par la Bibliothèque : on posait la séance sur le
+   mardi, puis on allait la retrouver ailleurs pour l'exporter. C'est le
+   geste le plus fréquent de la semaine, et c'était le seul qui obligeait à
+   changer d'écran.
+   L'ajustement de durée du jour voyage avec, comme pour la feuille : une
+   sortie longue portée à 1 h 50 part sur 1 h 50. */
+function wktExportJour(iso,si){
+  const it=(typeof _plSessions!=='undefined'&&_plSessions[iso]||[])[si];
+  if(!it) return;
+  let s=wktFindSession(it.t);
+  if(!s){ alert('Séance introuvable dans la bibliothèque : « '+it.t+' ».'); return; }
+  s=plSeanceAjustee(s,it);
+  if(s.muscu){ alert('Le format .fit ne décrit que de la course : une séance de musculation ne s’envoie pas sur la montre.'); return; }
+  const vm=wktVma();
+  if(!vm&&!wktToutEnAllure(s)){ alert('Charge un athlète : c’est sa VMA qui cale les allures cibles de la séance.'); return; }
+  // Le nom porte le jour : le coach en télécharge plusieurs dans la semaine.
+  const jm=iso.slice(8,10)+'/'+iso.slice(5,7);
+  const date=Object.assign({},s,{title:jm+' · '+s.title});
+  wktDl(wktToFit(date,vm?vm.v:null),
+    iso.slice(5).replace('-','')+'-'+wktSlug(s.title)+'.fit');
+}
 /* Télécharge la séance au format montre. La VMA vient du champ de la
    bibliothèque : sans elle, les allures cibles n'auraient aucun sens. */
 function wktExport(kind,idx){
@@ -8680,7 +8741,7 @@ function exportAthleteView(returnDoc){
   // La bascule Prévu / Réalisé est un outil de coach : elle lit Supabase avec
   // la session du coach, que la fiche n'a pas. On l'enlève entière, sans quoi
   // il resterait un cadre vide une fois ses boutons retirés.
-  clone.querySelectorAll('#db-vue,#db-realise').forEach(el=>el.remove());
+  clone.querySelectorAll('#db-vue,#db-realise,[data-athbar]').forEach(el=>el.remove());
   // Le détail d'une séance prévue s'ouvre par un onclick, que la fiche retire
   // plus bas : on enlève aussi ce qui le promettait, plutôt que de laisser un
   // chevron mort et un curseur de lien.
@@ -9060,14 +9121,41 @@ function toolAthleteBar(){
   }
   const ini=(S.pseudo||'?').slice(0,2).toUpperCase();
   const vc=S.csKmh?('VC '+S.csKmh.toFixed(1)+' km/h'):('VMA '+S.vma.toFixed(1)+' km/h');
-  return '<div class="tool-ath-bar" onclick="athSwitcherOpen()" title="Changer d’athlète" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding:11px 16px;border:1px solid rgba(255,107,26,0.25);border-radius:10px;background:rgba(255,107,26,0.05);cursor:pointer">'
-    +'<div style="width:34px;height:34px;border-radius:50%;background:rgba(255,107,26,0.14);border:1px solid rgba(255,107,26,0.3);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:900;color:var(--orange);flex-shrink:0">'+ini+'</div>'
-    +'<div style="font-size:13.5px;font-weight:800;color:var(--text)">'+(S.pseudo||'Athlète')+'</div>'
-    +'<div style="font-size:12.5px;font-weight:700;color:var(--orange)">'+vc+'</div>'
-    +(S.testDate?'<div style="font-size:11.5px;color:var(--muted2);margin-left:auto">Profil édité le '+S.testDate+'</div>':'')
-    +'<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;'+(S.testDate?'margin-left:8px':'margin-left:auto')+'"><polyline points="6 9 12 15 18 9"/></svg>'
-    +'<span style="font-size:11px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px">changer</span>'
+  /* Publier ne vivait que sur l'écran Athlètes : on corrigeait une VMA ici,
+     on ajustait le plan là, et il fallait un troisième écran juste pour
+     envoyer. Le bouton suit maintenant l'athlète. */
+  const pub=(S.athId!=null)
+    ? '<button type="button" class="tab-pub" onclick="event.stopPropagation();publishAthlete('+S.athId+',this)"'
+      +' title="Envoyer ou mettre à jour la fiche dans l’espace de l’athlète">\u2191 Publier l’espace</button>'
+    : '';
+  return '<div class="tool-ath-bar" onclick="athSwitcherOpen()" title="Changer d’athlète">'
+    +'<div class="tab-ini">'+ini+'</div>'
+    +'<div class="tab-nom">'+(S.pseudo||'Athlète')+'</div>'
+    +'<div class="tab-ref">'+vc+'</div>'
+    +(S.testDate?'<div class="tab-date">Profil édité le '+S.testDate+'</div>':'')
+    +'<div class="tab-fin">'+pub
+      +'<svg viewBox="0 0 24 24" class="tab-chev"><polyline points="6 9 12 15 18 9"/></svg>'
+      +'<span class="tab-chg">changer</span></div>'
     +'</div>';
+}
+/* La barre vit dans du HTML statique sur Saisie et sur le Dashboard : on la
+   remplit au changement d'écran et chaque fois que le profil bouge. */
+function athBarPoser(){
+  try{
+    var neuf=toolAthleteBar();
+    document.querySelectorAll('[data-athbar]').forEach(function(el){
+      /* Une publication en cours possède son bouton : publishAthlete() garde
+         le nœud pour le remettre en état à la fin, et rend le dashboard au
+         passage — ce qui repasserait ici et détacherait ce bouton. La barre
+         repasserait « prête à publier » pendant que l'envoi continue. */
+      if(el.querySelector('.tab-pub:disabled')) return;
+      /* Et on ne réécrit que si quelque chose a bougé : saveLS() part à
+         chaque frappe dans Saisie, inutile de reconstruire la barre à
+         chaque lettre. */
+      if(el.__athbar===neuf) return;
+      el.__athbar=neuf; el.innerHTML=neuf;
+    });
+  }catch(e){}
 }
 
 /* ══ PLANIFICATION ══ */
@@ -10381,6 +10469,7 @@ function plCalendarHTML(p,weeks,opts){
           +'<span>'+lbl+'</span>'
           +'<div class="plw-acts">'
             +'<button type="button" class="plw-cp" title="Régler la durée, ou modifier la séance" aria-label="Régler la durée, ou modifier la séance" onclick="event.stopPropagation();plDureeOuvrir(\''+iso+'\','+si+')">✎</button>'
+            +'<button type="button" class="plw-cp" title="Envoyer cette séance sur la montre (.fit)" aria-label="Envoyer sur la montre" onclick="event.stopPropagation();wktExportJour(\''+iso+'\','+si+')">\u2193</button>'
             +'<button type="button" class="plw-cp" title="Feuille de séance : noter les temps de ce jour-là" aria-label="Feuille de séance" onclick="event.stopPropagation();fsOuvrirPlan(\''+iso+'\','+si+')">▤</button>'
             +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
             +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
@@ -11395,6 +11484,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Les infobulles se posent sur le balisage statique, une fois pour toutes ;
   // les replis rendent l'écran tel que le coach l'a laissé.
   try{ rlInfoPoser(); }catch(e){}
+  try{ athBarPoser(); }catch(e){}
   try{ repliAppliquer(); }catch(e){}
   updMhCtx(S.vma?'dashboard':'input');
   const ac0=document.getElementById('sbn-ath-count');
