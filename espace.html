@@ -180,6 +180,42 @@ a{color:var(--accent)}
 .h2{font-size:11.5px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);margin:24px 0 12px}
 .h2:first-child{margin-top:0}
 .card2{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+/* ── Analyses ──
+   Les séances que le coach a épinglées depuis le lecteur de fichier montre.
+   La plus récente s'ouvre d'elle-même, les précédentes se déplient. */
+.an{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.an+.an,.an-plus{margin-top:10px}
+.an-hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.an-nom{font-size:14.5px;font-weight:800;color:var(--text)}
+.an-int{font-size:12px;color:var(--accent);font-weight:700;margin-top:2px}
+.an-date{font-size:11.5px;color:var(--muted2);white-space:nowrap}
+.an-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;
+  padding-top:12px;border-top:1px solid var(--border)}
+.an--nu .an-kpis{margin-top:0;padding-top:0;border-top:none}
+.an-kpi-v{font-size:17px;font-weight:900;color:var(--text);line-height:1.2}
+.an-kpi-l{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted2);margin-top:2px}
+.an-m{margin-top:14px}
+.an-m-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  flex-wrap:wrap;margin-bottom:4px}
+.an-m-nom{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:var(--text2)}
+.an-m-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.an-m-stats{display:flex;gap:12px;font-size:11.5px;color:var(--muted)}
+.an-m-stats b{color:var(--text2);font-weight:800}
+.an-svg{display:block;width:100%;height:76px}
+/* Les analyses précédentes : un résumé cliquable, le détail au même format. */
+.an-plus summary{cursor:pointer;list-style:none;background:var(--card);
+  border:1px solid var(--border);border-radius:14px;padding:12px 16px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.an-plus summary::-webkit-details-marker{display:none}
+.an-plus summary:hover{border-color:var(--border2)}
+.an-plus[open] summary{border-radius:14px 14px 0 0;border-bottom:none}
+.an-plus[open] .an{border-radius:0 0 14px 14px;border-top:none}
+.an-plus-n{font-size:13.5px;font-weight:800;color:var(--text2)}
+.an-plus-s{font-size:11.5px;color:var(--muted2)}
+.an-plus-c{font-size:11px;color:var(--accent);font-weight:800;white-space:nowrap}
+.an-plus-c::after{content:'Voir'}
+.an-plus[open] .an-plus-c::after{content:'Masquer'}
 .muted{color:var(--muted);font-size:13px;line-height:1.65}
 
 /* ── Mode aperçu ──
@@ -896,6 +932,89 @@ function ecranAccueil(d){
   h+='</div>';
   if(d.dateDuTest)h+='<div class="muted" style="margin-top:10px">Repères établis le '+esc(d.dateDuTest)+'.</div>';
   h+=blocCalculateur(d);
+  h+=blocAnalyses(d);
+  return h;
+}
+
+/* ══ ANALYSES ══════════════════════════════════════════════════════════
+   Le coach épingle une portion de séance depuis le lecteur de fichier
+   montre ; elle arrive ici telle qu'il l'a vue. Les courbes sont stockées
+   en points échantillonnés et redessinées en SVG — pas d'image, pas de
+   bibliothèque, et ça reste net à toutes les tailles. */
+function anFmt(v,fmt){
+  if(v==null||!isFinite(v))return '—';
+  if(fmt==='pace')return fAll(v);
+  if(fmt==='dec')return (+v).toFixed(1).replace('.',',');
+  return Math.round(v).toLocaleString('fr-FR');
+}
+var _anGid=0;
+function anCourbe(c){
+  var pts=(c&&c.pts)||[];
+  if(pts.length<2) return '';
+  var W=1000,H=76,P=6;
+  var xs=pts.map(function(p){return p[0];}), ys=pts.map(function(p){return p[1];});
+  var x0=Math.min.apply(null,xs), x1=Math.max.apply(null,xs);
+  var lo=Math.min.apply(null,ys), hi=Math.max.apply(null,ys);
+  if(hi-lo<1e-6) hi=lo+1;
+  var sp=hi-lo; lo-=sp*0.15; hi+=sp*0.15;
+  var px=function(v){return ((v-x0)/((x1-x0)||1))*W;};
+  var py=function(v){var f=(v-lo)/(hi-lo); return P+(c.invert?f:1-f)*(H-2*P);};
+  var d=pts.map(function(p,i){return (i?'L':'M')+px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1);}).join(' ');
+  var gid='an-g'+(++_anGid);
+  var moy=ys.reduce(function(a,b){return a+b;},0)/ys.length;
+  var best=c.invert?Math.min.apply(null,ys):Math.max.apply(null,ys);
+  var col=esc(c.color||'#FF6B1A');
+  return '<div class="an-m">'
+    +'<div class="an-m-top">'
+      +'<div class="an-m-nom"><span class="an-m-dot" style="background:'+col+'"></span>'+esc(c.title||'')+'</div>'
+      +'<div class="an-m-stats"><span>Moy <b>'+anFmt(moy,c.fmt)+'</b> '+esc(c.unit||'')+'</span>'
+      +'<span>'+(c.invert?'Meilleure':'Max')+' <b>'+anFmt(best,c.fmt)+'</b> '+esc(c.unit||'')+'</span></div>'
+    +'</div>'
+    +'<svg class="an-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'
+      +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
+        +'<stop offset="0" stop-color="'+col+'" stop-opacity=".38"/>'
+        +'<stop offset="1" stop-color="'+col+'" stop-opacity=".02"/>'
+      +'</linearGradient></defs>'
+      +'<path d="'+d+' L'+W+' '+H+' L0 '+H+' Z" fill="url(#'+gid+')"/>'
+      +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.5"'
+      +' stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+    +'</svg></div>';
+}
+function anDate(v){
+  if(!v) return '';
+  var t=new Date(v); if(isNaN(t)) return '';
+  return t.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+}
+/* sansEntete : dans un dépliant, le résumé porte déjà le nom, l'intervalle
+   et la date — les répéter juste en dessous ne dit rien de plus. */
+function anCarte(a,sansEntete){
+  var courbes=(a.charts||[]).map(anCourbe).join('');
+  return '<div class="an'+(sansEntete?' an--nu':'')+'">'
+    +(sansEntete?'':'<div class="an-hd">'
+      +'<div><div class="an-nom">'+esc(a.source||'Séance')+'</div>'
+      +(a.interval?'<div class="an-int">'+esc(a.interval)+'</div>':'')+'</div>'
+      +(anDate(a.date)?'<div class="an-date">'+esc(anDate(a.date))+'</div>':'')
+    +'</div>')
+    +'<div class="an-kpis">'
+      +'<div><div class="an-kpi-v">'+esc(a.time||'—')+'</div><div class="an-kpi-l">Temps</div></div>'
+      +'<div><div class="an-kpi-v">'+esc(a.distance||'—')+'</div><div class="an-kpi-l">Distance</div></div>'
+      +'<div><div class="an-kpi-v">'+esc(a.pace||'—')+'</div><div class="an-kpi-l">Allure</div></div>'
+    +'</div>'
+    +courbes
+    +'</div>';
+}
+function blocAnalyses(d){
+  var list=(d.analyses||[]).filter(Boolean);
+  if(!list.length) return '';          // rien à montrer : pas de section vide
+  var h='<div class="h2">Tes analyses</div>'+anCarte(list[0]);
+  /* Les précédentes se déplient : un <details> natif, sans une ligne de JS
+     de plus, et le contenu reste dans la page pour la recherche du navigateur. */
+  h+=list.slice(1).map(function(a){
+    return '<details class="an-plus"><summary>'
+      +'<span><span class="an-plus-n">'+esc(a.source||'Séance')+'</span><br>'
+      +'<span class="an-plus-s">'+esc([a.interval,a.time,anDate(a.date)].filter(Boolean).join(' · '))+'</span></span>'
+      +'<span class="an-plus-c"></span></summary>'+anCarte(a,true)+'</details>';
+  }).join('');
   return h;
 }
 
