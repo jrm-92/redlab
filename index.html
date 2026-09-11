@@ -853,6 +853,21 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-dlf input{width:15px;height:15px;accent-color:var(--muted2);cursor:pointer}
   .plw-man{font-size:10px;font-weight:800;color:var(--orange)}
   .pl-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  /* ── Fiche de séance à envoyer ── */
+  .fp-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:640px;width:100%;padding:18px;max-height:88vh;display:flex;flex-direction:column}
+  .fp-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .fp-t{font-size:15px;font-weight:800;color:var(--text);flex:1}
+  .fp-x{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;line-height:1}
+  .fp-note{font-size:12.5px;line-height:1.55;color:var(--muted2);background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.22);border-radius:9px;padding:10px 12px;margin-bottom:12px}
+  .fp-note b{color:var(--text)}
+  .fp-apercu{overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff;flex:1;min-height:0}
+  .fp-apercu img{display:block;width:100%;height:auto}
+  .fp-actions{display:flex;align-items:center;gap:9px;margin-top:13px;flex-wrap:wrap}
+  .fp-btn{background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;border-radius:9px;padding:9px 13px;cursor:pointer}
+  .fp-btn:hover{border-color:var(--orange)}
+  .fp-btn--p{background:var(--orange);border-color:var(--orange);color:#fff}
+  .fp-ok{font-size:12.5px;font-weight:700;color:#34D399}
+  @media (max-width:560px){ .fp-actions .fp-btn{flex:1} }
   .pl-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:520px;width:100%;padding:18px;max-height:82vh;display:flex;flex-direction:column}
   .pl-modal-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
   .pl-modal-top b{font-size:15px;color:var(--text)}
@@ -6373,6 +6388,10 @@ function libCard(s,vma,opts){
      pas de temps de passage. */
   const fsBtn=s.muscu?'':'<button type="button" class="lib-wkt" onclick="fsOuvrir(\''+_kind+'\','+_idx+')" title="Feuille de séance : les temps de passage de chaque athlète, imprimable">'
     +'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Feuille</button>';
+  /* Polar n'accepte aucun fichier de séance : pour ces montres-là, la fiche
+     est le seul chemin. Elle sert aussi d'aide-mémoire aux autres. */
+  const fpBtn='<button type="button" class="lib-wkt" onclick="fpOuvrir(\''+_kind+'\','+_idx+')" title="Fiche à envoyer à l\u2019athlète — indispensable pour une montre Polar, qui n\u2019importe aucun fichier de séance">'
+    +'<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Fiche</button>';
   const persoBadge=s.custom?'<span class="lib-perso">Perso</span>':'';
   const blocks=s.muscu
     ? libMuscuBody(s)
@@ -6391,7 +6410,7 @@ function libCard(s,vma,opts){
     +persoBadge+'<div class="lib-title">'+s.title+'</div></div></div>'+
     '<div class="lib-desc">'+s.desc+'</div>'+
     '<div class="lib-steps">'+warm+blocks+cool+'</div>'+
-    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+fsBtn+editBtn+'</div>'+
+    '<div class="lib-wkt-row">'+(s.muscu?'':wktBtn)+(s.muscu?'':fpBtn)+fsBtn+editBtn+'</div>'+
     (LIB_VARS[s.title]?'<div style="margin-top:10px;padding-top:9px;border-top:1px dashed rgba(255,255,255,.09);font-size:13px;line-height:1.65;color:var(--text2)"><div><b style="color:'+t.col+'">Variante m\u00eame niveau :</b> '+LIB_VARS[s.title].same+'</div><div style="margin-top:3px"><b style="color:#94A3B8">Niveau moins \u00e9lev\u00e9 :</b> '+LIB_VARS[s.title].easy+'</div></div>':'')+
     (s.src?'<div class="lib-src" style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:#8792a6;font-style:italic">Source · '+s.src+'</div>':'')+
     '</div>';
@@ -6479,15 +6498,29 @@ function fitNow(){return Math.max(0,Math.floor(Date.now()/1000)-631065600);}
    bouton tour) plutôt qu'une durée inventée. */
 function wktParseDur(txt){
   if(!txt||txt==='—')return null;
-  const t=String(txt).toLowerCase().replace(/[’′]/g,"'").replace(/[–—]/g,'-');
+  const t=String(txt).toLowerCase().replace(/[’′]/g,"'").replace(/[″”]/g,'"').replace(/[–—]/g,'-');
   if(/enchain|enchaîn|sans pause/.test(t))return null;   // pas d'étape du tout
   const pats=[
     [/(\d+)\s*-\s*\d+\s*km\b/,        m=>({dur:'distance',val:+m[1]*1000})],
     [/(\d+(?:[.,]\d+)?)\s*km\b/,      m=>({dur:'distance',val:Math.round(parseFloat(m[1].replace(',','.'))*1000)})],
     [/(\d+)\s*'\s*(\d{1,2})(?!\d)/,   m=>({dur:'time',val:+m[1]*60 + +m[2]})],
+    /* Les secondes s'écrivent « 40" » ou « 40'' ». Sans cette règle, « 40" »
+       ne donnait AUCUNE durée — récup libre sur la montre, elle ne repartait
+       jamais toute seule — et « 40'' » en donnait QUARANTE MINUTES, son
+       apostrophe étant lue comme une minute. « 40" » est justement la
+       notation que fHMS() produit. Elle passe donc avant la règle des
+       minutes, que le choix du plus petit index laisserait sinon gagner. */
+    [/(\d+)\s*(?:''|")/,              m=>({dur:'time',val:+m[1]})],
     [/(\d+)\s*-\s*\d+\s*(?:'|min\b)/, m=>({dur:'time',val:+m[1]*60})],
-    [/(\d+)\s*(?:'|min\b)/,           m=>({dur:'time',val:+m[1]*60})],
-    [/(\d+)\s*s\b/,                   m=>({dur:'time',val:+m[1]})],
+    /* Les unités s'écrivent en toutes lettres ou abrégées, et « \b » ne
+       suffit pas à les délimiter : une lettre accentuée n'est pas un
+       caractère de mot, si bien que « 3 séries » se lisait « 3 s » et
+       « 4 séances » « 4 s ». À l'inverse « 3 minutes » et « 30sec » ne se
+       lisaient pas du tout, faute de frontière après « min » et « s ».
+       On énumère donc les formes admises, et on exige qu'aucune lettre ne
+       les suive — accentuée comprise. */
+    [/(\d+)\s*(?:'|min|mins|minute|minutes)(?![a-zà-öø-ÿ])/, m=>({dur:'time',val:+m[1]*60})],
+    [/(\d+)\s*(?:s|sec|secs|seconde|secondes)(?![a-zà-öø-ÿ])/, m=>({dur:'time',val:+m[1]})],
     [/(\d+)\s*m\b/,                   m=>({dur:'distance',val:+m[1]})]
   ];
   let best=null;
@@ -6899,6 +6932,248 @@ function wktExport(kind,idx){
   if(!vm&&!wktToutEnAllure(s)){alert('Charge un athlète (ou renseigne une VMA en haut de la bibliothèque) : c’est elle qui cale les allures cibles de la séance.');return;}
   const nom=((vm&&vm.who)?wktSlug(vm.who)+'-':'')+wktSlug(s.title)+'.fit';
   wktDl(wktToFit(s,vm?vm.v:null),nom);
+}
+
+
+/* ══ FICHE DE SÉANCE À ENVOYER ══
+   Polar Flow n'importe AUCUN fichier de séance : ni FIT, ni TCX. Son import
+   « TCX ou GPX » est celui des PARCOURS — un tracé GPS, qui ne sait pas dire
+   « 6 × 400 m à 17 km/h ». Chez Polar une séance structurée est une « cible
+   d'entraînement par phases », et elle se saisit à la main dans le service web.
+
+   D'où cette fiche : la séance découpée en phases, dans l'ordre et les unités
+   du formulaire Polar, en une image qu'on envoie par message et que l'athlète
+   recopie une fois. Ce n'est pas automatique, et ça ne peut pas l'être — mais
+   c'est la différence entre « débrouille-toi » et « tape ça ».
+
+   Elle sert aussi d'aide-mémoire tout court : montre non programmable, ou pas
+   de montre du tout, et l'athlète lit quand même sa séance phase par phase. */
+
+/* mm/s (l'unité des cibles) → « 3:32 à 3:45/km · 16,0 à 17,0 km/h ».
+   La fourchette garde ses deux bornes : Polar demande une zone, pas un point. */
+function fpAllure(sp){
+  if(!sp||!sp.lo||!sp.hi)return '';
+  var kmh=function(v){return v/1000*3.6;}, sec=function(v){return 1000/(v/1000);};
+  var a1=fAll(sec(sp.hi)), a2=fAll(sec(sp.lo));          /* hi = le plus rapide */
+  var v1=kmh(sp.hi).toFixed(1).replace('.',','), v2=kmh(sp.lo).toFixed(1).replace('.',',');
+  return ((a1===a2)?a1+'/km':a1+' à '+a2+'/km')+'   ·   '+((v1===v2)?v1+' km/h':v2+' à '+v1+' km/h');
+}
+/* fHMS() écrit « 0'40" » et « 15'00" » : juste, mais fait pour un tableau de
+   tours, pas pour une fiche qu'on tend à quelqu'un. Ici on écrit comme on
+   parle — 40 s, 15 min, 2'30. */
+function fpDuree(e){
+  if(e.dur==='distance')return fDist(e.val);
+  if(e.dur!=='time')return 'libre';
+  var v=Math.round(e.val);
+  if(v<60)return v+' s';
+  if(v%60===0)return (v/60)+' min';
+  return Math.floor(v/60)+"'"+String(v%60).padStart(2,'0');
+}
+var FP_INT={warmup:'Échauffement',cooldown:'Retour au calme',recovery:'Récupération',
+            rest:'Récup série',interval:'Effort',active:'Effort',other:'Phase'};
+
+/* La liste plate de wktSteps() redevient un arbre. Une étape « repeat » porte
+   l'index de la première étape qu'elle répète : tout ce qui a été émis depuis
+   cet index forme le bloc. Les séries s'imbriquent donc d'elles-mêmes —
+   3 × (4 × (effort + récup) + récup série) ressort dans cet ordre. */
+function fpArbre(st){
+  var noeuds=[], pos=[];
+  st.forEach(function(e,i){
+    if(e.dur==='repeat'){
+      var debut=pos[e.from];
+      var enfants=noeuds.splice(debut);
+      noeuds.push({type:'bloc',count:e.count,enfants:enfants});
+      for(var k=e.from;k<=i;k++)if(pos[k]!=null&&pos[k]>=debut)pos[k]=noeuds.length-1;
+      pos[i]=noeuds.length-1;
+    }else{
+      var nom=e.name||FP_INT[e.int]||'Phase', duree=fpDuree(e);
+      /* wktSteps nomme souvent l'étape par sa durée ou sa distance, faute de
+         libellé : « 400 m — 400 m », « Échauffement 15 min — 15 min ». La
+         colonne de droite le dit déjà — on retire la redite plutôt que de la
+         faire lire deux fois. */
+      var fin=nom.length-duree.length;
+      if(fin>0&&nom.slice(fin)===duree)nom=nom.slice(0,fin).trim();
+      if(!nom||nom===duree)nom=FP_INT[e.int]||'Phase';
+      noeuds.push({type:'etape',nom:nom,role:FP_INT[e.int]||'Phase',
+                   duree:duree,allure:fpAllure(e.sp)});
+      pos[i]=noeuds.length-1;
+    }
+  });
+  return noeuds;
+}
+/* L'arbre en lignes à dessiner, chacune avec sa profondeur. */
+function fpLignes(noeuds,prof){
+  prof=prof||0;
+  var out=[];
+  (noeuds||[]).forEach(function(n){
+    if(n.type==='bloc'){
+      out.push({bloc:true,titre:'× '+n.count,prof:prof});
+      out.push.apply(out,fpLignes(n.enfants,prof+1));
+    }else{
+      out.push({nom:n.nom,role:n.role,duree:n.duree,allure:n.allure,prof:prof});
+    }
+  });
+  return out;
+}
+function fpSeance(kind,idx){
+  var s=libFindSession(kind,idx); if(!s)return null;
+  if(s.muscu)return null;
+  var vm=wktVma();
+  return {s:s, vma:vm?vm.v:null, qui:(vm&&vm.who)||'',
+          lignes:fpLignes(fpArbre(wktSteps(s,vm?vm.v:null)))};
+}
+
+/* La fiche en texte — pour un copier-coller dans un message, quand l'image
+   n'est pas pratique. */
+function fpTexte(f){
+  var L=[f.s.title||'Séance'];
+  if(f.qui)L.push('Pour : '+f.qui);
+  if(f.vma)L.push('Référence : VMA '+String(f.vma).replace('.',',')+' km/h');
+  L.push('');
+  f.lignes.forEach(function(l){
+    var ind=new Array(l.prof+1).join('   ');
+    if(l.bloc){ L.push(ind+'┌ '+l.titre); return; }
+    L.push(ind+'• '+l.nom+' — '+l.duree+(l.allure?'  ('+l.allure+')':''));
+  });
+  L.push('');
+  L.push('Polar Flow : Favoris → + Cible d’entraînement → Par phases.');
+  L.push('Une phase par ligne, dans cet ordre. Coche « démarrer la phase');
+  L.push('suivante automatiquement », et groupe les blocs « × n » avec');
+  L.push('« Répéter des phases ».');
+  return L.join('\n');
+}
+
+/* Le dessin. Un canevas plutôt qu'une capture d'écran : la fiche sort à la
+   même taille sur tous les appareils, et se lit sur un téléphone. Fond clair
+   à dessein — elle est faite pour être envoyée et imprimée, pas pour être
+   regardée dans l'outil. */
+function fpImage(f,ech){
+  ech=ech||2;
+  var W=900, PAD=44, LH=46, x2=function(v){return Math.round(v*ech);};
+  var hautEntete=f.vma||f.qui?168:132;
+  var hautPied=104;
+  var H=hautEntete+f.lignes.length*LH+PAD+hautPied;
+
+  var cv=document.createElement('canvas');
+  cv.width=x2(W); cv.height=x2(H);
+  var c=cv.getContext('2d');
+  c.scale(ech,ech);
+  var POLICE='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+  var f1=function(t,p){c.font=(p||'')+' '+t+'px '+POLICE;};
+
+  c.fillStyle='#FFFFFF'; c.fillRect(0,0,W,H);
+  c.fillStyle='#0F1729'; c.fillRect(0,0,W,hautEntete);
+  c.fillStyle='#FF6B35'; c.fillRect(0,hautEntete-5,W,5);
+
+  f1(31,'800'); c.fillStyle='#FFFFFF';
+  c.fillText(fpCoupe(c,f.s.title||'Séance',W-PAD*2),PAD,68);
+  f1(15,'600'); c.fillStyle='rgba(255,255,255,0.62)';
+  var sous=[];
+  if(f.qui)sous.push(f.qui);
+  if(f.vma)sous.push('VMA '+String(f.vma).replace('.',',')+' km/h');
+  if(sous.length)c.fillText(sous.join('   ·   '),PAD,102);
+  f1(12.5,'700'); c.fillStyle='#FF6B35';
+  c.fillText('REDING RUNNING',PAD,hautEntete-26);
+
+  var y=hautEntete+34;
+  f.lignes.forEach(function(l){
+    var dx=PAD+l.prof*26;
+    if(l.prof>0){ c.fillStyle='rgba(255,107,53,0.28)'; c.fillRect(PAD+(l.prof-1)*26+9,y-26,3,LH); }
+    if(l.bloc){
+      f1(15,'800'); c.fillStyle='#FF6B35';
+      c.fillText(l.titre,dx,y);
+    }else{
+      f1(17,'700'); c.fillStyle='#0F1729';
+      c.fillText(fpCoupe(c,l.nom,330-l.prof*26),dx,y);
+      f1(17,'800'); c.fillStyle='#0F1729';
+      c.fillText(l.duree,PAD+360,y);
+      if(l.allure){ f1(14.5,'600'); c.fillStyle='#6B7280';
+        c.fillText(l.allure,PAD+492,y); }
+    }
+    y+=LH;
+  });
+
+  var yp=H-hautPied;
+  c.fillStyle='#F3F4F6'; c.fillRect(0,yp,W,hautPied);
+  c.fillStyle='#FF6B35'; c.fillRect(0,yp,W,3);
+  f1(14,'800'); c.fillStyle='#0F1729';
+  c.fillText('Polar Flow : Favoris → + Cible d’entraînement → Par phases',PAD,yp+36);
+  f1(13,'500'); c.fillStyle='#6B7280';
+  c.fillText('Une phase par ligne, dans cet ordre. Coche « démarrer la phase suivante automatiquement »,',PAD,yp+60);
+  c.fillText('et groupe les blocs « × n » avec « Répéter des phases ». Puis synchronise la montre.',PAD,yp+80);
+  return cv;
+}
+/* Coupe un texte trop long pour sa colonne, avec un vrai caractère d'ellipse. */
+function fpCoupe(c,t,max){
+  t=String(t==null?'':t);
+  if(c.measureText(t).width<=max)return t;
+  while(t.length>1&&c.measureText(t+'…').width>max)t=t.slice(0,-1);
+  return t+'…';
+}
+
+var _fpCle=null;
+function fpOuvrir(kind,idx){
+  var f=fpSeance(kind,idx);
+  if(!f){ alert('La fiche décrit des phases de course : elle ne s’applique pas à une séance de musculation.'); return; }
+  if(!f.vma&&!wktToutEnAllure(f.s))
+    alert('Aucune VMA : la fiche sortira sans allures cibles. Charge un athlète, ou renseigne une VMA en haut de la bibliothèque.');
+  _fpCle={kind:kind,idx:idx};
+  rlModalOuvrir('fp-modal',fpHTML(f));
+  fpDessiner();
+}
+function fpFermer(){ rlModalFermer('fp-modal'); _fpCle=null; }
+function fpHTML(f){
+  return '<div class="fp-wrap">'
+    +'<div class="fp-head"><div class="fp-t">Fiche de séance</div>'
+    +'<button type="button" class="fp-x" onclick="fpFermer()" aria-label="Fermer">✕</button></div>'
+    +'<div class="fp-note">Polar Flow n’importe aucun fichier de séance — ni .FIT ni .TCX. '
+    +'Son import « TCX ou GPX » est celui des <b>parcours</b>. Envoie cette fiche à ton athlète : '
+    +'il la recopie une fois en <b>cible d’entraînement par phases</b>, et sa montre la suit.</div>'
+    +'<div class="fp-apercu"><img id="fp-img" alt="Fiche de la séance"></div>'
+    +'<div class="fp-actions">'
+    +'<button type="button" class="fp-btn fp-btn--p" onclick="fpTelecharger()">⤓ Télécharger l’image</button>'
+    +'<button type="button" class="fp-btn" onclick="fpCopier()">Copier le texte</button>'
+    +'<span class="fp-ok" id="fp-ok"></span>'
+    +'</div></div>';
+}
+function fpDessiner(){
+  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+  var img=document.getElementById('fp-img'); if(!img)return;
+  img.src=fpImage(f,2).toDataURL('image/png');
+}
+function fpTelecharger(){
+  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+  var nom=((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
+  fpImage(f,2).toBlob(function(b){
+    if(!b)return;
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download=nom;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    fpDit('Image enregistrée ✓');
+  },'image/png');
+}
+function fpCopier(){
+  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+  var t=fpTexte(f);
+  var fini=function(){fpDit('Texte copié ✓');};
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(t).then(fini,function(){fpReplique(t,fini);});
+  else fpReplique(t,fini);
+}
+/* Le presse-papier moderne demande un contexte sûr : hors https, on retombe
+   sur la vieille méthode plutôt que d'échouer sans rien dire. */
+function fpReplique(t,fini){
+  var z=document.createElement('textarea');
+  z.value=t; z.style.position='fixed'; z.style.opacity='0';
+  document.body.appendChild(z); z.select();
+  try{ document.execCommand('copy'); fini(); }catch(e){ alert(t); }
+  z.remove();
+}
+function fpDit(m){
+  var e=document.getElementById('fp-ok'); if(!e)return;
+  e.textContent=m; clearTimeout(e.__t);
+  e.__t=setTimeout(function(){ if(e) e.textContent=''; },2600);
 }
 
 /* ══ SÉANCES PERSO — parseur de notation libre ══ */
