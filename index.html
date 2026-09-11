@@ -453,6 +453,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plc-reset:hover{border-color:var(--orange);color:var(--orange)}
   .plc-send{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;color:#34D399;font-family:var(--font);font-size:11.5px;font-weight:800;padding:5px 12px;cursor:pointer;white-space:nowrap}
   .plc-send:hover{background:rgba(52,211,153,0.2)}
+  .plc-fiche{background:rgba(255,107,53,0.12);border:1px solid rgba(255,107,53,0.42);border-radius:8px;color:var(--orange);font-family:var(--font);font-size:11.5px;font-weight:800;padding:5px 12px;cursor:pointer;white-space:nowrap}
+  .plc-fiche:hover{background:rgba(255,107,53,0.22)}
 
   /* Les sept colonnes ne se compriment plus indéfiniment : sous une certaine
      largeur, c'est le calendrier entier qui défile — en-tête et semaines
@@ -7246,46 +7248,102 @@ function fpRelief(c,x,y){
   c.restore();
 }
 
+/* ══ L'EN-TÊTE, COMMUN AUX DEUX FICHES ══
+   La fiche de séance et celle du plan portent le même bandeau : logo à
+   gauche, cadre du titre jusqu'à la marge droite. Il est mesuré d'abord —
+   la hauteur du canevas en dépend — puis tracé. Deux fonctions plutôt
+   qu'une, pour que les deux fiches ne divergent jamais. */
+function fpEnteteMesure(titre,desc,sousT){
+  var g={titre:String(titre||'Séance'), desc:String(desc||'').trim(),
+         sousT:sousT||[], LOGO_H:74};
+  g.logoOk=!!(_fpLogo.complete&&_fpLogo.naturalWidth);
+  g.logoL=g.logoOk?Math.round(g.LOGO_H*_fpLogo.naturalWidth/_fpLogo.naturalHeight):132;
+  g.bX=FP_PAD+g.logoL+36; g.bY=FP_PAD; g.bW=FP_W-FP_PAD-g.bX; g.bH=60;
+
+  /* La description ne descend sous le cadre que si elle n'a pas tenu à côté
+     du titre. On mesure pour de vrai plutôt que d'estimer : c'est un canevas,
+     rien n'empêche de mesurer avant de décider. */
+  var cvM=document.createElement('canvas').getContext('2d');
+  cvM.font='800 34px '+FP_POLICE;
+  g.lTitre=cvM.measureText(g.titre).width;
+  cvM.font='600 15px '+FP_POLICE;
+  g.lDesc=g.desc?cvM.measureText(g.desc).width:0;
+  g.ensemble=!!g.desc && (g.bX+24+g.lTitre+34+g.lDesc+24 <= FP_W-FP_PAD);
+
+  /* Un titre trop long ne se fait pas amputer en silence : il rapetisse
+     jusqu'à tenir dans le cadre, et ce n'est qu'arrivé au plus petit corps
+     encore lisible qu'on se résout aux points de suspension. */
+  g.tMax=g.bW-48-(g.ensemble?g.lDesc+34:0); g.tPx=34;
+  while(g.tPx>22 && g.lTitre>g.tMax){
+    g.tPx-=1; cvM.font='800 '+g.tPx+'px '+FP_POLICE;
+    g.lTitre=cvM.measureText(g.titre).width;
+  }
+
+  g.h=FP_PAD+Math.max(g.LOGO_H, g.bH+(g.sousT.length?32:6))
+      +((g.desc&&!g.ensemble)?42:0)+22;
+  return g;
+}
+function fpEnteteTracer(c,g){
+  var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
+
+  /* Le logo. À défaut, son nom en toutes lettres — jamais un blanc. */
+  if(g.logoOk){
+    c.drawImage(_fpLogo,FP_PAD,g.bY+Math.round((g.bH-g.LOGO_H)/2)+8,g.logoL,g.LOGO_H);
+  }else{
+    f1(15,'800'); c.fillStyle='#FF6B35';
+    c.save(); c.letterSpacing='1.4px';
+    c.fillText('REDING',FP_PAD,g.bY+34);
+    f1(10.5,'700'); c.fillText('RUNNING',FP_PAD+2,g.bY+52);
+    c.restore();
+  }
+
+  /* Le cadre du titre. */
+  c.strokeStyle='rgba(255,255,255,0.3)'; c.lineWidth=1.6;
+  fpRect(c,g.bX,g.bY,g.bW,g.bH,12); c.stroke();
+
+  /* Ce qui ressemble à une allure passe en orange : on lit la nature de la
+     séance avant d'avoir lu la phrase. */
+  var yT=g.bY+g.bH/2+Math.round(g.tPx*0.35), xT=g.bX+24;
+  f1(g.tPx,'800');
+  fpCoupe(c,g.titre,g.tMax).split(/\s+/).forEach(function(m){
+    var l=c.measureText(m+' ').width;
+    if(xT+l>g.bX+g.bW-16)return;
+    c.fillStyle=FP_ALLURE.test(m.replace(/[^\w+%]/g,''))?'#FF6B35':'#FFFFFF';
+    c.fillText(m,xT,yT); xT+=l;
+  });
+
+  if(g.ensemble){
+    var xD=g.bX+g.bW-24-g.lDesc, xF=xD-26;
+    c.strokeStyle='rgba(255,255,255,0.28)'; c.lineWidth=1.4;
+    c.beginPath(); c.moveTo(xF,g.bY+14); c.lineTo(xF,g.bY+g.bH-14); c.stroke();
+    f1(15,'600'); c.fillStyle='rgba(255,255,255,0.92)';
+    c.fillText(g.desc,xD,g.bY+g.bH/2+5);
+  }
+
+  var y=g.bY+g.bH+26;
+  if(g.desc&&!g.ensemble){
+    f1(15,'600');
+    var t=fpCoupe(c,g.desc,FP_W-FP_PAD-g.bX-40);
+    c.strokeStyle='rgba(255,255,255,0.26)'; c.lineWidth=1.4;
+    fpRect(c,g.bX,y-21,c.measureText(t).width+26,32,8); c.stroke();
+    c.fillStyle='rgba(255,255,255,0.9)'; c.fillText(t,g.bX+13,y);
+    y+=40;
+  }
+  if(g.sousT.length){
+    f1(14.5,'600'); c.fillStyle='rgba(255,255,255,0.55)';
+    c.fillText(g.sousT.join('   ·   '),g.bX+6,y);
+  }
+}
+
 function fpImage(f,ech){
   ech=ech||2;
-  var desc=String((f.s&&f.s.desc)||'').trim();
   var sousT=[];
   var jour=fpDateLisible(f.date); if(jour)sousT.push(jour);
   if(f.qui)sousT.push(f.qui);
   if(f.vma)sousT.push('VMA '+String(f.vma).replace('.',',')+' km/h');
 
-  /* ── L'en-tête ──
-     Le logo tient la colonne de gauche ; le cadre du titre part à sa droite
-     et va jusqu'à la marge, la description calée contre le bord droit,
-     séparée du titre par un filet. La ligne athlète/VMA s'aligne sous le
-     cadre, pas sous le logo : c'est au titre qu'elle se rapporte. */
-  var LOGO_H=74;
-  var logoOk=!!(_fpLogo.complete&&_fpLogo.naturalWidth);
-  var logoL=logoOk?Math.round(LOGO_H*_fpLogo.naturalWidth/_fpLogo.naturalHeight):132;
-  var bX=FP_PAD+logoL+36, bY=FP_PAD, bW=FP_W-FP_PAD-bX, bH=60;
-
-  /* La structure ne descend sous le cadre que si elle n'a pas tenu à côté du
-     titre. On mesure pour de vrai plutôt que d'estimer : c'est un canevas,
-     rien n'empêche de mesurer avant de décider. */
-  var cvM=document.createElement('canvas').getContext('2d');
-  var titre=String(f.s.title||'Séance');
-  cvM.font='800 34px '+FP_POLICE;
-  var lTitre=cvM.measureText(titre).width;
-  cvM.font='600 15px '+FP_POLICE;
-  var lDesc=desc?cvM.measureText(desc).width:0;
-  var ensemble=desc && (bX+24+lTitre+34+lDesc+24 <= FP_W-FP_PAD);
-
-  /* Un titre trop long ne se fait pas amputer en silence : il rapetisse
-     jusqu'à tenir dans le cadre, et ce n'est qu'arrivé au plus petit corps
-     encore lisible qu'on se résout aux points de suspension. */
-  var tMax=bW-48-(ensemble?lDesc+34:0), tPx=34;
-  while(tPx>22 && lTitre>tMax){
-    tPx-=1; cvM.font='800 '+tPx+'px '+FP_POLICE;
-    lTitre=cvM.measureText(titre).width;
-  }
-
-  var hEntete=FP_PAD+Math.max(LOGO_H, bH+(sousT.length?32:6))
-              +((desc&&!ensemble)?42:0)+22;
+  var g=fpEnteteMesure(f.s.title,(f.s&&f.s.desc)||'',sousT);
+  var hEntete=g.h;
   var hCarte=22;
   f.lignes.forEach(function(l){ hCarte+=l.bloc?FP_LHB:FP_LH; });
   hCarte+=22;
@@ -7299,54 +7357,7 @@ function fpImage(f,ech){
   /* Fond marine, et le relief en haut à droite. */
   c.fillStyle='#0B1220'; c.fillRect(0,0,FP_W,H);
   fpRelief(c,FP_W-118,hEntete*0.46);
-
-  /* Le logo. À défaut, son nom en toutes lettres — jamais un blanc. */
-  if(logoOk){
-    c.drawImage(_fpLogo,FP_PAD,bY+Math.round((bH-LOGO_H)/2)+8,logoL,LOGO_H);
-  }else{
-    f1(15,'800'); c.fillStyle='#FF6B35';
-    c.save(); c.letterSpacing='1.4px';
-    c.fillText('REDING',FP_PAD,bY+34);
-    f1(10.5,'700'); c.fillText('RUNNING',FP_PAD+2,bY+52);
-    c.restore();
-  }
-
-  /* Le cadre du titre. */
-  c.strokeStyle='rgba(255,255,255,0.3)'; c.lineWidth=1.6;
-  fpRect(c,bX,bY,bW,bH,12); c.stroke();
-
-  /* Ce qui ressemble à une allure passe en orange : on lit la nature de la
-     séance avant d'avoir lu la phrase. */
-  var yT=bY+bH/2+Math.round(tPx*0.35), xT=bX+24;
-  f1(tPx,'800');
-  fpCoupe(c,titre,tMax).split(/\s+/).forEach(function(m){
-    var l=c.measureText(m+' ').width;
-    if(xT+l>bX+bW-16)return;
-    c.fillStyle=FP_ALLURE.test(m.replace(/[^\w+%]/g,''))?'#FF6B35':'#FFFFFF';
-    c.fillText(m,xT,yT); xT+=l;
-  });
-
-  if(ensemble){
-    var xD=bX+bW-24-lDesc, xF=xD-26;
-    c.strokeStyle='rgba(255,255,255,0.28)'; c.lineWidth=1.4;
-    c.beginPath(); c.moveTo(xF,bY+14); c.lineTo(xF,bY+bH-14); c.stroke();
-    f1(15,'600'); c.fillStyle='rgba(255,255,255,0.92)';
-    c.fillText(desc,xD,bY+bH/2+5);
-  }
-
-  var y=bY+bH+26;
-  if(desc&&!ensemble){
-    f1(15,'600');
-    var t=fpCoupe(c,desc,FP_W-FP_PAD-bX-40);
-    c.strokeStyle='rgba(255,255,255,0.26)'; c.lineWidth=1.4;
-    fpRect(c,bX,y-21,c.measureText(t).width+26,32,8); c.stroke();
-    c.fillStyle='rgba(255,255,255,0.9)'; c.fillText(t,bX+13,y);
-    y+=40;
-  }
-  if(sousT.length){
-    f1(14.5,'600'); c.fillStyle='rgba(255,255,255,0.55)';
-    c.fillText(sousT.join('   ·   '),bX+6,y);
-  }
+  fpEnteteTracer(c,g);
 
   /* La carte blanche. */
   var cx=FP_PAD, cy=hEntete, cw=FP_W-FP_PAD*2;
@@ -7524,10 +7535,273 @@ function fpReplique(t,fini){
   try{ document.execCommand('copy'); fini(); }catch(e){ alert(t); }
   z.remove();
 }
-function fpDit(m){
-  var e=document.getElementById('fp-ok'); if(!e)return;
+function fpDit(m,id){
+  var e=document.getElementById(id||'fp-ok'); if(!e)return;
   e.textContent=m; clearTimeout(e.__t);
   e.__t=setTimeout(function(){ if(e) e.textContent=''; },2600);
+}
+
+/* ══ FICHE DU PLAN ══
+   Le pendant de la fiche de séance, à l'échelle de la prépa : une image que
+   l'athlète garde sur son téléphone et consulte sans ouvrir son espace. Même
+   en-tête, même carte blanche — une semaine par ligne. */
+var FPL_PHT={base:'#475569',dev:'#C2410C',spe:'#047857',aff:'#7E22CE'};
+var FPL_JOURS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+function fplTeinte(hex,a){
+  hex=String(hex||'#94A3B8').replace('#','');
+  return 'rgba('+parseInt(hex.slice(0,2),16)+','+parseInt(hex.slice(2,4),16)
+        +','+parseInt(hex.slice(4,6),16)+','+a+')';
+}
+/* Le plan tel qu'il est à l'écran, mis à plat. On relit les mêmes globales
+   que le calendrier — pas de copie parallèle qui pourrait dériver. */
+function fplDonnees(){
+  if(typeof PLANIF==='undefined')return null;
+  var p=PLANIF.find(function(x){return x.id===_plD;}); if(!p)return null;
+  if(!_plW||_plW<1)return null;
+  var jours=_plSessions||{};
+  var weeks=plWeeks(p,_plW);
+  /* Sans date de début ni de course, plWeeks ne date pas les semaines : il
+     n'y a alors aucun calendrier à imprimer. */
+  if(!weeks||!weeks.length||!weeks[0].d0)return null;
+  var vm=(typeof wktVma==='function')?wktVma():null;
+  var nSeances=0, totKm=0;
+  var sem=weeks.map(function(wk){
+    var seances=[];
+    for(var d=0;d<7;d++){
+      var dt=new Date(wk.d0.getTime()+d*864e5);
+      var iso=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),
+               String(dt.getDate()).padStart(2,'0')].join('-');
+      (jours[iso]||[]).forEach(function(sx){
+        var th=LIB_THEMES.find(function(t){return t.id===sx.th;})||{};
+        seances.push({jour:FPL_JOURS[d], titre:String(sx.t||''),
+                      duree:plOvTxt(sx), col:th.col||'#94A3B8'});
+        nSeances++;
+      });
+    }
+    totKm+=wk.km||0;
+    return {n:wk.n, dates:wk.dates||'', phL:plPhLabel(wk.ph),
+            col:FPL_PHT[wk.ph]||'#475569', fond:PL_PHC[wk.ph]||'#94A3B8',
+            km:wk.km, rec:!!wk.rec, course:!!wk.race, inter:!!wk.inter,
+            seances:seances};
+  });
+  return {titre:(_plNom||('Plan '+p.lbl)), nom:_plNom||'', discipline:p.id,
+          qui:(vm&&vm.who)||'', vma:vm?vm.v:null,
+          course:_plDate2||'', semaines:sem,
+          nbSem:sem.length, nbSeances:nSeances, totKm:totKm};
+}
+function fplSousTitre(d){
+  var st=[];
+  var j=fpDateLisible(d.course); if(j)st.push('Course le '+j.charAt(0).toLowerCase()+j.slice(1));
+  if(d.qui)st.push(d.qui);
+  if(d.vma)st.push('VMA '+String(d.vma).replace('.',',')+' km/h');
+  return st;
+}
+function fplResume(d){
+  var r=[d.nbSem+' semaine'+(d.nbSem>1?'s':'')];
+  if(d.nbSeances)r.push(d.nbSeances+' séance'+(d.nbSeances>1?'s':''));
+  if(d.totKm)r.push(d.totKm+' km');
+  return r.join('  ·  ');
+}
+
+var FPL_LS=25;                      /* une ligne de séance */
+/* Le bas de la colonne de gauche : les dates, puis la pastille de décharge
+   quand il y en a une. La hauteur de la ligne se règle sur la plus haute des
+   deux colonnes — sans quoi une semaine à une seule séance écraserait sa
+   propre pastille. */
+function fplBasGauche(s){ return s.rec?65:51; }
+function fplHauteurSem(s){
+  var gauche=fplBasGauche(s)+((s.course||s.inter)?20:0)+13;
+  return Math.max(gauche,14+Math.max(1,s.seances.length)*FPL_LS+13);
+}
+
+function fplImage(d,ech){
+  ech=ech||2;
+  var g=fpEnteteMesure(d.titre,fplResume(d),fplSousTitre(d));
+  var hEntete=g.h;
+  var hCarte=20;
+  d.semaines.forEach(function(s){ hCarte+=fplHauteurSem(s); });
+  hCarte+=20;
+  var H=hEntete+hCarte+FP_PAD;
+
+  var cv=document.createElement('canvas');
+  cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
+  var c=cv.getContext('2d'); c.scale(ech,ech);
+  var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
+
+  c.fillStyle='#0B1220'; c.fillRect(0,0,FP_W,H);
+  fpRelief(c,FP_W-118,hEntete*0.46);
+  fpEnteteTracer(c,g);
+
+  /* La carte blanche, comme sur la fiche de séance. */
+  c.fillStyle='#FFFFFF';
+  fpRect(c,FP_PAD,hEntete,FP_W-FP_PAD*2,hCarte,18); c.fill();
+
+  var xB=FP_PAD+26;                 /* la barre de phase */
+  var xS=xB+18;                     /* « S1 » et ses dates */
+  var xP=210;                       /* la phase */
+  var xK=352;                       /* la charge */
+  var xL=440;                       /* les séances */
+  var xR=FP_W-FP_PAD-26;            /* la marge droite intérieure */
+  var y=hEntete+20;
+
+  d.semaines.forEach(function(s,i){
+    var h=fplHauteurSem(s);
+
+    /* Une semaine de décharge se voit d'un coup d'œil : c'est l'information
+       qu'on cherche en parcourant un plan. */
+    if(s.rec){ c.fillStyle='#F8FAFC'; fpRect(c,FP_PAD+12,y,FP_W-FP_PAD*2-24,h,10); c.fill(); }
+    if(i){ c.strokeStyle='#E2E8F0'; c.lineWidth=1;
+           c.beginPath(); c.moveTo(xB,y+0.5); c.lineTo(xR,y+0.5); c.stroke(); }
+
+    c.fillStyle=s.col; fpRect(c,xB,y+12,4,h-24,2); c.fill();
+
+    f1(19,'800'); c.fillStyle='#0F172A';
+    c.fillText('S'+s.n,xS,y+29);
+    f1(12,'600'); c.fillStyle='#64748B';
+    c.fillText(s.dates,xS,y+47);
+
+    /* La pastille de phase, et sous elle la décharge s'il y en a une. Le
+       libellé est borné : une phase au nom plus long viendrait sinon buter
+       contre la colonne de la charge. */
+    f1(12,'800');
+    var phL=fpCoupe(c,s.phL,xK-xP-34);
+    var lp=c.measureText(phL).width;
+    c.fillStyle=fplTeinte(s.fond,0.16);
+    fpRect(c,xP,y+15,lp+22,24,12); c.fill();
+    c.fillStyle=s.col; c.fillText(phL,xP+11,y+31);
+    if(s.rec){
+      f1(11,'800');
+      var ld=c.measureText('Décharge').width;
+      c.fillStyle='#E2E8F0'; fpRect(c,xP,y+45,ld+18,20,10); c.fill();
+      c.fillStyle='#475569'; c.fillText('Décharge',xP+9,y+59);
+    }
+
+    /* « visés » et non « courus » : c'est la charge que le plan prescrit, pas
+       la somme des séances posées. Sans ce mot, l'athlète additionnerait les
+       séances de la ligne et croirait le compte faux. */
+    f1(16,'800'); c.fillStyle='#0F172A';
+    c.fillText(s.km+' km',xK,y+30);
+    f1(11,'600'); c.fillStyle='#94A3B8';
+    c.fillText('visés',xK,y+47);
+
+    /* Le jalon de la semaine, s'il y en a un — calé sous l'identité de la
+       semaine, pas au bas d'une ligne dont la hauteur dépend des séances. */
+    var jalon=s.course?'🏁 Course':(s.inter?'★ Course prépa':'');
+    if(jalon){ f1(11.5,'800'); c.fillStyle=s.course?'#047857':'#B45309';
+               c.fillText(jalon,xS,y+fplBasGauche(s)+16); }
+
+    /* Les séances de la semaine, une par ligne. */
+    var ly=y+14;
+    if(!s.seances.length){
+      f1(13,'600'); c.fillStyle='#94A3B8';
+      c.fillText('Aucune séance posée',xL,ly+17);
+    }
+    s.seances.forEach(function(sx){
+      c.fillStyle=fplTeinte(sx.col,0.11);
+      fpRect(c,xL,ly,xR-xL,FPL_LS-4,6); c.fill();
+      c.fillStyle=sx.col; fpRect(c,xL,ly,3,FPL_LS-4,2); c.fill();
+      f1(12.5,'800'); c.fillStyle='#475569';
+      c.fillText(sx.jour,xL+12,ly+15);
+      f1(11,'700'); c.fillStyle='#64748B';
+      var ld=sx.duree?c.measureText(sx.duree).width:0;
+      if(sx.duree)c.fillText(sx.duree,xR-12-ld,ly+15);
+      f1(13.5,'700'); c.fillStyle='#0F172A';
+      c.fillText(fpCoupe(c,sx.titre,xR-(xL+52)-(ld?ld+22:12)),xL+52,ly+15);
+      ly+=FPL_LS;
+    });
+
+    y+=h;
+  });
+  return cv;
+}
+
+/* Le même plan en texte, pour un message quand l'image n'est pas commode. */
+function fplTexte(d){
+  var L=[d.titre, fplResume(d)];
+  var st=fplSousTitre(d); if(st.length)L.push(st.join('  ·  '));
+  L.push('');
+  d.semaines.forEach(function(s){
+    L.push('S'+s.n+'  '+s.dates+'  —  '+s.phL+'  ·  '+s.km+' km visés'
+           +(s.rec?'  ·  décharge':'')+(s.course?'  ·  COURSE':'')
+           +(s.inter?'  ·  course prépa':''));
+    if(!s.seances.length)L.push('   (aucune séance posée)');
+    s.seances.forEach(function(sx){
+      L.push('   '+sx.jour+'  '+sx.titre+(sx.duree?'  ('+sx.duree+')':''));
+    });
+    L.push('');
+  });
+  return L.join('\n');
+}
+function fplNom(d){
+  return 'plan-'+(d.course?d.course+'-':'')
+        +(d.qui?wktSlug(d.qui)+'-':'')
+        +wktSlug(d.nom||d.discipline||'prepa')+'.png';
+}
+
+function fplOuvrir(){
+  var d=fplDonnees();
+  if(!d){ alert('Renseigne une date de début ou une date de course : sans dates, le plan n’a pas encore de calendrier à mettre sur une fiche.'); return; }
+  rlModalOuvrir('fpl-modal',fplHTML(d));
+  fplDessiner();
+}
+function fplFermer(){ rlModalFermer('fpl-modal'); }
+function fplHTML(d){
+  return '<div class="fp-wrap">'
+    +'<div class="fp-head"><div class="fp-t">Fiche du plan</div>'
+    +'<button type="button" class="fp-x" onclick="fplFermer()" aria-label="Fermer">✕</button></div>'
+    +'<div class="fp-note">Le plan complet en une image : '+esc(fplResume(d))
+    +'. Envoie-la à ton athlète — il l’a sous les yeux sans ouvrir son espace. '
+    +'Elle reflète le calendrier tel qu’il est maintenant ; renvoie-la après chaque retouche.</div>'
+    +'<div class="fp-apercu"><img id="fpl-img" alt="Fiche du plan"></div>'
+    +'<div class="fp-astuce">Sur téléphone, tu peux aussi appuyer longuement sur l’image ci-dessus pour l’enregistrer ou la partager.</div>'
+    +'<div class="fp-actions">'
+    +(fpPeutPartager()
+        ? '<button type="button" class="fp-btn fp-btn--p" onclick="fplPartager()">Envoyer l’image</button>'
+          +'<button type="button" class="fp-btn" onclick="fplTelecharger()">⤓ Enregistrer</button>'
+        : '<button type="button" class="fp-btn fp-btn--p" onclick="fplTelecharger()">⤓ Télécharger l’image</button>')
+    +'<button type="button" class="fp-btn" onclick="fplCopier()">Copier le texte</button>'
+    +'<span class="fp-ok" id="fpl-ok"></span>'
+    +'</div></div>';
+}
+function fplDessiner(){
+  fpLogoPret(function(){
+    var d=fplDonnees(); if(!d)return;
+    var img=document.getElementById('fpl-img'); if(!img)return;
+    img.src=fplImage(d,2).toDataURL('image/png');
+  });
+}
+function fplPartager(){
+  fpLogoPret(function(){
+    var d=fplDonnees(); if(!d)return;
+    fplImage(d,2).toBlob(function(b){
+      if(!b)return;
+      navigator.share({files:[new File([b],fplNom(d),{type:'image/png'})],title:d.titre})
+        .then(function(){ fpDit('Envoyé ✓','fpl-ok'); })
+        .catch(function(e){ if(!e||e.name!=='AbortError') fplTelecharger(); });
+    },'image/png');
+  });
+}
+function fplTelecharger(){
+  fpLogoPret(function(){
+    var d=fplDonnees(); if(!d)return;
+    var nom=fplNom(d);
+    fplImage(d,2).toBlob(function(b){
+      if(!b)return;
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(b); a.download=nom;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+      fpDit('Image enregistrée ✓','fpl-ok');
+    },'image/png');
+  });
+}
+function fplCopier(){
+  var d=fplDonnees(); if(!d)return;
+  var t=fplTexte(d);
+  var fini=function(){fpDit('Texte copié ✓','fpl-ok');};
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(t).then(fini,function(){fpReplique(t,fini);});
+  else fpReplique(t,fini);
 }
 
 /* ══ SÉANCES PERSO — parseur de notation libre ══ */
@@ -11203,7 +11477,11 @@ function plCalendarHTML(p,weeks,opts){
   }).join('');
   var hasOv=(Object.keys(_plVolOverride).length||Object.keys(_plRecOverride).length);
   var nSess=Object.keys(_plSessions).reduce(function(a,k){return a+((_plSessions[k]&&_plSessions[k].length)||0);},0);
-  var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+(RO?'':''
+  var head='<div class="plc-head"><div class="plc-leg">'+leg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'
+    /* La fiche ne modifie rien : elle est à sa place aussi dans la vue en
+       lecture seule du tableau de bord. */
+    +'<button type="button" class="plc-fiche" onclick="fplOuvrir()" title="Le plan complet en une image, à envoyer à l’athlète">↓ Fiche du plan</button>'
+    +(RO?'':''
     +(nSess?'<button type="button" class="plc-send" onclick="wktExportPlan()" title="Télécharger toutes les séances du calendrier au format montre">↓ Séances montre ('+nSess+')</button>':'')
     +(nSess?'<button type="button" class="plc-send" onclick="planifSessionsToNolio()">→ Envoyer vers Nolio ('+nSess+')</button>':'')
     +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':''))+'</div></div>';
