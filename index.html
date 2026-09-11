@@ -7063,18 +7063,18 @@ else rlVersionDemarrer();
    Elle sert aussi d'aide-mémoire tout court : montre non programmable, ou pas
    de montre du tout, et l'athlète lit quand même sa séance phase par phase. */
 
-/* mm/s (l'unité des cibles) → « 3:32 à 3:45/km · 16,0 à 17,0 km/h ».
-   La fourchette garde ses deux bornes : Polar demande une zone, pas un point. */
-function fpAllure(sp){
-  if(!sp||!sp.lo||!sp.hi)return '';
-  var kmh=function(v){return v/1000*3.6;}, sec=function(v){return 1000/(v/1000);};
+/* mm/s → deux colonnes : l'allure et la vitesse, rendues séparément pour que
+   la fiche puisse les aligner chacune dans sa colonne. */
+function fpAllureTxt(sp){
+  if(!sp||!sp.lo||!sp.hi)return null;
+  var sec=function(v){return 1000/(v/1000);}, kmh=function(v){return v/1000*3.6;};
   var a1=fAll(sec(sp.hi)), a2=fAll(sec(sp.lo));          /* hi = le plus rapide */
   var v1=kmh(sp.hi).toFixed(1).replace('.',','), v2=kmh(sp.lo).toFixed(1).replace('.',',');
-  return ((a1===a2)?a1+'/km':a1+' à '+a2+'/km')+'   ·   '+((v1===v2)?v1+' km/h':v2+' à '+v1+' km/h');
+  return { allure:(a1===a2)?a1+'/km':a1+' à '+a2+'/km',
+           vitesse:(v1===v2)?v1+' km/h':v2+' à '+v1+' km/h' };
 }
-/* fHMS() écrit « 0'40" » et « 15'00" » : juste, mais fait pour un tableau de
-   tours, pas pour une fiche qu'on tend à quelqu'un. Ici on écrit comme on
-   parle — 40 s, 15 min, 2'30. */
+/* fHMS() écrit « 0'40" » et « 15'00" » : juste pour un tableau de tours, pas
+   pour une fiche qu'on tend à quelqu'un. Ici on écrit comme on parle. */
 function fpDuree(e){
   if(e.dur==='distance')return fDist(e.val);
   if(e.dur!=='time')return 'libre';
@@ -7083,14 +7083,45 @@ function fpDuree(e){
   if(v%60===0)return (v/60)+' min';
   return Math.floor(v/60)+"'"+String(v%60).padStart(2,'0');
 }
-var FP_INT={warmup:'Échauffement',cooldown:'Retour au calme',recovery:'Récupération',
+var FP_INT={warmup:'Échauffement',cooldown:'Retour au calme',recovery:'Récup',
             rest:'Récup série',interval:'Effort',active:'Effort',other:'Phase'};
+
+/* Un intitulé d'étape qui EST une allure — AS42, VMA+, Seuil, 85 % — se lit
+   mieux en pastille colorée qu'en texte : l'œil retrouve l'intensité d'une
+   ligne à l'autre sans relire. */
+var FP_ALLURE=/^(as\d+\+?|vma\+?|ef|am|seuil|tempo|\d{2,3}\s*%)$/i;
+/* Le pourcentage de VMA que porte un libellé, quand il en porte un. */
+function fpPct(lbl){
+  var t=String(lbl||'').toLowerCase().replace(/\s/g,'');
+  var m=t.match(/^(\d{2,3})%$/); if(m)return +m[1];
+  if(t==='ef')return 65;
+  if(t==='am')return 80;
+  if(t==='seuil'||t==='tempo')return 87;
+  if(t==='vma')return 100;
+  if(t==='vma+')return 105;
+  m=t.match(/^as(\d+)$/);
+  if(m){ var T={3:100,5:95,8:92,10:90,15:87,21:86,30:82,42:80}; return T[+m[1]]!=null?T[+m[1]]:85; }
+  return null;
+}
+/* La couleur suit l'intensité, pas le hasard : une pastille verte est toujours
+   plus lente qu'une marine, qui est toujours plus lente qu'une orange. À
+   défaut de libellé chiffrable, on retombe sur la vitesse rapportée à la VMA. */
+function fpTeinte(lbl,sp,vma){
+  var p=fpPct(lbl);
+  if(p==null&&sp&&sp.hi&&vma)p=Math.round((sp.hi/1000*3.6)/vma*100);
+  if(p==null)return '#475569';
+  if(p<=70)return '#0F766E';
+  if(p<=83)return '#15803D';
+  if(p<=88)return '#1E3A8A';
+  if(p<=96)return '#B45309';
+  if(p<=103)return '#C2410C';
+  return '#9F1239';
+}
 
 /* La liste plate de wktSteps() redevient un arbre. Une étape « repeat » porte
    l'index de la première étape qu'elle répète : tout ce qui a été émis depuis
-   cet index forme le bloc. Les séries s'imbriquent donc d'elles-mêmes —
-   3 × (4 × (effort + récup) + récup série) ressort dans cet ordre. */
-function fpArbre(st){
+   cet index forme le bloc. Les séries s'imbriquent donc d'elles-mêmes. */
+function fpArbre(st,vma){
   var noeuds=[], pos=[];
   st.forEach(function(e,i){
     if(e.dur==='repeat'){
@@ -7102,29 +7133,34 @@ function fpArbre(st){
     }else{
       var nom=e.name||FP_INT[e.int]||'Phase', duree=fpDuree(e);
       /* wktSteps nomme souvent l'étape par sa durée ou sa distance, faute de
-         libellé : « 400 m — 400 m », « Échauffement 15 min — 15 min ». La
-         colonne de droite le dit déjà — on retire la redite plutôt que de la
-         faire lire deux fois. */
+         libellé : « 400 m — 400 m ». La colonne voisine le dit déjà. */
       var fin=nom.length-duree.length;
       if(fin>0&&nom.slice(fin)===duree)nom=nom.slice(0,fin).trim();
       if(!nom||nom===duree)nom=FP_INT[e.int]||'Phase';
-      noeuds.push({type:'etape',nom:nom,role:FP_INT[e.int]||'Phase',
-                   duree:duree,allure:fpAllure(e.sp)});
+      var pastille=FP_ALLURE.test(nom)?nom.toUpperCase().replace(/\s/g,''):null;
+      noeuds.push({type:'etape',nom:nom,pastille:pastille,
+                   teinte:pastille?fpTeinte(nom,e.sp,vma):null,
+                   duree:duree,vit:fpAllureTxt(e.sp)});
       pos[i]=noeuds.length-1;
     }
   });
   return noeuds;
 }
-/* L'arbre en lignes à dessiner, chacune avec sa profondeur. */
+/* L'arbre en lignes à dessiner. Un bloc ouvre une ligne « × n » et referme
+   ses enfants : la barre orange les relie. */
 function fpLignes(noeuds,prof){
   prof=prof||0;
   var out=[];
   (noeuds||[]).forEach(function(n){
     if(n.type==='bloc'){
-      out.push({bloc:true,titre:'× '+n.count,prof:prof});
-      out.push.apply(out,fpLignes(n.enfants,prof+1));
+      var enfants=fpLignes(n.enfants,prof+1);
+      var resume=n.enfants.filter(function(e){return e.type==='etape'&&e.pastille;})
+                          .map(function(e){return e.duree+' '+e.pastille;}).join(' / ');
+      out.push({bloc:true,count:n.count,resume:resume,prof:prof,nbEnfants:enfants.length});
+      out.push.apply(out,enfants);
     }else{
-      out.push({nom:n.nom,role:n.role,duree:n.duree,allure:n.allure,prof:prof});
+      out.push({nom:n.nom,pastille:n.pastille,teinte:n.teinte,
+                duree:n.duree,vit:n.vit,prof:prof});
     }
   });
   return out;
@@ -7132,83 +7168,196 @@ function fpLignes(noeuds,prof){
 function fpSeance(kind,idx){
   var s=libFindSession(kind,idx); if(!s)return null;
   if(s.muscu)return null;
-  var vm=wktVma();
-  return {s:s, vma:vm?vm.v:null, qui:(vm&&vm.who)||'',
-          lignes:fpLignes(fpArbre(wktSteps(s,vm?vm.v:null)))};
+  var vm=wktVma(), v=vm?vm.v:null;
+  return {s:s, vma:v, qui:(vm&&vm.who)||'',
+          lignes:fpLignes(fpArbre(wktSteps(s,v),v))};
 }
 
-/* La fiche en texte — pour un copier-coller dans un message, quand l'image
-   n'est pas pratique. */
+/* La même fiche en texte, pour un copier-coller dans un message quand
+   l'image n'est pas commode. */
 function fpTexte(f){
   var L=[f.s.title||'Séance'];
-  if(f.qui)L.push('Pour : '+f.qui);
-  if(f.vma)L.push('Référence : VMA '+String(f.vma).replace('.',',')+' km/h');
+  var d=String((f.s&&f.s.desc)||'').trim(); if(d)L.push(d);
+  var st=[]; if(f.qui)st.push(f.qui);
+  if(f.vma)st.push('VMA '+String(f.vma).replace('.',',')+' km/h');
+  if(st.length)L.push(st.join('  ·  '));
   L.push('');
   f.lignes.forEach(function(l){
     var ind=new Array(l.prof+1).join('   ');
-    if(l.bloc){ L.push(ind+'┌ '+l.titre); return; }
-    L.push(ind+'• '+l.nom+' — '+l.duree+(l.allure?'  ('+l.allure+')':''));
+    if(l.bloc){ L.push(ind+'× '+l.count+(l.resume?'  ('+l.resume+')':'')); return; }
+    L.push(ind+'• '+(l.pastille||l.nom)+' — '+l.duree
+             +(l.vit?'  ('+l.vit.allure+'  ·  '+l.vit.vitesse+')':''));
   });
   return L.join('\n');
 }
 
-/* Le dessin. Un canevas plutôt qu'une capture d'écran : la fiche sort à la
-   même taille sur tous les appareils, et se lit sur un téléphone. Fond clair
-   à dessein — elle est faite pour être envoyée et imprimée, pas pour être
-   regardée dans l'outil. */
-function fpImage(f,ech){
-  ech=ech||2;
-  var W=900, PAD=44, LH=46, x2=function(v){return Math.round(v*ech);};
-  var hautEntete=f.vma||f.qui?168:132;
-  var H=hautEntete+f.lignes.length*LH+PAD;
+/* ══ LE DESSIN ══
+   Un canevas plutôt qu'une capture : la fiche sort à la même taille partout et
+   se lit sur un téléphone. Trois colonnes, comme sur le modèle — ce que c'est,
+   combien, à quelle allure — séparées par un filet, et la carte blanche posée
+   sur le marine de la marque. */
+var FP_W=1000, FP_PAD=30, FP_LH=52, FP_LHB=44;
+var FP_COL={nom:52, duree:378, filet:524, allure:552, vitesse:772};
+var FP_POLICE='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
 
-  var cv=document.createElement('canvas');
-  cv.width=x2(W); cv.height=x2(H);
-  var c=cv.getContext('2d');
-  c.scale(ech,ech);
-  var POLICE='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
-  var f1=function(t,p){c.font=(p||'')+' '+t+'px '+POLICE;};
-
-  c.fillStyle='#FFFFFF'; c.fillRect(0,0,W,H);
-  c.fillStyle='#0F1729'; c.fillRect(0,0,W,hautEntete);
-  c.fillStyle='#FF6B35'; c.fillRect(0,hautEntete-5,W,5);
-
-  f1(31,'800'); c.fillStyle='#FFFFFF';
-  c.fillText(fpCoupe(c,f.s.title||'Séance',W-PAD*2),PAD,68);
-  f1(15,'600'); c.fillStyle='rgba(255,255,255,0.62)';
-  var sous=[];
-  if(f.qui)sous.push(f.qui);
-  if(f.vma)sous.push('VMA '+String(f.vma).replace('.',',')+' km/h');
-  if(sous.length)c.fillText(sous.join('   ·   '),PAD,102);
-  f1(12.5,'700'); c.fillStyle='#FF6B35';
-  c.fillText('REDING RUNNING',PAD,hautEntete-26);
-
-  var y=hautEntete+34;
-  f.lignes.forEach(function(l){
-    var dx=PAD+l.prof*26;
-    if(l.prof>0){ c.fillStyle='rgba(255,107,53,0.28)'; c.fillRect(PAD+(l.prof-1)*26+9,y-26,3,LH); }
-    if(l.bloc){
-      f1(15,'800'); c.fillStyle='#FF6B35';
-      c.fillText(l.titre,dx,y);
-    }else{
-      f1(17,'700'); c.fillStyle='#0F1729';
-      c.fillText(fpCoupe(c,l.nom,330-l.prof*26),dx,y);
-      f1(17,'800'); c.fillStyle='#0F1729';
-      c.fillText(l.duree,PAD+360,y);
-      if(l.allure){ f1(14.5,'600'); c.fillStyle='#6B7280';
-        c.fillText(l.allure,PAD+492,y); }
-    }
-    y+=LH;
-  });
-
-  return cv;
+function fpRect(c,x,y,w,h,r){
+  r=Math.min(r,h/2,w/2);
+  c.beginPath();
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
 }
-/* Coupe un texte trop long pour sa colonne, avec un vrai caractère d'ellipse. */
 function fpCoupe(c,t,max){
   t=String(t==null?'':t);
   if(c.measureText(t).width<=max)return t;
   while(t.length>1&&c.measureText(t+'…').width>max)t=t.slice(0,-1);
   return t+'…';
+}
+/* Les courbes de niveau du fond : un rappel discret de l'identité, dessiné
+   plutôt qu'importé — aucune image à charger, net à toutes les tailles. */
+function fpRelief(c,x,y){
+  c.save(); c.strokeStyle='rgba(255,255,255,0.055)'; c.lineWidth=1.6;
+  for(var i=0;i<7;i++){
+    var r=46+i*27;
+    c.beginPath();
+    c.ellipse(x,y,r*1.35,r,-0.35,0,Math.PI*2);
+    c.stroke();
+  }
+  c.restore();
+}
+
+function fpImage(f,ech){
+  ech=ech||2;
+  var desc=String((f.s&&f.s.desc)||'').trim();
+  var sousT=[]; if(f.qui)sousT.push(f.qui);
+  if(f.vma)sousT.push('VMA '+String(f.vma).replace('.',',')+' km/h');
+
+  /* Le cadre du titre mesure 58 px ; la structure n'ajoute une ligne que si
+     elle n'a pas tenu à côté du titre — estimé ici, confirmé au tracé. */
+  var titreLong=String((f.s&&f.s.title)||'').length*19 + (desc?desc.length*8:0);
+  var hTitre=96 + ((desc && titreLong>FP_W-120)?42:0) + (sousT.length?26:0) + 26;
+  var hEntete=26+hTitre;
+  var hCarte=22;
+  f.lignes.forEach(function(l){ hCarte+=l.bloc?FP_LHB:FP_LH; });
+  hCarte+=22;
+  var H=hEntete+hCarte+FP_PAD;
+
+  var cv=document.createElement('canvas');
+  cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
+  var c=cv.getContext('2d'); c.scale(ech,ech);
+  var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
+
+  /* Fond marine, et le relief en haut à droite. */
+  c.fillStyle='#0B1220'; c.fillRect(0,0,FP_W,H);
+  fpRelief(c,FP_W-118,hEntete*0.46);
+
+  /* Le titre et la structure partagent un cadre, séparés d'un filet — la
+     séance et son résumé se lisent d'un seul regard. Quand la largeur ne
+     suffit pas, la structure repasse dessous dans son propre cadre plutôt
+     que d'être rognée. */
+  var x0=FP_PAD+8, maxX=FP_W-FP_PAD-14, y=FP_PAD+46;
+  var mots=String(f.s.title||'Séance').split(/\s+/);
+  f1(38,'800');
+  var lTitre=0; mots.forEach(function(m){ lTitre+=c.measureText(m+' ').width; });
+  lTitre-=c.measureText(' ').width;
+  f1(15,'600');
+  var lDesc=desc?c.measureText(desc).width:0;
+  var ensemble=desc && (x0+22+lTitre+26+lDesc+22 <= maxX);
+
+  var hCadre=58, yc=y-40;
+  var lCadre=22+lTitre+22+(ensemble?(4+26+lDesc+22):0);
+  c.strokeStyle='rgba(255,255,255,0.3)'; c.lineWidth=1.6;
+  fpRect(c,x0,yc,Math.min(lCadre,maxX-x0),hCadre,12); c.stroke();
+
+  /* Ce qui ressemble à une allure passe en orange : on lit la nature de la
+     séance avant d'avoir lu la phrase. */
+  f1(38,'800');
+  var x=x0+22;
+  mots.forEach(function(m){
+    var l=c.measureText(m+' ').width;
+    if(x+l>maxX-14)return;
+    c.fillStyle=FP_ALLURE.test(m.replace(/[^\w+%]/g,''))?'#FF6B35':'#FFFFFF';
+    c.fillText(m,x,y); x+=l;
+  });
+  if(ensemble){
+    var xs=x0+22+lTitre+22;
+    c.strokeStyle='rgba(255,255,255,0.28)'; c.lineWidth=1.4;
+    c.beginPath(); c.moveTo(xs,yc+13); c.lineTo(xs,yc+hCadre-13); c.stroke();
+    f1(15,'600'); c.fillStyle='rgba(255,255,255,0.92)';
+    c.fillText(desc,xs+26,y-4);
+  }
+  /* Le cadre descend jusqu'à y+18 : la ligne suivante doit partir plus bas,
+     sinon « VMA 16 km/h » vient toucher sa bordure. */
+  y+=48;
+  if(desc&&!ensemble){
+    f1(15,'600');
+    var t=fpCoupe(c,desc,maxX-x0-40);
+    c.strokeStyle='rgba(255,255,255,0.26)'; c.lineWidth=1.4;
+    fpRect(c,x0,y-8,c.measureText(t).width+26,32,8); c.stroke();
+    c.fillStyle='rgba(255,255,255,0.9)'; c.fillText(t,x0+13,y+13);
+    y+=42;
+  }
+  if(sousT.length){
+    f1(14.5,'600'); c.fillStyle='rgba(255,255,255,0.55)';
+    c.fillText(sousT.join('   ·   '),FP_PAD+8,y); y+=26;
+  }
+  f1(11.5,'800'); c.fillStyle='#FF6B35';
+  c.save(); c.letterSpacing='1.6px';
+  c.fillText('REDING RUNNING',FP_PAD+8,y); c.restore();
+
+  /* La carte blanche. */
+  var cx=FP_PAD, cy=hEntete, cw=FP_W-FP_PAD*2;
+  c.fillStyle='#FFFFFF'; fpRect(c,cx,cy,cw,hCarte,16); c.fill();
+
+  var ly=cy+22, i;
+  for(i=0;i<f.lignes.length;i++){
+    var l=f.lignes[i], h=l.bloc?FP_LHB:FP_LH, dx=cx+FP_COL.nom+l.prof*34;
+
+    /* La barre orange du bloc, du « × n » à sa dernière étape. */
+    if(l.bloc){
+      var hb=h; for(var k=1;k<=l.nbEnfants;k++)hb+=f.lignes[i+k].bloc?FP_LHB:FP_LH;
+      c.fillStyle=l.prof?'rgba(255,107,53,0.42)':'#FF6B35';
+      fpRect(c,dx-14,ly+8,4,hb-16,2); c.fill();
+      f1(21,'800'); c.fillStyle='#FF6B35';
+      c.fillText('× '+l.count,dx+14,ly+h/2+7);
+      if(l.resume){
+        f1(13.5,'600'); c.fillStyle='#94A3B8';
+        var lx=dx+14; f1(21,'800'); lx+=c.measureText('× '+l.count).width+18;
+        f1(13.5,'600');
+        c.fillText(fpCoupe(c,'('+l.resume+')',cx+FP_COL.filet-lx-24),lx,ly+h/2+5);
+      }
+      ly+=h; continue;
+    }
+
+    /* Les étapes d'un bloc reposent sur un fond très clair : on voit d'un
+       coup d'œil ce qui se répète. */
+    if(l.prof>0){ c.fillStyle='#F1F5F9'; fpRect(c,dx-14,ly+4,cw-(dx-cx)-24,h-8,8); c.fill(); }
+    else if(i){ c.strokeStyle='#E2E8F0'; c.lineWidth=1;
+                c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke(); }
+
+    if(l.pastille){
+      f1(15,'800');
+      var pw=c.measureText(l.pastille).width+26;
+      c.fillStyle=l.teinte; fpRect(c,dx,ly+h/2-15,pw,30,7); c.fill();
+      c.fillStyle='#FFFFFF'; c.fillText(l.pastille,dx+13,ly+h/2+6);
+    }else{
+      f1(18,'700'); c.fillStyle='#0F172A';
+      c.fillText(fpCoupe(c,l.nom,FP_COL.duree-FP_COL.nom-24),dx,ly+h/2+6);
+    }
+
+    f1(21,'800'); c.fillStyle='#0F172A';
+    c.fillText(l.duree,cx+FP_COL.duree,ly+h/2+7);
+
+    if(l.vit){
+      c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
+      c.beginPath(); c.moveTo(cx+FP_COL.filet,ly+13); c.lineTo(cx+FP_COL.filet,ly+h-13); c.stroke();
+      f1(16.5,'700'); c.fillStyle='#334155';
+      c.fillText(l.vit.allure,cx+FP_COL.allure,ly+h/2+6);
+      f1(15,'600'); c.fillStyle='#94A3B8';
+      c.fillText(l.vit.vitesse,cx+FP_COL.vitesse,ly+h/2+6);
+    }
+    ly+=h;
+  }
+  return cv;
 }
 
 var _fpCle=null;
@@ -8651,13 +8800,6 @@ function openNolioDeploy(){
     .then(function(){ window.open('http://localhost:8730/','_blank'); })
     .catch(function(){ alert("L'outil Nolio n'est pas lancé. Ouvre le dossier nolio-deploy et lance « node server.js », puis réessaie."); });
 }
-function exportNolioJSON(){
-  var data=libExportData();
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='redlab_seances_nolio.json';
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-}
 
 function renderLibrary(){
   const wrap=document.getElementById('library-wrap');if(!wrap)return;
@@ -8671,13 +8813,11 @@ function renderLibrary(){
       '<div class="lib-actions">'+
         '<button class="lib-create-btn" onclick="toggleLibCreate(false)">+ Créer une séance</button>'+
         '<button class="lib-create-btn" onclick="toggleLibCreate(true)" title="Exercices, séries, répétitions, charge et vidéo de démonstration">+ Séance de musculation</button>'+
-        /* Ces deux-là parlent à nolio-deploy, qui tourne sur l'ordinateur du
-           coach : « Déployer » appelle http://localhost:8730, et le JSON
-           n'a de sens que déposé dans nolio-deploy/data/. Sur un téléphone
-           ils ne peuvent rien faire — ils sont masqués, pas retirés. */
-        '<button class="lib-create-btn lib-btn--pc" onclick="exportNolioJSON()" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.1);color:#60A5FA" title="Enregistre toute la bibliothèque en JSON — à déposer dans nolio-deploy/data/workouts.json, ou à garder comme sauvegarde">⬇ Exporter (JSON)</button>'+
+        /* Celui-ci parle à nolio-deploy, qui tourne sur l'ordinateur du coach :
+           il appelle http://localhost:8730. Sur un téléphone il ne peut rien
+           faire — il est masqué, pas retiré. */
         '<button class="lib-create-btn lib-btn--pc" onclick="openNolioDeploy()" style="border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34D399" title="Lance d\'abord node server.js dans le dossier nolio-deploy">→ Déployer vers Nolio</button>'+
-        '<div class="lib-actions-pc">Export JSON et déploiement Nolio : sur ordinateur.</div>'+
+        '<div class="lib-actions-pc">Déploiement vers Nolio : sur ordinateur.</div>'+
       '</div>'+
     '</div>'+
     rlLexique([['ef','Base aérobie'],['seuil','Seuil'],['vo2','VO₂max'],
