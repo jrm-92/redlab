@@ -888,6 +888,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fp-btn{background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;border-radius:9px;padding:9px 13px;cursor:pointer}
   .fp-btn:hover{border-color:var(--orange)}
   .fp-btn--p{background:var(--orange);border-color:var(--orange);color:#fff}
+  .fp-date{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .fp-date label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
+  .fp-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;
+    color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;padding:8px 11px;outline:none}
+  .fp-date input:focus{border-color:var(--orange)}
+  .fp-date-x{background:none;border:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:4px 6px}
+  .fp-date-x:hover{color:var(--orange)}
   .fp-astuce{font-size:11.5px;color:var(--muted2);margin-top:7px;line-height:1.45}
   .fp-ok{font-size:12.5px;font-weight:700;color:#34D399}
   @media (max-width:560px){ .fp-actions .fp-btn{flex:1} }
@@ -7169,7 +7176,7 @@ function fpSeance(kind,idx){
   var s=libFindSession(kind,idx); if(!s)return null;
   if(s.muscu)return null;
   var vm=wktVma(), v=vm?vm.v:null;
-  return {s:s, vma:v, qui:(vm&&vm.who)||'',
+  return {s:s, vma:v, qui:(vm&&vm.who)||'', date:_fpDate,
           lignes:fpLignes(fpArbre(wktSteps(s,v),v))};
 }
 
@@ -7178,7 +7185,9 @@ function fpSeance(kind,idx){
 function fpTexte(f){
   var L=[f.s.title||'Séance'];
   var d=String((f.s&&f.s.desc)||'').trim(); if(d)L.push(d);
-  var st=[]; if(f.qui)st.push(f.qui);
+  var st=[];
+  var j=fpDateLisible(f.date); if(j)st.push(j);
+  if(f.qui)st.push(f.qui);
   if(f.vma)st.push('VMA '+String(f.vma).replace('.',',')+' km/h');
   if(st.length)L.push(st.join('  ·  '));
   L.push('');
@@ -7199,6 +7208,18 @@ function fpTexte(f){
 var FP_W=1000, FP_PAD=30, FP_LH=52, FP_LHB=44;
 var FP_COL={nom:52, duree:378, filet:524, allure:552, vitesse:772};
 var FP_POLICE='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+var _fpLogo=new Image();
+_fpLogo.src='logo_fiche.png';
+/* Le dessin est synchrone, le chargement ne l'est pas : on attend le logo
+   avant de tracer, sinon la première fiche de la session sortirait sans lui.
+   Un échec de chargement n'empêche rien — on retombe sur le texte. */
+function fpLogoPret(cb){
+  if(_fpLogo.complete){cb();return;}
+  var fait=false, fini=function(){ if(fait)return; fait=true; cb(); };
+  _fpLogo.addEventListener('load',fini,{once:true});
+  _fpLogo.addEventListener('error',fini,{once:true});
+  setTimeout(fini,2500);
+}
 
 function fpRect(c,x,y,w,h,r){
   r=Math.min(r,h/2,w/2);
@@ -7228,13 +7249,17 @@ function fpRelief(c,x,y){
 function fpImage(f,ech){
   ech=ech||2;
   var desc=String((f.s&&f.s.desc)||'').trim();
-  var sousT=[]; if(f.qui)sousT.push(f.qui);
+  var sousT=[];
+  var jour=fpDateLisible(f.date); if(jour)sousT.push(jour);
+  if(f.qui)sousT.push(f.qui);
   if(f.vma)sousT.push('VMA '+String(f.vma).replace('.',',')+' km/h');
 
   /* Le cadre du titre mesure 58 px ; la structure n'ajoute une ligne que si
      elle n'a pas tenu à côté du titre — estimé ici, confirmé au tracé. */
   var titreLong=String((f.s&&f.s.title)||'').length*19 + (desc?desc.length*8:0);
-  var hTitre=96 + ((desc && titreLong>FP_W-120)?42:0) + (sousT.length?26:0) + 26;
+  /* 96 : le cadre du titre et son dégagement. Puis la structure si elle n'a
+     pas tenu à côté du titre, la ligne athlète/VMA, et les 46 px du logo. */
+  var hTitre=96 + ((desc&&titreLong>FP_W-120)?42:0) + (sousT.length?16:0) + 46 + 22;
   var hEntete=26+hTitre;
   var hCarte=22;
   f.lignes.forEach(function(l){ hCarte+=l.bloc?FP_LHB:FP_LH; });
@@ -7298,11 +7323,21 @@ function fpImage(f,ech){
   }
   if(sousT.length){
     f1(14.5,'600'); c.fillStyle='rgba(255,255,255,0.55)';
-    c.fillText(sousT.join('   ·   '),FP_PAD+8,y); y+=26;
+    c.fillText(sousT.join('   ·   '),x0,y);
+    y+=16;                    /* y cesse d'être une ligne de base : il devient
+                                 le HAUT de la signature. Confondre les deux
+                                 faisait chevaucher le logo et cette ligne. */
+  }else{ y-=22; }
+  /* La signature : le logo s'il est chargé, le texte sinon. On ne laisse
+     jamais un blanc à la place. */
+  if(_fpLogo.complete&&_fpLogo.naturalWidth){
+    var lh=46, lw=Math.round(lh*_fpLogo.naturalWidth/_fpLogo.naturalHeight);
+    c.drawImage(_fpLogo,x0,y,lw,lh);
+  }else{
+    f1(11.5,'800'); c.fillStyle='#FF6B35';
+    c.save(); c.letterSpacing='1.6px';
+    c.fillText('REDING RUNNING',x0,y+30); c.restore();
   }
-  f1(11.5,'800'); c.fillStyle='#FF6B35';
-  c.save(); c.letterSpacing='1.6px';
-  c.fillText('REDING RUNNING',FP_PAD+8,y); c.restore();
 
   /* La carte blanche. */
   var cx=FP_PAD, cy=hEntete, cw=FP_W-FP_PAD*2;
@@ -7361,6 +7396,24 @@ function fpImage(f,ech){
 }
 
 var _fpCle=null;
+/* La date reste d'une fiche à l'autre : on prépare souvent plusieurs séances
+   pour un même jour, et la resaisir chaque fois découragerait de l'utiliser.
+   Vide par défaut — une date inventée sur une fiche vaut moins que pas de
+   date du tout. */
+var _fpDate='';
+function fpDateLisible(iso){
+  if(!iso)return '';
+  var d=new Date(iso+'T12:00:00');
+  if(isNaN(d))return '';
+  var t=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+function fpDateSet(v){
+  _fpDate=String(v||'');
+  var champ=document.getElementById('fp-jour'); if(champ)champ.value=_fpDate;
+  var croix=document.getElementById('fp-date-x'); if(croix)croix.hidden=!_fpDate;
+  fpDessiner();
+}
 function fpOuvrir(kind,idx){
   var f=fpSeance(kind,idx);
   if(!f){ alert('La fiche décrit des phases de course : elle ne s’applique pas à une séance de musculation.'); return; }
@@ -7378,6 +7431,10 @@ function fpHTML(f){
     +'<div class="fp-note">Polar Flow n’importe aucun fichier de séance — ni .FIT ni .TCX. '
     +'Son import « TCX ou GPX » est celui des <b>parcours</b>. Envoie cette fiche à ton athlète : '
     +'il la recopie une fois en <b>cible d’entraînement par phases</b>, et sa montre la suit.</div>'
+    +'<div class="fp-date"><label for="fp-jour">Date de la séance</label>'
+    +'<input type="date" id="fp-jour" value="'+esc(_fpDate)+'" onchange="fpDateSet(this.value)">'
+    +'<button type="button" class="fp-date-x" id="fp-date-x" onclick="fpDateSet(\'\')" title="Retirer la date"'+(_fpDate?'':' hidden')+'>✕</button>'
+    +'</div>'
     +'<div class="fp-apercu"><img id="fp-img" alt="Fiche de la séance"></div>'
     +'<div class="fp-astuce">Sur téléphone, tu peux aussi appuyer longuement sur l’image ci-dessus pour l’enregistrer ou la partager.</div>'
     +'<div class="fp-actions">'
@@ -7390,9 +7447,11 @@ function fpHTML(f){
     +'</div></div>';
 }
 function fpDessiner(){
-  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
-  var img=document.getElementById('fp-img'); if(!img)return;
-  img.src=fpImage(f,2).toDataURL('image/png');
+  fpLogoPret(function(){
+    var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+    var img=document.getElementById('fp-img'); if(!img)return;
+    img.src=fpImage(f,2).toDataURL('image/png');
+  });
 }
 /* Le partage natif — le bon geste sur un téléphone. Il ouvre la feuille de
    partage du système (WhatsApp, Messages, Mail) avec l'image en pièce jointe,
@@ -7407,30 +7466,37 @@ function fpPeutPartager(){
 /* « fiche- » en tête : sans ce préfixe le PNG et le .fit portaient le même nom
    de séance et se ressemblaient dans le dossier de téléchargements. */
 function fpNom(f){
-  return 'fiche-'+((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
+  /* La date en tête : les fiches d'un même athlète se rangent alors dans
+     l'ordre chronologique, sans rien trier. */
+  return 'fiche-'+(f.date?f.date+'-':'')
+        +((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
 }
 function fpPartager(){
-  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
-  fpImage(f,2).toBlob(function(b){
-    if(!b)return;
-    navigator.share({files:[new File([b],fpNom(f),{type:'image/png'})],title:f.s.title||'Séance'})
-      .then(function(){ fpDit('Envoyé ✓'); })
-      /* Refus de l'utilisateur : on ne fait rien. Vrai échec : on retombe
-         sur le téléchargement plutôt que de le laisser sans rien. */
-      .catch(function(e){ if(!e||e.name!=='AbortError') fpTelecharger(); });
-  },'image/png');
+  fpLogoPret(function(){
+    var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+    fpImage(f,2).toBlob(function(b){
+      if(!b)return;
+      navigator.share({files:[new File([b],fpNom(f),{type:'image/png'})],title:f.s.title||'Séance'})
+        .then(function(){ fpDit('Envoyé ✓'); })
+        /* Refus de l'utilisateur : on ne fait rien. Vrai échec : on retombe
+           sur le téléchargement plutôt que de le laisser sans rien. */
+        .catch(function(e){ if(!e||e.name!=='AbortError') fpTelecharger(); });
+    },'image/png');
+  });
 }
 function fpTelecharger(){
-  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
-  var nom=fpNom(f);
-  fpImage(f,2).toBlob(function(b){
-    if(!b)return;
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(b); a.download=nom;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
-    fpDit('Image enregistrée ✓');
-  },'image/png');
+  fpLogoPret(function(){
+    var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+    var nom=fpNom(f);
+    fpImage(f,2).toBlob(function(b){
+      if(!b)return;
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(b); a.download=nom;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+      fpDit('Image enregistrée ✓');
+    },'image/png');
+  });
 }
 function fpCopier(){
   var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
