@@ -3,6 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Politique de sécurité du contenu.
+     Elle n'empêche pas une injection : « unsafe-inline » est indispensable
+     tant que la page porte ses 302 gestionnaires on...= en attribut. Ce
+     qu'elle empêche, c'est la SUITE d'une injection — charger un script
+     depuis un domaine tiers, et surtout exfiltrer quoi que ce soit :
+     connect-src est la liste close des destinations autorisées.
+     Deux points à ne pas casser :
+       · http://localhost:8730 est le pont nolio-deploy, en clair par
+         nature (c'est la machine du coach). D'où l'absence de
+         « upgrade-insecure-requests », qui le passerait en https et le
+         romprait en silence.
+       · frame-src 'self' : le Dashboard affiche espace.html en cadre.
+     Toute nouvelle origine appelée par le code doit être ajoutée ici,
+     sinon l'appel échoue sans message visible. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://reding-running.fr https://*.basemaps.cartocdn.com; connect-src 'self' https://lacvhcuqkzsrojgcsjfj.supabase.co https://eutils.ncbi.nlm.nih.gov https://api.mymemory.translated.net http://localhost:8730; frame-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <meta name="theme-color" content="#0F1729">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -10826,7 +10841,6 @@ function plRenfoHTML(){
 
 /* ══ VEILLE PUBMED LIVE — API NCBI E-utilities + traduction FR ══ */
 const PUBMED_TERM='(running[tiab] OR runners[tiab] OR marathon[tiab] OR "half marathon"[tiab] OR "10 km"[tiab] OR "5 km"[tiab] OR "endurance training"[tiab]) AND (VO2max[tiab] OR "critical speed"[tiab] OR "critical power"[tiab] OR "lactate threshold"[tiab] OR "running economy"[tiab] OR periodization[tiab] OR "interval training"[tiab] OR "training load"[tiab] OR tapering[tiab] OR "durability"[tiab])';
-function plEsc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 function pubmedSearchURL(){return 'https://pubmed.ncbi.nlm.nih.gov/?sort=date&term='+encodeURIComponent(PUBMED_TERM);}
 async function plTranslateFR(t){
   try{
@@ -10859,14 +10873,16 @@ async function fetchPubmedLive(){
     const items=R.uids.map(function(id){
       const a=R[id]||{}; const au=(a.authors||[]).map(function(x){return x.name;});
       const authors=au.slice(0,3).join(', ')+(au.length>3?' et al.':'');
-      return {id:id, title:a.title||'(sans titre)', meta:[authors,a.fulljournalname||a.source||'',a.pubdate||''].filter(Boolean).map(plEsc).join(' · ')};
+      return {id:id, title:a.title||'(sans titre)', meta:[authors,a.fulljournalname||a.source||'',a.pubdate||''].filter(Boolean).map(function(x){return esc(x);}).join(' · ')};
     });
     function render(map){
       box.innerHTML=items.map(function(it){
         const fr=map&&map[it.id];
-        const titleTop=fr?plEsc(fr):plEsc(it.title);
-        const orig=fr?('<div class="pl-live-orig">'+plEsc(it.title)+'</div>'):'';
-        return '<a class="pl-live-item" href="https://pubmed.ncbi.nlm.nih.gov/'+it.id+'/" target="_blank" rel="noopener">'
+        const titleTop=fr?esc(fr):esc(it.title);
+        const orig=fr?('<div class="pl-live-orig">'+esc(it.title)+'</div>'):'';
+        /* it.id vient de l'API NCBI : c'est une donnée tierce, elle
+           s'échappe comme le reste avant d'entrer dans un attribut. */
+        return '<a class="pl-live-item" href="https://pubmed.ncbi.nlm.nih.gov/'+esc(it.id)+'/" target="_blank" rel="noopener">'
           +'<div class="pl-live-title">'+titleTop+'</div>'+orig
           +'<div class="pl-live-meta">'+it.meta+'</div></a>';
       }).join('');
