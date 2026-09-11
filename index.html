@@ -866,6 +866,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fp-btn{background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;border-radius:9px;padding:9px 13px;cursor:pointer}
   .fp-btn:hover{border-color:var(--orange)}
   .fp-btn--p{background:var(--orange);border-color:var(--orange);color:#fff}
+  .fp-astuce{font-size:11.5px;color:var(--muted2);margin-top:7px;line-height:1.45}
   .fp-ok{font-size:12.5px;font-weight:700;color:#34D399}
   @media (max-width:560px){ .fp-actions .fp-btn{flex:1} }
   .pl-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:520px;width:100%;padding:18px;max-height:82vh;display:flex;flex-direction:column}
@@ -6946,6 +6947,10 @@ function wktExport(kind,idx){
    recopie une fois. Ce n'est pas automatique, et ça ne peut pas l'être — mais
    c'est la différence entre « débrouille-toi » et « tape ça ».
 
+   L'image ne porte AUCUNE consigne Polar : elle part à l'athlète, qui n'a que
+   faire du mode d'emploi du coach. Le chemin « Favoris → + Cible
+   d'entraînement → Par phases » reste dans la modale, côté RedLab.
+
    Elle sert aussi d'aide-mémoire tout court : montre non programmable, ou pas
    de montre du tout, et l'athlète lit quand même sa séance phase par phase. */
 
@@ -7035,11 +7040,6 @@ function fpTexte(f){
     if(l.bloc){ L.push(ind+'┌ '+l.titre); return; }
     L.push(ind+'• '+l.nom+' — '+l.duree+(l.allure?'  ('+l.allure+')':''));
   });
-  L.push('');
-  L.push('Polar Flow : Favoris → + Cible d’entraînement → Par phases.');
-  L.push('Une phase par ligne, dans cet ordre. Coche « démarrer la phase');
-  L.push('suivante automatiquement », et groupe les blocs « × n » avec');
-  L.push('« Répéter des phases ».');
   return L.join('\n');
 }
 
@@ -7051,8 +7051,7 @@ function fpImage(f,ech){
   ech=ech||2;
   var W=900, PAD=44, LH=46, x2=function(v){return Math.round(v*ech);};
   var hautEntete=f.vma||f.qui?168:132;
-  var hautPied=104;
-  var H=hautEntete+f.lignes.length*LH+PAD+hautPied;
+  var H=hautEntete+f.lignes.length*LH+PAD;
 
   var cv=document.createElement('canvas');
   cv.width=x2(W); cv.height=x2(H);
@@ -7093,14 +7092,6 @@ function fpImage(f,ech){
     y+=LH;
   });
 
-  var yp=H-hautPied;
-  c.fillStyle='#F3F4F6'; c.fillRect(0,yp,W,hautPied);
-  c.fillStyle='#FF6B35'; c.fillRect(0,yp,W,3);
-  f1(14,'800'); c.fillStyle='#0F1729';
-  c.fillText('Polar Flow : Favoris → + Cible d’entraînement → Par phases',PAD,yp+36);
-  f1(13,'500'); c.fillStyle='#6B7280';
-  c.fillText('Une phase par ligne, dans cet ordre. Coche « démarrer la phase suivante automatiquement »,',PAD,yp+60);
-  c.fillText('et groupe les blocs « × n » avec « Répéter des phases ». Puis synchronise la montre.',PAD,yp+80);
   return cv;
 }
 /* Coupe un texte trop long pour sa colonne, avec un vrai caractère d'ellipse. */
@@ -7130,8 +7121,12 @@ function fpHTML(f){
     +'Son import « TCX ou GPX » est celui des <b>parcours</b>. Envoie cette fiche à ton athlète : '
     +'il la recopie une fois en <b>cible d’entraînement par phases</b>, et sa montre la suit.</div>'
     +'<div class="fp-apercu"><img id="fp-img" alt="Fiche de la séance"></div>'
+    +'<div class="fp-astuce">Sur téléphone, tu peux aussi appuyer longuement sur l’image ci-dessus pour l’enregistrer ou la partager.</div>'
     +'<div class="fp-actions">'
-    +'<button type="button" class="fp-btn fp-btn--p" onclick="fpTelecharger()">⤓ Télécharger l’image</button>'
+    +(fpPeutPartager()
+        ? '<button type="button" class="fp-btn fp-btn--p" onclick="fpPartager()">Envoyer l’image</button>'
+          +'<button type="button" class="fp-btn" onclick="fpTelecharger()">⤓ Enregistrer</button>'
+        : '<button type="button" class="fp-btn fp-btn--p" onclick="fpTelecharger()">⤓ Télécharger l’image</button>')
     +'<button type="button" class="fp-btn" onclick="fpCopier()">Copier le texte</button>'
     +'<span class="fp-ok" id="fp-ok"></span>'
     +'</div></div>';
@@ -7141,9 +7136,35 @@ function fpDessiner(){
   var img=document.getElementById('fp-img'); if(!img)return;
   img.src=fpImage(f,2).toDataURL('image/png');
 }
+/* Le partage natif — le bon geste sur un téléphone. Il ouvre la feuille de
+   partage du système (WhatsApp, Messages, Mail) avec l'image en pièce jointe,
+   et il évite le téléchargement d'un blob:, que Safari iOS traite mal : selon
+   les versions il ouvre un onglet, enregistre sans extension, ou ne fait rien.
+   Absent sur ordinateur : on n'y propose que le téléchargement. */
+function fpPeutPartager(){
+  try{ return !!(navigator.canShare && navigator.share
+        && navigator.canShare({files:[new File([new Blob(['x'])],'x.png',{type:'image/png'})]})); }
+  catch(e){ return false; }
+}
+/* « fiche- » en tête : sans ce préfixe le PNG et le .fit portaient le même nom
+   de séance et se ressemblaient dans le dossier de téléchargements. */
+function fpNom(f){
+  return 'fiche-'+((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
+}
+function fpPartager(){
+  var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
+  fpImage(f,2).toBlob(function(b){
+    if(!b)return;
+    navigator.share({files:[new File([b],fpNom(f),{type:'image/png'})],title:f.s.title||'Séance'})
+      .then(function(){ fpDit('Envoyé ✓'); })
+      /* Refus de l'utilisateur : on ne fait rien. Vrai échec : on retombe
+         sur le téléchargement plutôt que de le laisser sans rien. */
+      .catch(function(e){ if(!e||e.name!=='AbortError') fpTelecharger(); });
+  },'image/png');
+}
 function fpTelecharger(){
   var f=_fpCle&&fpSeance(_fpCle.kind,_fpCle.idx); if(!f)return;
-  var nom=((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
+  var nom=fpNom(f);
   fpImage(f,2).toBlob(function(b){
     if(!b)return;
     var a=document.createElement('a');
