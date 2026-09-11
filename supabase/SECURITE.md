@@ -7,9 +7,16 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 | Fichier | Rôle | Statut |
 |---|---|---|
 | `securite-lot1.sql` | Ferme les accès anonymes, rend l'effacement possible | exécuté le 19/08/2026 |
-| `securite-lot2.sql` | Supprime la table `meal_plans`, devenue sans objet | à exécuter dans SQL Editor |
-| `securite-lot1-optionnel.sql` | Supprime la colonne morte `access_token` | après le lot 1, au choix |
-| `schema.sql` | Tables Polar | **non déployé** — l'intégration Polar n'est pas active |
+| `securite-lot2.sql` | Supprime la table `meal_plans`, devenue sans objet | **exécuté le 19/08/2026** — le relevé du 11/09 ne trouve plus la table |
+| `securite-lot1-optionnel.sql` | Supprime la colonne morte `access_token` | **exécuté le 11/09/2026** |
+| `schema.sql` | Tables Polar + `muscu_charges` | **déployé** — les quatre tables `polar_*` et `muscu_charges` existent |
+| `securite-lot3.sql` | Ouvre le `DELETE`, et lui seul, sur `polar_tokens` | **exécuté** — confirmé par le relevé du 11/09 |
+
+Ce tableau a dit pendant trois semaines que le lot 2 restait à exécuter et que
+Polar n'était pas déployé, alors que le journal enregistrait le contraire et que
+la base disait autre chose encore. Un document de sécurité qui se contredit ne
+protège de rien : d'où le relevé ci-dessous, qui vient de la base et non de la
+mémoire.
 
 ## Ce que le lot 1 corrige
 
@@ -25,6 +32,62 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 3. **`search_path`** figé sur ces mêmes fonctions.
 4. **Policies `DELETE`** ajoutées sur `redlab_state` et `athlete_spaces` : aucune
    n'existait, l'effacement RGPD (art. 17) était techniquement impossible.
+
+## État relevé dans la base le 11 septembre 2026
+
+Quatre requêtes de contrôle, passées dans SQL Editor. Elles ne lisent que le
+catalogue système : `pg_class`, `pg_policies`, `pg_proc`, `pg_extension`.
+
+| Contrôle | Résultat |
+|---|---|
+| Tables sans RLS | **aucune** — les onze tables ont `relrowsecurity = true` |
+| `polar_tokens` | **`DELETE` seul** — ni `SELECT` ni `UPDATE` : le jeton se détruit, il ne se lit pas |
+| `stripe_events` | aucune règle — `service_role` seul |
+| Exposé à `anon` | **trois lignes exactement** : `preparations`, `preparation_seances`, `sessions`, toutes en `SELECT` |
+| Fonctions `SECURITY DEFINER` | huit, **aucune** exécutable par `anon`, `public` ni `authenticated` |
+| `search_path` | figé sur les huit, `pg_temp` en dernier depuis le 11/09 |
+
+Les quatre requêtes sont à rejouer après toute migration : une table ajoutée
+sans RLS, ou une policy écrite `to anon` au lieu de `to authenticated`, ne se
+voit pas autrement. L'éditeur SQL de Supabase n'affiche que le résultat de la
+**dernière** requête — les lancer une par une.
+
+## Corrections de code du 11 septembre 2026
+
+**Huit fonctions d'échappement, chacune incomplète autrement.** Laquelle
+s'appliquait dépendait de l'endroit du fichier où l'on écrivait : quatre ne
+traitaient que le guillemet (donc une balise passait en contexte texte), une
+traitait `& " <` mais pas `>`, une `& <`, une `<` seul, et celle d'`espace.html`
+`& < >` mais pas le guillemet — or elle servait dans `value="…"` et `href="…"`.
+Remplacées par **une seule**, dans `UTILS`, qui échappe `& < > "` et
+l'apostrophe. Elle ne suffirait pas dans un gestionnaire `on…="…"` : il n'en
+existe aucun qui l'utilise, et il ne faut pas en créer.
+
+Une donnée **tierce** entrait sans filtre : dans la veille PubMed, `it.id`
+venait de l'API NCBI et partait brut dans un `href`. NCBI ne renvoie que des
+identifiants numériques, donc rien n'est arrivé — c'était le seul endroit de
+RedLab où une donnée extérieure atteignait le DOM sans échappement.
+
+**Une CSP sur `index.html`, `espace.html` et `polar.html`.** Elle n'empêche pas
+une injection : `'unsafe-inline'` est indispensable tant qu'`index.html` porte
+ses 302 gestionnaires `on…=` en attribut. Elle empêche la **suite** — charger un
+script tiers, et surtout exfiltrer, `connect-src` étant une liste close.
+
+Deux réglages à ne pas casser :
+
+- `upgrade-insecure-requests` est **volontairement absente**. Le pont
+  nolio-deploy appelle `http://localhost:8730` en clair, ce qui est normal pour
+  la machine du coach ; la directive l'aurait basculé en https et rompu en
+  silence.
+- `frame-src 'self'` : le Dashboard affiche `espace.html` en cadre.
+
+Toute nouvelle origine appelée par le code doit être ajoutée à `connect-src`,
+faute de quoi l'appel échoue **sans message visible**.
+
+Vérifié en servant les CDN à leurs vraies URL, pour que la CSP les juge : les
+bibliothèques chargent, un script depuis une origine interdite est bloqué, un
+`fetch` d'exfiltration aussi. Sans ce dernier contrôle, une CSP malformée aurait
+été ignorée sans que rien ne le signale.
 
 ## État vérifié le 19 août 2026
 
@@ -80,8 +143,11 @@ santé.
 
 ## Reste à traiter
 
-- SIRET, adresse et médiateur de la consommation dans les pages légales
-  (dépôt `reding-coaching`, branche `claude/rgpd-pages-legales`).
+- **Médiateur de la consommation** — quatre `[À COMPLÉTER]` dans `cgv.html` du
+  dépôt `reding-coaching`, plus le nom de la préparation au § tarif.
+- **Expiration de session côté serveur** — réservée au plan Pro. La règle des
+  30 jours reste appliquée dans le navigateur : c'est un garde-fou, pas une
+  serrure. À reprendre le jour d'un passage au plan Pro.
 - Les points ouverts listés en fin de registre.
 
 ## Journal
@@ -90,4 +156,9 @@ santé.
 |---|---|
 | 19 août 2026 | Audit. `securite-lot1.sql` exécuté : fonction orpheline supprimée, billetterie réservée à `service_role`, `search_path` figé, policies `DELETE` créées. 2FA GitHub activée. |
 | 19 août 2026 | Table `meal_plans` supprimée (`securite-lot2.sql`) : l'outil de suivi des repas qu'elle servait est abandonné. Elle était vide, et ses trois policies ouvertes à `anon` avaient déjà été retirées. |
+| 11 sept. 2026 | `athlete_spaces.access_token` supprimée. Elle portait TROIS jetons, un par athlète — inertes depuis que `get_athlete_space_by_token` a disparu au lot 1, mais des secrets qui dormaient sans raison. Vérifié avant : `espace.html` demande `select('data')` nommément, jamais `select('*')` — ils ne sont donc jamais partis vers un navigateur ; `index.html` ne fait que `delete` et `upsert`. Les autres `access_token` du dépôt concernent `polar_tokens` et le flux OAuth de nolio-deploy, une autre colonne dans une autre table. |
+| 11 sept. 2026 | Relevé complet dans la base : onze tables, RLS partout, `polar_tokens` en `DELETE` seul, trois tables exposées à `anon` en `SELECT`, huit fonctions `SECURITY DEFINER` dont aucune appelable par `anon`. Aucune anomalie. |
+| 11 sept. 2026 | `pg_temp` forcé en dernier sur les quatre fonctions de comptage du modèle à trois tables : elles n'avaient que `search_path = public`, rompant la convention du lot 1. Non vulnérables (requêtes qualifiées `public.…`), mais la protection ne dépend plus d'un préfixe. |
+| 11 sept. 2026 | Huit fonctions d'échappement fondues en une seule, correcte en contexte texte comme en attribut. `it.id` de l'API NCBI échappé : seule donnée tierce qui atteignait le DOM sans filtre. |
+| 11 sept. 2026 | CSP posée sur les trois pages de RedLab. Vérifiée active : origine étrangère bloquée en entrée comme en sortie. |
 | 19 août 2026 | `shareFicheCloud()` et `ficheLinkModal()` retirés d'`index.html`, bucket `fiches` supprimé. Le partage de fiche par lien signé n'était relié à aucun bouton : du code mort portant un chemin d'envoi vers le stockage. |
