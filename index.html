@@ -78,7 +78,23 @@ body{color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiase
 .side-reset{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;cursor:pointer;color:var(--muted2);font-family:var(--font);font-size:12px;font-weight:600;padding:6px 4px;border-radius:8px;transition:color .15s}
 .side-reset:hover{color:#F87171}
 .side-reset svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.side-version{margin-top:8px;font-size:10.5px;color:var(--muted2);opacity:.6;letter-spacing:1px;padding-left:4px}
+.side-version{margin-top:8px;font-size:10.5px;color:var(--muted2);opacity:.6;letter-spacing:1px;padding-left:4px;cursor:pointer}
+.side-version:hover,.side-version:focus{opacity:1;color:var(--orange);outline:none}
+.kn-version{margin:-56px 28px 28px;font-size:11.5px;color:var(--muted2);opacity:.75;cursor:pointer;text-align:center}
+.kn-version:hover,.kn-version:focus{opacity:1;color:var(--orange);outline:none}
+.rl-vmaj{border-bottom:1px dotted currentColor}
+/* L'avis de mise à jour : en haut, au-dessus de tout, y compris de l'écran
+   de connexion — une version périmée peut justement bloquer la connexion. */
+#rl-maj{position:fixed;top:0;left:0;right:0;z-index:10000;display:flex;align-items:center;gap:10px;
+  padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));
+  background:var(--orange);color:#fff;font-size:13px;font-weight:700;
+  box-shadow:0 2px 14px rgba(0,0,0,.35)}
+#rl-maj span{flex:1;min-width:0}
+#rl-maj button{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;
+  font-family:var(--font);font-size:12.5px;font-weight:800;border-radius:8px;padding:6px 11px;cursor:pointer;flex-shrink:0}
+#rl-maj button:hover{background:rgba(255,255,255,.32)}
+#rl-maj #rl-maj-x{padding:6px 9px;background:none;border-color:transparent;font-size:15px}
+@media (max-width:520px){ #rl-maj{font-size:12px;gap:7px;padding-left:11px;padding-right:11px} }
 .side-legal{margin-top:10px;padding-left:4px;font-size:10.5px;line-height:1.7;color:var(--muted2)}
 .side-legal a{color:var(--muted2);text-decoration:none;border-bottom:1px solid transparent}
 .side-legal a:hover{color:var(--orange);border-bottom-color:currentColor}
@@ -2288,7 +2304,8 @@ table.lm-laps tbody tr{cursor:pointer}
         <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
         Réinitialiser le profil
       </button>
-      <div class="side-version">RedLab · Reding Running · build 2026-08-17 16:06</div>
+      <div class="side-version" data-rl-version tabindex="0" role="button"
+           title="Version que ce navigateur a chargée. Touche pour forcer le rechargement depuis le serveur."></div>
       <div class="side-legal">
         <a href="https://reding-running.fr/politique-confidentialite.html" target="_blank" rel="noopener">Confidentialité</a>
         · <a href="https://reding-running.fr/mentions-legales.html" target="_blank" rel="noopener">Mentions légales</a>
@@ -2740,6 +2757,8 @@ table.lm-laps tbody tr{cursor:pointer}
       <!-- ══════════ PANEL CONNAISSANCES ══════════ -->
       <div id="p-knowledge" class="panel">
         <div id="knowledge-wrap" style="padding:36px 28px 80px"></div>
+        <div class="kn-version" data-rl-version tabindex="0" role="button"
+             title="Version que ce navigateur a chargée. Touche pour forcer le rechargement depuis le serveur."></div>
       </div>
 
       <!-- ══════════ PANEL LECTEUR FICHIER MONTRE ══════════ -->
@@ -6935,6 +6954,80 @@ function wktExport(kind,idx){
   wktDl(wktToFit(s,vm?vm.v:null),nom);
 }
 
+
+/* ══ QUELLE VERSION CE NAVIGATEUR A-T-IL CHARGÉE ? ══
+   La ligne de version était écrite à la main — « build 2026-08-17 16:06 » —
+   et elle avait trois semaines de retard. Une date figée ne prévient pas
+   d'une version périmée : elle en invente une autre. Pire, elle inspire
+   confiance.
+
+   document.lastModified dit tout autre chose, et c'est exactement la bonne
+   chose : la date du fichier TEL QUE LE NAVIGATEUR L'A REÇU. Servi depuis le
+   cache, il rend la date de la copie en cache — donc une ancienne. C'est
+   précisément la question qu'on se pose quand « ça ne marche pas » après une
+   mise à jour, et elle n'exige aucun entretien.
+
+   RedLab s'installe sur l'écran d'accueil (display: standalone) : iOS y garde
+   les pages très longtemps, et il n'y a ni barre d'adresse ni bouton
+   recharger. D'où le clic sur la ligne, qui redemande la page au serveur avec
+   un paramètre neuf que le cache ne peut pas satisfaire. */
+function rlVersionTexte(){
+  var d=new Date(document.lastModified);
+  if(isNaN(d)) return 'RedLab · Reding Running';
+  var j=d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+  var h=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  return 'RedLab · version du '+j+' à '+h+' · <span class="rl-vmaj">recharger</span>';
+}
+function rlRecharger(){
+  /* pathname seul : un éventuel ?v= précédent ne s'accumule pas. Le fragment
+     est conservé pour ne pas perdre l'écran en cours. */
+  location.replace(location.pathname+'?v='+Date.now()+location.hash);
+}
+function rlVersionPoser(){
+  var t=rlVersionTexte();
+  document.querySelectorAll('[data-rl-version]').forEach(function(el){
+    if(el.__rlv) return;
+    el.__rlv=true;
+    el.innerHTML=t;
+    el.addEventListener('click',rlRecharger);
+    el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); rlRecharger(); } });
+  });
+}
+
+/* Une étiquette qu'il faut aller chercher ne prévient personne : sur
+   téléphone elle est au bas de l'onglet Infos. On demande donc au serveur
+   la date de sa copie et on compare à celle qu'on a reçue. Si le serveur
+   est plus récent, c'est qu'on lit une version périmée — et on le dit.
+
+   Une requête HEAD, sans cache, au démarrage. La minute de tolérance
+   absorbe la granularité de l'en-tête ; un échec réseau ne dit rien plutôt
+   que de crier au loup. */
+function rlVersionVerifier(){
+  fetch(location.pathname,{method:'HEAD',cache:'no-store'})
+    .then(function(r){
+      var lm=r.headers.get('Last-Modified'); if(!lm) return;
+      var serveur=new Date(lm), recue=new Date(document.lastModified);
+      if(isNaN(serveur)||isNaN(recue)) return;
+      if(serveur.getTime()-recue.getTime()>60000) rlVersionAvis(serveur);
+    })
+    .catch(function(){});
+}
+function rlVersionAvis(d){
+  if(document.getElementById('rl-maj')) return;
+  var j=d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+  var h=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  var b=document.createElement('div');
+  b.id='rl-maj';
+  b.innerHTML='<span>Une version plus récente existe — '+esc(j)+' à '+esc(h)+'</span>'
+             +'<button type="button" id="rl-maj-go">Recharger</button>'
+             +'<button type="button" id="rl-maj-x" aria-label="Plus tard">✕</button>';
+  document.body.appendChild(b);
+  document.getElementById('rl-maj-go').addEventListener('click',rlRecharger);
+  document.getElementById('rl-maj-x').addEventListener('click',function(){ b.remove(); });
+}
+function rlVersionDemarrer(){ rlVersionPoser(); rlVersionVerifier(); }
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',rlVersionDemarrer);
+else rlVersionDemarrer();
 
 /* ══ FICHE DE SÉANCE À ENVOYER ══
    Polar Flow n'importe AUCUN fichier de séance : ni FIT, ni TCX. Son import
