@@ -888,6 +888,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fp-btn{background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;border-radius:9px;padding:9px 13px;cursor:pointer}
   .fp-btn:hover{border-color:var(--orange)}
   .fp-btn--p{background:var(--orange);border-color:var(--orange);color:#fff}
+  .fp-date{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .fp-date label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted2)}
+  .fp-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;
+    color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;padding:8px 11px;outline:none}
+  .fp-date input:focus{border-color:var(--orange)}
+  .fp-date-x{background:none;border:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:4px 6px}
+  .fp-date-x:hover{color:var(--orange)}
   .fp-astuce{font-size:11.5px;color:var(--muted2);margin-top:7px;line-height:1.45}
   .fp-ok{font-size:12.5px;font-weight:700;color:#34D399}
   @media (max-width:560px){ .fp-actions .fp-btn{flex:1} }
@@ -7169,7 +7176,7 @@ function fpSeance(kind,idx){
   var s=libFindSession(kind,idx); if(!s)return null;
   if(s.muscu)return null;
   var vm=wktVma(), v=vm?vm.v:null;
-  return {s:s, vma:v, qui:(vm&&vm.who)||'',
+  return {s:s, vma:v, qui:(vm&&vm.who)||'', date:_fpDate,
           lignes:fpLignes(fpArbre(wktSteps(s,v),v))};
 }
 
@@ -7178,7 +7185,9 @@ function fpSeance(kind,idx){
 function fpTexte(f){
   var L=[f.s.title||'Séance'];
   var d=String((f.s&&f.s.desc)||'').trim(); if(d)L.push(d);
-  var st=[]; if(f.qui)st.push(f.qui);
+  var st=[];
+  var j=fpDateLisible(f.date); if(j)st.push(j);
+  if(f.qui)st.push(f.qui);
   if(f.vma)st.push('VMA '+String(f.vma).replace('.',',')+' km/h');
   if(st.length)L.push(st.join('  ·  '));
   L.push('');
@@ -7240,7 +7249,9 @@ function fpRelief(c,x,y){
 function fpImage(f,ech){
   ech=ech||2;
   var desc=String((f.s&&f.s.desc)||'').trim();
-  var sousT=[]; if(f.qui)sousT.push(f.qui);
+  var sousT=[];
+  var jour=fpDateLisible(f.date); if(jour)sousT.push(jour);
+  if(f.qui)sousT.push(f.qui);
   if(f.vma)sousT.push('VMA '+String(f.vma).replace('.',',')+' km/h');
 
   /* Le cadre du titre mesure 58 px ; la structure n'ajoute une ligne que si
@@ -7385,6 +7396,24 @@ function fpImage(f,ech){
 }
 
 var _fpCle=null;
+/* La date reste d'une fiche à l'autre : on prépare souvent plusieurs séances
+   pour un même jour, et la resaisir chaque fois découragerait de l'utiliser.
+   Vide par défaut — une date inventée sur une fiche vaut moins que pas de
+   date du tout. */
+var _fpDate='';
+function fpDateLisible(iso){
+  if(!iso)return '';
+  var d=new Date(iso+'T12:00:00');
+  if(isNaN(d))return '';
+  var t=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+function fpDateSet(v){
+  _fpDate=String(v||'');
+  var champ=document.getElementById('fp-jour'); if(champ)champ.value=_fpDate;
+  var croix=document.getElementById('fp-date-x'); if(croix)croix.hidden=!_fpDate;
+  fpDessiner();
+}
 function fpOuvrir(kind,idx){
   var f=fpSeance(kind,idx);
   if(!f){ alert('La fiche décrit des phases de course : elle ne s’applique pas à une séance de musculation.'); return; }
@@ -7402,6 +7431,10 @@ function fpHTML(f){
     +'<div class="fp-note">Polar Flow n’importe aucun fichier de séance — ni .FIT ni .TCX. '
     +'Son import « TCX ou GPX » est celui des <b>parcours</b>. Envoie cette fiche à ton athlète : '
     +'il la recopie une fois en <b>cible d’entraînement par phases</b>, et sa montre la suit.</div>'
+    +'<div class="fp-date"><label for="fp-jour">Date de la séance</label>'
+    +'<input type="date" id="fp-jour" value="'+esc(_fpDate)+'" onchange="fpDateSet(this.value)">'
+    +'<button type="button" class="fp-date-x" id="fp-date-x" onclick="fpDateSet(\'\')" title="Retirer la date"'+(_fpDate?'':' hidden')+'>✕</button>'
+    +'</div>'
     +'<div class="fp-apercu"><img id="fp-img" alt="Fiche de la séance"></div>'
     +'<div class="fp-astuce">Sur téléphone, tu peux aussi appuyer longuement sur l’image ci-dessus pour l’enregistrer ou la partager.</div>'
     +'<div class="fp-actions">'
@@ -7433,7 +7466,10 @@ function fpPeutPartager(){
 /* « fiche- » en tête : sans ce préfixe le PNG et le .fit portaient le même nom
    de séance et se ressemblaient dans le dossier de téléchargements. */
 function fpNom(f){
-  return 'fiche-'+((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
+  /* La date en tête : les fiches d'un même athlète se rangent alors dans
+     l'ordre chronologique, sans rien trier. */
+  return 'fiche-'+(f.date?f.date+'-':'')
+        +((f.qui?wktSlug(f.qui)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
 }
 function fpPartager(){
   fpLogoPret(function(){
