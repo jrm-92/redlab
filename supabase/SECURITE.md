@@ -8,7 +8,7 @@ Suivi des corrections issues de l'audit RGPD / sécurité du 19 août 2026.
 |---|---|---|
 | `securite-lot1.sql` | Ferme les accès anonymes, rend l'effacement possible | exécuté le 19/08/2026 |
 | `securite-lot2.sql` | Supprime la table `meal_plans`, devenue sans objet | **exécuté le 19/08/2026** — le relevé du 11/09 ne trouve plus la table |
-| `securite-lot1-optionnel.sql` | Supprime la colonne morte `access_token` | **à vérifier** — voir « Reste à traiter » |
+| `securite-lot1-optionnel.sql` | Supprime la colonne morte `access_token` | **exécuté le 11/09/2026** |
 | `schema.sql` | Tables Polar + `muscu_charges` | **déployé** — les quatre tables `polar_*` et `muscu_charges` existent |
 | `securite-lot3.sql` | Ouvre le `DELETE`, et lui seul, sur `polar_tokens` | **exécuté** — confirmé par le relevé du 11/09 |
 
@@ -143,12 +143,6 @@ santé.
 
 ## Reste à traiter
 
-- **`athlete_spaces.access_token`** — le lot 1 optionnel n'a jamais été
-  confirmé. Le relevé du 11/09 porte sur les tables et les policies, pas sur les
-  colonnes. À vérifier :
-  `select column_name from information_schema.columns where table_name='athlete_spaces' and column_name='access_token';`
-  Si la ligne sort, la colonne ne contient que des secrets dormants : plus rien
-  ne la lit depuis la suppression de `get_athlete_space_by_token`.
 - **Médiateur de la consommation** — quatre `[À COMPLÉTER]` dans `cgv.html` du
   dépôt `reding-coaching`, plus le nom de la préparation au § tarif.
 - **Expiration de session côté serveur** — réservée au plan Pro. La règle des
@@ -162,6 +156,7 @@ santé.
 |---|---|
 | 19 août 2026 | Audit. `securite-lot1.sql` exécuté : fonction orpheline supprimée, billetterie réservée à `service_role`, `search_path` figé, policies `DELETE` créées. 2FA GitHub activée. |
 | 19 août 2026 | Table `meal_plans` supprimée (`securite-lot2.sql`) : l'outil de suivi des repas qu'elle servait est abandonné. Elle était vide, et ses trois policies ouvertes à `anon` avaient déjà été retirées. |
+| 11 sept. 2026 | `athlete_spaces.access_token` supprimée. Elle portait TROIS jetons, un par athlète — inertes depuis que `get_athlete_space_by_token` a disparu au lot 1, mais des secrets qui dormaient sans raison. Vérifié avant : `espace.html` demande `select('data')` nommément, jamais `select('*')` — ils ne sont donc jamais partis vers un navigateur ; `index.html` ne fait que `delete` et `upsert`. Les autres `access_token` du dépôt concernent `polar_tokens` et le flux OAuth de nolio-deploy, une autre colonne dans une autre table. |
 | 11 sept. 2026 | Relevé complet dans la base : onze tables, RLS partout, `polar_tokens` en `DELETE` seul, trois tables exposées à `anon` en `SELECT`, huit fonctions `SECURITY DEFINER` dont aucune appelable par `anon`. Aucune anomalie. |
 | 11 sept. 2026 | `pg_temp` forcé en dernier sur les quatre fonctions de comptage du modèle à trois tables : elles n'avaient que `search_path = public`, rompant la convention du lot 1. Non vulnérables (requêtes qualifiées `public.…`), mais la protection ne dépend plus d'un préfixe. |
 | 11 sept. 2026 | Huit fonctions d'échappement fondues en une seule, correcte en contexte texte comme en attribut. `it.id` de l'API NCBI échappé : seule donnée tierce qui atteignait le DOM sans filtre. |
