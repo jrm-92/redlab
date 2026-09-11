@@ -8651,13 +8651,6 @@ function openNolioDeploy(){
     .then(function(){ window.open('http://localhost:8730/','_blank'); })
     .catch(function(){ alert("L'outil Nolio n'est pas lancé. Ouvre le dossier nolio-deploy et lance « node server.js », puis réessaie."); });
 }
-function exportNolioJSON(){
-  var data=libExportData();
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='redlab_seances_nolio.json';
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-}
 
 function renderLibrary(){
   const wrap=document.getElementById('library-wrap');if(!wrap)return;
@@ -8671,13 +8664,11 @@ function renderLibrary(){
       '<div class="lib-actions">'+
         '<button class="lib-create-btn" onclick="toggleLibCreate(false)">+ Créer une séance</button>'+
         '<button class="lib-create-btn" onclick="toggleLibCreate(true)" title="Exercices, séries, répétitions, charge et vidéo de démonstration">+ Séance de musculation</button>'+
-        /* Ces deux-là parlent à nolio-deploy, qui tourne sur l'ordinateur du
-           coach : « Déployer » appelle http://localhost:8730, et le JSON
-           n'a de sens que déposé dans nolio-deploy/data/. Sur un téléphone
-           ils ne peuvent rien faire — ils sont masqués, pas retirés. */
-        '<button class="lib-create-btn lib-btn--pc" onclick="exportNolioJSON()" style="border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.1);color:#60A5FA" title="Enregistre toute la bibliothèque en JSON — à déposer dans nolio-deploy/data/workouts.json, ou à garder comme sauvegarde">⬇ Exporter (JSON)</button>'+
+        /* Celui-ci parle à nolio-deploy, qui tourne sur l'ordinateur du coach :
+           il appelle http://localhost:8730. Sur un téléphone il ne peut rien
+           faire — il est masqué, pas retiré. */
         '<button class="lib-create-btn lib-btn--pc" onclick="openNolioDeploy()" style="border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34D399" title="Lance d\'abord node server.js dans le dossier nolio-deploy">→ Déployer vers Nolio</button>'+
-        '<div class="lib-actions-pc">Export JSON et déploiement Nolio : sur ordinateur.</div>'+
+        '<div class="lib-actions-pc">Déploiement vers Nolio : sur ordinateur.</div>'+
       '</div>'+
     '</div>'+
     rlLexique([['ef','Base aérobie'],['seuil','Seuil'],['vo2','VO₂max'],
