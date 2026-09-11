@@ -565,7 +565,12 @@ try{ _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storageKey:'redla
 // ── Helpers de formatage ──
 function fAll(s){s=Math.round(s);var m=Math.floor(s/60),sc=s%60;return m+':'+String(sc).padStart(2,'0');}
 function fHMS(s){s=Math.round(s);var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;if(h>0)return h+"h"+String(m).padStart(2,'0')+"'"+String(sc).padStart(2,'0')+'"';return m+"'"+String(sc).padStart(2,'0')+'"';}
-function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* Échappement HTML. Le guillemet et l'apostrophe comptent autant que les
+   chevrons : esc() sert aussi dans des attributs (value="…", href="…"),
+   où une valeur contenant un guillemet sortait de l'attribut. */
+function esc(t){return String(t==null?'':t)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 // ── Référentiels (identiques à RedLab) ──
 /* Recopie EXACTE du référentiel de RedLab. Les bandes sont en % de VMA et

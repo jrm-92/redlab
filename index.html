@@ -2832,6 +2832,21 @@ table.lm-laps tbody tr{cursor:pointer}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ══ UTILS ══ */
+/* Échappement HTML — UNE seule fonction, valable partout.
+   Elle remplaçait cinq variantes locales qui n'échappaient chacune qu'une
+   partie des caractères : quatre ne traitaient que le guillemet (donc
+   « <script> » passait en contexte texte), une traitait « & " < » mais pas
+   « > ». Selon l'endroit du fichier où l'on se trouvait, on tombait sur
+   l'une ou l'autre. Les cinq sont supprimées ; celle-ci couvre le contexte
+   texte comme le contenu d'attribut.
+   Note : elle n'est PAS suffisante à l'intérieur d'un gestionnaire
+   on...="..." — il n'y en a aucun qui l'utilise, et il ne faut pas en
+   introduire. */
+function esc(v){
+  return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function pt(s){if(!s)return null;s=s.trim();const p=s.split(':');if(p.length===2){const m=+p[0],sc=+p[1];return isNaN(m)||isNaN(sc)?null:m*60+sc;}return null;}
 function fAll(s){s=Math.round(s);const m=Math.floor(s/60),sc=s%60;return m+':'+String(sc).padStart(2,'0');}
 function fHMS(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;if(h>0)return h+"h"+String(m).padStart(2,'0')+"'"+String(sc).padStart(2,'0')+'"';return m+"'"+String(sc).padStart(2,'0')+'"';}
@@ -6992,7 +7007,6 @@ function lcBordSplit(txt,zoneDefaut){
 }
 function lcBordField(quoi,titre,valeur,exemple,zoneDefaut){
   var d=lcBordSplit(valeur,zoneDefaut);
-  var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
   var opts=(typeof ZONES_VMA!=='undefined'?ZONES_VMA:[]).map(function(z){
     return '<option value="z'+z.z+'"'+(d.mode==='z'+z.z?' selected':'')+'>Z'+z.z+' · '+z.n+'</option>';
   }).join('')
@@ -7045,7 +7059,6 @@ function lcBordVal(quoi){
 }
 function libCreateFormHTML(pre){
   pre=pre||{};
-  const esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
   const themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'"'+(t.id===pre.theme?' selected':'')+'>'+t.lbl+'</option>';}).join('');
   return '<div class="lc-head">'+(pre.title?('Modifier « '+String(pre.title).replace(/</g,'&lt;')+' »'):'Nouvelle séance')+'</div>'
     +'<div class="lc-grid">'
@@ -7456,7 +7469,6 @@ function libSegSet(i,j,champ,v){
 }
 function libEditFormHTML(s){
   var themeOpts=LIB_THEMES.map(function(t){return '<option value="'+t.id+'"'+(t.id===s.theme?' selected':'')+'>'+t.lbl+'</option>';}).join('');
-  var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
   var rows=(_libEdit.blocks||[]).map(libBlocRow).join('');
   var creation=(_libEdit.src==='new');
   return '<div class="lc-head">'+(creation?'Nouvelle séance':('Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »'))+'</div>'
@@ -7491,7 +7503,6 @@ function libEditFormHTML(s){
 function muscuExoVide(){ return {nom:'',series:3,reps:8,ct:'kg',kg:'',pct:80,rm:1,rec:'',video:''}; }
 
 function libMuscuRow(e,i){
-  var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');};
   var yid=ytId(e.video);
   var charge='';
   if(e.ct==='kg'){
@@ -7549,7 +7560,6 @@ function muscuMonter(i){
 }
 
 function libMuscuFormHTML(s){
-  var esc=function(v){return String(v==null?'':v).replace(/"/g,'&quot;');};
   var creation=(_libEdit.src==='new');
   var typeOpts=MUSCU_TYPES.map(function(t){return '<option value="'+t.id+'"'+(t.id===(s.mtype||'force')?' selected':'')+'>'+t.lbl+'</option>';}).join('');
   return '<div class="lc-head">'+(creation?'Nouvelle séance de musculation':('Modifier « '+String(s.title||'').replace(/</g,'&lt;')+' »'))+'</div>'
@@ -7609,7 +7619,6 @@ function libMuscuBuild(){
 }
 /* Le corps d'une carte de musculation : un exercice par ligne. */
 function libMuscuBody(s){
-  var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;');};
   return (s.exos||[]).map(function(e){
     var lien=e.video?(' <a class="lib-yt" href="'+ytLien(e.video)+'" target="_blank" rel="noopener noreferrer" title="Voir la démonstration sur YouTube">▶</a>'):'';
     return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+esc(e.nom)+lien+'</span>'
@@ -11409,7 +11418,6 @@ function plPubBilanRender(){
   var host=document.getElementById('ath-pub-bilan'); if(!host)return;
   if(!_plPubBilan){ host.innerHTML=''; return; }
   var b=_plPubBilan, n=b.ok.length, e=b.echecs.length;
-  var esc=function(t){return String(t).replace(/</g,'&lt;');};
   var heure=new Date(b.ts).toLocaleTimeString('fr-FR').slice(0,5);
   var col=e?'#FBBF24':'#34D399', bg=e?'rgba(251,191,36,.09)':'rgba(52,211,153,.09)';
   var html='<div style="margin-top:14px;padding:13px 15px;border-radius:11px;border:1px solid '+col+'44;background:'+bg+';font-size:13px;line-height:1.6">'
