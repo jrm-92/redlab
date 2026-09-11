@@ -77,6 +77,16 @@ node index.js --limit=3   # ne traite que les 3 premières (pour tester en réel
 
 Chaque exécution écrit un journal dans `logs/`.
 
+### Le raccourci (le plus simple)
+
+Double-clique **`Nolio.bat`**. Il se place tout seul dans le bon dossier, vérifie que
+Node et `config.json` sont là, et propose trois choix : lancer l'interface (le cas
+normal), réautoriser Nolio, ou faire un essai à blanc.
+
+Pour l'avoir sous la main : clic droit sur `Nolio.bat` → **Envoyer vers → Bureau
+(créer un raccourci)**. Le raccourci fonctionne depuis n'importe où, le fichier se
+recale sur son propre dossier.
+
 ### Interface graphique (recommandé)
 
 Plutôt que de déployer en vrac, lance l'interface locale :
@@ -120,6 +130,7 @@ Il faut avoir fait `node index.js --auth` au moins une fois avant.
 ## Architecture
 
 ```
+Nolio.bat           raccourci Windows : menu de lancement
 index.js            orchestration (auth, mapping, envoi, logs)
 src/config.js       lecture/validation de config.json
 src/auth.js         OAuth2 (autorisation + refresh avec rotation)

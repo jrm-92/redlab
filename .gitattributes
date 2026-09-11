@@ -1,0 +1,5 @@
+# Les fichiers de commande Windows doivent arriver avec des fins de ligne CRLF,
+# quelle que soit la configuration git de la machine : cmd.exe se trompe sur les
+# étiquettes et les « goto » quand elles sont en LF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
