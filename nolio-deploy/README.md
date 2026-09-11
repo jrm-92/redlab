@@ -47,15 +47,24 @@ cp config.example.json config.json
 
 ## 4. Fournir les séances
 
-Dans RedLab → **Bibliothèque → ⬇ Exporter (JSON)**. Place le fichier téléchargé ici :
+Rien à faire à la main. Lance `node server.js` (§5), puis dans RedLab →
+**Bibliothèque → → Déployer vers Nolio**. Le bouton envoie toute la bibliothèque
+au pont, qui l'écrit lui-même dans :
 
 ```
 nolio-deploy/data/workouts.json
 ```
 
-Astuce : garde dans ce fichier **uniquement les séances que tu veux déployer**, dans
-l'ordre voulu. Tu peux aussi ajouter `"date": "2026-09-03"` à une séance pour forcer
-sa date (sinon les dates sont calculées depuis `startDate`).
+Tu choisis ensuite dans l'interface locale **quelles** séances partent et **à quelle
+date** — inutile donc de filtrer le fichier en amont.
+
+> Il a existé un bouton « ⬇ Exporter (JSON) » qui téléchargeait ce fichier pour qu'on
+> le dépose soi-même. Il a été retiré : le pont fait ce travail, et personne ne s'en
+> était jamais servi.
+
+Le fichier reste lisible et modifiable si tu veux forcer une date : ajoute
+`"date": "2026-09-03"` à une séance (sinon les dates viennent de `startDate`, ou de
+ce que tu saisis dans l'interface).
 
 ## 5. Lancer
 
@@ -117,7 +126,7 @@ src/auth.js         OAuth2 (autorisation + refresh avec rotation)
 src/api.js          appels HTTP (erreurs texte/JSON, retry 429)
 src/mapper.js       séance RedLab → séance planifiée + workout structuré
 src/logger.js       journal console + fichier
-data/workouts.json  séances exportées depuis RedLab (à toi de le déposer)
+data/workouts.json  séances reçues de RedLab (écrit par server.js)
 ```
 
 Docs API Nolio : https://github.com/NolioApp/NolioAPI-Documentation/wiki
