@@ -2742,7 +2742,7 @@ table.lm-laps tbody tr{cursor:pointer}
 
   <div class="lm-drop" id="lm-drop">
     <div class="lm-drop-title">Déposez un fichier .FIT ou .TCX ici</div>
-    <div class="lm-drop-sub">Garmin, Polar, Suunto, Coros, Wahoo, Strava — .gz accepté</div>
+    <div class="lm-drop-sub">Garmin, Suunto, Coros, Wahoo, Strava — .gz accepté.<br><b>Polar Flow n’exporte pas de .FIT : prends le .TCX</b> (le .GPX ne contient ni durée ni fréquence cardiaque).</div>
     <button class="lm-btn-primary" id="lm-btnPick">Choisir un fichier</button>
   </div>
   <div class="lm-error" id="lm-err" role="alert"></div>
@@ -2818,7 +2818,7 @@ table.lm-laps tbody tr{cursor:pointer}
 </div>
 
 <!-- pas d'attribut accept : iOS grise les .tcx/.fit, dont il ignore le type -->
-<input type="file" id="lm-fileInput" hidden>
+<input type="file" id="lm-fileInput" accept=".fit,.tcx,.gz,.gpx" hidden>
 </div>
       </div>
 
@@ -5484,7 +5484,8 @@ function dbRealiseHTML(rows,ath){
     return barre+dbNote((lie
       ? "Aucune séance remontée pour l'instant. Polar ne livre une séance qu'après la synchronisation de la montre avec Polar Flow."
       : "La montre de cet athlète n'est pas reliée. Pour une montre Polar, va dans l'onglet <b>Athlètes</b> et clique sur <b>⌚ Connecter sa montre Polar</b>.")
-      +"<br><br>Pour toute autre marque, <b>⤒ Importer un fichier</b> lit les <b>.FIT</b> et les <b>.TCX</b> exportés depuis Garmin Connect, COROS, Suunto ou n'importe quelle application de montre.");
+      +"<br><br>Pour toute autre marque, <b>⤒ Importer un fichier</b> lit les <b>.FIT</b> et les <b>.TCX</b> exportés depuis Garmin Connect, COROS, Suunto ou n'importe quelle application de montre."
+      +"<br><br>Depuis <b>Polar Flow</b>, choisis l'export <b>.TCX</b> : Polar ne propose pas de .FIT, et son .GPX ne contient ni durée ni fréquence cardiaque.");
   }
 
   // ── Totaux ──
@@ -5914,8 +5915,9 @@ function dbSeanceModalHTML(r){
 /* ══ SÉANCES IMPORTÉES DEPUIS UN FICHIER ══
    Toutes les marques n'ont pas d'API, et je ne veux pas dépendre d'un
    intermédiaire. Le fichier reste le dénominateur commun : Garmin, COROS,
-   Suunto et Polar exportent tous du FIT ou du TCX, et RedLab sait déjà les
-   lire — c'est le lecteur de course qui fait ce travail. On réutilise son
+   Suunto exportent du FIT ou du TCX, Polar Flow uniquement du TCX (son GPX
+   ne porte ni durée ni fréquence cardiaque), et RedLab sait déjà lire les
+   deux — c'est le lecteur de course qui fait ce travail. On réutilise son
    décodeur, on n'en garde que le résumé, et on range ça dans l'athlète.
 
    Pourquoi dans l'athlète et pas dans Supabase : polar_exercises interdit
