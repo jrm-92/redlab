@@ -7254,13 +7254,38 @@ function fpImage(f,ech){
   if(f.qui)sousT.push(f.qui);
   if(f.vma)sousT.push('VMA '+String(f.vma).replace('.',',')+' km/h');
 
-  /* Le cadre du titre mesure 58 px ; la structure n'ajoute une ligne que si
-     elle n'a pas tenu à côté du titre — estimé ici, confirmé au tracé. */
-  var titreLong=String((f.s&&f.s.title)||'').length*19 + (desc?desc.length*8:0);
-  /* 96 : le cadre du titre et son dégagement. Puis la structure si elle n'a
-     pas tenu à côté du titre, la ligne athlète/VMA, et les 46 px du logo. */
-  var hTitre=96 + ((desc&&titreLong>FP_W-120)?42:0) + (sousT.length?16:0) + 46 + 22;
-  var hEntete=26+hTitre;
+  /* ── L'en-tête ──
+     Le logo tient la colonne de gauche ; le cadre du titre part à sa droite
+     et va jusqu'à la marge, la description calée contre le bord droit,
+     séparée du titre par un filet. La ligne athlète/VMA s'aligne sous le
+     cadre, pas sous le logo : c'est au titre qu'elle se rapporte. */
+  var LOGO_H=74;
+  var logoOk=!!(_fpLogo.complete&&_fpLogo.naturalWidth);
+  var logoL=logoOk?Math.round(LOGO_H*_fpLogo.naturalWidth/_fpLogo.naturalHeight):132;
+  var bX=FP_PAD+logoL+36, bY=FP_PAD, bW=FP_W-FP_PAD-bX, bH=60;
+
+  /* La structure ne descend sous le cadre que si elle n'a pas tenu à côté du
+     titre. On mesure pour de vrai plutôt que d'estimer : c'est un canevas,
+     rien n'empêche de mesurer avant de décider. */
+  var cvM=document.createElement('canvas').getContext('2d');
+  var titre=String(f.s.title||'Séance');
+  cvM.font='800 34px '+FP_POLICE;
+  var lTitre=cvM.measureText(titre).width;
+  cvM.font='600 15px '+FP_POLICE;
+  var lDesc=desc?cvM.measureText(desc).width:0;
+  var ensemble=desc && (bX+24+lTitre+34+lDesc+24 <= FP_W-FP_PAD);
+
+  /* Un titre trop long ne se fait pas amputer en silence : il rapetisse
+     jusqu'à tenir dans le cadre, et ce n'est qu'arrivé au plus petit corps
+     encore lisible qu'on se résout aux points de suspension. */
+  var tMax=bW-48-(ensemble?lDesc+34:0), tPx=34;
+  while(tPx>22 && lTitre>tMax){
+    tPx-=1; cvM.font='800 '+tPx+'px '+FP_POLICE;
+    lTitre=cvM.measureText(titre).width;
+  }
+
+  var hEntete=FP_PAD+Math.max(LOGO_H, bH+(sousT.length?32:6))
+              +((desc&&!ensemble)?42:0)+22;
   var hCarte=22;
   f.lignes.forEach(function(l){ hCarte+=l.bloc?FP_LHB:FP_LH; });
   hCarte+=22;
@@ -7275,68 +7300,52 @@ function fpImage(f,ech){
   c.fillStyle='#0B1220'; c.fillRect(0,0,FP_W,H);
   fpRelief(c,FP_W-118,hEntete*0.46);
 
-  /* Le titre et la structure partagent un cadre, séparés d'un filet — la
-     séance et son résumé se lisent d'un seul regard. Quand la largeur ne
-     suffit pas, la structure repasse dessous dans son propre cadre plutôt
-     que d'être rognée. */
-  var x0=FP_PAD+8, maxX=FP_W-FP_PAD-14, y=FP_PAD+46;
-  var mots=String(f.s.title||'Séance').split(/\s+/);
-  f1(38,'800');
-  var lTitre=0; mots.forEach(function(m){ lTitre+=c.measureText(m+' ').width; });
-  lTitre-=c.measureText(' ').width;
-  f1(15,'600');
-  var lDesc=desc?c.measureText(desc).width:0;
-  var ensemble=desc && (x0+22+lTitre+26+lDesc+22 <= maxX);
+  /* Le logo. À défaut, son nom en toutes lettres — jamais un blanc. */
+  if(logoOk){
+    c.drawImage(_fpLogo,FP_PAD,bY+Math.round((bH-LOGO_H)/2)+8,logoL,LOGO_H);
+  }else{
+    f1(15,'800'); c.fillStyle='#FF6B35';
+    c.save(); c.letterSpacing='1.4px';
+    c.fillText('REDING',FP_PAD,bY+34);
+    f1(10.5,'700'); c.fillText('RUNNING',FP_PAD+2,bY+52);
+    c.restore();
+  }
 
-  var hCadre=58, yc=y-40;
-  var lCadre=22+lTitre+22+(ensemble?(4+26+lDesc+22):0);
+  /* Le cadre du titre. */
   c.strokeStyle='rgba(255,255,255,0.3)'; c.lineWidth=1.6;
-  fpRect(c,x0,yc,Math.min(lCadre,maxX-x0),hCadre,12); c.stroke();
+  fpRect(c,bX,bY,bW,bH,12); c.stroke();
 
   /* Ce qui ressemble à une allure passe en orange : on lit la nature de la
      séance avant d'avoir lu la phrase. */
-  f1(38,'800');
-  var x=x0+22;
-  mots.forEach(function(m){
+  var yT=bY+bH/2+Math.round(tPx*0.35), xT=bX+24;
+  f1(tPx,'800');
+  fpCoupe(c,titre,tMax).split(/\s+/).forEach(function(m){
     var l=c.measureText(m+' ').width;
-    if(x+l>maxX-14)return;
+    if(xT+l>bX+bW-16)return;
     c.fillStyle=FP_ALLURE.test(m.replace(/[^\w+%]/g,''))?'#FF6B35':'#FFFFFF';
-    c.fillText(m,x,y); x+=l;
+    c.fillText(m,xT,yT); xT+=l;
   });
+
   if(ensemble){
-    var xs=x0+22+lTitre+22;
+    var xD=bX+bW-24-lDesc, xF=xD-26;
     c.strokeStyle='rgba(255,255,255,0.28)'; c.lineWidth=1.4;
-    c.beginPath(); c.moveTo(xs,yc+13); c.lineTo(xs,yc+hCadre-13); c.stroke();
+    c.beginPath(); c.moveTo(xF,bY+14); c.lineTo(xF,bY+bH-14); c.stroke();
     f1(15,'600'); c.fillStyle='rgba(255,255,255,0.92)';
-    c.fillText(desc,xs+26,y-4);
+    c.fillText(desc,xD,bY+bH/2+5);
   }
-  /* Le cadre descend jusqu'à y+18 : la ligne suivante doit partir plus bas,
-     sinon « VMA 16 km/h » vient toucher sa bordure. */
-  y+=48;
+
+  var y=bY+bH+26;
   if(desc&&!ensemble){
     f1(15,'600');
-    var t=fpCoupe(c,desc,maxX-x0-40);
+    var t=fpCoupe(c,desc,FP_W-FP_PAD-bX-40);
     c.strokeStyle='rgba(255,255,255,0.26)'; c.lineWidth=1.4;
-    fpRect(c,x0,y-8,c.measureText(t).width+26,32,8); c.stroke();
-    c.fillStyle='rgba(255,255,255,0.9)'; c.fillText(t,x0+13,y+13);
-    y+=42;
+    fpRect(c,bX,y-21,c.measureText(t).width+26,32,8); c.stroke();
+    c.fillStyle='rgba(255,255,255,0.9)'; c.fillText(t,bX+13,y);
+    y+=40;
   }
   if(sousT.length){
     f1(14.5,'600'); c.fillStyle='rgba(255,255,255,0.55)';
-    c.fillText(sousT.join('   ·   '),x0,y);
-    y+=16;                    /* y cesse d'être une ligne de base : il devient
-                                 le HAUT de la signature. Confondre les deux
-                                 faisait chevaucher le logo et cette ligne. */
-  }else{ y-=22; }
-  /* La signature : le logo s'il est chargé, le texte sinon. On ne laisse
-     jamais un blanc à la place. */
-  if(_fpLogo.complete&&_fpLogo.naturalWidth){
-    var lh=46, lw=Math.round(lh*_fpLogo.naturalWidth/_fpLogo.naturalHeight);
-    c.drawImage(_fpLogo,x0,y,lw,lh);
-  }else{
-    f1(11.5,'800'); c.fillStyle='#FF6B35';
-    c.save(); c.letterSpacing='1.6px';
-    c.fillText('REDING RUNNING',x0,y+30); c.restore();
+    c.fillText(sousT.join('   ·   '),bX+6,y);
   }
 
   /* La carte blanche. */
