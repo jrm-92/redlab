@@ -8772,6 +8772,20 @@ function fsSec(txt){
   if(/^\d{1,5}(\.\d+)?$/.test(t)) return Math.round(parseFloat(t));
   return null;
 }
+/* Sur une distance, on relève le temps. Sur une durée, on relève la
+   distance : « 30 secondes » n'a pas de chrono à lire — ce sont les mètres
+   parcourus qui disent tout. La règle se déduit de la ligne elle-même, donc
+   rien n'est à ranger en plus et rien n'est à migrer. */
+function fsMesure(l){ return (l&&l.d>0)?'t':'d'; }
+/* « 148 », « 148 m » ou « 148,5 » donnent tous 148 mètres. */
+function fsMetres(txt){
+  var t=String(txt==null?'':txt).trim().toLowerCase().replace(',','.').replace(/\s*m$/,'').trim();
+  if(!/^\d{1,5}(\.\d+)?$/.test(t)) return null;
+  var v=Math.round(parseFloat(t));
+  return (v>0&&v<=100000)?v:null;
+}
+function fsLitVal(txt,mes){ return (mes==='d')?fsMetres(txt):fsSec(txt); }
+function fsEcritVal(v,mes){ return (mes==='d')?String(v):fHMS(v); }
 function fsPerfs(a){ return (a&&a.perfs)||{}; }
 /* Un écart se lit en secondes tant qu'il en reste sous la minute : « +3 s »
    se saisit d'un coup d'œil là où « +0'03" » demande un décodage. */
@@ -8779,15 +8793,20 @@ function fsEcartTxt(d){
   d=Math.round(Math.abs(d));
   return d<60 ? (d+' s') : fHMS(d);
 }
+function fsEcartTxtM(d){ return Math.round(Math.abs(d))+' m'; }
 /* Où se situe le chrono par rapport à la fenêtre visée. */
-function fsEcart(reel,lo,hi){
+function fsEcart(reel,lo,hi,mes){
   if(reel==null||lo==null||hi==null) return null;
+  var dist=(mes==='d');
   /* Le chrono se lit à la seconde, la cible se calcule à la décimale : sans
      ce seuil, une cible à 3'03",4 rendait « +0 s » pour un 3'03" — hors cible
-     pour quatre dixièmes que personne n'a chronométrés. Sous la seconde,
-     c'est dans la cible. */
-  if(reel-hi>=1) return {cls:'lent', txt:'+'+fsEcartTxt(reel-hi)};
-  if(lo-reel>=1) return {cls:'vif',  txt:'\u2212'+fsEcartTxt(lo-reel)};
+     pour quatre dixièmes que personne n'a chronométrés. En mètres, cinq : on
+     repère un plot, on ne mesure pas au décimètre.
+     Et le sens s'inverse : dépasser la cible en temps, c'est être lent ;
+     la dépasser en distance, c'est être allé plus vite. */
+  var seuil=dist?5:1, f=dist?fsEcartTxtM:fsEcartTxt;
+  if(reel-hi>=seuil) return {cls:dist?'vif':'lent', txt:'+'+f(reel-hi)};
+  if(lo-reel>=seuil) return {cls:dist?'lent':'vif', txt:'\u2212'+f(lo-reel)};
   return {cls:'ok', txt:'dans la cible'};
 }
 /* La clé d'un effort dans la fiche : le rang de la ligne, et le numéro de la
@@ -8871,9 +8890,10 @@ function fsLire(athId,titre,i,k){
   if(fsEstX(v)) return FS_NP;
   return (typeof v==='number'&&v>0)?v:null;
 }
-function fsNoter(athId,titre,i,k,champ){
+function fsNoter(athId,titre,i,k,champ,mes){
+  mes=mes||'t';
   var np=fsLitX(champ.value);
-  var sec=np?null:fsSec(champ.value);
+  var sec=np?null:fsLitVal(champ.value,mes);
   var liste=(typeof getAthletes==='function'?getAthletes():[]);
   var a=liste.find(function(x){return x.id===athId;});
   if(!a) return;
@@ -8894,24 +8914,24 @@ function fsNoter(athId,titre,i,k,champ){
   if(typeof _saveAthletes==='function') _saveAthletes(liste);
   /* Réécrire la case dans la forme de RedLab : le coach voit aussitôt que sa
      virgule a bien été lue comme un deux-points, au lieu de le supposer. */
-  champ.value=np?FS_NP:((sec!=null&&sec>0)?fHMS(sec):'');
+  champ.value=np?FS_NP:((sec!=null&&sec>0)?fsEcritVal(sec,mes):'');
   champ.classList.toggle('fs-in--x',np);
   var bouton=champ.parentNode&&champ.parentNode.querySelector('.fs-x');
   if(bouton) bouton.classList.toggle('on',np);
-  fsEcartMaj(champ, sec, np);
+  fsEcartMaj(champ, sec, np, mes);
   // Le premier chrono d'un athlète fait apparaître sa fiche à envoyer ;
   // le dernier effacé la retire. Le tableau, lui, n'est pas retouché.
   try{ fsFichesMaj(); }catch(e){}
 }
 /* Le bouton ✕ : le même geste que taper « x », mais sans clavier. */
-function fsBasculeX(athId,titre,i,k,btn){
+function fsBasculeX(athId,titre,i,k,btn,mes){
   var rep=btn.parentNode, champ=rep&&rep.querySelector('.fs-in'); if(!champ) return;
   champ.value=fsLitX(champ.value)?'':FS_NP;
-  fsNoter(athId,titre,i,k,champ);
+  fsNoter(athId,titre,i,k,champ,mes);
 }
 /* L'écart s'affiche à côté de la case, sans redessiner le tableau : le coach
    enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
-function fsEcartMaj(champ,sec,np){
+function fsEcartMaj(champ,sec,np,mes){
   var rep=champ.parentNode; if(!rep) return;
   // Le voisinage d'UNE case : avec plusieurs répétitions, chercher l'écart
   // dans tout le <td> effacerait celui de la répétition précédente.
@@ -8925,7 +8945,7 @@ function fsEcartMaj(champ,sec,np){
   var td=champ.closest('td'); if(!td) return;
   var lo=parseFloat(td.getAttribute('data-lo')), hi=parseFloat(td.getAttribute('data-hi'));
   if(sec==null||!isFinite(lo)||!isFinite(hi)) return;
-  var r=fsEcart(sec,lo,hi); if(!r) return;
+  var r=fsEcart(sec,lo,hi,mes||td.getAttribute('data-mes')||'t'); if(!r) return;
   e.className='fs-ec fs-ec--'+r.cls;
   e.textContent=r.txt;
 }
@@ -8971,7 +8991,7 @@ function plFaitBilan(iso,titre,ov){
     if(!l) return;
     n++;
     var c=fsCible(l,a.vma);
-    var r=c?fsEcart(reel,c.lo,c.hi):null;
+    var r=c?fsEcart(reel,c.lo,c.hi,c.mes):null;
     if(!r) return;
     if(r.cls==='ok') ok++; else if(r.cls==='lent') lent++; else vif++;
   });
@@ -8985,7 +9005,7 @@ function plFaitBilan(iso,titre,ov){
 function plFaitChip(iso,titre,ov){
   var b=plFaitBilan(iso,titre,ov);
   if(!b) return '';
-  var t={ok:'Tous les temps dans la cible',lent:'Plutôt au-dessus de la cible',vif:'Plutôt en dessous de la cible'}[b.cls];
+  var t={ok:'Tout dans la cible',lent:'Plutôt plus lent que la cible',vif:'Plutôt plus rapide que la cible'}[b.cls];
   return '<span class="plw-fait plw-fait--'+b.cls+'" title="'+t+' — '+b.n+' temps relev'+(b.n>1?'és':'é')+'">\u2713 '+b.n+'</span>';
 }
 
@@ -9044,14 +9064,22 @@ function fsCible(l,vma){
   var aTxt=(Math.abs(v.lo-v.hi)<0.01)?(all(v.lo)+'/km'):(all(v.hi)+'–'+all(v.lo)+'/km');
   if(l.d>0){
     var tLent=l.d/v.lo, tVif=l.d/v.hi;
-    return {txt:((Math.abs(tLent-tVif)<1.5)
+    return {mes:'t', txt:((Math.abs(tLent-tVif)<1.5)
              ? fHMS(Math.round((tLent+tVif)/2))
              : fHMS(Math.round(tVif))+'–'+fHMS(Math.round(tLent)))+'<small>'+aTxt+'</small>',
             lo:tVif, hi:tLent};
   }
-  // Un bloc en durée n'a pas de temps de passage : sa durée EST la consigne.
-  return {txt:aTxt+(l.sec>0?'<small>'+fHMS(l.sec)+'</small>':''),
-          lo:(l.sec>0?l.sec:null), hi:(l.sec>0?l.sec:null)};
+  /* Un bloc en durée n'a pas de temps de passage : sa durée EST la consigne,
+     et ce qu'on relève, c'est la distance couverte pendant ce temps-là. */
+  if(l.sec>0){
+    var dLent=l.sec*v.lo, dVif=l.sec*v.hi;
+    return {mes:'d', txt:((Math.abs(dVif-dLent)<5)
+             ? Math.round((dVif+dLent)/2)+' m'
+             : Math.round(dLent)+'–'+Math.round(dVif)+' m')
+             +'<small>'+fHMS(l.sec)+' · '+aTxt+'</small>',
+            lo:dLent, hi:dVif};
+  }
+  return {mes:'d', txt:aTxt, lo:null, hi:null};
 }
 /* Les athlètes utilisables : il faut une VMA pour convertir un pourcentage.
    Ceux qui n'en ont pas sont montrés quand même, grisés, avec la raison —
@@ -9114,6 +9142,7 @@ function frDonnees(athId){
   lignes.forEach(function(l){
     if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
     var c=fsCible(l,a.vma);
+    var mes=c?c.mes:fsMesure(l);
     var haut='', bas='';
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
     var nEff=Math.max(1,l.n||1), vu=false;
@@ -9136,11 +9165,12 @@ function frDonnees(athId){
       fcR=(typeof fcR==='number'&&fcR>0)?fcR:null;
       if(fcE!=null||fcR!=null) avecFC=true;
       if(fcE!=null){ fcN++; fcSom+=fcE; }
-      var r=c?fsEcart(reel,c.lo,c.hi):null;
+      var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
-                 reel:fHMS(reel), fcE:fcE, fcR:fcR, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+                 reel:fsEcritVal(reel,mes)+(mes==='d'?' m':''), fcE:fcE, fcR:fcR,
+                 ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
   });
@@ -9152,8 +9182,11 @@ function frDonnees(athId){
 function frBilan(f){
   var L=[f.n+' temps relev'+(f.n>1?'és':'é')];
   if(f.ok) L.push(f.ok+' dans la cible');
-  if(f.lent) L.push(f.lent+' au-dessus');
-  if(f.vif) L.push(f.vif+' en dessous');
+  /* « au-dessus » et « en dessous » ne veulent plus rien dire depuis qu'une
+     fraction peut se mesurer en mètres : y courir moins loin, c'est être
+     au-dessous du repère ET plus lent. On nomme donc ce qui compte. */
+  if(f.lent) L.push(f.lent+' plus lent'+(f.lent>1?'s':''));
+  if(f.vif) L.push(f.vif+' plus rapide'+(f.vif>1?'s':''));
   if(f.saute) L.push(f.saute+' non couru'+(f.saute>1?'s':''));
   if(f.fcMoy) L.push('FC moyenne sur les efforts : '+f.fcMoy);
   return L.join('   ·   ');
@@ -9482,12 +9515,14 @@ function fsHTML(){
              couru, et son chrono vaut d'être noté. On garde donc les cases,
              sans écart à calculer. */
           var c=fsCible(l,a.vma);
+          var mes=c?c.mes:fsMesure(l);
           var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
+          bornes+=' data-mes="'+mes+'"';
           var cases='';
           for(var k=0;k<nEff;k++){
             var brut=fsLire(a.id,s.title,l.i,k);
             var np=fsEstX(brut), reel=np?null:brut;
-            var r=c?fsEcart(reel,c.lo,c.hi):null;
+            var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
             var ec=np?'<span class="fs-ec fs-ec--np">non couru</span>'
                      :(r?'<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>':'<span class="fs-ec"></span>');
             var num=numero(k);
@@ -9522,15 +9557,18 @@ function fsHTML(){
             }
             cases+='<span class="fs-rep">'
               +(num?'<i class="fs-no">'+num+'</i>':'')
-              +'<input class="fs-in'+(np?' fs-in--x':'')+'" type="text" inputmode="decimal" maxlength="7"'
+              +'<input class="fs-in'+(np?' fs-in--x':'')+'" type="text" maxlength="7"'
               /* fHMS() écrit 3'28" : le guillemet fermait l'attribut en plein
                  milieu, et la case se rouvrait sur « 3'28 ». */
-              +' value="'+e(np?'x':(reel!=null?fHMS(reel):''))+'" placeholder="1,13"'
-              +' aria-label="Temps réalisé — '+quoi+'"'
-              +' onchange="fsNoter('+appel+',this)">'+fcs+ec
+              +' value="'+e(np?'x':(reel!=null?fsEcritVal(reel,mes):''))+'"'
+              +' placeholder="'+(mes==='d'?'150 m':'1,13')+'"'
+              +' inputmode="'+(mes==='d'?'numeric':'decimal')+'"'
+              +' title="'+(mes==='d'?'Distance parcourue, en mètres':'Temps réalisé')+'"'
+              +' aria-label="'+(mes==='d'?'Distance parcourue':'Temps réalisé')+' — '+quoi+'"'
+              +' onchange="fsNoter('+appel+',this,\''+mes+'\')">'+fcs+ec
               +'<button type="button" class="fs-x'+(np?' on':'')+'"'
               +' title="Fraction non courue" aria-label="Marquer non couru — '+quoi+'"'
-              +' onclick="fsBasculeX('+appel+',this)">\u2715</button>'
+              +' onclick="fsBasculeX('+appel+',this,\''+mes+'\')">\u2715</button>'
               +'</span>';
           }
           return '<td class="fs-val"'+bornes+'>'
