@@ -375,6 +375,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .lb-add--seg{margin-top:2px;font-size:12px;padding:7px}
   .lb-acts{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
   .lb-x,.lb-at{font-size:12px;font-weight:800;color:var(--muted2);flex-shrink:0}
+  .lb-libre{font-size:12px;font-weight:700;font-style:italic;color:var(--muted2);flex-shrink:0}
   /* Durée libre, puis intensité au menu — et l'allure quand c'est elle. */
   .lc-bord{display:flex;gap:7px;flex-wrap:wrap}
   .lc-bord input{flex:1 1 130px;min-width:0}
@@ -476,6 +477,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-days{display:grid;grid-template-columns:repeat(7,minmax(132px,1fr));gap:5px;margin-top:9px}
   .plw-day{position:relative;min-height:126px;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;padding:6px 7px 7px}
   .plw-dtop{display:flex;align-items:center;gap:4px;min-height:16px;position:relative}
+  .plw-dj{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2)}
   .plw-dn{font-size:14px;font-weight:800;color:var(--text2)}
   .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .plw-mk{margin-left:auto;font-size:12px}
@@ -512,6 +514,18 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-x:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
   .db-suppr{width:28px;height:28px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:16px;line-height:1;cursor:pointer;padding:0}
   .db-suppr:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
+  /* La liste d'outils d'une séance : une ligne par outil, nommée, à la taille
+     d'un doigt. Elle remplace cinq pastilles que personne ne savait viser. */
+  .plo-jour{font-size:12.5px;font-weight:700;color:var(--muted2);margin:-4px 0 14px}
+  .plo-liste{display:flex;flex-direction:column;gap:8px}
+  .plo-b{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:11px;color:var(--text);font-family:var(--font);padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+  .plo-b:hover{border-color:var(--orange);background:rgba(255,107,26,.08)}
+  .plo-i{flex:0 0 auto;width:26px;text-align:center;font-size:17px;line-height:1.2;color:var(--muted2)}
+  .plo-b:hover .plo-i{color:var(--orange)}
+  .plo-t{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:14px;font-weight:800}
+  .plo-t small{font-size:11.5px;font-weight:600;color:var(--muted2);line-height:1.45;white-space:normal}
+  .plo-b--del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
+  .plo-b--del:hover .plo-i,.plo-b--del:hover .plo-t{color:#F87171}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
@@ -5331,12 +5345,12 @@ function _seancePourEspace(titre,vma,ov){
     var pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
     var val=b.d?(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m')
               :(b.m?b.m+' min':(b.sec?b.sec+'s':''));
-    var core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pctTxt+'% VMA'));
+    var core=(b.r>1?b.r+' × ':'')+val+libCibleSuffixe(b);
     if(b.sets)core=b.sets+' séries de '+core;
     if(b.all!=null){
       var spdA=allVit(b.all);
       if(b.d)core+=' · '+fHMS(b.d/spdA)+'/rép';
-    } else if(vma){
+    } else if(vma&&b.pct!=null){
       var pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;
       var spd=vma*pc/100/3.6;
       core+=' → '+fAll(1000/spd)+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');
@@ -5753,6 +5767,7 @@ function dbRealiseCalHTML(rows){
       var isRace=(iso&&iso===d.race), isInter=(iso&&iso===d.inter);
       var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
       var mo=(dt&&(i===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
+      var dj='<span class="plw-dj">'+DOW[i]+'</span>';
       var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px'
              :(isInter?';outline:2px solid #FBBF24;outline-offset:-2px'
              :(iso===ajd?';outline:2px solid var(--orange);outline-offset:-2px':''));
@@ -5779,7 +5794,7 @@ function dbRealiseCalHTML(rows){
 
       var obj=isRace?plCourseChip('race',d.obj,d.nom,d.time):(isInter?plCourseChip('inter'):'');
       jours+='<div class="plw-day" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'">'
-        +'<div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
+        +'<div class="plw-dtop">'+dj+'<span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
         +'<div class="plw-sess">'+obj+chipsP+chipsF+manque+'</div></div>';
     }
     var meta='<div class="plw-meta">'
@@ -6435,19 +6450,35 @@ function pctPose(p){ return Array.isArray(p)?(p[0]>0):(p>0); }
 function pctTxt(p){ return Array.isArray(p)?(p[0]+'–'+p[1]+' %'):(p+' %'); }
 function allTxt(a){ return Array.isArray(a)?(fAll(a[0])+'–'+fAll(a[1])+'/km'):(fAll(a)+'/km'); }
 function allVit(a){ return 1000/allMoy(a); }   // m/s, pour les temps par répétition
+/* L'intensité d'un bloc, en toutes lettres. Trois cas et non deux : une
+   allure écrite, un pourcentage de VMA, ou rien du tout. Un gainage, une
+   côte, un fartlek au ressenti n'ont pas d'allure cible — et l'absence est
+   un choix, pas un oubli. */
+function libSansCible(o){ return !!o && o.all==null && o.pct==null; }
+function libCibleTxt(o){
+  if(libSansCible(o)) return 'sans cible';
+  if(o.all!=null) return allTxt(o.all);
+  return (Array.isArray(o.pct)?(o.pct[0]+'\u2013'+o.pct[1]):o.pct)+'% VMA';
+}
+/* Le même texte, accroché à ce qui précède. « @ » annonce une cible : sans
+   cible, il ne reste rien à annoncer, et « @ sans cible » se lirait mal. */
+function libCibleSuffixe(o){
+  return libSansCible(o) ? ' \u2014 sans cible' : (' @ '+libCibleTxt(o));
+}
 function libBlock(b,vma,lbl){
   const pctTxt=Array.isArray(b.pct)?(b.pct[0]+'–'+b.pct[1]):(''+b.pct);
   let val='';
   if(b.d)val=(b.d>=1000?String(b.d/1000).replace('.',',')+' km':b.d+' m');
   else if(b.m)val=b.m+' min';
   else if(b.sec)val=b.sec+'s';
-  let core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pctTxt+'% VMA'));
+  let core=(b.r>1?b.r+' × ':'')+val+libCibleSuffixe(b);
   if(b.sets)core=b.sets+' séries de '+core;
   let calc='';
   // Allure écrite : il n'y a rien à convertir, seul le temps par répétition
   // reste à dire. Pourcentage : on montre ce qu'il vaut pour cet athlète.
+  // Sans cible, il n'y a rien à dire du tout.
   if(b.all!=null){const spd=allVit(b.all);calc=b.d?fHMS(b.d/spd)+'/rép':'';}
-  else if(vma){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
+  else if(vma&&b.pct!=null){const pc=Array.isArray(b.pct)?(b.pct[0]+b.pct[1])/2:b.pct;const spd=vma*pc/100/3.6;const pace=fAll(1000/spd);calc=pace+'/km'+(b.d?(' · '+fHMS(b.d/spd)+'/rép'):'');}
   const rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   const recTxt=rec.length?' <span class="lib-rec">('+rec.join(' · ')+')</span>':'';
   return '<div class="lib-step lib-step--core"><span class="lib-step-k">'+lbl+'</span><span class="lib-step-v"><b>'+core+'</b>'+(calc?' <span class="lib-calc">→ '+calc+'</span>':'')+recTxt+'</span></div>';
@@ -8190,8 +8221,8 @@ function libEditCancel(){
    l'autre, jamais les deux : c'est le choix du coach pour ce bloc-là.
    Une seule valeur = une allure ronde ; les deux = une fourchette. */
 function libIntensiteHTML(o,IS,appel,large){
-  var all=(o.all!=null);
-  var v0=all?fAll(Array.isArray(o.all)?o.all[0]:o.all):(Array.isArray(o.pct)?o.pct[0]:(o.pct||70));
+  var sc=libSansCible(o), all=(o.all!=null);
+  var v0=all?fAll(Array.isArray(o.all)?o.all[0]:o.all):(Array.isArray(o.pct)?o.pct[0]:(o.pct!=null?o.pct:70));
   var v1=all?(Array.isArray(o.all)?fAll(o.all[1]):''):(Array.isArray(o.pct)?o.pct[1]:'');
   /* inputmode="decimal" et non "numeric" : le clavier d'un téléphone n'a pas
      de touche « : ». Avec « decimal » il porte une virgule, et allSec() la
@@ -8200,12 +8231,20 @@ function libIntensiteHTML(o,IS,appel,large){
     ? 'type="text" inputmode="decimal" maxlength="5"'
     : 'type="number" min="30" max="130" step="1"';
   var w0=all?'62px':'62px', w1=large?'66px':'62px';
-  return '<input '+num+' value="'+v0+'" oninput="'+appel+'\'v0\',this.value)" title="'+(all?'allure au km : 4,05 ou 4:05 pour 4 min 05 s':'% VMA')+'" style="'+IS+';width:'+w0+';text-align:center">'
-    +'<span class="lb-at">–</span>'
-    +'<input '+num+' value="'+v1+'" placeholder="'+(all?'à':'max')+'" oninput="'+appel+'\'v1\',this.value)" title="'+(all?'allure la plus lente, facultatif : 4,20 ou 4:20':'% VMA haut (facultatif)')+'" style="'+IS+';width:'+w1+';text-align:center">'
-    +'<select onchange="'+appel+'\'mode\',this.value)" title="unité d’intensité" style="'+IS+';width:88px">'
-      +'<option value="pct"'+(all?'':' selected')+'>% VMA</option>'
-      +'<option value="all"'+(all?' selected':'')+'>min/km</option></select>';
+  /* Sans cible, les deux champs n'ont rien à porter : on les cache plutôt que
+     de laisser un chiffre mort que le coach croirait pris en compte. */
+  var cache=sc?';display:none':'';
+  /* Le « à » introduit la cible : « à 90 % VMA ». Sans cible il n'introduit
+     rien, et « à au ressenti » ne se dit pas. */
+  return (sc?'':'<span class="lb-at">à</span>')
+    +'<input class="lb-i0" '+num+' value="'+v0+'" oninput="'+appel+'\'v0\',this.value)" title="'+(all?'allure au km : 4,05 ou 4:05 pour 4 min 05 s':'% VMA')+'" style="'+IS+';width:'+w0+';text-align:center'+cache+'">'
+    +'<span class="lb-at"'+(sc?' style="display:none"':'')+'>–</span>'
+    +'<input class="lb-i1" '+num+' value="'+v1+'" placeholder="'+(all?'à':'max')+'" oninput="'+appel+'\'v1\',this.value)" title="'+(all?'allure la plus lente, facultatif : 4,20 ou 4:20':'% VMA haut (facultatif)')+'" style="'+IS+';width:'+w1+';text-align:center'+cache+'">'
+    +(sc?'<span class="lb-libre">au ressenti</span>':'')
+    +'<select class="lb-mode" onchange="'+appel+'\'mode\',this.value)" title="unité d\u2019intensité" style="'+IS+';width:112px">'
+      +'<option value="pct"'+((!sc&&!all)?' selected':'')+'>% VMA</option>'
+      +'<option value="all"'+(all?' selected':'')+'>min/km</option>'
+      +'<option value="non"'+(sc?' selected':'')+'>Pas de cible</option></select>';
 }
 
 /* Une ligne de bloc : répétitions × valeur (m, km ou min) à une intensité —
@@ -8216,15 +8255,19 @@ function libBlocRow(b,i){
   var unite=b.m?'min':(b.sec?'sec':(b.d>=1000?'km':'m'));
   var val=b.m?b.m:(b.sec?b.sec:(b.d>=1000?(b.d/1000):(b.d||0)));
   var o=function(v,t){return '<option value="'+v+'"'+(unite===v?' selected':'')+'>'+t+'</option>';};
+  /* Les séries ouvrent la ligne, comme on les écrit : 2 × (10 × 30/30) r2'.
+     Leur récup ferme la ligne, après celle des répétitions. */
   return '<div class="lb-row" data-i="'+i+'">'
     +lbGrip(i,null)
-    +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
+    +'<input class="lb-sets" type="number" min="1" step="1" value="'+Math.max(1,b.sets||1)+'" oninput="libBlocSet('+i+',\'sets\',this.value)" title="séries : 2 pour 2 × (10 × 30/30)" style="'+IS+';width:52px;text-align:center">'
+    +'<span class="lb-x">séries&nbsp;×</span>'
+    +'<input class="lb-r" type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
     +'<span class="lb-x">×</span>'
-    +'<input type="number" min="0" step="any" value="'+val+'" oninput="libBlocSet('+i+',\'val\',this.value)" title="valeur" style="'+IS+';width:74px;text-align:center">'
-    +'<select onchange="libBlocSet('+i+',\'unite\',this.value)" title="unité" style="'+IS+';width:72px">'+o('m','m')+o('km','km')+o('min','min')+o('sec','sec')+'</select>'
-    +'<span class="lb-at">à</span>'
+    +'<input class="lb-val" type="number" min="0" step="any" value="'+val+'" oninput="libBlocSet('+i+',\'val\',this.value)" title="valeur" style="'+IS+';width:74px;text-align:center">'
+    +'<select class="lb-unite" onchange="libBlocSet('+i+',\'unite\',this.value)" title="unité" style="'+IS+';width:72px">'+o('m','m')+o('km','km')+o('min','min')+o('sec','sec')+'</select>'
     +libIntensiteHTML(b,IS,'libBlocInt('+i+',',true)
-    +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:110px">'
+    +'<input class="lb-rec" value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup (ex : 2’ jog)" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:110px">'
+    +'<input class="lb-recset" value="'+String(b.recSet||'').replace(/"/g,'&quot;')+'" placeholder="récup entre séries (ex : 3 min)" oninput="libBlocSet('+i+',\'recSet\',this.value)" title="récup entre les séries" style="'+IS+';flex:1;min-width:150px">'
     +'<span class="lb-acts">'
       +'<button type="button" class="lb-alt" onclick="libBlocEnAlt('+i+')" title="Transformer en alternance : plusieurs allures dans la même répétition">⇄ Alterner</button>'
       +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
@@ -8245,10 +8288,9 @@ function libBlocRowAlt(b,i,IS){
     var val=km?(sg.d/1000):(sg.d||0);
     return '<div class="lb-seg" data-i="'+i+'" data-j="'+j+'">'
       +(segs.length>1?lbGrip(i,j):'')
-      +'<input type="number" min="0" step="any" value="'+val+'" oninput="libSegSet('+i+','+j+',\'val\',this.value)" title="distance" style="'+IS+';width:74px;text-align:center">'
-      +'<select onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
+      +'<input class="lb-val" type="number" min="0" step="any" value="'+val+'" oninput="libSegSet('+i+','+j+',\'val\',this.value)" title="distance" style="'+IS+';width:74px;text-align:center">'
+      +'<select class="lb-unite" onchange="libSegSet('+i+','+j+',\'unite\',this.value)" title="unité" style="'+IS+';width:66px">'
         +'<option value="m"'+(km?'':' selected')+'>m</option><option value="km"'+(km?' selected':'')+'>km</option></select>'
-      +'<span class="lb-at">à</span>'
       +libIntensiteHTML(sg,IS,'libSegInt('+i+','+j+',',false)
       +'<input value="'+String(sg.lbl||'').replace(/"/g,'&quot;')+'" placeholder="libellé (ex : AS42)" oninput="libSegSet('+i+','+j+',\'lbl\',this.value)" style="'+IS+';flex:1;min-width:120px">'
       +(segs.length>1?'<button type="button" class="lb-del" onclick="libSegDel('+i+','+j+')" title="Retirer ce segment">✕</button>':'')
@@ -8257,9 +8299,12 @@ function libBlocRowAlt(b,i,IS){
   return '<div class="lb-row lb-row--alt" data-i="'+i+'">'
     +'<div class="lb-alt-hd">'
       +lbGrip(i,null)
-      +'<input type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
+      +'<input class="lb-sets" type="number" min="1" step="1" value="'+Math.max(1,b.sets||1)+'" oninput="libBlocSet('+i+',\'sets\',this.value)" title="séries" style="'+IS+';width:52px;text-align:center">'
+      +'<span class="lb-x">séries&nbsp;×</span>'
+      +'<input class="lb-r" type="number" min="1" step="1" value="'+(b.r||1)+'" oninput="libBlocSet('+i+',\'r\',this.value)" title="répétitions" style="'+IS+';width:52px;text-align:center">'
       +'<span class="lb-x">× alternance</span>'
-      +'<input value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup entre répétitions" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:150px">'
+      +'<input class="lb-rec" value="'+String(b.rec||'').replace(/"/g,'&quot;')+'" placeholder="récup entre répétitions" oninput="libBlocSet('+i+',\'rec\',this.value)" style="'+IS+';flex:1;min-width:150px">'
+      +'<input class="lb-recset" value="'+String(b.recSet||'').replace(/"/g,'&quot;')+'" placeholder="récup entre séries" oninput="libBlocSet('+i+',\'recSet\',this.value)" style="'+IS+';flex:1;min-width:140px">'
       +'<span class="lb-acts">'
         +'<button type="button" class="lb-alt" onclick="libBlocEnSimple('+i+')" title="Revenir à un bloc à une seule allure">⇄ Simple</button>'
         +'<button type="button" class="lb-del" onclick="libBlocDel('+i+')" title="Retirer ce bloc">✕</button>'
@@ -8421,8 +8466,9 @@ function libSegSet(i,j,champ,v){
   if(champ==='lbl'){ sg.lbl=String(v||'').slice(0,24); }
   else {
     var row=document.querySelector('.lb-seg[data-i="'+i+'"][data-j="'+j+'"]');
-    var val=+((row&&row.querySelector('input').value)||0);
-    var u=(row&&row.querySelector('select').value)||'m';
+    var cv=row&&row.querySelector('.lb-val'), cu=row&&row.querySelector('.lb-unite');
+    var val=+((cv&&cv.value)||0);
+    var u=(cu&&cu.value)||'m';
     sg.d=(u==='km')?Math.round(val*1000):Math.round(val);
   }
   libPreview();
@@ -8593,13 +8639,16 @@ function libMuscuBody(s){
    regarde. */
 function libIntMode(o,mode){
   var vma=libVmaVal();
+  /* Sans cible : on efface les deux, l'absence EST le mode. Rien de plus à
+     ranger, rien à migrer sur les séances déjà écrites. */
+  if(mode==='non'){ delete o.pct; delete o.all; return; }
   if(mode==='all'){
     if(o.all!=null)return;
-    var pc=Array.isArray(o.pct)?o.pct[0]:(o.pct||80);
+    var pc=Array.isArray(o.pct)?o.pct[0]:(o.pct!=null?o.pct:80);
     o.all=vma?Math.round(1000/(vma*pc/100/3.6)):270;
     delete o.pct;
   } else {
-    if(o.all==null)return;
+    if(o.pct!=null)return;
     var sec=Array.isArray(o.all)?o.all[0]:o.all;
     o.pct=(vma&&sec)?Math.max(30,Math.min(130,Math.round(3600/sec/vma*100))):80;
     delete o.all;
@@ -8610,11 +8659,11 @@ function libIntMode(o,mode){
    saisie encore incomplète — « 4: » — ne touche à rien : on attend la suite. */
 function libIntLit(o,ligne){
   if(!ligne)return;
-  var ins=ligne.querySelectorAll('input');
-  // Une ligne de bloc commence par « répétitions × valeur », un segment par sa
-  // seule distance : les deux champs d'intensité ne tombent pas au même rang.
-  var k=ligne.classList.contains('lb-seg')?1:2;
-  var t0=(ins[k]&&ins[k].value)||'', t1=(ins[k+1]&&ins[k+1].value)||'';
+  if(libSansCible(o))return;          // rien à lire : le bloc n'a pas de cible
+  /* Repérés par leur classe et non par leur rang : la ligne d'un bloc a gagné
+     des champs (séries, récup entre séries) et en gagnera d'autres. */
+  var c0=ligne.querySelector('.lb-i0'), c1=ligne.querySelector('.lb-i1');
+  var t0=(c0&&c0.value)||'', t1=(c1&&c1.value)||'';
   if(o.all!=null){
     var s0=allSec(t0), s1=t1.trim()?allSec(t1):null;
     if(s0==null)return;
@@ -8641,10 +8690,17 @@ function libBlocSet(i,champ,v){
   var b=_libEdit&&_libEdit.blocks&&_libEdit.blocks[i]; if(!b)return;
   if(champ==='r'){ b.r=Math.max(1,Math.round(+v||1)); }
   else if(champ==='rec'){ b.rec=v; }
+  else if(champ==='recSet'){ if(String(v||'').trim()) b.recSet=v; else delete b.recSet; }
+  else if(champ==='sets'){
+    // Une seule série, c'est un bloc ordinaire : on ne range rien.
+    var n=Math.max(1,Math.round(+v||1));
+    if(n>1) b.sets=n; else delete b.sets;
+  }
   else if(champ==='val'||champ==='unite'){
     var row=document.querySelector('.lb-row[data-i="'+i+'"]');
-    var val=+((row&&row.querySelectorAll('input')[1].value)||0);
-    var u=(row&&row.querySelector('select').value)||'m';
+    var cv=row&&row.querySelector('.lb-val'), cu=row&&row.querySelector('.lb-unite');
+    var val=+((cv&&cv.value)||0);
+    var u=(cu&&cu.value)||'m';
     delete b.d; delete b.m; delete b.sec;
     if(u==='km')b.d=Math.round(val*1000); else if(u==='m')b.d=Math.round(val);
     else if(u==='min')b.m=val; else b.sec=Math.round(val);
@@ -9143,8 +9199,9 @@ function frImage(f,ech){
       c.fillText('n° '+r.num,cx+FR_COL.nom,mid+6);
     }
 
-    f1(19,'800'); c.fillStyle='#334155';
-    c.fillText(r.viseHaut,cx+FR_COL.vise,mid+(r.viseBas?0:6));
+    if(r.viseHaut){ f1(19,'800'); c.fillStyle='#334155'; }
+    else { f1(15,'700'); c.fillStyle='#CBD5E1'; }
+    c.fillText(r.viseHaut||'sans cible',cx+FR_COL.vise,mid+(r.viseBas?0:6));
     if(r.viseBas){ f1(13.5,'600'); c.fillStyle='#94A3B8';
                    c.fillText(r.viseBas,cx+FR_COL.vise,mid+20); }
 
@@ -9187,7 +9244,10 @@ function frTexte(f){
     if(r.fcE!=null||r.fcR!=null){
       fc='  |  FC '+(r.fcE!=null?r.fcE:'—')+(r.fcR!=null?' puis '+r.fcR+' en fin de récup':'');
     }
-    L.push('• '+(r.nom?r.nom+' ':'')+(r.num?'n° '+r.num:'')+' — visé '+r.viseHaut
+    /* Un bloc sans cible n'a rien à viser : « visé  » suivi d'un blanc
+       ressemblerait à une donnée manquante. */
+    L.push('• '+(r.nom?r.nom+' ':'')+(r.num?'n° '+r.num:'')
+             +(r.viseHaut?' — visé '+r.viseHaut:' — sans cible')
              +'  |  réel '+r.reel+fc+(r.ecTxt?'  ('+r.ecTxt+')':''));
   });
   L.push(''); L.push(frBilan(f));
@@ -9419,14 +9479,16 @@ function fsHTML(){
       };
       return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
         +pris.map(function(a){
+          /* Un bloc sans cible n'a pas d'allure à afficher — mais il a été
+             couru, et son chrono vaut d'être noté. On garde donc les cases,
+             sans écart à calculer. */
           var c=fsCible(l,a.vma);
-          if(!c) return '<td class="fs-val"><span style="color:var(--muted2)">—</span></td>';
-          var bornes=(c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
+          var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
           var cases='';
           for(var k=0;k<nEff;k++){
             var brut=fsLire(a.id,s.title,l.i,k);
             var np=fsEstX(brut), reel=np?null:brut;
-            var r=fsEcart(reel,c.lo,c.hi);
+            var r=c?fsEcart(reel,c.lo,c.hi):null;
             var ec=np?'<span class="fs-ec fs-ec--np">non couru</span>'
                      :(r?'<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>':'<span class="fs-ec"></span>');
             var num=numero(k);
@@ -9459,7 +9521,9 @@ function fsHTML(){
               +' onclick="fsBasculeX('+appel+',this)">\u2715</button>'
               +'</span>';
           }
-          return '<td class="fs-val"'+bornes+'>'+c.txt+'<span class="fs-reps">'+cases+'</span></td>';
+          return '<td class="fs-val"'+bornes+'>'
+            +(c?c.txt:'<span style="color:var(--muted2)">\u2014</span>')
+            +'<span class="fs-reps">'+cases+'</span></td>';
         }).join('')
         +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>'
         +ligneRecup();
@@ -9600,12 +9664,12 @@ function renderExtrapol(){
 /* ══ EXPORT SÉANCES → JSON (schéma générique, réutilisable API Nolio) ══ */
 function libBlockText(b){
   if(b.segs){
-    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+(sg.all!=null?allTxt(sg.all):((Array.isArray(sg.pct)?sg.pct.join('-'):sg.pct)+'% VMA'))+')';}).join(' + ');
+    const segs=b.segs.map(function(sg){return fDist(sg.d)+' '+sg.lbl+' ('+libCibleTxt(sg)+')';}).join(' + ');
     return (b.label?b.label+' : ':'')+(b.r>1?b.r+' × ':'')+segs+(b.rec?' — récup '+b.rec:'');
   }
   var val=b.d?(b.d>=1000?(String(b.d/1000).replace('.',','))+' km':b.d+' m'):(b.m?b.m+' min':(b.sec?b.sec+'s':''));
   var pct=Array.isArray(b.pct)?b.pct.join('-'):b.pct;
-  var core=(b.r>1?b.r+' × ':'')+val+' @ '+(b.all!=null?allTxt(b.all):(pct+'% VMA'));
+  var core=(b.r>1?b.r+' × ':'')+val+libCibleSuffixe(b);
   if(b.sets)core=b.sets+' séries de '+core;
   var rec=[];if(b.rec)rec.push('récup '+b.rec);if(b.recSet)rec.push(b.recSet+' entre séries');
   return core+(rec.length?' ('+rec.join(' · ')+')':'');
@@ -11486,6 +11550,59 @@ function plGrabToggle(ev,iso,i){
   _plGrab=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===i)?null:{iso:iso,i:i};
   plUpd();
 }
+/* ══ LES OUTILS D'UNE SÉANCE POSÉE ══
+   Ils tenaient en cinq pastilles d'un demi-centimètre au bord de la case :
+   ✎ ↓ ▤ ⧉ ×. Sur un téléphone on visait au hasard, et rien ne disait ce que
+   chacune faisait — le nom n'existait que dans l'infobulle, invisible au
+   doigt. Un appui sur la séance ouvre maintenant la liste, en toutes lettres.
+
+   Le déplacement y entre aussi : il se déclenchait par un appui sur la
+   séance, geste que plus rien n'annonçait une fois la liste installée. */
+function plOutilsOuvrir(iso,si){
+  var l=(typeof _plSessions!=='undefined'&&_plSessions&&_plSessions[iso])||[];
+  var sx=l[si]; if(!sx) return;
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var d=new Date(iso+'T12:00:00');
+  var jour=isNaN(d)?iso:d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  // Une majuscule au premier mot seulement : « Mardi 15 Septembre » se lit mal.
+  jour=jour.charAt(0).toUpperCase()+jour.slice(1);
+  var ov=(typeof plOvTxt==='function')?plOvTxt(sx):'';
+  var b=function(act,icone,titre,desc,cls){
+    return '<button type="button" class="plo-b'+(cls?' '+cls:'')+'"'
+      +' onclick="plOutilsFaire(\''+act+'\',\''+rlJsStr(iso)+'\','+si+')">'
+      +'<span class="plo-i">'+icone+'</span>'
+      +'<span class="plo-t">'+titre+'<small>'+desc+'</small></span></button>';
+  };
+  var corps='<div class="plo-liste">'
+    +b('voir','\uD83D\uDC41','Voir le détail','la séance en entier, telle qu\u2019elle est écrite')
+    +b('duree','\u270E','Régler la durée','raccourcir ou rallonger la séance pour ce jour-là')
+    +b('montre','\u2193','Envoyer sur la montre','le fichier .fit à importer dans Garmin, COROS, Suunto')
+    +b('res','\u25A4','Résultats','noter les chronos et les pulsations de ce jour-là')
+    +b('copie','\u29C9','Dupliquer','poser la même séance une seconde fois ce jour-là')
+    +b('bouge','\u21C4','Déplacer','puis touche le jour où tu veux la poser')
+    +b('del','\u2715','Retirer','enlever cette séance du plan','plo-b--del')
+    +'</div>';
+  rlModalOuvrir('pl-outils',
+    '<div class="pl-modal-box" style="max-width:420px">'
+    +'<div class="pl-modal-top"><b>'+e(sx.t)+'</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="rlModalFermer(\'pl-outils\')">×</button></div>'
+    +'<div class="plo-jour">'+e(jour)+(ov?' \u00b7 '+e(ov):'')+'</div>'
+    +corps+'</div>');
+}
+function plOutilsFaire(act,iso,si){
+  var l=(typeof _plSessions!=='undefined'&&_plSessions&&_plSessions[iso])||[];
+  var sx=l[si]; if(!sx) return;
+  var titre=sx.t;
+  if(act==='del'&&!confirm('Retirer « '+titre+' » du '+iso+' ?')) return;
+  rlModalFermer('pl-outils');
+  if(act==='voir')   return plApercuOuvrir(titre,iso,si);
+  if(act==='duree')  return plDureeOuvrir(iso,si);
+  if(act==='montre') return wktExportJour(iso,si);
+  if(act==='res')    return fsOuvrirPlan(iso,si);
+  if(act==='copie')  return plDaySessCopy(iso,si);
+  if(act==='del')    return plDaySessDel(iso,si);
+  if(act==='bouge'){ _plGrab={iso:iso,i:si}; plUpd(); }
+}
 function plDayTap(iso){
   if(!_plGrab)return;
   plMoveSession(_plGrab.iso,_plGrab.i,iso,false);
@@ -11931,6 +12048,11 @@ function plCalendarHTML(p,weeks,opts){
       var isRace=same(dt,raceD), isInter=same(dt,interD);
       var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
       var mo=(dt&&(d===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
+      /* Le jour de la semaine dans la case, et pas seulement en en-tête : cet
+         en-tête-là reste tout en haut du calendrier, hors de vue dès la
+         deuxième semaine, et sur un téléphone le tableau glisse aussi de côté.
+         Écrit ici, il suit la case où qu'elle soit. */
+      var dj='<span class="plw-dj">'+DOW[d]+'</span>';
       var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px':(isInter?';outline:2px solid #FBBF24;outline-offset:-2px':'');
       var sess=(_plSessions[iso]||[]).map(function(sx,si){
         var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';
@@ -11941,25 +12063,18 @@ function plCalendarHTML(p,weeks,opts){
         var lbl=esc+(ov?' <span class="plw-ov">'+ov+'</span>':'')+fait;
         if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\','+si+')" title="Voir le détail de la séance"><span>'+lbl+'</span><span class="plw-oeil">›</span></div>';
-        return '<div class="plw-ch plw-ch--act'+held+'" draggable="true"'
+        return '<div class="plw-ch plw-ch--ouvre'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
-          +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
+          +' onclick="event.stopPropagation();plOutilsOuvrir(\''+iso+'\','+si+')"'
           +' style="background:'+col+'20;border-left:3px solid '+col+'"'
-          +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
-          +'<span>'+lbl+'</span>'
-          +'<div class="plw-acts">'
-            +'<button type="button" class="plw-cp" title="Régler la durée, ou modifier la séance" aria-label="Régler la durée, ou modifier la séance" onclick="event.stopPropagation();plDureeOuvrir(\''+iso+'\','+si+')">✎</button>'
-            +'<button type="button" class="plw-cp" title="Envoyer cette séance sur la montre (.fit)" aria-label="Envoyer sur la montre" onclick="event.stopPropagation();wktExportJour(\''+iso+'\','+si+')">\u2193</button>'
-            +'<button type="button" class="plw-cp" title="Résultats : noter les temps de ce jour-là" aria-label="Résultats de séance" onclick="event.stopPropagation();fsOuvrirPlan(\''+iso+'\','+si+')">▤</button>'
-            +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
-            +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
-          +'</div></div>';
+          +' title="'+esc+' — touche-la pour ouvrir ses outils, ou glisse-la sur un autre jour (Alt pour copier)">'
+          +'<span>'+lbl+'</span><span class="plw-oeil">\u22ef</span></div>';
       }).join('');
       var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
       if(iso){ var kj=plKmJour(iso,vmaCal); kmSem+=kj.m; if(kj.partiel)kmPartiel=true; }
       var obj=isRace?plCourseChip('race',_plD,_plNom,_plTime):(isInter?plCourseChip('inter'):'');
-      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+obj+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
+      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop">'+dj+'<span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+obj+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
     }
     var meta='<div class="plw-meta">'
       +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+(wk.dates||'')+'</span></span>'
