@@ -476,6 +476,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-days{display:grid;grid-template-columns:repeat(7,minmax(132px,1fr));gap:5px;margin-top:9px}
   .plw-day{position:relative;min-height:126px;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;padding:6px 7px 7px}
   .plw-dtop{display:flex;align-items:center;gap:4px;min-height:16px;position:relative}
+  .plw-dj{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2)}
   .plw-dn{font-size:14px;font-weight:800;color:var(--text2)}
   .plw-mo{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .plw-mk{margin-left:auto;font-size:12px}
@@ -5753,6 +5754,7 @@ function dbRealiseCalHTML(rows){
       var isRace=(iso&&iso===d.race), isInter=(iso&&iso===d.inter);
       var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
       var mo=(dt&&(i===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
+      var dj='<span class="plw-dj">'+DOW[i]+'</span>';
       var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px'
              :(isInter?';outline:2px solid #FBBF24;outline-offset:-2px'
              :(iso===ajd?';outline:2px solid var(--orange);outline-offset:-2px':''));
@@ -5779,7 +5781,7 @@ function dbRealiseCalHTML(rows){
 
       var obj=isRace?plCourseChip('race',d.obj,d.nom,d.time):(isInter?plCourseChip('inter'):'');
       jours+='<div class="plw-day" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'">'
-        +'<div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
+        +'<div class="plw-dtop">'+dj+'<span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div>'
         +'<div class="plw-sess">'+obj+chipsP+chipsF+manque+'</div></div>';
     }
     var meta='<div class="plw-meta">'
@@ -11931,6 +11933,11 @@ function plCalendarHTML(p,weeks,opts){
       var isRace=same(dt,raceD), isInter=same(dt,interD);
       var mk=isRace?'<span class="plw-mk">🏁</span>':(isInter?'<span class="plw-mk">★</span>':'');
       var mo=(dt&&(d===0||dt.getDate()===1))?'<span class="plw-mo">'+MON[dt.getMonth()]+'</span>':'';
+      /* Le jour de la semaine dans la case, et pas seulement en en-tête : cet
+         en-tête-là reste tout en haut du calendrier, hors de vue dès la
+         deuxième semaine, et sur un téléphone le tableau glisse aussi de côté.
+         Écrit ici, il suit la case où qu'elle soit. */
+      var dj='<span class="plw-dj">'+DOW[d]+'</span>';
       var ol=isRace?';outline:2px solid #34D399;outline-offset:-2px':(isInter?';outline:2px solid #FBBF24;outline-offset:-2px':'');
       var sess=(_plSessions[iso]||[]).map(function(sx,si){
         var col=(LIB_THEMES.find(function(t){return t.id===sx.th;})||{}).col||'#94A3B8';
@@ -11959,7 +11966,7 @@ function plCalendarHTML(p,weeks,opts){
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
       if(iso){ var kj=plKmJour(iso,vmaCal); kmSem+=kj.m; if(kj.partiel)kmPartiel=true; }
       var obj=isRace?plCourseChip('race',_plD,_plNom,_plTime):(isInter?plCourseChip('inter'):'');
-      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop"><span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+obj+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
+      days+='<div class="plw-day'+(_plGrab&&iso&&!RO?' plw-day--target':'')+'" style="background:'+pha(c,wk.rec?0.05:0.11)+ol+'"'+drop+'><div class="plw-dtop">'+dj+'<span class="plw-dn">'+(dt?dt.getDate():'')+'</span>'+mo+mk+'</div><div class="plw-sess">'+obj+sess+'</div>'+((iso&&!RO)?'<button type="button" class="plw-add" onclick="event.stopPropagation();plDayPick(\''+iso+'\')">+ séance</button>':'')+'</div>';
     }
     var meta='<div class="plw-meta">'
       +'<span class="plw-s"><b>S'+wk.n+'</b> <span class="plc-dt">'+(wk.dates||'')+'</span></span>'
