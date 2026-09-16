@@ -627,6 +627,10 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-fc:focus{border-color:#F87171}
   .fs-fc::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
   .fs-fc--rec{border-style:dashed}
+  /* La ligne de récup : même retrait que l'échauffement, pour qu'on la lise
+     comme un entre-deux et non comme un effort de plus. */
+  .fs-tab tr.fs-recl td{background:rgba(255,255,255,.02)}
+  .fs-tab tr.fs-recl td.fs-eff{background:#1b2436;color:var(--muted);font-weight:700}
   .fs-fc-sw.on{background:rgba(248,113,113,.14);border-color:#F87171;color:#F87171}
   /* Les répétitions : une case par fraction, numérotée à gauche. Empilées,
      elles se remplissent au stylo aussi bien qu'au clavier. */
@@ -9386,6 +9390,33 @@ function fsHTML(){
          quatre fractions par une moyenne que personne n'a courue. */
       var nEff=Math.max(1,l.n||1);
       var numero=function(k){ return fsNumero(l,k); };
+      /* La récup a sa propre ligne : une case par athlète et par récup, dans
+         SA colonne. La colonne « Récup » de droite, elle, porte la consigne —
+         la même pour tout le monde, donc incapable d'accueillir une
+         pulsation, qui appartient à quelqu'un. */
+      var ligneRecup=function(){
+        if(!_fsFC) return '';
+        var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
+        return '<tr class="fs-recl"><td class="fs-eff">Récup'
+          +(consigne?'<span class="fs-soft-v">'+e(consigne)+'</span>':'')+'</td>'
+          +pris.map(function(a){
+             var boites='';
+             for(var k=0;k<nEff;k++){
+               var num=numero(k);
+               var fcR=fsLireFC(a.id,s.title,l.i,k,true);
+               boites+='<span class="fs-rep">'
+                 +(num?'<i class="fs-no">'+num+'</i>':'')
+                 +'<input class="fs-fc fs-fc--rec" type="text" inputmode="numeric" maxlength="3"'
+                 +' value="'+(fcR!=null?fcR:'')+'" placeholder="FC"'
+                 +' title="Pulsations à la fin de la récup"'
+                 +' aria-label="FC fin de récup — '+e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'')+'"'
+                 +' onchange="fsNoterFC('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k+',true,this)">'
+                 +'</span>';
+             }
+             return '<td class="fs-val"><span class="fs-reps">'+boites+'</span></td>';
+           }).join('')
+          +'<td class="fs-rec">—</td></tr>';
+      };
       return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
         +pris.map(function(a){
           var c=fsCible(l,a.vma);
@@ -9403,20 +9434,17 @@ function fsHTML(){
             var appel=a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k;
             /* Les pulsations n'apparaissent que si le coach les prend : sans
                interrupteur, la feuille de piste doublerait de largeur pour
-               tout le monde. */
+               tout le monde. Celles de la récup ont leur propre ligne, plus
+               bas — la récup est un moment à elle, pas une colonne de
+               l'effort. */
             var fcs='';
             if(_fsFC){
-              var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
+              var fcE=fsLireFC(a.id,s.title,l.i,k,false);
               fcs='<input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
                 +' value="'+(fcE!=null?fcE:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de l\u2019effort"'
                 +' aria-label="FC effort — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',false,this)">'
-                +'<input class="fs-fc fs-fc--rec" type="text" inputmode="numeric" maxlength="3"'
-                +' value="'+(fcR!=null?fcR:'')+'" placeholder="réc"'
-                +' title="Pulsations à la fin de la récup"'
-                +' aria-label="FC fin de récup — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',true,this)">';
+                +' onchange="fsNoterFC('+appel+',false,this)">';
             }
             cases+='<span class="fs-rep">'
               +(num?'<i class="fs-no">'+num+'</i>':'')
@@ -9433,7 +9461,8 @@ function fsHTML(){
           }
           return '<td class="fs-val"'+bornes+'>'+c.txt+'<span class="fs-reps">'+cases+'</span></td>';
         }).join('')
-        +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>';
+        +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>'
+        +ligneRecup();
     }).join('');
     corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
       +'<th>Effort</th>'
@@ -9448,8 +9477,9 @@ function fsHTML(){
       +'Une fraction que l’athlète n’a pas courue se marque avec le bouton <b>✕</b> à côté de la case (ou en tapant <b>x</b>) : '
       +'elle apparaîtra « non couru » sur sa fiche, alors qu’une case laissée vide veut seulement dire « pas encore noté ». '
       +'<br><b style="color:var(--text2)">Pulsations</b> — le bouton <b>♥ FC</b>, au-dessus, ajoute deux cases par fraction : '
-      +'la première pour le cœur à la <b>fin de l’effort</b>, la seconde, en pointillés, pour le cœur à la <b>fin de la récup</b>. '
-      +'C’est la seconde qui dit si le cœur redescend. Elles s’enregistrent comme les chronos et partent sur la fiche de l’athlète. '
+      +'une case pour le cœur à la <b>fin de l’effort</b>, sur la ligne de la fraction ; '
+      +'et une ligne <b>Récup</b> juste en dessous, avec sa propre case, pour le cœur à la <b>fin de la récup</b>. '
+      +'C’est cette seconde valeur qui dit si le cœur redescend. Elles s’enregistrent comme les chronos et partent sur la fiche de l’athlète. '
       +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
       +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
   }
