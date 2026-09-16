@@ -614,6 +614,13 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-ec--ok{color:#34D399}
   .fs-ec--vif{color:#60A5FA}
   .fs-ec--lent{color:#FBBF24}
+  .fs-ec--np{color:var(--muted2)}
+  /* Le bouton « non couru ». Un clavier de téléphone n'a pas de touche « x » :
+     le geste doit exister sans clavier, au doigt, à côté de la case. */
+  .fs-x{flex:0 0 auto;width:27px;height:27px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1.5px solid var(--input-border);border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:11px;font-weight:800;line-height:1;padding:0;cursor:pointer;transition:all .15s}
+  .fs-x:hover{color:var(--text2);border-color:var(--muted2)}
+  .fs-x.on{background:rgba(148,163,184,.2);border-color:var(--muted2);color:var(--text2)}
+  .fs-in--x{color:var(--muted2);font-style:italic}
   /* Les répétitions : une case par fraction, numérotée à gauche. Empilées,
      elles se remplissent au stylo aussi bien qu'au clavier. */
   .fs-reps{display:flex;flex-direction:column;gap:4px;align-items:center;margin-top:6px}
@@ -654,6 +661,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     /* Le sélecteur de date ne sert qu'à l'écran : sur le papier, la date est
        déjà écrite en toutes lettres sous le titre. */
     #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act,#fs-modal .fs-fiches,#fs-modal .fs-date{display:none!important}
+    /* Sur le papier, la case se remplit au stylo : un bouton n'y sert à rien. */
+    #fs-modal .fs-x{display:none!important}
     #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #fs-modal .fs-t{font-size:17pt}
     #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
@@ -8700,14 +8709,28 @@ function fsEcart(reel,lo,hi){
 function fsCle(i,k){ return k>0 ? (i+'.'+k) : String(i); }
 /* Le rang de ligne que designe une clé, dans les deux écritures. */
 function fsCleLigne(cle){ return parseInt(String(cle).split('.')[0],10); }
+/* « Non couru » n'est pas un vide. Une case blanche veut dire « pas encore
+   noté » ; la fraction sautée, elle, est une information — l'athlète doit la
+   retrouver sur sa fiche. On la range sous la même clé, en toutes lettres. */
+var FS_NP='x';
+function fsEstX(v){ return v===FS_NP; }
+/* Ce que le coach peut taper pour dire « pas couru ». Le clavier d'un
+   téléphone n'ayant pas de « x », le bouton ✕ de chaque case fait le même
+   travail : c'est lui qu'on utilise sur la piste. */
+function fsLitX(txt){
+  var t=String(txt==null?'':txt).trim().toLowerCase();
+  return t==='x'||t==='\u00d7'||t==='-'||t==='\u2013'||t==='abs'||t==='np'||t==='non couru';
+}
 function fsLire(athId,titre,i,k){
   var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
   var j=fsPerfs(a)[_fsDate]||{};
   var v=(j[titre]||{})[fsCle(i,k||0)];
+  if(fsEstX(v)) return FS_NP;
   return (typeof v==='number'&&v>0)?v:null;
 }
 function fsNoter(athId,titre,i,k,champ){
-  var sec=fsSec(champ.value);
+  var np=fsLitX(champ.value);
+  var sec=np?null:fsSec(champ.value);
   var liste=(typeof getAthletes==='function'?getAthletes():[]);
   var a=liste.find(function(x){return x.id===athId;});
   if(!a) return;
@@ -8715,7 +8738,9 @@ function fsNoter(athId,titre,i,k,champ){
   a.perfs[_fsDate]=a.perfs[_fsDate]||{};
   a.perfs[_fsDate][titre]=a.perfs[_fsDate][titre]||{};
   var cle=fsCle(i,k||0);
-  if(sec==null||sec<=0){
+  if(np){
+    a.perfs[_fsDate][titre][cle]=FS_NP;
+  } else if(sec==null||sec<=0){
     delete a.perfs[_fsDate][titre][cle];
     // On ne laisse pas de coquilles vides derrière soi.
     if(!Object.keys(a.perfs[_fsDate][titre]).length) delete a.perfs[_fsDate][titre];
@@ -8726,27 +8751,40 @@ function fsNoter(athId,titre,i,k,champ){
   if(typeof _saveAthletes==='function') _saveAthletes(liste);
   /* Réécrire la case dans la forme de RedLab : le coach voit aussitôt que sa
      virgule a bien été lue comme un deux-points, au lieu de le supposer. */
-  champ.value=(sec!=null&&sec>0)?fHMS(sec):'';
-  fsEcartMaj(champ, sec);
+  champ.value=np?FS_NP:((sec!=null&&sec>0)?fHMS(sec):'');
+  champ.classList.toggle('fs-in--x',np);
+  var bouton=champ.parentNode&&champ.parentNode.querySelector('.fs-x');
+  if(bouton) bouton.classList.toggle('on',np);
+  fsEcartMaj(champ, sec, np);
   // Le premier chrono d'un athlète fait apparaître sa fiche à envoyer ;
   // le dernier effacé la retire. Le tableau, lui, n'est pas retouché.
   try{ fsFichesMaj(); }catch(e){}
 }
+/* Le bouton ✕ : le même geste que taper « x », mais sans clavier. */
+function fsBasculeX(athId,titre,i,k,btn){
+  var rep=btn.parentNode, champ=rep&&rep.querySelector('.fs-in'); if(!champ) return;
+  champ.value=fsLitX(champ.value)?'':FS_NP;
+  fsNoter(athId,titre,i,k,champ);
+}
 /* L'écart s'affiche à côté de la case, sans redessiner le tableau : le coach
    enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
-function fsEcartMaj(champ,sec){
-  var td=champ.closest('td'); if(!td) return;
+function fsEcartMaj(champ,sec,np){
+  var rep=champ.parentNode; if(!rep) return;
   // Le voisinage d'UNE case : avec plusieurs répétitions, chercher l'écart
   // dans tout le <td> effacerait celui de la répétition précédente.
-  var vieux=champ.parentNode.querySelector('.fs-ec'); if(vieux) vieux.remove();
-  if(sec==null) return;
+  var e=rep.querySelector('.fs-ec');
+  if(!e){
+    e=document.createElement('span');
+    rep.insertBefore(e, rep.querySelector('.fs-x')||null);
+  }
+  if(np){ e.className='fs-ec fs-ec--np'; e.textContent='non couru'; return; }
+  e.className='fs-ec'; e.textContent='';
+  var td=champ.closest('td'); if(!td) return;
   var lo=parseFloat(td.getAttribute('data-lo')), hi=parseFloat(td.getAttribute('data-hi'));
-  if(!isFinite(lo)||!isFinite(hi)) return;
+  if(sec==null||!isFinite(lo)||!isFinite(hi)) return;
   var r=fsEcart(sec,lo,hi); if(!r) return;
-  var e=document.createElement('span');
   e.className='fs-ec fs-ec--'+r.cls;
   e.textContent=r.txt;
-  champ.parentNode.appendChild(e);
 }
 function fsDateSet(v){
   if(!v) return;
@@ -8924,7 +8962,7 @@ function frDonnees(athId){
   var notes=((a.perfs||{})[_fsDate]||{})[s.title]||{};
   var lignes=fsLignes(s);
   lignes.forEach(function(l,i){ l.i=i; });
-  var rows=[], n=0, ok=0, lent=0, vif=0;
+  var rows=[], n=0, ok=0, lent=0, vif=0, saute=0;
   lignes.forEach(function(l){
     if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
     var c=fsCible(l,a.vma);
@@ -8933,19 +8971,28 @@ function frDonnees(athId){
     var nEff=Math.max(1,l.n||1), vu=false;
     for(var k=0;k<nEff;k++){
       var reel=notes[fsCle(l.i,k)];
-      if(typeof reel!=='number'||reel<=0) continue;
+      var np=fsEstX(reel);
+      if(!np&&(typeof reel!=='number'||reel<=0)) continue;
+      /* « 5 × 1 km » cinq fois de suite n'apprend rien : le libellé ouvre
+         la série, les numéros suffisent ensuite. */
+      if(np){
+        /* Une fraction sautée se dit : sans elle, l'athlète compterait quatre
+           lignes là où il en attend cinq et croirait sa fiche incomplète. */
+        saute++;
+        rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
+                   reel:'non couru', np:true, ecTxt:'', ecCls:''});
+        vu=true; continue;
+      }
       var r=c?fsEcart(reel,c.lo,c.hi):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
-      /* « 5 × 1 km » cinq fois de suite n'apprend rien : le libellé ouvre
-         la série, les numéros suffisent ensuite. */
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                  reel:fHMS(reel), ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
   });
   if(!n) return null;
-  return {s:s, a:a, date:_fsDate, rows:rows, n:n, ok:ok, lent:lent, vif:vif};
+  return {s:s, a:a, date:_fsDate, rows:rows, n:n, ok:ok, lent:lent, vif:vif, saute:saute};
 }
 /* Le bilan en une phrase, sous le tableau. */
 function frBilan(f){
@@ -8953,6 +9000,7 @@ function frBilan(f){
   if(f.ok) L.push(f.ok+' dans la cible');
   if(f.lent) L.push(f.lent+' au-dessus');
   if(f.vif) L.push(f.vif+' en dessous');
+  if(f.saute) L.push(f.saute+' non couru'+(f.saute>1?'s':''));
   return L.join('   ·   ');
 }
 function frImage(f,ech){
@@ -9013,7 +9061,8 @@ function frImage(f,ech){
     if(r.viseBas){ f1(13.5,'600'); c.fillStyle='#94A3B8';
                    c.fillText(r.viseBas,cx+FR_COL.vise,mid+20); }
 
-    f1(23,'800'); c.fillStyle='#0F172A';
+    if(r.np){ f1(16,'700'); c.fillStyle='#94A3B8'; }
+    else { f1(23,'800'); c.fillStyle='#0F172A'; }
     c.fillText(r.reel,cx+FR_COL.reel,mid+(r.viseBas?2:7));
 
     if(r.ecTxt){
@@ -9248,16 +9297,26 @@ function fsHTML(){
           var bornes=(c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
           var cases='';
           for(var k=0;k<nEff;k++){
-            var reel=fsLire(a.id,s.title,l.i,k);
+            var brut=fsLire(a.id,s.title,l.i,k);
+            var np=fsEstX(brut), reel=np?null:brut;
             var r=fsEcart(reel,c.lo,c.hi);
-            var ec=r?('<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>'):'';
+            var ec=np?'<span class="fs-ec fs-ec--np">non couru</span>'
+                     :(r?'<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>':'<span class="fs-ec"></span>');
             var num=numero(k);
+            var quoi=e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'');
+            var appel=a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k;
             cases+='<span class="fs-rep">'
               +(num?'<i class="fs-no">'+num+'</i>':'')
-              +'<input class="fs-in" type="text" inputmode="decimal" maxlength="7"'
-              +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="1,13"'
-              +' aria-label="Temps réalisé — '+e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'')+'"'
-              +' onchange="fsNoter('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k+',this)">'+ec+'</span>';
+              +'<input class="fs-in'+(np?' fs-in--x':'')+'" type="text" inputmode="decimal" maxlength="7"'
+              /* fHMS() écrit 3'28" : le guillemet fermait l'attribut en plein
+                 milieu, et la case se rouvrait sur « 3'28 ». */
+              +' value="'+e(np?'x':(reel!=null?fHMS(reel):''))+'" placeholder="1,13"'
+              +' aria-label="Temps réalisé — '+quoi+'"'
+              +' onchange="fsNoter('+appel+',this)">'+ec
+              +'<button type="button" class="fs-x'+(np?' on':'')+'"'
+              +' title="Fraction non courue" aria-label="Marquer non couru — '+quoi+'"'
+              +' onclick="fsBasculeX('+appel+',this)">\u2715</button>'
+              +'</span>';
           }
           return '<td class="fs-val"'+bornes+'>'+c.txt+'<span class="fs-reps">'+cases+'</span></td>';
         }).join('')
@@ -9273,6 +9332,8 @@ function fsHTML(){
       +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — <b>une case par fraction</b>, numérotée : un 5 × 1000 se note cinq fois, pas en moyenne. '
       +'Tape le chrono lu : <b>1,13</b> pour 1 min 13 s — la virgule du clavier remplace les deux-points, et il faut <b>deux chiffres après</b> (1,05 et non 1,5). '
       +'Sous la minute, le nombre de secondes suffit : <b>47</b>. '
+      +'Une fraction que l’athlète n’a pas courue se marque avec le bouton <b>✕</b> à côté de la case (ou en tapant <b>x</b>) : '
+      +'elle apparaîtra « non couru » sur sa fiche, alors qu’une case laissée vide veut seulement dire « pas encore noté ». '
       +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
       +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
   }
