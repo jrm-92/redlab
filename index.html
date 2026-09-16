@@ -642,6 +642,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-fc::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
   .fs-fc--rec{border-style:dashed}
   .fs-lb{flex:0 0 auto;font-style:normal;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
+  .fs-fcg{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  .fs-rec-in{display:none}
   .fs-fc-sw.on{background:rgba(248,113,113,.14);border-color:#F87171;color:#F87171}
   .fs-opt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-6px 0 14px}
   .fs-opt-t{font-size:11.5px;font-weight:600;color:var(--muted2);line-height:1.5;flex:1;min-width:180px}
@@ -670,13 +672,25 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   @media(max-width:640px){
     .fs-tab td.fs-val{font-size:14px}
     .fs-tab th,.fs-tab td{padding:8px 8px}
-    /* Sur un téléphone, la ligne d'une fraction porte jusqu'à six éléments :
-       on resserre plutôt que de faire défiler le tableau à chaque saisie. */
-    .fs-rep{gap:4px}
+    /* Sur un téléphone, la fraction se replie en deux : le chrono et son écart
+       en haut, les pulsations dessous, dans le même bloc. Ce n'est pas deux
+       listes — c'est une fraction sur deux lignes, et tout reste à l'écran. */
+    .fs-rep{gap:4px;flex-wrap:wrap;justify-content:flex-start}
+    /* Un filet entre deux fractions : repliées sur deux lignes, elles se
+       toucheraient sans lui, et la deuxième ligne de l'une se lirait comme
+       la première de la suivante. */
+    .fs-reps{gap:9px;align-items:stretch}
+    .fs-rep+.fs-rep{border-top:1px solid rgba(255,255,255,.07);padding-top:9px}
     .fs-in{width:66px}
-    .fs-fc{width:40px;padding:5px 2px}
+    .fs-fc{width:44px;padding:5px 2px}
     .fs-rep .fs-ec{min-width:44px;font-size:10px}
     .fs-x{width:24px;height:24px}
+    .fs-fcg{order:9;flex:0 0 100%;padding-left:26px;gap:5px}
+    .fs-tab td.fs-eff{white-space:normal}
+    /* La colonne « Récup » disparaît : sa consigne est déjà réécrite sous le
+       nom de l'effort, et ses 54 px servent mieux à la saisie. */
+    .fs-tab th:last-child,.fs-tab td.fs-rec{display:none}
+    .fs-rec-in{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:3px;white-space:normal}
   }
 
   /* L'impression : fond blanc, encre économe, une page A4 paysage.
@@ -9386,8 +9400,14 @@ function fsOuvrir(kind,idx,depuisPlan){
   _fsKind=kind; _fsIdx=idx;
   if(!_fsDate) _fsDate=fsIsoJour();
   var tous=fsAthletes();
-  // Tous cochés d'emblée : le coach imprime pour son groupe, pas pour un.
-  if(_fsSel==null) _fsSel=tous.filter(function(a){return a.vma;}).map(function(a){return a.id;});
+  /* Un athlète à la fois. Plusieurs colonnes côte à côte tenaient tant qu'une
+     case portait un chrono ; avec le cœur en fin d'effort et le cœur en fin de
+     récup, la ligne d'une fraction en porte trois, et rien ne tenait plus à
+     l'écran. On relève un athlète, puis le suivant — et sa fiche part dans la
+     foulée. */
+  var dispo=tous.filter(function(a){return a.vma;});
+  if(!_fsSel||!_fsSel.length||!dispo.some(function(a){return a.id===_fsSel[0];}))
+    _fsSel=dispo.length?[dispo[0].id]:[];
   rlModalOuvrir('fs-modal', fsHTML());
 }
 /* Fermer la feuille redessine le calendrier : les temps qu'on vient de noter
@@ -9399,8 +9419,8 @@ function fsFermer(){
   try{ if(typeof renderDashPlan==='function'&&document.getElementById('db-plan')) renderDashPlan(); }catch(e){}
 }
 function fsToggle(id){
-  var i=_fsSel.indexOf(id);
-  if(i<0)_fsSel.push(id); else _fsSel.splice(i,1);
+  // Choisir, pas cocher : on remplace, on n'ajoute pas.
+  _fsSel=[id];
   var h=document.getElementById('fs-modal');
   if(h) h.innerHTML=fsHTML();
 }
@@ -9415,13 +9435,14 @@ function fsHTML(){
   var pick=tous.map(function(a){
     if(!a.vma) return '<span class="fs-a fs-a--off" title="Pas de VMA renseignée : les allures ne peuvent pas être calculées">'+e(a.nom)+' <small>sans VMA</small></span>';
     var on=_fsSel.indexOf(a.id)>=0;
-    return '<button type="button" class="fs-a'+(on?' on':'')+'" onclick="fsToggle('+a.id+')">'
+    return '<button type="button" class="fs-a'+(on?' on':'')+'" onclick="fsToggle('+a.id+')"'
+      +' title="Relever les résultats de '+e(a.nom)+'">'
       +(on?'✓ ':'')+e(a.nom)+' <small>'+a.vma.toFixed(1)+'</small></button>';
   }).join('');
 
   var corps;
   if(!pris.length){
-    corps='<div class="fs-note" style="padding:18px 2px;font-size:13px">Choisis au moins un athlète pour calculer les temps de passage.</div>';
+    corps='<div class="fs-note" style="padding:18px 2px;font-size:13px">Choisis l’athlète dont tu relèves les résultats. Il lui faut une VMA pour que les temps de passage soient calculés.</div>';
   } else {
     var lignes=fsLignes(s);
     lignes.forEach(function(l,i){ l.i=i; });   // rang stable = clé de stockage
@@ -9450,7 +9471,12 @@ function fsHTML(){
          quatre fractions par une moyenne que personne n'a courue. */
       var nEff=Math.max(1,l.n||1);
       var numero=function(k){ return fsNumero(l,k); };
-      return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
+      var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
+      /* Au téléphone la colonne « Récup » est masquée — 54 px que la ligne
+         d'une fraction utilise bien mieux. Sa consigne est donc réécrite ici,
+         sous le nom de l'effort, et cachée dès qu'il y a la place. */
+      return '<tr><td class="fs-eff">'+e(l.lbl)
+        +(consigne?'<span class="fs-rec-in">récup '+e(consigne)+'</span>':'')+'</td>'
         +pris.map(function(a){
           /* Un bloc sans cible n'a pas d'allure à afficher — mais il a été
              couru, et son chrono vaut d'être noté. On garde donc les cases,
@@ -9479,7 +9505,7 @@ function fsHTML(){
             var fcs='';
             if(_fsFC){
               var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
-              fcs='<input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
+              fcs='<span class="fs-fcg"><input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
                 +' value="'+(fcE!=null?fcE:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de l\u2019effort"'
                 +' aria-label="FC effort — '+quoi+'"'
@@ -9492,7 +9518,7 @@ function fsHTML(){
                 +' value="'+(fcR!=null?fcR:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de la récup"'
                 +' aria-label="FC fin de récup — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',true,this)">';
+                +' onchange="fsNoterFC('+appel+',true,this)"></span>';
             }
             cases+='<span class="fs-rep">'
               +(num?'<i class="fs-no">'+num+'</i>':'')
@@ -9511,7 +9537,7 @@ function fsHTML(){
             +(c?c.txt:'<span style="color:var(--muted2)">\u2014</span>')
             +'<span class="fs-reps">'+cases+'</span></td>';
         }).join('')
-        +'<td class="fs-rec">'+e([l.rec,l.recSet].filter(Boolean).join(' · ')||'—')+'</td></tr>';
+        +'<td class="fs-rec">'+e(consigne||'—')+'</td></tr>';
     }).join('');
     corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
       +'<th>Effort</th>'
