@@ -514,6 +514,18 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .plw-x:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
   .db-suppr{width:28px;height:28px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--muted2);font-family:var(--font);font-size:16px;line-height:1;cursor:pointer;padding:0}
   .db-suppr:hover{color:#F87171;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4)}
+  /* La liste d'outils d'une séance : une ligne par outil, nommée, à la taille
+     d'un doigt. Elle remplace cinq pastilles que personne ne savait viser. */
+  .plo-jour{font-size:12.5px;font-weight:700;color:var(--muted2);margin:-4px 0 14px}
+  .plo-liste{display:flex;flex-direction:column;gap:8px}
+  .plo-b{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:11px;color:var(--text);font-family:var(--font);padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+  .plo-b:hover{border-color:var(--orange);background:rgba(255,107,26,.08)}
+  .plo-i{flex:0 0 auto;width:26px;text-align:center;font-size:17px;line-height:1.2;color:var(--muted2)}
+  .plo-b:hover .plo-i{color:var(--orange)}
+  .plo-t{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:14px;font-weight:800}
+  .plo-t small{font-size:11.5px;font-weight:600;color:var(--muted2);line-height:1.45;white-space:normal}
+  .plo-b--del:hover{border-color:#F87171;background:rgba(248,113,113,.1)}
+  .plo-b--del:hover .plo-i,.plo-b--del:hover .plo-t{color:#F87171}
   .plw-add{margin-top:auto;border:1px dashed var(--border2);background:transparent;color:var(--muted2);border-radius:6px;font-size:10.5px;font-weight:800;padding:4px 2px;cursor:pointer;width:100%}
   .plw-add:hover{border-color:var(--orange);color:var(--orange)}
   .plw-ch--ro{cursor:default}
@@ -11538,6 +11550,59 @@ function plGrabToggle(ev,iso,i){
   _plGrab=(_plGrab&&_plGrab.iso===iso&&_plGrab.i===i)?null:{iso:iso,i:i};
   plUpd();
 }
+/* ══ LES OUTILS D'UNE SÉANCE POSÉE ══
+   Ils tenaient en cinq pastilles d'un demi-centimètre au bord de la case :
+   ✎ ↓ ▤ ⧉ ×. Sur un téléphone on visait au hasard, et rien ne disait ce que
+   chacune faisait — le nom n'existait que dans l'infobulle, invisible au
+   doigt. Un appui sur la séance ouvre maintenant la liste, en toutes lettres.
+
+   Le déplacement y entre aussi : il se déclenchait par un appui sur la
+   séance, geste que plus rien n'annonçait une fois la liste installée. */
+function plOutilsOuvrir(iso,si){
+  var l=(typeof _plSessions!=='undefined'&&_plSessions&&_plSessions[iso])||[];
+  var sx=l[si]; if(!sx) return;
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var d=new Date(iso+'T12:00:00');
+  var jour=isNaN(d)?iso:d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  // Une majuscule au premier mot seulement : « Mardi 15 Septembre » se lit mal.
+  jour=jour.charAt(0).toUpperCase()+jour.slice(1);
+  var ov=(typeof plOvTxt==='function')?plOvTxt(sx):'';
+  var b=function(act,icone,titre,desc,cls){
+    return '<button type="button" class="plo-b'+(cls?' '+cls:'')+'"'
+      +' onclick="plOutilsFaire(\''+act+'\',\''+rlJsStr(iso)+'\','+si+')">'
+      +'<span class="plo-i">'+icone+'</span>'
+      +'<span class="plo-t">'+titre+'<small>'+desc+'</small></span></button>';
+  };
+  var corps='<div class="plo-liste">'
+    +b('voir','\uD83D\uDC41','Voir le détail','la séance en entier, telle qu\u2019elle est écrite')
+    +b('duree','\u270E','Régler la durée','raccourcir ou rallonger la séance pour ce jour-là')
+    +b('montre','\u2193','Envoyer sur la montre','le fichier .fit à importer dans Garmin, COROS, Suunto')
+    +b('res','\u25A4','Résultats','noter les chronos et les pulsations de ce jour-là')
+    +b('copie','\u29C9','Dupliquer','poser la même séance une seconde fois ce jour-là')
+    +b('bouge','\u21C4','Déplacer','puis touche le jour où tu veux la poser')
+    +b('del','\u2715','Retirer','enlever cette séance du plan','plo-b--del')
+    +'</div>';
+  rlModalOuvrir('pl-outils',
+    '<div class="pl-modal-box" style="max-width:420px">'
+    +'<div class="pl-modal-top"><b>'+e(sx.t)+'</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="rlModalFermer(\'pl-outils\')">×</button></div>'
+    +'<div class="plo-jour">'+e(jour)+(ov?' \u00b7 '+e(ov):'')+'</div>'
+    +corps+'</div>');
+}
+function plOutilsFaire(act,iso,si){
+  var l=(typeof _plSessions!=='undefined'&&_plSessions&&_plSessions[iso])||[];
+  var sx=l[si]; if(!sx) return;
+  var titre=sx.t;
+  if(act==='del'&&!confirm('Retirer « '+titre+' » du '+iso+' ?')) return;
+  rlModalFermer('pl-outils');
+  if(act==='voir')   return plApercuOuvrir(titre,iso,si);
+  if(act==='duree')  return plDureeOuvrir(iso,si);
+  if(act==='montre') return wktExportJour(iso,si);
+  if(act==='res')    return fsOuvrirPlan(iso,si);
+  if(act==='copie')  return plDaySessCopy(iso,si);
+  if(act==='del')    return plDaySessDel(iso,si);
+  if(act==='bouge'){ _plGrab={iso:iso,i:si}; plUpd(); }
+}
 function plDayTap(iso){
   if(!_plGrab)return;
   plMoveSession(_plGrab.iso,_plGrab.i,iso,false);
@@ -11998,19 +12063,12 @@ function plCalendarHTML(p,weeks,opts){
         var lbl=esc+(ov?' <span class="plw-ov">'+ov+'</span>':'')+fait;
         if(RO)return '<div class="plw-ch plw-ch--ro plw-ch--ouvre" style="background:'+col+'20;border-left:3px solid '+col+'"'
           +' onclick="plApercuOuvrir(\''+rlJsStr(sx.t)+'\',\''+iso+'\','+si+')" title="Voir le détail de la séance"><span>'+lbl+'</span><span class="plw-oeil">›</span></div>';
-        return '<div class="plw-ch plw-ch--act'+held+'" draggable="true"'
+        return '<div class="plw-ch plw-ch--ouvre'+held+'" draggable="true"'
           +' ondragstart="plDragStart(event,\''+iso+'\','+si+')" ondragend="plDragEnd()"'
-          +' onclick="plGrabToggle(event,\''+iso+'\','+si+')"'
+          +' onclick="event.stopPropagation();plOutilsOuvrir(\''+iso+'\','+si+')"'
           +' style="background:'+col+'20;border-left:3px solid '+col+'"'
-          +' title="'+esc+' — glisse-la sur un autre jour (Alt pour copier), ou touche-la puis touche le jour voulu">'
-          +'<span>'+lbl+'</span>'
-          +'<div class="plw-acts">'
-            +'<button type="button" class="plw-cp" title="Régler la durée, ou modifier la séance" aria-label="Régler la durée, ou modifier la séance" onclick="event.stopPropagation();plDureeOuvrir(\''+iso+'\','+si+')">✎</button>'
-            +'<button type="button" class="plw-cp" title="Envoyer cette séance sur la montre (.fit)" aria-label="Envoyer sur la montre" onclick="event.stopPropagation();wktExportJour(\''+iso+'\','+si+')">\u2193</button>'
-            +'<button type="button" class="plw-cp" title="Résultats : noter les temps de ce jour-là" aria-label="Résultats de séance" onclick="event.stopPropagation();fsOuvrirPlan(\''+iso+'\','+si+')">▤</button>'
-            +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
-            +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
-          +'</div></div>';
+          +' title="'+esc+' — touche-la pour ouvrir ses outils, ou glisse-la sur un autre jour (Alt pour copier)">'
+          +'<span>'+lbl+'</span><span class="plw-oeil">\u22ef</span></div>';
       }).join('');
       var drop=(iso&&!RO)?(' ondragover="plDragOver(event,this)" ondragleave="plDragLeave(this)"'
         +' ondrop="plDrop(event,\''+iso+'\',this)" onclick="plDayTap(\''+iso+'\')"'):'';
