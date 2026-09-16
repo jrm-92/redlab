@@ -1860,6 +1860,8 @@ body.rl-locked .app,body.rl-locked .mobile-header{display:none}
 .ag-btn:hover{filter:brightness(1.08)}
 
 .ag-msg{font-size:12.5px;line-height:1.6;margin-top:14px;min-height:1px}
+.ag-oubli{display:block;width:100%;margin-top:14px;padding:4px;background:none;border:0;color:var(--muted2);font-family:var(--font);font-size:12.5px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ag-oubli:hover{color:var(--text)}
 
 /* Bannière profil : liseré lumineux (petit écran uniquement, voir plus bas) */
 .profile-hero{box-shadow:inset 0 1px 0 rgba(255,255,255,0.04),0 12px 32px -16px rgba(0,0,0,0.6),0 0 0 1px rgba(255,107,26,0.06)}
@@ -12055,7 +12057,17 @@ function cloudOpen(){
   var body;
   if(_cloudUser){
     body='<div style="font-size:13px;color:var(--text2);line-height:1.7">Connecté : <b>'+String(_cloudUser.email||'').replace(/</g,'&lt;')+'</b><br><span id="cloud-stat" style="color:var(--muted2)">Synchro active</span></div>'
-      +'<div style="display:flex;gap:10px;margin-top:16px"><button class="lc-save" onclick="cloudPush(true)">Forcer la synchro</button><button class="lc-cancel" onclick="cloudSignOut()">Se déconnecter</button></div>';
+      +'<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="lc-save" onclick="cloudPush(true)">Forcer la synchro</button><button class="lc-cancel" onclick="cloudSignOut()">Se déconnecter</button></div>'
+      +'<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">'
+      +'<button type="button" class="lc-cancel" id="cloud-mdp-ouvrir" onclick="cloudMdpOuvrir()" style="width:100%">Changer mon mot de passe</button>'
+      +'<div id="cloud-mdp-bloc" style="display:none">'
+      +'<div id="cloud-mdp-note" style="display:none;font-size:12.5px;color:#34D399;line-height:1.6;margin-bottom:12px">Tu es revenu par le lien reçu par e-mail. Indique simplement ton nouveau mot de passe.</div>'
+      +'<div class="lc-field" id="cloud-mdp0-champ"><label>Mot de passe actuel</label><input id="cloud-mdp0" type="password" autocomplete="current-password" placeholder="celui que tu utilises aujourd\'hui"></div>'
+      +'<div class="lc-field"><label>Nouveau mot de passe</label><input id="cloud-mdp1" type="password" autocomplete="new-password" placeholder="12 caractères minimum"></div>'
+      +'<div class="lc-field"><label>Confirme le nouveau</label><input id="cloud-mdp2" type="password" autocomplete="new-password" placeholder="le même, à nouveau"></div>'
+      +'<div id="cloud-mdp-msg" style="font-size:12px;color:#FB923C;min-height:16px;margin:2px 0 8px"></div>'
+      +'<div style="display:flex;gap:10px"><button class="lc-save" onclick="cloudMdpValider()">Enregistrer</button><button class="lc-cancel" onclick="cloudMdpFermer()">Annuler</button></div>'
+      +'</div></div>';
   }else{
     body='<div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6">Connecte-toi pour sauvegarder tes séances, athlètes et plans dans le cloud (synchro automatique, multi-appareils).</div>'
       +'<div class="lc-field"><label>E-mail</label><input id="cloud-email" type="email" placeholder="toi@exemple.fr" autocomplete="username"></div>'
@@ -12075,6 +12087,63 @@ async function cloudSignIn(){
   _cloudUser=r.data.user;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();await cloudPull();
 }
 async function cloudSignOut(){await _sb.auth.signOut();_cloudUser=null;var m=document.getElementById('cloud-modal');if(m)m.remove();cloudFabState();showAuthGate();}
+
+// ── Changement du mot de passe du compte coach ─────────────────────────
+//    Ni REDLAB ni le tableau de bord Supabase n'offraient de moyen de le
+//    faire. On agit sur la session déjà ouverte : pas d'e-mail à recevoir,
+//    pas de page de retour à configurer.
+function cloudMdpMsg(t,ok){var e=document.getElementById('cloud-mdp-msg');if(e){e.textContent=t||'';e.style.color=ok?'#34D399':'#FB923C';}}
+function cloudMdpOuvrir(){
+  var b=document.getElementById('cloud-mdp-bloc'),o=document.getElementById('cloud-mdp-ouvrir');
+  if(!b)return;
+  b.style.display='';if(o)o.style.display='none';
+  ['cloud-mdp0','cloud-mdp1','cloud-mdp2'].forEach(function(id){
+    var c=document.getElementById(id);
+    if(c)c.addEventListener('keydown',function(e){if(e.key==='Enter')cloudMdpValider();});
+  });
+  var p=document.getElementById('cloud-mdp0');if(p)p.focus();
+}
+function cloudMdpFermer(){
+  var b=document.getElementById('cloud-mdp-bloc'),o=document.getElementById('cloud-mdp-ouvrir');
+  if(b)b.style.display='none';if(o)o.style.display='';
+  ['cloud-mdp0','cloud-mdp1','cloud-mdp2'].forEach(function(id){var c=document.getElementById(id);if(c)c.value='';});
+  cloudMdpMsg('');
+}
+async function cloudMdpValider(){
+  var v=(document.getElementById('cloud-mdp0')||{}).value||'',
+      a=(document.getElementById('cloud-mdp1')||{}).value||'',
+      b=(document.getElementById('cloud-mdp2')||{}).value||'';
+  if(!_mdpOublieRetour&&!v){cloudMdpMsg('Indique d\'abord ton mot de passe actuel.');return;}
+  if(a.length<12){cloudMdpMsg('12 caractères minimum.');return;}
+  if(a!==b){cloudMdpMsg('Les deux nouveaux mots de passe ne sont pas identiques.');return;}
+  if(!_sb){cloudMdpMsg('Service indisponible (réseau ?).');return;}
+  // Le jeton peut avoir expiré depuis l'ouverture de l'application : sans
+  // session valide, le changement échouerait sans message clair.
+  if(!(await _uid())){cloudMdpMsg('Session expirée — reconnecte-toi, puis recommence.');return;}
+  // La session seule ne suffit pas : un appareil déverrouillé laissé sans
+  // surveillance permettrait de changer le mot de passe et d'enfermer le
+  // coach dehors. On réclame donc l'ancien mot de passe, vérifié auprès du
+  // serveur avant d'écrire le nouveau.
+  if(!_mdpOublieRetour){
+    var em=(_cloudUser&&_cloudUser.email)||'';
+    if(!em){cloudMdpMsg('Compte introuvable — reconnecte-toi, puis recommence.');return;}
+    cloudMdpMsg('Vérification…');
+    var ctl=await _sb.auth.signInWithPassword({email:em,password:v});
+    if(ctl.error){cloudMdpMsg('Mot de passe actuel incorrect.');return;}
+  }
+  cloudMdpMsg('Enregistrement…');
+  var r=await _sb.auth.updateUser({password:a});
+  if(r.error){cloudMdpMsg('Erreur : '+r.error.message);return;}
+  ['cloud-mdp0','cloud-mdp1','cloud-mdp2'].forEach(function(id){var c=document.getElementById(id);if(c)c.value='';});
+  if(_mdpOublieRetour){
+    // Un rafraîchissement ne doit pas rouvrir le formulaire allégé.
+    _mdpOublieRetour=false;
+    var ch=document.getElementById('cloud-mdp0-champ');if(ch)ch.style.display='';
+    var nt=document.getElementById('cloud-mdp-note');if(nt)nt.style.display='none';
+    try{history.replaceState({},'',location.pathname);}catch(e){}
+  }
+  cloudMdpMsg('Mot de passe changé ✓ Range-le dans ton gestionnaire de mots de passe.',true);
+}
 function cloudPushDebounced(){if(!_cloudUser)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(function(){cloudPush();},1500);}
 // ID utilisateur RÉEL de la session (= auth.uid côté serveur). _cloudUser.id peut être périmé.
 async function _uid(){
@@ -12378,6 +12447,7 @@ function showAuthGate(){
     +'<label>Email</label><input id="ag-email" type="email" autocomplete="username" placeholder="toi@exemple.fr">'
     +'<label>Mot de passe</label><input id="ag-pass" type="password" autocomplete="current-password" placeholder="••••••••">'
     +'<button class="ag-btn" onclick="gateSignIn()">Se connecter</button>'
+    +'<button type="button" class="ag-oubli" onclick="gateOubli()">Mot de passe oublié ?</button>'
     +'<div id="ag-msg" class="ag-msg"></div>'
     +'</div>';
   document.body.appendChild(g);
@@ -12387,6 +12457,20 @@ function showAuthGate(){
 function hideAuthGate(){var g=document.getElementById('auth-gate');if(g)g.remove();}
 function unlockApp(){document.body.classList.remove('rl-locked');}
 function agMsg(t,err){var m=document.getElementById('ag-msg');if(m){m.textContent=t||'';m.style.color=err?'#F87171':'#34D399';}}
+// Adresse de retour du lien reçu par e-mail. Elle doit figurer telle quelle
+// dans Supabase → Authentication → URL Configuration, sinon le lien renvoie
+// vers l'adresse par défaut du projet et n'arrive jamais ici.
+function _mdpRetourURL(){ return location.origin+location.pathname; }
+async function gateOubli(){
+  var em=((document.getElementById('ag-email')||{}).value||'').trim();
+  if(!em){agMsg('Écris ton e-mail dans la case au-dessus, puis reclique.',true);
+    var c=document.getElementById('ag-email');if(c)c.focus();return;}
+  if(!_sb){agMsg('Service indisponible (réseau ?).',true);return;}
+  agMsg('Envoi du lien…');
+  var r=await _sb.auth.resetPasswordForEmail(em,{redirectTo:_mdpRetourURL()});
+  if(r.error){agMsg('Erreur : '+r.error.message,true);return;}
+  agMsg('Lien envoyé à '+em+'. Ouvre ta boîte mail et clique dessus. Attention : seulement 2 envois par heure.');
+}
 async function gateSignIn(){
   var em=(document.getElementById('ag-email')||{}).value||'',pw=(document.getElementById('ag-pass')||{}).value||'';
   if(!em.trim()||!pw){agMsg('Email et mot de passe requis.',true);return;}
@@ -12411,17 +12495,46 @@ function _coachSessionTropAncienne(){
 }
 function _coachMarquerVisite(){ try{ localStorage.setItem(COACH_CLE_VUE,String(Date.now())); }catch(e){} }
 
+/* Retour du lien « mot de passe oublié ». Selon le mode d'échange, Supabase
+   renvoie soit un fragment (#type=recovery), soit un paramètre (?code=…) —
+   et supabase-js les efface de la barre d'adresse dès sa création. On relève
+   donc l'indice AVANT d'ouvrir la connexion. REDLAB n'a pas d'autre parcours
+   par lien, donc un « code » ne peut venir que de là. */
+var _mdpOublieRetour=(function(){
+  try{
+    var h=String(location.hash||''),q=String(location.search||'');
+    return /type=recovery/.test(h)||/type=recovery/.test(q)||/[?&]code=/.test(q);
+  }catch(e){ return false; }
+})();
+function cloudMdpOuvrirRecuperation(){
+  if(!_cloudUser)return;
+  hideAuthGate();
+  var m=document.getElementById('cloud-modal');if(m)m.remove();
+  cloudOpen();cloudMdpOuvrir();
+  var ch=document.getElementById('cloud-mdp0-champ');if(ch)ch.style.display='none';
+  var nt=document.getElementById('cloud-mdp-note');if(nt)nt.style.display='';
+  var p=document.getElementById('cloud-mdp1');if(p)p.focus();
+}
 async function cloudInit(){
   if(!window.supabase||!window.supabase.createClient){showAuthGate();return;}
   // storageKey distinct : évite que la session de l'espace athlète (même origine GitHub)
   // n'écrase celle du coach. Chaque app garde sa propre connexion.
   try{_sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storageKey:'redlab_coach_auth',persistSession:true,autoRefreshToken:true}});}catch(e){showAuthGate();return;}
+  try{_sb.auth.onAuthStateChange(function(ev){
+    if(ev!=='PASSWORD_RECOVERY')return;
+    _mdpOublieRetour=true;
+    if(_cloudUser)cloudMdpOuvrirRecuperation();
+  });}catch(e){}
   var fab=document.createElement('button');fab.id='cloud-fab';fab.title='Synchronisation cloud';fab.onclick=cloudOpen;
   fab.innerHTML='☁<span id="cloud-dot"></span>';document.body.appendChild(fab);
   ['saveLS','_saveAthletes','saveCustomSessions'].forEach(function(fn){
     if(typeof window[fn]==='function'){var o=window[fn];window[fn]=function(){var res=o.apply(this,arguments);cloudPushDebounced();return res;};}
   });
   var s=await _sb.auth.getSession();
+  // Un mot de passe oublié depuis plus de trente jours déclencherait la
+  // déconnexion pour inactivité juste avant la saisie. Le lien reçu par
+  // e-mail prouve l'identité : on laisse passer.
+  if(_mdpOublieRetour)_coachMarquerVisite();
   if(s.data&&s.data.session&&_coachSessionTropAncienne()){
     // Session encore valide côté serveur, mais dormante depuis trop longtemps.
     try{ localStorage.removeItem(COACH_CLE_VUE); }catch(e){}
@@ -12431,7 +12544,13 @@ async function cloudInit(){
     if(_m)_m.textContent='Session expirée après 30 jours sans usage — reconnecte-toi.';
     return;
   }
-  if(s.data&&s.data.session){_coachMarquerVisite();_cloudUser=s.data.session.user;cloudFabState();unlockApp();await cloudPull();}
+  if(s.data&&s.data.session){
+    _coachMarquerVisite();_cloudUser=s.data.session.user;cloudFabState();unlockApp();
+    // La synchro peut recharger la page : elle emporterait le formulaire
+    // avant la saisie. On la remet à la prochaine ouverture.
+    if(_mdpOublieRetour){cloudMdpOuvrirRecuperation();return;}
+    await cloudPull();
+  }
   else { cloudFabState(); showAuthGate(); }
 }
 
