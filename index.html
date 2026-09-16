@@ -647,6 +647,32 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-rt:focus{border-color:var(--orange);border-style:solid}
   .fs-rt::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
   .fs-rec-in{display:none}
+  /* ── La saisie au téléphone : une carte par fraction ──────────────
+     Quatre cases nommées sur toute la largeur, au lieu de quatre cases
+     serrées dans le tiers d'écran que la colonne « Effort » voulait bien
+     laisser. */
+  .fsc-liste{display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0;flex:1 1 auto;-webkit-overflow-scrolling:touch}
+  .fsc-doux{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;color:var(--muted);padding:9px 11px;background:rgba(255,255,255,.03);border-radius:10px}
+  .fsc-doux b{color:var(--text2);font-weight:800;font-size:13px;white-space:nowrap}
+  .fsc-doux span{text-align:right}
+  .fsc-bloc{border:1px solid var(--border);border-radius:12px;padding:11px 11px 12px}
+  .fsc-tete{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .fsc-tete b{font-size:14.5px;font-weight:900;color:var(--text)}
+  .fsc-tete span{font-size:11px;font-weight:700;color:var(--muted2)}
+  .fsc-cible{font-size:15px;font-weight:900;color:var(--orange);margin:3px 0 10px;font-variant-numeric:tabular-nums}
+  .fsc-cible small{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:1px}
+  .fsc-frac{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}
+  .fsc-frac:first-of-type{border-top:0;padding-top:0;margin-top:0}
+  .fsc-hd{display:flex;align-items:center;gap:8px;margin-bottom:5px;min-height:24px}
+  .fsc-hd i{flex:0 0 auto;font-style:normal;font-size:11px;font-weight:900;color:var(--muted2);min-width:24px;font-variant-numeric:tabular-nums}
+  .fsc-hd .fs-ec{margin:0;flex:1 1 auto;min-width:0;font-size:11.5px}
+  .fsc-hd .fs-x{margin-left:auto}
+  .fsc-champs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .fsc-champs--1{grid-template-columns:minmax(0,160px)}
+  .fsc-ch{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .fsc-ch>span{font-size:8.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fsc-ch .fs-in,.fsc-ch .fs-fc,.fsc-ch .fs-rt{display:block;width:100%;margin:0;padding:9px 3px;font-size:14px}
+  .fsc-ch .fs-fc::placeholder,.fsc-ch .fs-rt::placeholder,.fsc-ch .fs-in::placeholder{font-size:11px}
   .fs-fc-sw.on{background:rgba(248,113,113,.14);border-color:#F87171;color:#F87171}
   .fs-opt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-6px 0 14px}
   .fs-opt-t{font-size:11.5px;font-weight:600;color:var(--muted2);line-height:1.5;flex:1;min-width:180px}
@@ -678,6 +704,15 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     /* Sur un téléphone, la fraction se replie en deux : le chrono et son écart
        en haut, les pulsations dessous, dans le même bloc. Ce n'est pas deux
        listes — c'est une fraction sur deux lignes, et tout reste à l'écran. */
+    /* De la hauteur pour la liste : tout ce qui se répète ailleurs à l'écran
+       s'efface. La date est déjà dans le sélecteur juste en dessous, et ce que
+       fait l'interrupteur n'a plus à être expliqué une fois qu'il est allumé. */
+    .fs-box{max-height:90vh}
+    .fs-hd{margin-bottom:10px}
+    .fs-s{display:none}
+    .fs-fc-sw.on+.fs-opt-t{display:none}
+    .fs-pick{margin-bottom:10px}
+    .fs-opt{margin:-4px 0 10px}
     .fs-rep{gap:4px;flex-wrap:wrap;justify-content:flex-start}
     /* Un filet entre deux fractions : repliées sur deux lignes, elles se
        toucheraient sans lui, et la deuxième ligne de l'une se lirait comme
@@ -713,6 +748,8 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-opt,#fs-modal .fs-act,#fs-modal .fs-fiches,#fs-modal .fs-date{display:none!important}
     /* Sur le papier, la case se remplit au stylo : un bouton n'y sert à rien. */
     #fs-modal .fs-x{display:none!important}
+    #fs-modal .fsc-liste{overflow:visible!important}
+    #fs-modal .fsc-bloc,#fs-modal .fsc-frac{break-inside:avoid}
     #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #fs-modal .fs-t{font-size:17pt}
     #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
@@ -8951,7 +8988,8 @@ function fsNoter(athId,titre,i,k,champ,mes){
      virgule a bien été lue comme un deux-points, au lieu de le supposer. */
   champ.value=np?FS_NP:((sec!=null&&sec>0)?fsEcritVal(sec,mes):'');
   champ.classList.toggle('fs-in--x',np);
-  var bouton=champ.parentNode&&champ.parentNode.querySelector('.fs-x');
+  var hote=champ.closest('.fs-rep,.fsc-frac');
+  var bouton=hote&&hote.querySelector('.fs-x');
   if(bouton) bouton.classList.toggle('on',np);
   fsEcartMaj(champ, sec, np, mes);
   // Le premier chrono d'un athlète fait apparaître sa fiche à envoyer ;
@@ -8960,27 +8998,29 @@ function fsNoter(athId,titre,i,k,champ,mes){
 }
 /* Le bouton ✕ : le même geste que taper « x », mais sans clavier. */
 function fsBasculeX(athId,titre,i,k,btn,mes){
-  var rep=btn.parentNode, champ=rep&&rep.querySelector('.fs-in'); if(!champ) return;
+  var rep=btn.closest('.fs-rep,.fsc-frac'), champ=rep&&rep.querySelector('.fs-in'); if(!champ) return;
   champ.value=fsLitX(champ.value)?'':FS_NP;
   fsNoter(athId,titre,i,k,champ,mes);
 }
 /* L'écart s'affiche à côté de la case, sans redessiner le tableau : le coach
    enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
 function fsEcartMaj(champ,sec,np,mes){
-  var rep=champ.parentNode; if(!rep) return;
-  // Le voisinage d'UNE case : avec plusieurs répétitions, chercher l'écart
-  // dans tout le <td> effacerait celui de la répétition précédente.
+  /* Le voisinage d'UNE fraction : chercher l'écart plus haut effacerait celui
+     de la fraction précédente. Deux mises en page, un seul repère — la
+     fraction, ligne du tableau ou carte du téléphone. */
+  var rep=champ.closest('.fs-rep,.fsc-frac'); if(!rep) return;
+  var cible=rep.querySelector('.fsc-hd')||rep;
   var e=rep.querySelector('.fs-ec');
   if(!e){
     e=document.createElement('span');
-    rep.insertBefore(e, rep.querySelector('.fs-x')||null);
+    cible.insertBefore(e, cible.querySelector('.fs-x')||null);
   }
   if(np){ e.className='fs-ec fs-ec--np'; e.textContent='non couru'; return; }
   e.className='fs-ec'; e.textContent='';
-  var td=champ.closest('td'); if(!td) return;
-  var lo=parseFloat(td.getAttribute('data-lo')), hi=parseFloat(td.getAttribute('data-hi'));
+  var box=champ.closest('[data-lo]'); if(!box) return;
+  var lo=parseFloat(box.getAttribute('data-lo')), hi=parseFloat(box.getAttribute('data-hi'));
   if(sec==null||!isFinite(lo)||!isFinite(hi)) return;
-  var r=fsEcart(sec,lo,hi,mes||td.getAttribute('data-mes')||'t'); if(!r) return;
+  var r=fsEcart(sec,lo,hi,mes||box.getAttribute('data-mes')||'t'); if(!r) return;
   e.className='fs-ec fs-ec--'+r.cls;
   e.textContent=r.txt;
 }
@@ -9504,6 +9544,92 @@ function fsToggle(id){
   if(h) h.innerHTML=fsHTML();
 }
 function fsImprimer(){ window.print(); }
+/* ══ LA SAISIE AU TÉLÉPHONE ══
+   Un tableau sert à comparer des colonnes. Sur un écran de 390 px il n'en
+   reste qu'une, et ses quatre relevés se serrent dans un tiers de la largeur
+   pendant que la colonne « Effort » occupe le reste, vide. On sort donc du
+   tableau : un bloc par effort, une carte par fraction, et quatre cases
+   nommées qui prennent toute la largeur. Au-delà, le tableau reprend sa
+   place — il redevient utile. */
+function fsEtroit(){
+  try{ return window.matchMedia('(max-width:640px)').matches; }catch(e){ return false; }
+}
+var _fsEtroitRendu=null;
+/* Le passage portrait/paysage change de mise en page ; l'ouverture du clavier
+   change la hauteur sans changer la largeur, et ne doit rien redessiner —
+   sinon la case en cours de saisie perdrait le focus à chaque frappe. */
+function fsRedessineSiBesoin(){
+  var h=document.getElementById('fs-modal'); if(!h) return;
+  if(fsEtroit()===_fsEtroitRendu) return;
+  h.innerHTML=fsHTML();
+}
+try{ window.addEventListener('resize',fsRedessineSiBesoin); }catch(e){}
+
+function fsCartesHTML(s,a,lignes,e){
+  var out='';
+  lignes.forEach(function(l){
+    if(l.soft){
+      var cib=(l.bord&&a.vma&&typeof wktBordCibleTxt==='function')?wktBordCibleTxt(l.val,a.vma,l.bord):'';
+      out+='<div class="fsc-doux"><b>'+e(l.lbl)+'</b><span>'+e(l.val)
+        +(cib?' · '+e(cib):'')+'</span></div>';
+      return;
+    }
+    var c=fsCible(l,a.vma);
+    var mes=c?c.mes:fsMesure(l);
+    var nEff=Math.max(1,l.n||1);
+    var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
+    var dRec=(typeof wktParseDur==='function')?wktParseDur(l.rec):null;
+    var recPh=(dRec&&dRec.dur==='time'&&dRec.val>0)?fHMS(dRec.val):'récup';
+    var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
+    bornes+=' data-mes="'+mes+'"';
+
+    out+='<div class="fsc-bloc">'
+      +'<div class="fsc-tete"><b>'+e(l.lbl)+'</b>'
+      +(consigne?'<span>récup '+e(consigne)+'</span>':'')+'</div>'
+      +'<div class="fsc-cible">'+(c?c.txt:'<span style="color:var(--muted2)">sans cible</span>')+'</div>';
+
+    for(var k=0;k<nEff;k++){
+      var num=fsNumero(l,k)||'1';
+      var brut=fsLire(a.id,s.title,l.i,k);
+      var np=fsEstX(brut), reel=np?null:brut;
+      var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
+      var appel=a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k;
+      var quoi=e(a.nom)+', '+e(l.lbl)+' n° '+num;
+      var etat=np?'<span class="fs-ec fs-ec--np">non couru</span>'
+                 :(r?'<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>':'<span class="fs-ec"></span>');
+      var ch=function(cls,lbl,val,ph,im,ml,onch,titre){
+        return '<label class="fsc-ch"><span>'+lbl+'</span>'
+          +'<input class="'+cls+'" type="text" inputmode="'+im+'" maxlength="'+ml+'"'
+          +' value="'+e(val)+'" placeholder="'+e(ph)+'" title="'+e(titre)+'"'
+          +' aria-label="'+titre+' — '+quoi+'"'
+          +' onchange="'+onch+'"></label>';
+      };
+      var champs=ch('fs-in'+(np?' fs-in--x':''), mes==='d'?'Distance':'Temps',
+                    np?'x':(reel!=null?fsEcritVal(reel,mes):''),
+                    mes==='d'?'150 m':'1,13', mes==='d'?'numeric':'decimal', 7,
+                    'fsNoter('+appel+',this,\''+mes+'\')',
+                    mes==='d'?'Distance parcourue, en mètres':'Temps réalisé');
+      if(_fsFC){
+        var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
+        var tRec=fsLireRec(a.id,s.title,l.i,k);
+        champs+=ch('fs-fc','FC effort',(fcE!=null?fcE:''),'FC','numeric',3,
+                   'fsNoterFC('+appel+',false,this)','Pulsations à la fin de l’effort')
+          +ch('fs-rt','Récup',(tRec!=null?fHMS(tRec):''),recPh,'decimal',7,
+              'fsNoterRec('+appel+',this)','Temps de récup réellement pris')
+          +ch('fs-fc fs-fc--rec','FC récup',(fcR!=null?fcR:''),'FC','numeric',3,
+              'fsNoterFC('+appel+',true,this)','Pulsations à la fin de la récup');
+      }
+      out+='<div class="fsc-frac"'+bornes+'>'
+        +'<div class="fsc-hd"><i>'+e(num)+'</i>'+etat
+        +'<button type="button" class="fs-x'+(np?' on':'')+'" title="Fraction non courue"'
+        +' aria-label="Marquer non couru — '+quoi+'"'
+        +' onclick="fsBasculeX('+appel+',this,\''+mes+'\')">✕</button></div>'
+        +'<div class="fsc-champs'+(_fsFC?'':' fsc-champs--1')+'">'+champs+'</div></div>';
+    }
+    out+='</div>';
+  });
+  return '<div class="fsc-liste">'+out+'</div>';
+}
 function fsHTML(){
   var s=fsSeanceCourante(); if(!s) return '';
   var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
@@ -9525,6 +9651,8 @@ function fsHTML(){
   } else {
     var lignes=fsLignes(s);
     lignes.forEach(function(l,i){ l.i=i; });   // rang stable = clé de stockage
+    _fsEtroitRendu=fsEtroit();
+    if(_fsEtroitRendu) return fsBoite(s,th,e,pick,pris,fsCartesHTML(s,pris[0],lignes,e));
     var rows=lignes.map(function(l){
       if(l.soft){
         /* Échauffement et retour au calme portent une allure, différente d'un
@@ -9640,6 +9768,12 @@ function fsHTML(){
       +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
 
+  return fsBoite(s,th,e,pick,pris,corps);
+}
+/* La boîte du modal, commune aux deux mises en page : même en-tête, même
+   sélecteur d'athlète, même interrupteur, mêmes boutons — seul le corps
+   change. Deux copies auraient divergé au premier ajout. */
+function fsBoite(s,th,e,pick,pris,corps){
   return '<div class="pl-modal-box fs-box">'
     +'<div class="pl-modal-top"><b>Résultats de séance</b><span style="flex:1"></span>'
       +'<button type="button" class="pl-modal-x" onclick="fsFermer()">×</button></div>'
