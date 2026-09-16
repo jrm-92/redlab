@@ -626,6 +626,14 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
   .fs-date input:focus{border-color:var(--orange)}
   .fs-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  /* La proposition d'envoi : elle n'existe que lorsqu'il y a des chronos, et
+     s'efface à l'impression — on n'envoie rien depuis une feuille papier. */
+  .fs-fiches{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .fs-fiches:empty{display:none}
+  .fs-fiches-t{font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--muted2);margin-right:2px}
+  .fs-fiche-b{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,26,.12);border:1.5px solid var(--orange);border-radius:9px;color:var(--orange);font-family:var(--font);font-size:12.5px;font-weight:800;padding:8px 12px;cursor:pointer;transition:filter .15s}
+  .fs-fiche-b:hover{filter:brightness(1.12)}
+  .fs-fiche-b small{font-weight:600;opacity:.8}
 
   @media(max-width:640px){
     .fs-tab td.fs-val{font-size:14px}
@@ -645,7 +653,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
       box-shadow:none!important;background:#fff!important;padding:0!important;max-height:none!important;overflow:visible!important}
     /* Le sélecteur de date ne sert qu'à l'écran : sur le papier, la date est
        déjà écrite en toutes lettres sous le titre. */
-    #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act,#fs-modal .fs-date{display:none!important}
+    #fs-modal .pl-modal-x,#fs-modal .fs-pick,#fs-modal .fs-act,#fs-modal .fs-fiches,#fs-modal .fs-date{display:none!important}
     #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #fs-modal .fs-t{font-size:17pt}
     #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
@@ -6433,8 +6441,8 @@ function libCard(s,vma,opts){
     +'<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Modifier</button>';
   /* La feuille n'a de sens que pour de la course : une séance de muscu n'a
      pas de temps de passage. */
-  const fsBtn=s.muscu?'':'<button type="button" class="lib-wkt" onclick="fsOuvrir(\''+_kind+'\','+_idx+')" title="Feuille de séance : les temps de passage de chaque athlète, imprimable">'
-    +'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Feuille</button>';
+  const fsBtn=s.muscu?'':'<button type="button" class="lib-wkt" onclick="fsOuvrir(\''+_kind+'\','+_idx+')" title="Résultats : les temps de passage de chaque athlète, à relever puis à envoyer">'
+    +'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Résultats</button>';
   /* Polar n'accepte aucun fichier de séance : pour ces montres-là, la fiche
      est le seul chemin. Elle sert aussi d'aide-mémoire aux autres. */
   const fpBtn='<button type="button" class="lib-wkt" onclick="fpOuvrir(\''+_kind+'\','+_idx+')" title="Fiche à envoyer à l\u2019athlète — indispensable pour une montre Polar, qui n\u2019importe aucun fichier de séance">'
@@ -8674,8 +8682,12 @@ function fsEcartTxt(d){
 /* Où se situe le chrono par rapport à la fenêtre visée. */
 function fsEcart(reel,lo,hi){
   if(reel==null||lo==null||hi==null) return null;
-  if(reel>hi) return {cls:'lent', txt:'+'+fsEcartTxt(reel-hi)};
-  if(reel<lo) return {cls:'vif',  txt:'\u2212'+fsEcartTxt(lo-reel)};
+  /* Le chrono se lit à la seconde, la cible se calcule à la décimale : sans
+     ce seuil, une cible à 3'03",4 rendait « +0 s » pour un 3'03" — hors cible
+     pour quatre dixièmes que personne n'a chronométrés. Sous la seconde,
+     c'est dans la cible. */
+  if(reel-hi>=1) return {cls:'lent', txt:'+'+fsEcartTxt(reel-hi)};
+  if(lo-reel>=1) return {cls:'vif',  txt:'\u2212'+fsEcartTxt(lo-reel)};
   return {cls:'ok', txt:'dans la cible'};
 }
 /* La clé d'un effort dans la fiche : le rang de la ligne, et le numéro de la
@@ -8710,6 +8722,9 @@ function fsNoter(athId,titre,i,k,champ){
   }
   if(typeof _saveAthletes==='function') _saveAthletes(liste);
   fsEcartMaj(champ, sec);
+  // Le premier chrono d'un athlète fait apparaître sa fiche à envoyer ;
+  // le dernier effacé la retire. Le tableau, lui, n'est pas retouché.
+  try{ fsFichesMaj(); }catch(e){}
 }
 /* L'écart s'affiche à côté de la case, sans redessiner le tableau : le coach
    enchaîne ses saisies, il ne doit pas perdre le focus entre deux chronos. */
@@ -8854,11 +8869,281 @@ function fsCible(l,vma){
 /* Les athlètes utilisables : il faut une VMA pour convertir un pourcentage.
    Ceux qui n'en ont pas sont montrés quand même, grisés, avec la raison —
    les taire laisserait le coach chercher pourquoi il en manque un. */
+/* Le numéro d'une fraction. Avec des séries, on écrit « série · répétition » :
+   c'est ainsi que le coach compte au bord de la piste. Partagé par le tableau
+   de saisie et par la fiche des résultats, pour qu'ils ne divergent jamais. */
+function fsNumero(l,k){
+  var nEff=Math.max(1,l.n||1);
+  if(nEff<2) return '';
+  if(l.sets>1&&l.reps>1) return (Math.floor(k/l.reps)+1)+'\u00b7'+((k%l.reps)+1);
+  return String(k+1);
+}
+/* La séance affichée, ajustement du jour compris. */
+function fsSeanceCourante(){
+  var s=libFindSession(_fsKind,_fsIdx); if(!s) return null;
+  if(_fsOv&&typeof plSeanceAjustee==='function') s=plSeanceAjustee(s,_fsOv);
+  return s;
+}
 function fsAthletes(){
   return (typeof getAthletes==='function'?getAthletes():[]).map(function(a){
     return {id:a.id, nom:a.pseudo||'Sans nom', vma:(a.vma&&a.vma>=6&&a.vma<=35)?a.vma:null};
   });
 }
+
+/* ══ LA FICHE DES RÉSULTATS ══
+   Les chronos étaient relevés, rangés, résumés par une pastille sur le
+   calendrier — et ils s'arrêtaient là. L'athlète, lui, ne recevait rien.
+   Une fiche par athlète : chaque fraction, ce qui était visé, ce qu'il a
+   couru, l'écart. Le même bandeau que la fiche de séance : c'est la même
+   séance, une fois faite.
+
+   Elle est construite sur fsLignes() — les lignes du tableau de saisie —
+   et non sur l'arbre de la fiche d'avant-séance : c'est ce découpage-là qui
+   porte les clés des relevés, donc le seul qui ne puisse pas se décaler. */
+var _frAth=null;
+var FR_LH=58, FR_COL={nom:26, vise:430, reel:632, ecart:790};
+var FR_TEINTE={ok:'#15803D', lent:'#B45309', vif:'#1D4ED8'};
+
+/* Combien de chronos cet athlète a-t-il sur cette séance, ce jour-là. */
+function fsCombien(athId,titre){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  if(!a) return 0;
+  var notes=((a.perfs||{})[_fsDate]||{})[titre]||{};
+  return Object.keys(notes).filter(function(c){ return typeof notes[c]==='number'&&notes[c]>0; }).length;
+}
+function frDonnees(athId){
+  var s=fsSeanceCourante(); if(!s) return null;
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  if(!a||!a.vma) return null;
+  var notes=((a.perfs||{})[_fsDate]||{})[s.title]||{};
+  var lignes=fsLignes(s);
+  lignes.forEach(function(l,i){ l.i=i; });
+  var rows=[], n=0, ok=0, lent=0, vif=0;
+  lignes.forEach(function(l){
+    if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
+    var c=fsCible(l,a.vma);
+    var haut='', bas='';
+    if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
+    var nEff=Math.max(1,l.n||1), vu=false;
+    for(var k=0;k<nEff;k++){
+      var reel=notes[fsCle(l.i,k)];
+      if(typeof reel!=='number'||reel<=0) continue;
+      var r=c?fsEcart(reel,c.lo,c.hi):null;
+      n++;
+      if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
+      /* « 5 × 1 km » cinq fois de suite n'apprend rien : le libellé ouvre
+         la série, les numéros suffisent ensuite. */
+      rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
+                 reel:fHMS(reel), ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+      vu=true;
+    }
+  });
+  if(!n) return null;
+  return {s:s, a:a, date:_fsDate, rows:rows, n:n, ok:ok, lent:lent, vif:vif};
+}
+/* Le bilan en une phrase, sous le tableau. */
+function frBilan(f){
+  var L=[f.n+' temps relev'+(f.n>1?'és':'é')];
+  if(f.ok) L.push(f.ok+' dans la cible');
+  if(f.lent) L.push(f.lent+' au-dessus');
+  if(f.vif) L.push(f.vif+' en dessous');
+  return L.join('   ·   ');
+}
+function frImage(f,ech){
+  ech=ech||2;
+  var sousT=[];
+  var jour=fpDateLisible(f.date); if(jour)sousT.push(jour);
+  sousT.push(f.a.pseudo||'Athlète');
+  if(f.a.vma)sousT.push('VMA '+String(f.a.vma.toFixed(1)).replace('.',',')+' km/h');
+
+  var g=fpEnteteMesure(f.s.title,'Résultats',sousT);
+  var hEntete=g.h;
+  var hTete=44, hPied=46;
+  var hCarte=18+hTete+f.rows.length*FR_LH+hPied+14;
+  var H=hEntete+hCarte+FP_PAD;
+
+  var cv=document.createElement('canvas');
+  cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
+  var c=cv.getContext('2d'); c.scale(ech,ech);
+  var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
+
+  c.fillStyle='#0B1220'; c.fillRect(0,0,FP_W,H);
+  fpRelief(c,FP_W-118,hEntete*0.46);
+  fpEnteteTracer(c,g);
+
+  var cx=FP_PAD, cy=hEntete, cw=FP_W-FP_PAD*2;
+  c.fillStyle='#FFFFFF'; fpRect(c,cx,cy,cw,hCarte,16); c.fill();
+
+  /* L'en-tête des colonnes : sans lui, « 3:22 » et « 3:18 » se ressemblent. */
+  var ty=cy+18+26;
+  f1(12.5,'800'); c.fillStyle='#94A3B8';
+  c.save(); c.letterSpacing='1.2px';
+  c.fillText('EFFORT',cx+FR_COL.nom,ty);
+  c.fillText('VISÉ',cx+FR_COL.vise,ty);
+  c.fillText('RÉEL',cx+FR_COL.reel,ty);
+  c.fillText('ÉCART',cx+FR_COL.ecart,ty);
+  c.restore();
+  c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
+  c.beginPath(); c.moveTo(cx+26,ty+14); c.lineTo(cx+cw-26,ty+14); c.stroke();
+
+  var ly=cy+18+hTete;
+  f.rows.forEach(function(r,i){
+    if(i){ c.strokeStyle='#F1F5F9'; c.lineWidth=1;
+           c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke(); }
+    var mid=ly+FR_LH/2;
+
+    if(r.nom){
+      f1(18,'700'); c.fillStyle='#0F172A';
+      c.fillText(fpCoupe(c,r.nom,FR_COL.vise-FR_COL.nom-70),cx+FR_COL.nom,mid+(r.num?0:6));
+      if(r.num){ f1(13,'800'); c.fillStyle='#94A3B8';
+                 c.fillText('n° '+r.num,cx+FR_COL.nom,mid+20); }
+    }else if(r.num){
+      f1(15,'800'); c.fillStyle='#64748B';
+      c.fillText('n° '+r.num,cx+FR_COL.nom,mid+6);
+    }
+
+    f1(19,'800'); c.fillStyle='#334155';
+    c.fillText(r.viseHaut,cx+FR_COL.vise,mid+(r.viseBas?0:6));
+    if(r.viseBas){ f1(13.5,'600'); c.fillStyle='#94A3B8';
+                   c.fillText(r.viseBas,cx+FR_COL.vise,mid+20); }
+
+    f1(23,'800'); c.fillStyle='#0F172A';
+    c.fillText(r.reel,cx+FR_COL.reel,mid+(r.viseBas?2:7));
+
+    if(r.ecTxt){
+      f1(16,'800');
+      var t=r.ecTxt, w=c.measureText(t).width+22, col=FR_TEINTE[r.ecCls]||'#475569';
+      c.fillStyle=col+'1A'; fpRect(c,cx+FR_COL.ecart,mid-16,w,32,8); c.fill();
+      c.fillStyle=col; c.fillText(t,cx+FR_COL.ecart+11,mid+(r.viseBas?2:6));
+    }
+    ly+=FR_LH;
+  });
+
+  c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
+  c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke();
+  f1(15,'700'); c.fillStyle='#64748B';
+  c.fillText(frBilan(f),cx+FR_COL.nom,ly+29);
+  return cv;
+}
+function frTexte(f){
+  var L=[(f.s.title||'Séance')+' — résultats'];
+  var st=[]; var j=fpDateLisible(f.date); if(j)st.push(j);
+  st.push(f.a.pseudo||'Athlète');
+  if(f.a.vma)st.push('VMA '+String(f.a.vma.toFixed(1)).replace('.',',')+' km/h');
+  L.push(st.join('  ·  ')); L.push('');
+  f.rows.forEach(function(r){
+    L.push('• '+(r.nom?r.nom+' ':'')+(r.num?'n° '+r.num:'')+' — visé '+r.viseHaut
+             +'  |  réel '+r.reel+(r.ecTxt?'  ('+r.ecTxt+')':''));
+  });
+  L.push(''); L.push(frBilan(f));
+  return L.join('\n');
+}
+function frNom(f){
+  return 'resultats-'+(f.date?f.date+'-':'')
+        +((f.a.pseudo?wktSlug(f.a.pseudo)+'-':'')+wktSlug(f.s.title||'seance'))+'.png';
+}
+function frHTML(f){
+  return '<div class="fp-wrap">'
+    +'<div class="fp-head"><div class="fp-t">Fiche des résultats</div>'
+    +'<button type="button" class="fp-x" onclick="frFermer()" aria-label="Fermer">✕</button></div>'
+    +'<div class="fp-note"><b>'+esc(f.a.pseudo||'Athlète')+'</b> — ce qui était visé, ce qui a été couru, et l’écart. '
+    +'Envoie-lui l’image : elle se lit sans rien ouvrir d’autre.</div>'
+    +'<div class="fp-apercu"><img id="fr-img" alt="Fiche des résultats"></div>'
+    +'<div class="fp-astuce">Sur téléphone, tu peux aussi appuyer longuement sur l’image pour l’enregistrer ou la partager.</div>'
+    +'<div class="fp-actions">'
+    +(fpPeutPartager()
+        ? '<button type="button" class="fp-btn fp-btn--p" onclick="frPartager()">Envoyer l’image</button>'
+          +'<button type="button" class="fp-btn" onclick="frTelecharger()">⤓ Enregistrer</button>'
+        : '<button type="button" class="fp-btn fp-btn--p" onclick="frTelecharger()">⤓ Télécharger l’image</button>')
+    +'<button type="button" class="fp-btn" onclick="frCopier()">Copier le texte</button>'
+    +'<span class="fp-ok" id="fr-ok"></span>'
+    +'</div></div>';
+}
+function frOuvrir(athId){
+  var f=frDonnees(athId);
+  if(!f){ alert('Aucun temps relevé pour cet athlète sur cette séance à cette date.'); return; }
+  _frAth=athId;
+  rlModalOuvrir('fr-modal',frHTML(f));
+  /* rlModalOuvrir referme sèchement : on veut repasser par frFermer, seul à
+     rendre la touche Échap au tableau resté ouvert derrière. */
+  var hote=document.getElementById('fr-modal');
+  if(hote) hote.onclick=function(e){ if(e.target===hote) frFermer(); };
+  if(_rlEchap) document.removeEventListener('keydown',_rlEchap);
+  _rlEchap=function(e){ if(e.key==='Escape') frFermer(); };
+  document.addEventListener('keydown',_rlEchap);
+  fpLogoPret(function(){
+    var g=frDonnees(_frAth); if(!g) return;
+    var img=document.getElementById('fr-img'); if(!img) return;
+    img.src=frImage(g,2).toDataURL('image/png');
+  });
+}
+function frFermer(){
+  rlModalFermer('fr-modal'); _frAth=null;
+  /* Le tableau des résultats est resté ouvert derrière : on lui rend Échap,
+     que la fermeture vient de lui retirer. */
+  if(document.getElementById('fs-modal')){
+    _rlEchap=function(e){ if(e.key==='Escape') fsFermer(); };
+    document.addEventListener('keydown',_rlEchap);
+  }
+}
+function frPartager(){
+  fpLogoPret(function(){
+    var f=frDonnees(_frAth); if(!f)return;
+    frImage(f,2).toBlob(function(b){
+      if(!b)return;
+      navigator.share({files:[new File([b],frNom(f),{type:'image/png'})],title:(f.s.title||'Séance')+' — résultats'})
+        .then(function(){ fpDit('Envoyé ✓','fr-ok'); })
+        .catch(function(e){ if(!e||e.name!=='AbortError') frTelecharger(); });
+    },'image/png');
+  });
+}
+function frTelecharger(){
+  fpLogoPret(function(){
+    var f=frDonnees(_frAth); if(!f)return;
+    var nom=frNom(f);
+    frImage(f,2).toBlob(function(b){
+      if(!b)return;
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(b); a.download=nom;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+      fpDit('Image enregistrée ✓','fr-ok');
+    },'image/png');
+  });
+}
+function frCopier(){
+  var f=frDonnees(_frAth); if(!f)return;
+  var t=frTexte(f), fini=function(){fpDit('Texte copié ✓','fr-ok');};
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(t).then(fini,function(){fpReplique(t,fini);});
+  else fpReplique(t,fini);
+}
+/* La rangée de propositions sous le tableau. Elle n'apparaît que lorsqu'il y
+   a quelque chose à envoyer, et se rafraîchit à chaque chrono saisi — sans
+   toucher au tableau, pour ne pas voler le focus entre deux saisies. */
+function fsFichesHTML(pris,titre){
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var avec=(pris||[]).map(function(a){ return {a:a,n:fsCombien(a.id,titre)}; })
+                     .filter(function(x){ return x.n>0; });
+  if(!avec.length) return '';
+  return '<div class="fs-fiches-t">Envoyer la fiche des résultats :</div>'
+    + avec.map(function(x){
+        return '<button type="button" class="fs-fiche-b" onclick="frOuvrir('+x.a.id+')">'
+          +e(x.a.nom)+' <small>'+x.n+' temps</small></button>';
+      }).join('');
+}
+function fsFichesMaj(){
+  var h=document.getElementById('fs-fiches'); if(!h) return;
+  var s=fsSeanceCourante(); if(!s) return;
+  var pris=fsAthletes().filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
+  var neuf=fsFichesHTML(pris,s.title);
+  /* Ne redessiner que si quelque chose a bougé. Quitter une case déclenche
+     son enregistrement : si c'était pour aller appuyer sur un de ces boutons,
+     le remplacer à cet instant ferait retomber l'appui dans le vide, et il
+     faudrait appuyer deux fois. */
+  if(h.innerHTML!==neuf) h.innerHTML=neuf;
+}
+
 /* ══ LA FEUILLE OUVERTE DEPUIS LE PLAN ══
    Le coach vient de poser une séance un mardi : c'est là qu'il veut noter
    les chronos, pas en retrouvant la séance dans la Bibliothèque et en
@@ -8882,7 +9167,7 @@ function fsOuvrirPlan(iso,si){
 function fsOuvrir(kind,idx,depuisPlan){
   var s=libFindSession(kind,idx); if(!s) return;
   if(!depuisPlan) _fsOv=null;
-  if(s.muscu){ alert('La feuille de séance donne des temps de passage : elle ne s’applique pas à une séance de musculation.'); return; }
+  if(s.muscu){ alert('Les résultats se comptent en temps de passage : ils ne s’appliquent pas à une séance de musculation.'); return; }
   _fsKind=kind; _fsIdx=idx;
   if(!_fsDate) _fsDate=fsIsoJour();
   var tous=fsAthletes();
@@ -8906,8 +9191,7 @@ function fsToggle(id){
 }
 function fsImprimer(){ window.print(); }
 function fsHTML(){
-  var s=libFindSession(_fsKind,_fsIdx); if(!s) return '';
-  if(_fsOv&&typeof plSeanceAjustee==='function') s=plSeanceAjustee(s,_fsOv);
+  var s=fsSeanceCourante(); if(!s) return '';
   var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
   var tous=fsAthletes();
   var pris=tous.filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
@@ -8950,13 +9234,7 @@ function fsHTML(){
          chronomètre cinq fois : noter une seule valeur revenait à écraser
          quatre fractions par une moyenne que personne n'a courue. */
       var nEff=Math.max(1,l.n||1);
-      var numero=function(k){
-        if(nEff<2) return '';
-        // Avec des séries, on numérote « série · répétition » : c'est ainsi
-        // que le coach compte au bord de la piste.
-        if(l.sets>1&&l.reps>1) return (Math.floor(k/l.reps)+1)+'·'+((k%l.reps)+1);
-        return String(k+1);
-      };
+      var numero=function(k){ return fsNumero(l,k); };
       return '<tr><td class="fs-eff">'+e(l.lbl)+'</td>'
         +pris.map(function(a){
           var c=fsCible(l,a.vma);
@@ -8992,7 +9270,7 @@ function fsHTML(){
   }
 
   return '<div class="pl-modal-box fs-box">'
-    +'<div class="pl-modal-top"><b>Feuille de séance</b><span style="flex:1"></span>'
+    +'<div class="pl-modal-top"><b>Résultats de séance</b><span style="flex:1"></span>'
       +'<button type="button" class="pl-modal-x" onclick="fsFermer()">×</button></div>'
     +'<div class="fs-hd"><div style="flex:1;min-width:200px"><div class="fs-t">'+e(s.title)+'</div>'
       +'<div class="fs-s">'+(th?e(th.lbl)+' · ':'')
@@ -9000,8 +9278,9 @@ function fsHTML(){
       +'<label class="fs-date">Séance du <input type="date" value="'+_fsDate+'" onchange="fsDateSet(this.value)"></label></div>'
     +'<div class="fs-pick">'+pick+'</div>'
     +corps
+    +'<div class="fs-fiches" id="fs-fiches">'+fsFichesHTML(pris,s.title)+'</div>'
     +'<div class="fs-act">'
-      +'<button type="button" class="lc-save" onclick="fsImprimer()">⎙ Imprimer la feuille</button>'
+      +'<button type="button" class="lc-save" onclick="fsImprimer()">⎙ Imprimer</button>'
       +'<button type="button" class="lc-cancel" onclick="fsFermer()">Fermer</button>'
     +'</div></div>';
 }
@@ -11453,7 +11732,7 @@ function plCalendarHTML(p,weeks,opts){
           +'<div class="plw-acts">'
             +'<button type="button" class="plw-cp" title="Régler la durée, ou modifier la séance" aria-label="Régler la durée, ou modifier la séance" onclick="event.stopPropagation();plDureeOuvrir(\''+iso+'\','+si+')">✎</button>'
             +'<button type="button" class="plw-cp" title="Envoyer cette séance sur la montre (.fit)" aria-label="Envoyer sur la montre" onclick="event.stopPropagation();wktExportJour(\''+iso+'\','+si+')">\u2193</button>'
-            +'<button type="button" class="plw-cp" title="Feuille de séance : noter les temps de ce jour-là" aria-label="Feuille de séance" onclick="event.stopPropagation();fsOuvrirPlan(\''+iso+'\','+si+')">▤</button>'
+            +'<button type="button" class="plw-cp" title="Résultats : noter les temps de ce jour-là" aria-label="Résultats de séance" onclick="event.stopPropagation();fsOuvrirPlan(\''+iso+'\','+si+')">▤</button>'
             +'<button type="button" class="plw-cp" title="Dupliquer" aria-label="Dupliquer cette séance" onclick="event.stopPropagation();plDaySessCopy(\''+iso+'\','+si+')">⧉</button>'
             +'<button type="button" class="plw-x" title="Retirer" aria-label="Retirer cette séance" onclick="event.stopPropagation();plDaySessDel(\''+iso+'\','+si+')">×</button>'
           +'</div></div>';
