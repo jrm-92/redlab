@@ -9531,21 +9531,7 @@ function fsHTML(){
     corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
       +'<th>Effort</th>'
       +pris.map(function(a){ return '<th class="fs-ath">'+e(a.nom)+'<br><span style="font-size:10px;font-weight:700;color:var(--muted2)">VMA '+a.vma.toFixed(1)+'</span></th>'; }).join('')
-      +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-      +'<div class="fs-note">Chrono à tenir sur la fraction, allure au kilomètre en dessous. '
-      +'Une fourchette d’intensité donne une fourchette de temps : c’est la marge, pas une imprécision. '
-      +'Les allures écrites en min/km sont absolues et valent pour tout le monde.'
-      +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — <b>une case par fraction</b>, numérotée : un 5 × 1000 se note cinq fois, pas en moyenne. '
-      +'Tape le chrono lu : <b>1,13</b> pour 1 min 13 s — la virgule du clavier remplace les deux-points, et il faut <b>deux chiffres après</b> (1,05 et non 1,5). '
-      +'Sous la minute, le nombre de secondes suffit : <b>47</b>. '
-      +'Une fraction que l’athlète n’a pas courue se marque avec le bouton <b>✕</b> à côté de la case (ou en tapant <b>x</b>) : '
-      +'elle apparaîtra « non couru » sur sa fiche, alors qu’une case laissée vide veut seulement dire « pas encore noté ». '
-      +'<br><b style="color:var(--text2)">Pulsations</b> — le bouton <b>♥ FC</b>, au-dessus, ajoute deux cases par fraction : '
-      +'une case pour le cœur à la <b>fin de l’effort</b>, sur la ligne de la fraction ; '
-      +'et une ligne <b>Récup</b> juste en dessous, avec sa propre case, pour le cœur à la <b>fin de la récup</b>. '
-      +'C’est cette seconde valeur qui dit si le cœur redescend. Elles s’enregistrent comme les chronos et partent sur la fiche de l’athlète. '
-      +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
-      +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
+      +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
 
   return '<div class="pl-modal-box fs-box">'
