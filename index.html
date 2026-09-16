@@ -8166,13 +8166,16 @@ function libIntensiteHTML(o,IS,appel,large){
   var all=(o.all!=null);
   var v0=all?fAll(Array.isArray(o.all)?o.all[0]:o.all):(Array.isArray(o.pct)?o.pct[0]:(o.pct||70));
   var v1=all?(Array.isArray(o.all)?fAll(o.all[1]):''):(Array.isArray(o.pct)?o.pct[1]:'');
+  /* inputmode="decimal" et non "numeric" : le clavier d'un téléphone n'a pas
+     de touche « : ». Avec « decimal » il porte une virgule, et allSec() la
+     lit comme un deux-points — 4,05 vaut 4:05. */
   var num=all
-    ? 'type="text" inputmode="numeric" maxlength="5"'
+    ? 'type="text" inputmode="decimal" maxlength="5"'
     : 'type="number" min="30" max="130" step="1"';
   var w0=all?'62px':'62px', w1=large?'66px':'62px';
-  return '<input '+num+' value="'+v0+'" oninput="'+appel+'\'v0\',this.value)" title="'+(all?'allure au km (4:05)':'% VMA')+'" style="'+IS+';width:'+w0+';text-align:center">'
+  return '<input '+num+' value="'+v0+'" oninput="'+appel+'\'v0\',this.value)" title="'+(all?'allure au km : 4,05 ou 4:05 pour 4 min 05 s':'% VMA')+'" style="'+IS+';width:'+w0+';text-align:center">'
     +'<span class="lb-at">–</span>'
-    +'<input '+num+' value="'+v1+'" placeholder="'+(all?'à':'max')+'" oninput="'+appel+'\'v1\',this.value)" title="'+(all?'allure la plus lente (facultatif)':'% VMA haut (facultatif)')+'" style="'+IS+';width:'+w1+';text-align:center">'
+    +'<input '+num+' value="'+v1+'" placeholder="'+(all?'à':'max')+'" oninput="'+appel+'\'v1\',this.value)" title="'+(all?'allure la plus lente, facultatif : 4,20 ou 4:20':'% VMA haut (facultatif)')+'" style="'+IS+';width:'+w1+';text-align:center">'
     +'<select onchange="'+appel+'\'mode\',this.value)" title="unité d’intensité" style="'+IS+';width:88px">'
       +'<option value="pct"'+(all?'':' selected')+'>% VMA</option>'
       +'<option value="all"'+(all?' selected':'')+'>min/km</option></select>';
@@ -8721,6 +8724,9 @@ function fsNoter(athId,titre,i,k,champ){
     a.perfs[_fsDate][titre][cle]=sec;
   }
   if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  /* Réécrire la case dans la forme de RedLab : le coach voit aussitôt que sa
+     virgule a bien été lue comme un deux-points, au lieu de le supposer. */
+  champ.value=(sec!=null&&sec>0)?fHMS(sec):'';
   fsEcartMaj(champ, sec);
   // Le premier chrono d'un athlète fait apparaître sa fiche à envoyer ;
   // le dernier effacé la retire. Le tableau, lui, n'est pas retouché.
@@ -9248,8 +9254,8 @@ function fsHTML(){
             var num=numero(k);
             cases+='<span class="fs-rep">'
               +(num?'<i class="fs-no">'+num+'</i>':'')
-              +'<input class="fs-in" type="text" inputmode="numeric" maxlength="7"'
-              +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="réel"'
+              +'<input class="fs-in" type="text" inputmode="decimal" maxlength="7"'
+              +' value="'+(reel!=null?fHMS(reel):'')+'" placeholder="1,13"'
               +' aria-label="Temps réalisé — '+e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'')+'"'
               +' onchange="fsNoter('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k+',this)">'+ec+'</span>';
           }
@@ -9265,7 +9271,9 @@ function fsHTML(){
       +'Une fourchette d’intensité donne une fourchette de temps : c’est la marge, pas une imprécision. '
       +'Les allures écrites en min/km sont absolues et valent pour tout le monde.'
       +'<br><b style="color:var(--text2)">Saisie du réalisé</b> — <b>une case par fraction</b>, numérotée : un 5 × 1000 se note cinq fois, pas en moyenne. '
-      +'Tape le chrono lu (<b>1:13</b> ou <b>73</b>, au choix) ; l’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
+      +'Tape le chrono lu : <b>1,13</b> pour 1 min 13 s — la virgule du clavier remplace les deux-points, et il faut <b>deux chiffres après</b> (1,05 et non 1,5). '
+      +'Sous la minute, le nombre de secondes suffit : <b>47</b>. '
+      +'L’écart s’affiche aussitôt et l’enregistrement est immédiat, sur la fiche de l’athlète. '
       +'Sur le papier, ces cases sont là pour être remplies au stylo.</div>';
   }
 
