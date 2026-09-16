@@ -12059,6 +12059,7 @@ function cloudOpen(){
       +'<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">'
       +'<button type="button" class="lc-cancel" id="cloud-mdp-ouvrir" onclick="cloudMdpOuvrir()" style="width:100%">Changer mon mot de passe</button>'
       +'<div id="cloud-mdp-bloc" style="display:none">'
+      +'<div class="lc-field"><label>Mot de passe actuel</label><input id="cloud-mdp0" type="password" autocomplete="current-password" placeholder="celui que tu utilises aujourd\'hui"></div>'
       +'<div class="lc-field"><label>Nouveau mot de passe</label><input id="cloud-mdp1" type="password" autocomplete="new-password" placeholder="12 caractères minimum"></div>'
       +'<div class="lc-field"><label>Confirme le nouveau</label><input id="cloud-mdp2" type="password" autocomplete="new-password" placeholder="le même, à nouveau"></div>'
       +'<div id="cloud-mdp-msg" style="font-size:12px;color:#FB923C;min-height:16px;margin:2px 0 8px"></div>'
@@ -12093,31 +12094,42 @@ function cloudMdpOuvrir(){
   var b=document.getElementById('cloud-mdp-bloc'),o=document.getElementById('cloud-mdp-ouvrir');
   if(!b)return;
   b.style.display='';if(o)o.style.display='none';
-  ['cloud-mdp1','cloud-mdp2'].forEach(function(id){
+  ['cloud-mdp0','cloud-mdp1','cloud-mdp2'].forEach(function(id){
     var c=document.getElementById(id);
     if(c)c.addEventListener('keydown',function(e){if(e.key==='Enter')cloudMdpValider();});
   });
-  var p=document.getElementById('cloud-mdp1');if(p)p.focus();
+  var p=document.getElementById('cloud-mdp0');if(p)p.focus();
 }
 function cloudMdpFermer(){
   var b=document.getElementById('cloud-mdp-bloc'),o=document.getElementById('cloud-mdp-ouvrir');
   if(b)b.style.display='none';if(o)o.style.display='';
-  ['cloud-mdp1','cloud-mdp2'].forEach(function(id){var c=document.getElementById(id);if(c)c.value='';});
+  ['cloud-mdp0','cloud-mdp1','cloud-mdp2'].forEach(function(id){var c=document.getElementById(id);if(c)c.value='';});
   cloudMdpMsg('');
 }
 async function cloudMdpValider(){
-  var a=(document.getElementById('cloud-mdp1')||{}).value||'',
+  var v=(document.getElementById('cloud-mdp0')||{}).value||'',
+      a=(document.getElementById('cloud-mdp1')||{}).value||'',
       b=(document.getElementById('cloud-mdp2')||{}).value||'';
+  if(!v){cloudMdpMsg('Indique d\'abord ton mot de passe actuel.');return;}
   if(a.length<12){cloudMdpMsg('12 caractères minimum.');return;}
-  if(a!==b){cloudMdpMsg('Les deux mots de passe ne sont pas identiques.');return;}
+  if(a!==b){cloudMdpMsg('Les deux nouveaux mots de passe ne sont pas identiques.');return;}
   if(!_sb){cloudMdpMsg('Service indisponible (réseau ?).');return;}
   // Le jeton peut avoir expiré depuis l'ouverture de l'application : sans
   // session valide, le changement échouerait sans message clair.
   if(!(await _uid())){cloudMdpMsg('Session expirée — reconnecte-toi, puis recommence.');return;}
+  // La session seule ne suffit pas : un appareil déverrouillé laissé sans
+  // surveillance permettrait de changer le mot de passe et d'enfermer le
+  // coach dehors. On réclame donc l'ancien mot de passe, vérifié auprès du
+  // serveur avant d'écrire le nouveau.
+  var em=(_cloudUser&&_cloudUser.email)||'';
+  if(!em){cloudMdpMsg('Compte introuvable — reconnecte-toi, puis recommence.');return;}
+  cloudMdpMsg('Vérification…');
+  var ctl=await _sb.auth.signInWithPassword({email:em,password:v});
+  if(ctl.error){cloudMdpMsg('Mot de passe actuel incorrect.');return;}
   cloudMdpMsg('Enregistrement…');
   var r=await _sb.auth.updateUser({password:a});
   if(r.error){cloudMdpMsg('Erreur : '+r.error.message);return;}
-  ['cloud-mdp1','cloud-mdp2'].forEach(function(id){var c=document.getElementById(id);if(c)c.value='';});
+  ['cloud-mdp0','cloud-mdp1','cloud-mdp2'].forEach(function(id){var c=document.getElementById(id);if(c)c.value='';});
   cloudMdpMsg('Mot de passe changé ✓ Range-le dans ton gestionnaire de mots de passe.',true);
 }
 function cloudPushDebounced(){if(!_cloudUser)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(function(){cloudPush();},1500);}
