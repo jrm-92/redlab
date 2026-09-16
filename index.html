@@ -643,6 +643,9 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-fc--rec{border-style:dashed}
   .fs-lb{flex:0 0 auto;font-style:normal;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
   .fs-fcg{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  .fs-rt{flex:0 0 auto;width:62px;background:var(--input-bg);border:1.5px dashed var(--input-border);border-radius:7px;color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:800;text-align:center;padding:5px 3px;outline:none;font-variant-numeric:tabular-nums}
+  .fs-rt:focus{border-color:var(--orange);border-style:solid}
+  .fs-rt::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
   .fs-rec-in{display:none}
   .fs-fc-sw.on{background:rgba(248,113,113,.14);border-color:#F87171;color:#F87171}
   .fs-opt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-6px 0 14px}
@@ -682,10 +685,11 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     .fs-reps{gap:9px;align-items:stretch}
     .fs-rep+.fs-rep{border-top:1px solid rgba(255,255,255,.07);padding-top:9px}
     .fs-in{width:66px}
-    .fs-fc{width:44px;padding:5px 2px}
+    .fs-fc{width:42px;padding:5px 1px}
+    .fs-rt{width:52px;padding:5px 1px}
     .fs-rep .fs-ec{min-width:44px;font-size:10px}
     .fs-x{width:24px;height:24px}
-    .fs-fcg{order:9;flex:0 0 100%;padding-left:26px;gap:5px}
+    .fs-fcg{order:9;flex:0 0 100%;padding-left:22px;gap:4px}
     .fs-tab td.fs-eff{white-space:normal}
     /* La colonne « Récup » disparaît : sa consigne est déjà réécrite sous le
        nom de l'effort, et ses 54 px servent mieux à la saisie. */
@@ -8856,6 +8860,37 @@ function fsFCLit(txt){
   return (v>=30&&v<=240)?v:null;
 }
 function fsCleFC(i,k,rec){ return (rec?'r':'')+fsCle(i,k||0); }
+/* Le temps de récup réellement pris. Son propre casier, comme les pulsations :
+   une récup de 32 secondes n'est ni un chrono d'effort ni une pulsation, et
+   aucun lecteur existant ne doit risquer de la compter pour l'un des deux.
+
+     athlete.recs = { '2026-09-16': { 'Titre de séance': { '3': 32 } } }  */
+function fsRecs(a){ return (a&&a.recs)||{}; }
+function fsLireRec(athId,titre,i,k){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  var j=fsRecs(a)[_fsDate]||{};
+  var v=(j[titre]||{})[fsCle(i,k||0)];
+  return (typeof v==='number'&&v>0)?v:null;
+}
+function fsNoterRec(athId,titre,i,k,champ){
+  var sec=fsSec(champ.value);
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===athId;});
+  if(!a) return;
+  a.recs=a.recs||{};
+  a.recs[_fsDate]=a.recs[_fsDate]||{};
+  a.recs[_fsDate][titre]=a.recs[_fsDate][titre]||{};
+  var cle=fsCle(i,k||0);
+  if(sec==null||sec<=0){
+    delete a.recs[_fsDate][titre][cle];
+    if(!Object.keys(a.recs[_fsDate][titre]).length) delete a.recs[_fsDate][titre];
+    if(!Object.keys(a.recs[_fsDate]).length) delete a.recs[_fsDate];
+  } else {
+    a.recs[_fsDate][titre][cle]=sec;
+  }
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  champ.value=(sec!=null&&sec>0)?fHMS(sec):'';
+}
 function fsFCs(a){ return (a&&a.fcs)||{}; }
 function fsLireFC(athId,titre,i,k,rec){
   var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
@@ -9136,6 +9171,7 @@ function frDonnees(athId){
   if(!a||!a.vma) return null;
   var notes=((a.perfs||{})[_fsDate]||{})[s.title]||{};
   var pouls=((a.fcs||{})[_fsDate]||{})[s.title]||{};
+  var repos=((a.recs||{})[_fsDate]||{})[s.title]||{};
   var lignes=fsLignes(s);
   lignes.forEach(function(l,i){ l.i=i; });
   var rows=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
@@ -9161,16 +9197,22 @@ function frDonnees(athId){
         vu=true; continue;
       }
       var fcE=pouls[fsCleFC(l.i,k,false)], fcR=pouls[fsCleFC(l.i,k,true)];
+      var tR=repos[fsCle(l.i,k)];
       fcE=(typeof fcE==='number'&&fcE>0)?fcE:null;
       fcR=(typeof fcR==='number'&&fcR>0)?fcR:null;
-      if(fcE!=null||fcR!=null) avecFC=true;
+      tR=(typeof tR==='number'&&tR>0)?tR:null;
+      if(fcE!=null||fcR!=null||tR!=null) avecFC=true;
       if(fcE!=null){ fcN++; fcSom+=fcE; }
+      /* Le bas de la colonne FC porte toute la récup : son temps, puis le
+         cœur au bout. Une colonne de plus ne tiendrait pas en largeur. */
+      var basRec=[]; if(tR!=null) basRec.push(fHMS(tR)); if(fcR!=null) basRec.push(fcR);
+      basRec=basRec.length?('réc '+basRec.join(' \u00b7 ')):'';
       var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
-                 reel:fsEcritVal(reel,mes)+(mes==='d'?' m':''), fcE:fcE, fcR:fcR,
-                 ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+                 reel:fsEcritVal(reel,mes)+(mes==='d'?' m':''), fcE:fcE, fcR:fcR, tR:tR,
+                 basRec:basRec, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
   });
@@ -9258,11 +9300,11 @@ function frImage(f,ech){
 
     /* Les deux pulsations l'une sous l'autre : l'effort en grand, la récup
        en petit. C'est la chute entre les deux qui se lit. */
-    if(f.avecFC&&(r.fcE!=null||r.fcR!=null)){
+    if(f.avecFC&&(r.fcE!=null||r.basRec)){
       if(r.fcE!=null){ f1(20,'800'); c.fillStyle='#BE123C';
-                       c.fillText(String(r.fcE),cx+FR_COL.fc,mid+(r.fcR!=null?0:6)); }
-      if(r.fcR!=null){ f1(13.5,'700'); c.fillStyle='#94A3B8';
-                       c.fillText('réc '+r.fcR,cx+FR_COL.fc,mid+(r.fcE!=null?20:6)); }
+                       c.fillText(String(r.fcE),cx+FR_COL.fc,mid+(r.basRec?0:6)); }
+      if(r.basRec){ f1(13,'700'); c.fillStyle='#94A3B8';
+                    c.fillText(r.basRec,cx+FR_COL.fc,mid+(r.fcE!=null?20:6)); }
     }
 
     if(r.ecTxt){
@@ -9288,8 +9330,12 @@ function frTexte(f){
   L.push(st.join('  ·  ')); L.push('');
   f.rows.forEach(function(r){
     var fc='';
-    if(r.fcE!=null||r.fcR!=null){
-      fc='  |  FC '+(r.fcE!=null?r.fcE:'—')+(r.fcR!=null?' puis '+r.fcR+' en fin de récup':'');
+    if(r.fcE!=null||r.tR!=null||r.fcR!=null){
+      var bouts=[];
+      if(r.fcE!=null) bouts.push('FC '+r.fcE+' en fin d\u2019effort');
+      if(r.tR!=null)  bouts.push('récup '+fHMS(r.tR));
+      if(r.fcR!=null) bouts.push('FC '+r.fcR+' au bout');
+      fc='  |  '+bouts.join(', ');
     }
     /* Un bloc sans cible n'a rien à viser : « visé  » suivi d'un blanc
        ressemblerait à une donnée manquante. */
@@ -9540,6 +9586,11 @@ function fsHTML(){
             var fcs='';
             if(_fsFC){
               var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
+              var tRec=fsLireRec(a.id,s.title,l.i,k);
+              /* La récup prévue sert d'exemple dans la case : « 0'30" » dit à
+                 la fois ce qui était demandé et dans quelle forme répondre. */
+              var dRec=(typeof wktParseDur==='function')?wktParseDur(l.rec):null;
+              var recPh=(dRec&&dRec.dur==='time'&&dRec.val>0)?fHMS(dRec.val):'récup';
               fcs='<span class="fs-fcg"><input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
                 +' value="'+(fcE!=null?fcE:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de l\u2019effort"'
@@ -9547,8 +9598,14 @@ function fsHTML(){
                 +' onchange="fsNoterFC('+appel+',false,this)">'
                 /* L'étiquette reste visible une fois la case remplie : un
                    marqueur de place disparaîtrait au moment où les deux
-                   nombres se ressemblent le plus. */
+                   nombres se ressemblent le plus. Elle ouvre tout ce qui
+                   concerne la récup : son temps, puis son cœur. */
                 +'<i class="fs-lb">réc</i>'
+                +'<input class="fs-rt" type="text" inputmode="decimal" maxlength="7"'
+                +' value="'+e(tRec!=null?fHMS(tRec):'')+'" placeholder="'+e(recPh)+'"'
+                +' title="Temps de récup réellement pris'+(recPh?' (prévu : '+recPh+')':'')+'"'
+                +' aria-label="Temps de récup — '+quoi+'"'
+                +' onchange="fsNoterRec('+appel+',this)">'
                 +'<input class="fs-fc fs-fc--rec" type="text" inputmode="numeric" maxlength="3"'
                 +' value="'+(fcR!=null?fcR:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de la récup"'
@@ -9597,10 +9654,10 @@ function fsHTML(){
        qu'il ajoute écrit à côté. */
     +'<div class="fs-opt">'
       +'<button type="button" class="fs-a fs-fc-sw'+(_fsFC?' on':'')+'" onclick="fsFCBascule()">'
-      +(_fsFC?'\u2713 ':'')+'\u2665 Pulsations</button>'
+      +(_fsFC?'\u2713 ':'')+'\u2665 FC & récup</button>'
       +'<span class="fs-opt-t">'+(_fsFC
-          ? 'après chaque chrono : le cœur en <b>fin d\u2019effort</b>, puis en <b>fin de récup</b>'
-          : 'ajoute deux cases par fraction : le cœur en fin d\u2019effort, puis en fin de récup')
+          ? 'après chaque effort : le cœur en <b>fin d\u2019effort</b>, puis le <b>temps de récup</b> et le cœur au bout'
+          : 'ajoute trois cases par fraction : le cœur en fin d\u2019effort, le temps de récup, et le cœur au bout')
       +'</span></div>'
     +corps
     +'<div class="fs-fiches" id="fs-fiches">'+fsFichesHTML(pris,s.title)+'</div>'
