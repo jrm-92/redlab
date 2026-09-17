@@ -645,6 +645,9 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-fcg{display:flex;align-items:center;gap:6px;flex:0 0 auto}
   .fs-rt{flex:0 0 auto;width:62px;background:var(--input-bg);border:1.5px dashed var(--input-border);border-radius:7px;color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:800;text-align:center;padding:5px 3px;outline:none;font-variant-numeric:tabular-nums}
   .fs-rt:focus{border-color:var(--orange);border-style:solid}
+  /* Pré-remplie par la consigne : en gris tant que c'est elle qui parle, et
+     non le coach. Elle redevient normale dès qu'il y touche. */
+  .fs-rt.est-defaut{color:var(--muted2);font-weight:700}
   .fs-rt::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
   .fs-rec-in{display:none}
   /* ── La saisie au téléphone : une carte par fraction ──────────────
@@ -668,7 +671,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fsc-hd .fs-ec{margin:0;flex:1 1 auto;min-width:0;font-size:11.5px}
   .fsc-hd .fs-x{margin-left:auto}
   .fsc-champs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-  .fsc-champs--1{grid-template-columns:minmax(0,160px)}
+  .fsc-champs--2{grid-template-columns:repeat(2,minmax(0,1fr));max-width:230px}
   .fsc-ch{display:flex;flex-direction:column;gap:3px;min-width:0}
   .fsc-ch>span{font-size:8.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .fsc-ch .fs-in,.fsc-ch .fs-fc,.fsc-ch .fs-rt{display:block;width:100%;margin:0;padding:9px 3px;font-size:14px}
@@ -8903,6 +8906,14 @@ function fsCleFC(i,k,rec){ return (rec?'r':'')+fsCle(i,k||0); }
 
      athlete.recs = { '2026-09-16': { 'Titre de séance': { '3': 32 } } }  */
 function fsRecs(a){ return (a&&a.recs)||{}; }
+/* La récup prévue par la séance, en secondes. Elle pré-remplit la case : neuf
+   fois sur dix c'est la bonne réponse, et le coach ne corrige que l'exception.
+   Une récup écrite en distance (« 200 m trot ») n'a pas de durée : la case
+   reste vide plutôt que d'annoncer un temps que personne n'a demandé. */
+function fsRecPrevue(l){
+  var d=(typeof wktParseDur==='function')?wktParseDur(l&&l.rec):null;
+  return (d&&d.dur==='time'&&d.val>0)?d.val:null;
+}
 function fsLireRec(athId,titre,i,k){
   var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
   var j=fsRecs(a)[_fsDate]||{};
@@ -8927,6 +8938,8 @@ function fsNoterRec(athId,titre,i,k,champ){
   }
   if(typeof _saveAthletes==='function') _saveAthletes(liste);
   champ.value=(sec!=null&&sec>0)?fHMS(sec):'';
+  // Ce n'est plus la consigne qui parle, c'est le coach.
+  champ.classList.remove('est-defaut');
 }
 function fsFCs(a){ return (a&&a.fcs)||{}; }
 function fsLireFC(athId,titre,i,k,rec){
@@ -9241,7 +9254,12 @@ function frDonnees(athId){
       fcE=(typeof fcE==='number'&&fcE>0)?fcE:null;
       fcR=(typeof fcR==='number'&&fcR>0)?fcR:null;
       tR=(typeof tR==='number'&&tR>0)?tR:null;
+      /* La colonne n'apparaît que si le coach a relevé quelque chose. La récup
+         prévue, elle, ne fait que combler les blancs une fois la colonne là :
+         elle ne la déclenche pas, sinon toutes les fiches la porteraient sans
+         que personne n'ait rien noté. */
       if(fcE!=null||fcR!=null||tR!=null) avecFC=true;
+      if(tR==null) tR=fsRecPrevue(l);
       if(fcE!=null){ fcN++; fcSom+=fcE; }
       /* Le bas de la colonne FC porte toute la récup : son temps, puis le
          cœur au bout. Une colonne de plus ne tiendrait pas en largeur. */
@@ -9578,8 +9596,7 @@ function fsCartesHTML(s,a,lignes,e){
     var mes=c?c.mes:fsMesure(l);
     var nEff=Math.max(1,l.n||1);
     var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
-    var dRec=(typeof wktParseDur==='function')?wktParseDur(l.rec):null;
-    var recPh=(dRec&&dRec.dur==='time'&&dRec.val>0)?fHMS(dRec.val):'récup';
+    var prevu=fsRecPrevue(l);
     var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
     bornes+=' data-mes="'+mes+'"';
 
@@ -9610,21 +9627,29 @@ function fsCartesHTML(s,a,lignes,e){
                     'fsNoter('+appel+',this,\''+mes+'\')',
                     mes==='d'?'Distance parcourue, en mètres':'Temps réalisé');
       if(_fsFC){
-        var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
-        var tRec=fsLireRec(a.id,s.title,l.i,k);
+        var fcE=fsLireFC(a.id,s.title,l.i,k,false);
         champs+=ch('fs-fc','FC effort',(fcE!=null?fcE:''),'FC','numeric',3,
-                   'fsNoterFC('+appel+',false,this)','Pulsations à la fin de l’effort')
-          +ch('fs-rt','Récup',(tRec!=null?fHMS(tRec):''),recPh,'decimal',7,
-              'fsNoterRec('+appel+',this)','Temps de récup réellement pris')
-          +ch('fs-fc fs-fc--rec','FC récup',(fcR!=null?fcR:''),'FC','numeric',3,
-              'fsNoterFC('+appel+',true,this)','Pulsations à la fin de la récup');
+                   'fsNoterFC('+appel+',false,this)','Pulsations à la fin de l’effort');
+      }
+      /* Le temps de récup ne dépend pas de l'interrupteur des pulsations : ce
+         n'est pas une donnée de cardio. Il arrive pré-rempli par la consigne,
+         en gris tant que c'est elle qui parle et non le coach. */
+      var tRec=fsLireRec(a.id,s.title,l.i,k);
+      champs+=ch('fs-rt'+((tRec==null&&prevu!=null)?' est-defaut':''),'Récup',
+                 (tRec!=null?fHMS(tRec):(prevu!=null?fHMS(prevu):'')),
+                 'récup','decimal',7,'fsNoterRec('+appel+',this)',
+                 'Temps de récup réellement pris'+(prevu!=null?' (prévu : '+fHMS(prevu)+')':''));
+      if(_fsFC){
+        var fcR=fsLireFC(a.id,s.title,l.i,k,true);
+        champs+=ch('fs-fc fs-fc--rec','FC récup',(fcR!=null?fcR:''),'FC','numeric',3,
+                   'fsNoterFC('+appel+',true,this)','Pulsations à la fin de la récup');
       }
       out+='<div class="fsc-frac"'+bornes+'>'
         +'<div class="fsc-hd"><i>'+e(num)+'</i>'+etat
         +'<button type="button" class="fs-x'+(np?' on':'')+'" title="Fraction non courue"'
         +' aria-label="Marquer non couru — '+quoi+'"'
         +' onclick="fsBasculeX('+appel+',this,\''+mes+'\')">✕</button></div>'
-        +'<div class="fsc-champs'+(_fsFC?'':' fsc-champs--1')+'">'+champs+'</div></div>';
+        +'<div class="fsc-champs'+(_fsFC?'':' fsc-champs--2')+'">'+champs+'</div></div>';
     }
     out+='</div>';
   });
@@ -9702,44 +9727,41 @@ function fsHTML(){
             var num=numero(k);
             var quoi=e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'');
             var appel=a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k;
-            /* Les pulsations n'apparaissent que si le coach les prend : sans
-               interrupteur, la feuille de piste doublerait de largeur pour
-               tout le monde.
-
-               Les deux restent sur la ligne de leur fraction, dans l'ordre
-               où elles se lisent au bord de la piste : le chrono, le cœur en
-               fin d'effort, le cœur en fin de récup. Séparées sur deux listes
-               — une ligne « Récup » à part — il fallait compter les rangs de
-               l'une pour retrouver la fraction de l'autre. */
-            var fcs='';
+            /* Le temps de récup n'est pas une donnée de cardio : il reste là
+               même sans l'interrupteur. Et il arrive pré-rempli par la
+               consigne de la séance — neuf fois sur dix c'est la bonne
+               réponse, on ne corrige que l'exception. */
+            var tRec=fsLireRec(a.id,s.title,l.i,k);
+            var prevu=fsRecPrevue(l);
+            var recVal=(tRec!=null)?fHMS(tRec):(prevu!=null?fHMS(prevu):'');
+            var recDef=(tRec==null&&prevu!=null);
+            var fcs='<span class="fs-fcg">';
             if(_fsFC){
-              var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
-              var tRec=fsLireRec(a.id,s.title,l.i,k);
-              /* La récup prévue sert d'exemple dans la case : « 0'30" » dit à
-                 la fois ce qui était demandé et dans quelle forme répondre. */
-              var dRec=(typeof wktParseDur==='function')?wktParseDur(l.rec):null;
-              var recPh=(dRec&&dRec.dur==='time'&&dRec.val>0)?fHMS(dRec.val):'récup';
-              fcs='<span class="fs-fcg"><input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
+              var fcE=fsLireFC(a.id,s.title,l.i,k,false);
+              fcs+='<input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
                 +' value="'+(fcE!=null?fcE:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de l\u2019effort"'
                 +' aria-label="FC effort — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',false,this)">'
-                /* L'étiquette reste visible une fois la case remplie : un
-                   marqueur de place disparaîtrait au moment où les deux
-                   nombres se ressemblent le plus. Elle ouvre tout ce qui
-                   concerne la récup : son temps, puis son cœur. */
-                +'<i class="fs-lb">réc</i>'
-                +'<input class="fs-rt" type="text" inputmode="decimal" maxlength="7"'
-                +' value="'+e(tRec!=null?fHMS(tRec):'')+'" placeholder="'+e(recPh)+'"'
-                +' title="Temps de récup réellement pris'+(recPh?' (prévu : '+recPh+')':'')+'"'
-                +' aria-label="Temps de récup — '+quoi+'"'
-                +' onchange="fsNoterRec('+appel+',this)">'
-                +'<input class="fs-fc fs-fc--rec" type="text" inputmode="numeric" maxlength="3"'
+                +' onchange="fsNoterFC('+appel+',false,this)">';
+            }
+            /* L'étiquette reste visible une fois la case remplie : un marqueur
+               de place disparaîtrait au moment où les nombres se ressemblent
+               le plus. Elle ouvre tout ce qui concerne la récup. */
+            fcs+='<i class="fs-lb">réc</i>'
+              +'<input class="fs-rt'+(recDef?' est-defaut':'')+'" type="text" inputmode="decimal" maxlength="7"'
+              +' value="'+e(recVal)+'" placeholder="récup"'
+              +' title="Temps de récup réellement pris'+(prevu!=null?' (prévu : '+fHMS(prevu)+')':'')+'"'
+              +' aria-label="Temps de récup — '+quoi+'"'
+              +' onchange="fsNoterRec('+appel+',this)">';
+            if(_fsFC){
+              var fcR=fsLireFC(a.id,s.title,l.i,k,true);
+              fcs+='<input class="fs-fc fs-fc--rec" type="text" inputmode="numeric" maxlength="3"'
                 +' value="'+(fcR!=null?fcR:'')+'" placeholder="FC"'
                 +' title="Pulsations à la fin de la récup"'
                 +' aria-label="FC fin de récup — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',true,this)"></span>';
+                +' onchange="fsNoterFC('+appel+',true,this)">';
             }
+            fcs+='</span>';
             cases+='<span class="fs-rep">'
               +(num?'<i class="fs-no">'+num+'</i>':'')
               +'<input class="fs-in'+(np?' fs-in--x':'')+'" type="text" maxlength="7"'
@@ -9788,10 +9810,10 @@ function fsBoite(s,th,e,pick,pris,corps){
        qu'il ajoute écrit à côté. */
     +'<div class="fs-opt">'
       +'<button type="button" class="fs-a fs-fc-sw'+(_fsFC?' on':'')+'" onclick="fsFCBascule()">'
-      +(_fsFC?'\u2713 ':'')+'\u2665 FC & récup</button>'
+      +(_fsFC?'\u2713 ':'')+'\u2665 Pulsations</button>'
       +'<span class="fs-opt-t">'+(_fsFC
-          ? 'après chaque effort : le cœur en <b>fin d\u2019effort</b>, puis le <b>temps de récup</b> et le cœur au bout'
-          : 'ajoute trois cases par fraction : le cœur en fin d\u2019effort, le temps de récup, et le cœur au bout')
+          ? 'le cœur en <b>fin d\u2019effort</b> et en <b>fin de récup</b> \u2014 le temps de récup, lui, est toujours là'
+          : 'ajoute le cœur en fin d\u2019effort et en fin de récup. Le temps de récup se note sans ça.')
       +'</span></div>'
     +corps
     +'<div class="fs-fiches" id="fs-fiches">'+fsFichesHTML(pris,s.title)+'</div>'
