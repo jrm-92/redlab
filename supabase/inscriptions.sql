@@ -14,20 +14,23 @@
 --  Un remboursement total n'efface rien : il pose une date dans
 --  « annule_le ». La place se rouvre, la trace reste.
 --
---  Qui peut lire : le coach, et lui seul. Les athlètes de l'espace
---  personnel sont eux aussi « authenticated » — une règle ouverte à tout
---  le monde connecté leur donnerait le nom et l'email de chaque
---  participant. La règle est donc nominative.
+--  QUI LIT — personne, via l'API. La liste se consulte dans le tableau
+--  de bord Supabase, qui se connecte en propriétaire de la table et
+--  n'est donc pas soumis aux règles RLS. Aucune policy n'est créée : ni
+--  le site, ni REDLAB, ni l'espace athlète ne peuvent atteindre ces
+--  lignes. Même dispositif que stripe_events.
 --
---  Qui peut écrire : personne, sauf service_role — c'est-à-dire la
---  fonction stripe-webhook, et rien d'autre. Aucune règle INSERT,
---  UPDATE ou DELETE n'est créée : un navigateur ne peut pas inventer
---  une inscription.
+--  QUI ÉCRIT — service_role seul, c'est-à-dire la fonction
+--  stripe-webhook. Un navigateur ne peut pas inventer une inscription.
 -- ═══════════════════════════════════════════════════════════════════════
 
 create table if not exists public.inscriptions (
-  -- identifiant du paiement chez Stripe (cs_…) : empêche les doublons
+  -- identifiant de la session de paiement Stripe (cs_…) : empêche les doublons
   id              text        primary key,
+
+  -- identifiant du paiement (pi_…) : seul lien commun entre l'encaissement
+  -- et le remboursement, qui n'arrive pas sous la même forme
+  payment_intent  text,
 
   -- l'un OU l'autre, jamais les deux
   session_id      text,                   -- public.sessions.id
@@ -48,24 +51,26 @@ create table if not exists public.inscriptions (
   annule_le       timestamptz             -- remboursement total
 );
 
--- Retrouver vite « qui vient à cette séance »
+-- Ajouts pour une table déjà créée sans ces colonnes
+alter table public.inscriptions add column if not exists payment_intent text;
+
+-- Retrouver vite « qui vient à cette séance », et la ligne à annuler
 create index if not exists inscriptions_session_idx
   on public.inscriptions (session_id, date_seance);
 create index if not exists inscriptions_preparation_idx
   on public.inscriptions (preparation_id, date_seance);
+create index if not exists inscriptions_paiement_idx
+  on public.inscriptions (payment_intent);
 
 alter table public.inscriptions enable row level security;
 
--- ── Lecture : le coach seul ────────────────────────────────────────────
---  Remplace l'adresse ci-dessous si tu te connectes à REDLAB avec une
---  autre. C'est la seule ligne à adapter de tout ce fichier.
+-- Aucune règle de lecture : la liste se consulte dans le tableau de bord.
+-- Une règle « to authenticated » aurait ouvert la liste aux athlètes de
+-- l'espace personnel, qui sont eux aussi des comptes connectés.
 drop policy if exists "le coach lit les inscriptions" on public.inscriptions;
-create policy "le coach lit les inscriptions" on public.inscriptions
-  for select to authenticated
-  using (lower(coalesce(auth.jwt() ->> 'email', '')) = lower('jeremy.reding@outlook.fr'));
 
 -- ── Vérification ───────────────────────────────────────────────────────
---  Doit afficher UNE seule ligne : inscriptions / SELECT / {authenticated}
+--  Ne doit afficher AUCUNE ligne.
 select tablename, policyname, cmd, roles::text
   from pg_policies
  where schemaname = 'public' and tablename = 'inscriptions';
