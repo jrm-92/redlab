@@ -7,16 +7,27 @@
 //  IMPORTANT : « Verify JWT » doit rester DÉSACTIVÉ (Stripe n'envoie pas
 //  de jeton Supabase). Un seul secret à définir : STRIPE_WEBHOOK_SECRET.
 //
-//  ── Ce que chaque lien de paiement Stripe doit porter ────────────────
-//  Dans les métadonnées du lien, UNE clé :
-//      session_id      → l'identifiant de la séance      (public.sessions.id)
-//   ou preparation_id  → l'identifiant de la préparation (public.preparations.id)
+//  ── Comment on sait quelle séance a été payée ──────────────────
+//  RIEN à saisir dans Stripe. La page courir-en-groupe.html ajoute
+//  elle-même l'identifiant à l'URL du lien de paiement au moment de
+//  l'ouvrir (paramètre client_reference_id, voir avecReference()), et
+//  Stripe le recopie dans la session de paiement. Une séance créée
+//  aujourd'hui est donc comptée correctement aujourd'hui.
 //
-//  Sans l'une des deux, le paiement est quand même enregistré — nom
+//  Cet identifiant désigne soit une séance, soit une préparation — il ne
+//  dit pas laquelle des deux. On cherche donc dans « sessions », puis
+//  dans « preparations ». Les métadonnées session_id / preparation_id
+//  restent acceptées en secours, si un lien devait un jour être réglé à
+//  la main.
+//
+//  Sans identifiant reconnu, le paiement est quand même enregistré — nom
 //  compris — mais aucun compteur ne bouge. Mieux vaut un compteur
 //  immobile qu'un compteur faux. La ligne apparaît alors dans la table
-//  « inscriptions » avec ses deux colonnes de rattachement vides : c'est
-//  le signe qu'un lien de paiement est mal réglé.
+//  « inscriptions » avec ses deux colonnes de rattachement vides.
+//
+//  ⚠ Les identifiants doivent rester en lettres, chiffres, tiret et
+//    souligné : Stripe n'accepte rien d'autre dans client_reference_id,
+//    et la page remplace le reste par un tiret.
 //
 //  ── Ce que cette version corrige ─────────────────────────────────────
 //  1. Le compteur. L'ancienne version appelait incr_inscrits_evenement,
@@ -68,25 +79,42 @@ async function premiere(path: string): Promise<any> {
   return Array.isArray(lignes) && lignes.length ? lignes[0] : null;
 }
 
-// Date de référence d'une inscription : la date de la séance pour une
-// séance à l'unité, la date de la DERNIÈRE séance pour une préparation —
-// c'est à partir de là que courent les six mois de conservation.
-async function dateDeReference(
-  sessionId: string | null,
-  preparationId: string | null,
-): Promise<string | null> {
-  if (sessionId) {
-    const l = await premiere(`sessions?id=eq.${encodeURIComponent(sessionId)}&select=date&limit=1`);
-    return l?.date ?? null;
-  }
-  if (preparationId) {
-    const l = await premiere(
-      `preparation_seances?preparation_id=eq.${encodeURIComponent(preparationId)}` +
+// À quoi se rattache ce paiement, et à quelle date.
+//
+// L'identifiant arrive par client_reference_id, que la page a ajouté à
+// l'URL du lien de paiement. Il désigne une séance OU une préparation :
+// on cherche dans l'une, puis dans l'autre.
+//
+// La date retenue est celle de la séance, ou celle de la DERNIÈRE séance
+// d'une préparation — c'est à partir de là que courent les six mois de
+// conservation.
+type Rattachement = {
+  sessionId: string | null;
+  preparationId: string | null;
+  date: string | null;
+};
+
+async function rattachement(obj: any): Promise<Rattachement> {
+  const meta = obj.metadata ?? {};
+  const ref: string | null =
+    obj.client_reference_id || meta.session_id || meta.preparation_id || null;
+  const vide: Rattachement = { sessionId: null, preparationId: null, date: null };
+  if (!ref) return vide;
+
+  const s = await premiere(`sessions?id=eq.${encodeURIComponent(ref)}&select=date&limit=1`);
+  if (s) return { sessionId: ref, preparationId: null, date: s.date ?? null };
+
+  const p = await premiere(`preparations?id=eq.${encodeURIComponent(ref)}&select=id&limit=1`);
+  if (p) {
+    const d = await premiere(
+      `preparation_seances?preparation_id=eq.${encodeURIComponent(ref)}` +
         `&select=date&order=date.desc&limit=1`,
     );
-    return l?.date ?? null;
+    return { sessionId: null, preparationId: ref, date: d?.date ?? null };
   }
-  return null;
+
+  console.error("identifiant de paiement inconnu en base :", ref);
+  return vide;
 }
 
 // Vérifie la signature Stripe (HMAC-SHA256) sans dépendre du SDK Stripe.
@@ -143,9 +171,9 @@ Deno.serve(async (req) => {
   //  Seul checkout.session.completed est écouté : c'est le seul moment
   //  où Stripe garantit à la fois la place payée et l'identité du payeur.
   if (event.type === "checkout.session.completed") {
-    const meta = obj.metadata ?? {};
-    const sessionId: string | null = meta.session_id || null;
-    const preparationId: string | null = sessionId ? null : (meta.preparation_id || null);
+    const ou = await rattachement(obj);
+    const sessionId = ou.sessionId;
+    const preparationId = ou.preparationId;
     const client = obj.customer_details ?? {};
 
     // La ligne est posée avant le compteur : si le compteur échoue, le nom
@@ -156,7 +184,7 @@ Deno.serve(async (req) => {
       payment_intent: obj.payment_intent ?? null,
       session_id: sessionId,
       preparation_id: preparationId,
-      date_seance: await dateDeReference(sessionId, preparationId),
+      date_seance: ou.date,
       nom: client.name ?? null,
       email: client.email ?? null,
       telephone: client.phone ?? null,
@@ -172,7 +200,7 @@ Deno.serve(async (req) => {
 
     if (sessionId) await rpc("incr_inscrits_session", { p_id: sessionId });
     else if (preparationId) await rpc("incr_inscrits_preparation", { p_id: preparationId });
-    else console.error("lien de paiement sans session_id ni preparation_id :", obj.id);
+    else console.error("paiement sans rattachement, compteur inchangé :", obj.id);
   } // ── Remboursement TOTAL : la place se rouvre ─────────────────────────
   //  Le remboursement ne porte pas les métadonnées du lien. On retrouve
   //  l'inscription par son numéro de paiement, et c'est elle qui dit quel

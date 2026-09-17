@@ -9,10 +9,11 @@
 //      npx tsc index.ts --target ES2022 --lib ES2022,DOM --module esnext --outDir out
 //      node verification.mjs
 //
-//  Neuf scénarios : séance payée, événement renvoyé deux fois,
-//  préparation payée, lien mal réglé, remboursement total, remboursement
-//  partiel, remboursement renvoyé deux fois, signature invalide, requête
-//  GET. Chacun doit afficher ✔.
+//  Onze scénarios : séance payée, événement renvoyé deux fois,
+//  préparation payée, lien sans étiquette, remboursement total,
+//  remboursement partiel, remboursement renvoyé deux fois, signature
+//  invalide, requête GET, référence inconnue en base, métadonnées en
+//  secours. Chacun doit afficher ✔.
 // ════════════════════════════════════════════════════════════════════════
 
 import { readFileSync } from 'node:fs';
@@ -26,6 +27,7 @@ let inscriptions = new Map();      // id -> ligne
 let evenementsVus = new Set();
 const SESSIONS = { TEST1: { date: '2026-10-17' }, TEST4: { date: '2026-11-14' } };
 const PREP_SEANCES = { P1: ['2026-11-07', '2027-01-30'] };
+const PREPARATIONS = { P1: true };
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -46,6 +48,10 @@ globalThis.fetch = async (url, init = {}) => {
   if (chemin === 'sessions' && methode === 'GET') {
     const id = decodeURIComponent((u.searchParams.get('id') || '').replace('eq.', ''));
     return json(SESSIONS[id] ? [{ date: SESSIONS[id].date }] : []);
+  }
+  if (chemin === 'preparations' && methode === 'GET') {
+    const id = decodeURIComponent((u.searchParams.get('id') || '').replace('eq.', ''));
+    return json(PREPARATIONS[id] ? [{ id }] : []);
   }
   if (chemin === 'preparation_seances' && methode === 'GET') {
     const id = decodeURIComponent((u.searchParams.get('preparation_id') || '').replace('eq.', ''));
@@ -109,7 +115,7 @@ console.log('\n── 1. Séance à l\'unité payée ─────────
 let r = await envoyer({
   id: 'evt_1', type: 'checkout.session.completed',
   data: { object: { id: 'cs_1', payment_intent: 'pi_1', amount_total: 1300, currency: 'eur',
-    metadata: { session_id: 'TEST1' },
+    client_reference_id: 'TEST1',
     customer_details: { name: 'Marie Dupont', email: 'marie@exemple.fr', phone: null } } },
 });
 console.log('  réponse :', r.statut, r.texte, '| appels :', rpcs(r.journal).join(', ') || 'aucun');
@@ -131,7 +137,7 @@ console.log('\n── 3. Préparation payée ───────────�
 r = await envoyer({
   id: 'evt_2', type: 'checkout.session.completed',
   data: { object: { id: 'cs_2', payment_intent: 'pi_2', amount_total: 12000, currency: 'eur',
-    metadata: { preparation_id: 'P1' },
+    client_reference_id: 'P1',
     customer_details: { name: 'Paul Martin', email: 'paul@exemple.fr', phone: '0612345678' } } },
 });
 l = inscriptions.get('cs_2');
@@ -189,6 +195,28 @@ ok(r.statut === 400 && r.journal.length === 0, 'refusée avant d\'atteindre la b
 console.log('\n── 9. Requête GET (quelqu\'un ouvre l\'adresse) ───────────────');
 r = await envoyer({ id: 'evt_8' }, { methode: 'GET' });
 ok(r.statut === 405, 'refusée');
+
+console.log('\n── 10. Référence inconnue en base (séance supprimée) ─────');
+r = await envoyer({
+  id: 'evt_9', type: 'checkout.session.completed',
+  data: { object: { id: 'cs_10', payment_intent: 'pi_10', amount_total: 1300, currency: 'eur',
+    client_reference_id: 'DISPARUE',
+    customer_details: { name: 'Hugo Petit', email: 'hugo@exemple.fr' } } },
+});
+l = inscriptions.get('cs_10');
+ok(l.nom === 'Hugo Petit' && l.session_id === null && l.preparation_id === null, 'nom gardé, rien rattaché');
+ok(rpcs(r.journal).length === 0, 'aucun compteur touché');
+
+console.log('\n── 11. Métadonnées en secours (lien réglé à la main) ────');
+r = await envoyer({
+  id: 'evt_10', type: 'checkout.session.completed',
+  data: { object: { id: 'cs_11', payment_intent: 'pi_11', amount_total: 1300, currency: 'eur',
+    metadata: { session_id: 'TEST4' },
+    customer_details: { name: 'Zoé Roux', email: 'zoe@exemple.fr' } } },
+});
+l = inscriptions.get('cs_11');
+ok(l.session_id === 'TEST4' && l.date_seance === '2026-11-14', 'rattachée par les métadonnées');
+ok(rpcs(r.journal).join() === 'incr_inscrits_session({"p_id":"TEST4"})', 'bon compteur');
 
 console.log('\n── État final de la table inscriptions ──────────────────────');
 for (const [id, v] of inscriptions) {
