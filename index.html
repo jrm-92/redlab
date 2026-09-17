@@ -587,7 +587,11 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
      Une séance, plusieurs athlètes, un tableau de temps de passage. Elle se
      lit sur la piste : soit sur le téléphone, soit imprimée et plastifiée.
      Les deux usages sont servis par la même vue. */
-  .fs-box{max-width:min(1100px,96vw)}
+  /* Deux classes, pas une : .pl-modal-box borne TOUS les modals à 520 px et
+     elle est déclarée plus bas dans la feuille — à spécificité égale, c'est
+     elle qui gagnait. La fenêtre des résultats n'a donc jamais dépassé 520 px,
+     sur aucun écran, et son tableau s'y étouffait. */
+  .pl-modal-box.fs-box{max-width:min(1100px,96vw)}
   .fs-hd{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
   .fs-t{font-size:19px;font-weight:900;color:var(--text);line-height:1.25}
   .fs-s{font-size:12.5px;color:var(--muted);margin-top:3px}
@@ -597,27 +601,6 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-a.on{background:rgba(255,107,26,.14);border-color:var(--orange);color:var(--orange)}
   .fs-a small{font-weight:600;opacity:.75}
   .fs-a--off{opacity:.45;cursor:not-allowed}
-  /* La boîte du modal est une colonne flex bornée à 82vh : sans min-height:0
-     le tableau s'y fait écraser au lieu de défiler. Il défile donc dans les
-     deux sens, pendant que l'en-tête, le sélecteur et les boutons ne bougent
-     pas — on garde « Imprimer » sous la main. */
-  .fs-t-wrap{overflow:auto;min-height:0;flex:1 1 auto;border:1px solid var(--border);border-radius:12px;-webkit-overflow-scrolling:touch}
-  /* La colonne des efforts reste à l'écran quand on fait défiler les
-     athlètes : sans elle, on lit un chrono sans savoir de quelle fraction. */
-  .fs-tab th:first-child,.fs-tab td.fs-eff{position:sticky;left:0;z-index:2;background:var(--bg2)}
-  .fs-tab thead th{position:sticky;top:0;z-index:3;background:var(--bg2)}
-  .fs-tab thead th:first-child{z-index:4}
-  .fs-tab tr.fs-soft td.fs-eff{background:#1b2436}
-  .fs-tab{width:100%;border-collapse:collapse;font-size:13px}
-  .fs-tab th{padding:9px 11px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(255,255,255,.02)}
-  .fs-tab th.fs-ath{color:var(--text);font-size:12px;letter-spacing:0;text-transform:none;text-align:center}
-  .fs-tab td{padding:10px 11px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
-  .fs-tab tr:last-child td{border-bottom:none}
-  .fs-tab td.fs-eff{font-weight:800;color:var(--text);white-space:nowrap}
-  .fs-tab td.fs-val{text-align:center;font-variant-numeric:tabular-nums;font-weight:900;font-size:15px;color:var(--orange);white-space:nowrap}
-  .fs-tab td.fs-val small{display:block;font-size:10.5px;font-weight:700;color:var(--muted2)}
-  .fs-tab tr.fs-soft td{background:rgba(255,255,255,.02);color:var(--muted);font-weight:700}
-  .fs-rec{font-size:11.5px;color:var(--muted2);font-weight:600;white-space:nowrap}
   .fs-note{font-size:11.5px;color:var(--muted2);line-height:1.6;margin-top:12px}
   /* La saisie du réalisé. Une case sous la cible : a l'écran on y tape, sur
      le papier on y écrit au stylo. Le meme balisage sert aux deux. */
@@ -641,19 +624,15 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-fc:focus{border-color:#F87171}
   .fs-fc::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
   .fs-fc--rec{border-style:dashed}
-  .fs-lb{flex:0 0 auto;font-style:normal;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted2)}
-  .fs-fcg{display:flex;align-items:center;gap:6px;flex:0 0 auto}
   .fs-rt{flex:0 0 auto;width:62px;background:var(--input-bg);border:1.5px dashed var(--input-border);border-radius:7px;color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:800;text-align:center;padding:5px 3px;outline:none;font-variant-numeric:tabular-nums}
   .fs-rt:focus{border-color:var(--orange);border-style:solid}
   /* Pré-remplie par la consigne : en gris tant que c'est elle qui parle, et
      non le coach. Elle redevient normale dès qu'il y touche. */
   .fs-rt.est-defaut{color:var(--muted2);font-weight:700}
   .fs-rt::placeholder{font-weight:600;color:var(--muted2);font-size:10.5px}
-  .fs-rec-in{display:none}
-  /* ── La saisie au téléphone : une carte par fraction ──────────────
-     Quatre cases nommées sur toute la largeur, au lieu de quatre cases
-     serrées dans le tiers d'écran que la colonne « Effort » voulait bien
-     laisser. */
+  /* ── Une carte par fraction, à toutes les largeurs ────────────────
+     Quatre cases nommées qui s'étalent quand il y a de la place. Sur une
+     tablette, deux fractions tiennent côte à côte. */
   .fsc-liste{display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0;flex:1 1 auto;-webkit-overflow-scrolling:touch}
   .fsc-doux{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;color:var(--muted);padding:9px 11px;background:rgba(255,255,255,.03);border-radius:10px}
   .fsc-doux b{color:var(--text2);font-weight:800;font-size:13px;white-space:nowrap}
@@ -664,25 +643,26 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fsc-tete span{font-size:11px;font-weight:700;color:var(--muted2)}
   .fsc-cible{font-size:15px;font-weight:900;color:var(--orange);margin:3px 0 10px;font-variant-numeric:tabular-nums}
   .fsc-cible small{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:1px}
-  .fsc-frac{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}
-  .fsc-frac:first-of-type{border-top:0;padding-top:0;margin-top:0}
+  /* Les fractions d'un bloc : une colonne sur un téléphone, deux dès qu'il
+     y a la place. On lit de gauche à droite, puis on descend — l'ordre des
+     numéros ne s'en trouve pas changé. */
+  .fsc-fracs{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:10px}
+  .fsc-frac{border-top:1px solid var(--border);padding-top:10px}
+  @media(min-width:720px){
+    .fsc-fracs{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px}
+  }
+  @media(min-width:1160px){
+    .fsc-fracs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
   .fsc-hd{display:flex;align-items:center;gap:8px;margin-bottom:5px;min-height:24px}
   .fsc-hd i{flex:0 0 auto;font-style:normal;font-size:11px;font-weight:900;color:var(--muted2);min-width:24px;font-variant-numeric:tabular-nums}
   .fsc-hd .fs-ec{margin:0;flex:1 1 auto;min-width:0;font-size:11.5px}
   .fsc-hd .fs-x{margin-left:auto}
-  .fsc-champs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .fsc-champs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-width:520px}
   .fsc-ch{display:flex;flex-direction:column;gap:3px;min-width:0}
   .fsc-ch>span{font-size:8.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .fsc-ch .fs-in,.fsc-ch .fs-fc,.fsc-ch .fs-rt{display:block;width:100%;margin:0;padding:9px 3px;font-size:14px}
   .fsc-ch .fs-fc::placeholder,.fsc-ch .fs-rt::placeholder,.fsc-ch .fs-in::placeholder{font-size:11px}
-  /* Les répétitions : une case par fraction, numérotée à gauche. Empilées,
-     elles se remplissent au stylo aussi bien qu'au clavier. */
-  .fs-reps{display:flex;flex-direction:column;gap:4px;align-items:center;margin-top:6px}
-  .fs-rep{display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-  .fs-no{flex:0 0 auto;width:22px;text-align:right;font-style:normal;font-size:10.5px;
-    font-weight:800;color:var(--muted2);font-variant-numeric:tabular-nums}
-  .fs-rep .fs-in{margin:0}
-  .fs-rep .fs-ec{margin:0;flex:0 0 auto;min-width:52px;text-align:left;font-size:10.5px}
   .fs-date{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted2)}
   .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
   .fs-date input:focus{border-color:var(--orange)}
@@ -697,35 +677,14 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-fiche-b small{font-weight:600;opacity:.8}
 
   @media(max-width:640px){
-    .fs-tab td.fs-val{font-size:14px}
-    .fs-tab th,.fs-tab td{padding:8px 8px}
-    /* Sur un téléphone, la fraction se replie en deux : le chrono et son écart
-       en haut, les pulsations dessous, dans le même bloc. Ce n'est pas deux
-       listes — c'est une fraction sur deux lignes, et tout reste à l'écran. */
-    /* De la hauteur pour la liste : tout ce qui se répète ailleurs à l'écran
-       s'efface. La date est déjà dans le sélecteur juste en dessous, et ce que
-       fait l'interrupteur n'a plus à être expliqué une fois qu'il est allumé. */
+    /* De la hauteur pour la liste : la date est déjà dans le sélecteur juste
+       en dessous, inutile de l'écrire deux fois. */
     .fs-box{max-height:90vh}
     .fs-hd{margin-bottom:10px}
     .fs-s{display:none}
     .fs-pick{margin-bottom:10px}
-    .fs-rep{gap:4px;flex-wrap:wrap;justify-content:flex-start}
-    /* Un filet entre deux fractions : repliées sur deux lignes, elles se
-       toucheraient sans lui, et la deuxième ligne de l'une se lirait comme
-       la première de la suivante. */
-    .fs-reps{gap:9px;align-items:stretch}
-    .fs-rep+.fs-rep{border-top:1px solid rgba(255,255,255,.07);padding-top:9px}
-    .fs-in{width:66px}
-    .fs-fc{width:42px;padding:5px 1px}
-    .fs-rt{width:52px;padding:5px 1px}
-    .fs-rep .fs-ec{min-width:44px;font-size:10px}
-    .fs-x{width:24px;height:24px}
-    .fs-fcg{order:9;flex:0 0 100%;padding-left:22px;gap:4px}
-    .fs-tab td.fs-eff{white-space:normal}
-    /* La colonne « Récup » disparaît : sa consigne est déjà réécrite sous le
-       nom de l'effort, et ses 54 px servent mieux à la saisie. */
-    .fs-tab th:last-child,.fs-tab td.fs-rec{display:none}
-    .fs-rec-in{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:3px;white-space:normal}
+    .fsc-ch>span{font-size:8px}
+    .fsc-champs{gap:5px}
   }
 
   /* L'impression : fond blanc, encre économe, une page A4 paysage.
@@ -749,21 +708,12 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     #fs-modal,#fs-modal *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     #fs-modal .fs-t{font-size:17pt}
     #fs-modal .fs-s,#fs-modal .fs-note{color:#555!important}
-    #fs-modal .fs-t-wrap{overflow:visible!important;border:1px solid #bbb!important;border-radius:0!important;max-height:none!important}
-    #fs-modal .fs-tab th,#fs-modal .fs-tab td.fs-eff{position:static!important;background:transparent!important}
-    #fs-modal .fs-tab thead th{background:#f2f2f2!important}
-    #fs-modal .fs-tab{font-size:10.5pt}
-    #fs-modal .fs-tab th{background:#f2f2f2!important;border-bottom:1px solid #bbb!important;color:#333!important}
-    #fs-modal .fs-tab td{border-bottom:1px solid #ddd!important}
-    #fs-modal .fs-tab td.fs-val{color:#000!important;font-size:12pt}
-    #fs-modal .fs-tab td.fs-val small{color:#666!important}
     /* Sur le papier, la case de saisie devient une case a remplir. */
     #fs-modal .fs-in{border:none!important;border-bottom:1px solid #999!important;border-radius:0!important;
       background:transparent!important;color:#000!important;width:62px!important;padding:2px 0!important;
       font-size:11pt!important;margin-top:6px!important}
     #fs-modal .fs-in::placeholder{color:transparent!important}
     #fs-modal .fs-ec{color:#555!important}
-    #fs-modal .fs-tab tr.fs-soft td{background:#fafafa!important;color:#555!important}
     #fs-modal tr{break-inside:avoid}
   }
 
@@ -8986,7 +8936,7 @@ function fsNoter(athId,titre,i,k,champ,mes){
      virgule a bien été lue comme un deux-points, au lieu de le supposer. */
   champ.value=np?FS_NP:((sec!=null&&sec>0)?fsEcritVal(sec,mes):'');
   champ.classList.toggle('fs-in--x',np);
-  var hote=champ.closest('.fs-rep,.fsc-frac');
+  var hote=champ.closest('.fsc-frac');
   var bouton=hote&&hote.querySelector('.fs-x');
   if(bouton) bouton.classList.toggle('on',np);
   fsEcartMaj(champ, sec, np, mes);
@@ -8996,7 +8946,7 @@ function fsNoter(athId,titre,i,k,champ,mes){
 }
 /* Le bouton ✕ : le même geste que taper « x », mais sans clavier. */
 function fsBasculeX(athId,titre,i,k,btn,mes){
-  var rep=btn.closest('.fs-rep,.fsc-frac'), champ=rep&&rep.querySelector('.fs-in'); if(!champ) return;
+  var rep=btn.closest('.fsc-frac'), champ=rep&&rep.querySelector('.fs-in'); if(!champ) return;
   champ.value=fsLitX(champ.value)?'':FS_NP;
   fsNoter(athId,titre,i,k,champ,mes);
 }
@@ -9006,7 +8956,7 @@ function fsEcartMaj(champ,sec,np,mes){
   /* Le voisinage d'UNE fraction : chercher l'écart plus haut effacerait celui
      de la fraction précédente. Deux mises en page, un seul repère — la
      fraction, ligne du tableau ou carte du téléphone. */
-  var rep=champ.closest('.fs-rep,.fsc-frac'); if(!rep) return;
+  var rep=champ.closest('.fsc-frac'); if(!rep) return;
   var cible=rep.querySelector('.fsc-hd')||rep;
   var e=rep.querySelector('.fs-ec');
   if(!e){
@@ -9547,27 +9497,17 @@ function fsToggle(id){
   if(h) h.innerHTML=fsHTML();
 }
 function fsImprimer(){ window.print(); }
-/* ══ LA SAISIE AU TÉLÉPHONE ══
-   Un tableau sert à comparer des colonnes. Sur un écran de 390 px il n'en
-   reste qu'une, et ses quatre relevés se serrent dans un tiers de la largeur
-   pendant que la colonne « Effort » occupe le reste, vide. On sort donc du
-   tableau : un bloc par effort, une carte par fraction, et quatre cases
-   nommées qui prennent toute la largeur. Au-delà, le tableau reprend sa
-   place — il redevient utile. */
-function fsEtroit(){
-  try{ return window.matchMedia('(max-width:640px)').matches; }catch(e){ return false; }
-}
-var _fsEtroitRendu=null;
-/* Le passage portrait/paysage change de mise en page ; l'ouverture du clavier
-   change la hauteur sans changer la largeur, et ne doit rien redessiner —
-   sinon la case en cours de saisie perdrait le focus à chaque frappe. */
-function fsRedessineSiBesoin(){
-  var h=document.getElementById('fs-modal'); if(!h) return;
-  if(fsEtroit()===_fsEtroitRendu) return;
-  h.innerHTML=fsHTML();
-}
-try{ window.addEventListener('resize',fsRedessineSiBesoin); }catch(e){}
+/* ══ LA SAISIE ══
+   Un tableau sert à comparer des colonnes. Depuis qu'on relève un athlète à
+   la fois, il n'en reste qu'une — et la colonne « Effort » mangeait le reste,
+   vide sur toute sa hauteur, pendant que les quatre relevés se serraient dans
+   ce qu'elle laissait. Sur un téléphone c'était illisible ; sur une tablette,
+   la même chose en plus large.
 
+   Plus de tableau, donc : un bloc par effort, portant son nom, sa cible et sa
+   consigne de récup une fois pour toutes ; puis une carte par fraction, avec
+   quatre cases nommées. La même forme à toutes les largeurs — elle s'étale
+   quand il y a de la place, elle ne se serre jamais. */
 function fsCartesHTML(s,a,lignes,e){
   var out='';
   lignes.forEach(function(l){
@@ -9588,7 +9528,8 @@ function fsCartesHTML(s,a,lignes,e){
     out+='<div class="fsc-bloc">'
       +'<div class="fsc-tete"><b>'+e(l.lbl)+'</b>'
       +(consigne?'<span>récup '+e(consigne)+'</span>':'')+'</div>'
-      +'<div class="fsc-cible">'+(c?c.txt:'<span style="color:var(--muted2)">sans cible</span>')+'</div>';
+      +'<div class="fsc-cible">'+(c?c.txt:'<span style="color:var(--muted2)">sans cible</span>')+'</div>'
+      +'<div class="fsc-fracs">';
 
     for(var k=0;k<nEff;k++){
       var num=fsNumero(l,k)||'1';
@@ -9604,6 +9545,10 @@ function fsCartesHTML(s,a,lignes,e){
           +'<input class="'+cls+'" type="text" inputmode="'+im+'" maxlength="'+ml+'"'
           +' value="'+e(val)+'" placeholder="'+e(ph)+'" title="'+e(titre)+'"'
           +' aria-label="'+titre+' — '+quoi+'"'
+          /* Le contenu se sélectionne à l'entrée dans la case : la récup arrive
+             pré-remplie, et sans cela taper « 34 » sur « 0'30" » écrivait
+             « 0'30"34 » — illisible, donc effacé. On retape, on ne complète pas. */
+          +' onfocus="try{this.select();}catch(_){}"'
           +' onchange="'+onch+'"></label>';
       };
       var champs=ch('fs-in'+(np?' fs-in--x':''), mes==='d'?'Distance':'Temps',
@@ -9632,7 +9577,7 @@ function fsCartesHTML(s,a,lignes,e){
         +' onclick="fsBasculeX('+appel+',this,\''+mes+'\')">✕</button></div>'
         +'<div class="fsc-champs">'+champs+'</div></div>';
     }
-    out+='</div>';
+    out+='</div></div>';
   });
   return '<div class="fsc-liste">'+out+'</div>';
 }
@@ -9657,113 +9602,7 @@ function fsHTML(){
   } else {
     var lignes=fsLignes(s);
     lignes.forEach(function(l,i){ l.i=i; });   // rang stable = clé de stockage
-    _fsEtroitRendu=fsEtroit();
-    if(_fsEtroitRendu) return fsBoite(s,th,e,pick,pris,fsCartesHTML(s,pris[0],lignes,e));
-    var rows=lignes.map(function(l){
-      if(l.soft){
-        /* Échauffement et retour au calme portent une allure, différente d'un
-           athlète à l'autre : elle se lit dans SA colonne, comme le reste. */
-        if(l.bord&&typeof wktBordCibleTxt==='function'){
-          /* Le libellé ET le texte tiennent dans la colonne « Effort » : une
-             cellule de plus décalerait toutes les allures d'une colonne, et
-             chaque athlète lirait celle du voisin. La colonne Récup reste,
-             vide, pour que la ligne compte autant de cellules que l'en-tête. */
-          return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)
-            +'<span class="fs-soft-v">'+e(l.val)+'</span></td>'
-            +pris.map(function(a){
-               var c=a.vma?wktBordCibleTxt(l.val,a.vma,l.bord):'';
-               return '<td class="fs-val">'+(c?e(c):'<span style="color:var(--muted2)">—</span>')+'</td>';
-             }).join('')
-            +'<td class="fs-rec">—</td></tr>';
-        }
-        return '<tr class="fs-soft"><td class="fs-eff">'+e(l.lbl)+'</td>'
-          +'<td colspan="'+(pris.length+1)+'">'+e(l.val)+'</td></tr>';
-      }
-      /* Une case par répétition. Un 5 × 1000 se lit sur une ligne mais se
-         chronomètre cinq fois : noter une seule valeur revenait à écraser
-         quatre fractions par une moyenne que personne n'a courue. */
-      var nEff=Math.max(1,l.n||1);
-      var numero=function(k){ return fsNumero(l,k); };
-      var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
-      /* Au téléphone la colonne « Récup » est masquée — 54 px que la ligne
-         d'une fraction utilise bien mieux. Sa consigne est donc réécrite ici,
-         sous le nom de l'effort, et cachée dès qu'il y a la place. */
-      return '<tr><td class="fs-eff">'+e(l.lbl)
-        +(consigne?'<span class="fs-rec-in">récup '+e(consigne)+'</span>':'')+'</td>'
-        +pris.map(function(a){
-          /* Un bloc sans cible n'a pas d'allure à afficher — mais il a été
-             couru, et son chrono vaut d'être noté. On garde donc les cases,
-             sans écart à calculer. */
-          var c=fsCible(l,a.vma);
-          var mes=c?c.mes:fsMesure(l);
-          var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
-          bornes+=' data-mes="'+mes+'"';
-          var cases='';
-          for(var k=0;k<nEff;k++){
-            var brut=fsLire(a.id,s.title,l.i,k);
-            var np=fsEstX(brut), reel=np?null:brut;
-            var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
-            var ec=np?'<span class="fs-ec fs-ec--np">non couru</span>'
-                     :(r?'<span class="fs-ec fs-ec--'+r.cls+'">'+r.txt+'</span>':'<span class="fs-ec"></span>');
-            var num=numero(k);
-            var quoi=e(a.nom)+', '+e(l.lbl)+(num?(' n° '+num):'');
-            var appel=a.id+',\''+rlJsStr(s.title)+'\','+l.i+','+k;
-            /* Le temps de récup n'est pas une donnée de cardio : il reste là
-               même sans l'interrupteur. Et il arrive pré-rempli par la
-               consigne de la séance — neuf fois sur dix c'est la bonne
-               réponse, on ne corrige que l'exception. */
-            var tRec=fsLireRec(a.id,s.title,l.i,k);
-            var prevu=fsRecPrevue(l);
-            var recVal=(tRec!=null)?fHMS(tRec):(prevu!=null?fHMS(prevu):'');
-            var recDef=(tRec==null&&prevu!=null);
-            var fcE=fsLireFC(a.id,s.title,l.i,k,false), fcR=fsLireFC(a.id,s.title,l.i,k,true);
-            var fcs='<span class="fs-fcg">'
-              +'<input class="fs-fc" type="text" inputmode="numeric" maxlength="3"'
-                +' value="'+(fcE!=null?fcE:'')+'" placeholder="FC"'
-                +' title="Pulsations à la fin de l\u2019effort"'
-                +' aria-label="FC effort — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',false,this)">';
-            /* L'étiquette reste visible une fois la case remplie : un marqueur
-               de place disparaîtrait au moment où les nombres se ressemblent
-               le plus. Elle ouvre tout ce qui concerne la récup. */
-            fcs+='<i class="fs-lb">réc</i>'
-              +'<input class="fs-rt'+(recDef?' est-defaut':'')+'" type="text" inputmode="decimal" maxlength="7"'
-              +' value="'+e(recVal)+'" placeholder="récup"'
-              +' title="Temps de récup réellement pris'+(prevu!=null?' (prévu : '+fHMS(prevu)+')':'')+'"'
-              +' aria-label="Temps de récup — '+quoi+'"'
-              +' onchange="fsNoterRec('+appel+',this)">'
-              +'<input class="fs-fc fs-fc--rec" type="text" inputmode="numeric" maxlength="3"'
-                +' value="'+(fcR!=null?fcR:'')+'" placeholder="FC"'
-                +' title="Pulsations à la fin de la récup"'
-                +' aria-label="FC fin de récup — '+quoi+'"'
-                +' onchange="fsNoterFC('+appel+',true,this)">'
-              +'</span>';
-            cases+='<span class="fs-rep">'
-              +(num?'<i class="fs-no">'+num+'</i>':'')
-              +'<input class="fs-in'+(np?' fs-in--x':'')+'" type="text" maxlength="7"'
-              /* fHMS() écrit 3'28" : le guillemet fermait l'attribut en plein
-                 milieu, et la case se rouvrait sur « 3'28 ». */
-              +' value="'+e(np?'x':(reel!=null?fsEcritVal(reel,mes):''))+'"'
-              +' placeholder="'+(mes==='d'?'150 m':'1,13')+'"'
-              +' inputmode="'+(mes==='d'?'numeric':'decimal')+'"'
-              +' title="'+(mes==='d'?'Distance parcourue, en mètres':'Temps réalisé')+'"'
-              +' aria-label="'+(mes==='d'?'Distance parcourue':'Temps réalisé')+' — '+quoi+'"'
-              +' onchange="fsNoter('+appel+',this,\''+mes+'\')">'+fcs+ec
-              +'<button type="button" class="fs-x'+(np?' on':'')+'"'
-              +' title="Fraction non courue" aria-label="Marquer non couru — '+quoi+'"'
-              +' onclick="fsBasculeX('+appel+',this,\''+mes+'\')">\u2715</button>'
-              +'</span>';
-          }
-          return '<td class="fs-val"'+bornes+'>'
-            +(c?c.txt:'<span style="color:var(--muted2)">\u2014</span>')
-            +'<span class="fs-reps">'+cases+'</span></td>';
-        }).join('')
-        +'<td class="fs-rec">'+e(consigne||'—')+'</td></tr>';
-    }).join('');
-    corps='<div class="fs-t-wrap"><table class="fs-tab"><thead><tr>'
-      +'<th>Effort</th>'
-      +pris.map(function(a){ return '<th class="fs-ath">'+e(a.nom)+'<br><span style="font-size:10px;font-weight:700;color:var(--muted2)">VMA '+a.vma.toFixed(1)+'</span></th>'; }).join('')
-      +'<th>Récup</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    corps=fsCartesHTML(s,pris[0],lignes,e);
   }
 
   return fsBoite(s,th,e,pick,pris,corps);
