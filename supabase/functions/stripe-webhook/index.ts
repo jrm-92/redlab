@@ -104,8 +104,22 @@ async function rattachement(obj: any): Promise<Rattachement> {
   const s = await premiere(`sessions?id=eq.${encodeURIComponent(ref)}&select=date&limit=1`);
   if (s) return { sessionId: ref, preparationId: null, date: s.date ?? null };
 
-  const p = await premiere(`preparations?id=eq.${encodeURIComponent(ref)}&select=id&limit=1`);
+  // « select=* » et non la liste des colonnes : la colonne « dates » n'existe
+  // pas sur les bases qui n'ont pas encore été reprises, et la nommer ferait
+  // échouer la requête — le paiement arriverait alors sans rattachement.
+  const p = await premiere(`preparations?id=eq.${encodeURIComponent(ref)}&select=*&limit=1`);
   if (p) {
+    // Les dates de la préparation vivent sur la préparation elle-même. La
+    // dernière est celle qui compte : c'est d'elle que partent les six mois
+    // de conservation.
+    const jours: string[] = (Array.isArray(p.dates) ? p.dates : [])
+      .map((x: unknown) => String(x ?? "").slice(0, 10))
+      .filter((x: string) => /^\d{4}-\d{2}-\d{2}$/.test(x))
+      .sort();
+    if (jours.length) {
+      return { sessionId: null, preparationId: ref, date: jours[jours.length - 1] };
+    }
+    // Repli, tant qu'une préparation n'a pas reçu ses dates.
     const d = await premiere(
       `preparation_seances?preparation_id=eq.${encodeURIComponent(ref)}` +
         `&select=date&order=date.desc&limit=1`,

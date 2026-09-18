@@ -9,11 +9,11 @@
 //      npx tsc index.ts --target ES2022 --lib ES2022,DOM --module esnext --outDir out
 //      node verification.mjs
 //
-//  Onze scénarios : séance payée, événement renvoyé deux fois,
+//  Douze scénarios : séance payée, événement renvoyé deux fois,
 //  préparation payée, lien sans étiquette, remboursement total,
 //  remboursement partiel, remboursement renvoyé deux fois, signature
 //  invalide, requête GET, référence inconnue en base, métadonnées en
-//  secours. Chacun doit afficher ✔.
+//  secours, préparation pas encore reprise. Chacun doit afficher ✔.
 // ════════════════════════════════════════════════════════════════════════
 
 import { readFileSync } from 'node:fs';
@@ -26,8 +26,9 @@ let journal = [];
 let inscriptions = new Map();      // id -> ligne
 let evenementsVus = new Set();
 const SESSIONS = { TEST1: { date: '2026-10-17' }, TEST4: { date: '2026-11-14' } };
-const PREP_SEANCES = { P1: ['2026-11-07', '2027-01-30'] };
-const PREPARATIONS = { P1: true };
+const PREP_SEANCES = { P1: ['2026-11-07', '2027-01-30'], P2: ['2026-09-05', '2026-10-10'] };
+const PREPARATIONS = { P1: { id:'P1', dates:['2026-11-07','2027-01-30','2026-12-12'] },
+                       P2: { id:'P2' } };   // P2 : pas encore reprise
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -51,7 +52,7 @@ globalThis.fetch = async (url, init = {}) => {
   }
   if (chemin === 'preparations' && methode === 'GET') {
     const id = decodeURIComponent((u.searchParams.get('id') || '').replace('eq.', ''));
-    return json(PREPARATIONS[id] ? [{ id }] : []);
+    return json(PREPARATIONS[id] ? [PREPARATIONS[id]] : []);
   }
   if (chemin === 'preparation_seances' && methode === 'GET') {
     const id = decodeURIComponent((u.searchParams.get('preparation_id') || '').replace('eq.', ''));
@@ -217,6 +218,17 @@ r = await envoyer({
 l = inscriptions.get('cs_11');
 ok(l.session_id === 'TEST4' && l.date_seance === '2026-11-14', 'rattachée par les métadonnées');
 ok(rpcs(r.journal).join() === 'incr_inscrits_session({"p_id":"TEST4"})', 'bon compteur');
+
+console.log('\n── 12. Préparation pas encore reprise (repli) ────────');
+r = await envoyer({
+  id: 'evt_11', type: 'checkout.session.completed',
+  data: { object: { id: 'cs_12', payment_intent: 'pi_12', amount_total: 12000, currency: 'eur',
+    client_reference_id: 'P2',
+    customer_details: { name: 'Anaïs Girard', email: 'anais@exemple.fr' } } },
+});
+l = inscriptions.get('cs_12');
+ok(l.preparation_id === 'P2' && l.date_seance === '2026-10-10', 'date lue dans l\'ancienne table');
+ok(rpcs(r.journal).join() === 'incr_inscrits_preparation({"p_id":"P2"})', 'bon compteur');
 
 console.log('\n── État final de la table inscriptions ──────────────────────');
 for (const [id, v] of inscriptions) {
