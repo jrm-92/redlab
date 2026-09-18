@@ -9,11 +9,12 @@
 //      npx tsc index.ts --target ES2022 --lib ES2022,DOM --module esnext --outDir out
 //      node verification.mjs
 //
-//  Douze scénarios : séance payée, événement renvoyé deux fois,
+//  Treize scénarios : séance payée, événement renvoyé deux fois,
 //  préparation payée, lien sans étiquette, remboursement total,
 //  remboursement partiel, remboursement renvoyé deux fois, signature
 //  invalide, requête GET, référence inconnue en base, métadonnées en
-//  secours, préparation pas encore reprise. Chacun doit afficher ✔.
+//  secours, préparation pas encore reprise,
+//  ancienne liste de dates. Chacun doit afficher ✔.
 // ════════════════════════════════════════════════════════════════════════
 
 import { readFileSync } from 'node:fs';
@@ -27,7 +28,8 @@ let inscriptions = new Map();      // id -> ligne
 let evenementsVus = new Set();
 const SESSIONS = { TEST1: { date: '2026-10-17' }, TEST4: { date: '2026-11-14' } };
 const PREP_SEANCES = { P1: ['2026-11-07', '2027-01-30'], P2: ['2026-09-05', '2026-10-10'] };
-const PREPARATIONS = { P1: { id:'P1', dates:['2026-11-07','2027-01-30','2026-12-12'] },
+const PREPARATIONS = { P1: { id:'P1', date_debut:'2026-11-07', date_fin:'2027-01-30' },
+                       P3: { id:'P3', dates:['2026-11-07','2027-02-06','2026-12-12'] },   // ancienne liste
                        P2: { id:'P2' } };   // P2 : pas encore reprise
 
 function json(body, status = 200) {
@@ -229,6 +231,16 @@ r = await envoyer({
 l = inscriptions.get('cs_12');
 ok(l.preparation_id === 'P2' && l.date_seance === '2026-10-10', 'date lue dans l\'ancienne table');
 ok(rpcs(r.journal).join() === 'incr_inscrits_preparation({"p_id":"P2"})', 'bon compteur');
+
+console.log('\n── 13. Ancienne liste de dates (repli) ─────────────');
+r = await envoyer({
+  id: 'evt_12', type: 'checkout.session.completed',
+  data: { object: { id: 'cs_13', payment_intent: 'pi_13', amount_total: 9000, currency: 'eur',
+    client_reference_id: 'P3',
+    customer_details: { name: 'Karim Sow', email: 'karim@exemple.fr' } } },
+});
+l = inscriptions.get('cs_13');
+ok(l.preparation_id === 'P3' && l.date_seance === '2027-02-06', 'derni\u00e8re date de la liste');
 
 console.log('\n── État final de la table inscriptions ──────────────────────');
 for (const [id, v] of inscriptions) {

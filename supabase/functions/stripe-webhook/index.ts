@@ -109,12 +109,20 @@ async function rattachement(obj: any): Promise<Rattachement> {
   // échouer la requête — le paiement arriverait alors sans rattachement.
   const p = await premiere(`preparations?id=eq.${encodeURIComponent(ref)}&select=*&limit=1`);
   if (p) {
-    // Les dates de la préparation vivent sur la préparation elle-même. La
-    // dernière est celle qui compte : c'est d'elle que partent les six mois
-    // de conservation.
+    // Ce qui compte ici, c'est la DERNIÈRE séance : c'est d'elle que partent
+    // les six mois de conservation. Une préparation la porte directement,
+    // dans « date_fin ».
+    const jour = (v: unknown) => {
+      const t = String(v ?? "").slice(0, 10);
+      return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : "";
+    };
+    const fin = jour(p.date_fin);
+    if (fin) return { sessionId: null, preparationId: ref, date: fin };
+
+    // Repli : l'ancienne liste de dates, sur une préparation pas encore reprise.
     const jours: string[] = (Array.isArray(p.dates) ? p.dates : [])
-      .map((x: unknown) => String(x ?? "").slice(0, 10))
-      .filter((x: string) => /^\d{4}-\d{2}-\d{2}$/.test(x))
+      .map(jour)
+      .filter(Boolean)
       .sort();
     if (jours.length) {
       return { sessionId: null, preparationId: ref, date: jours[jours.length - 1] };
