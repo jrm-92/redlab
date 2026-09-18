@@ -9139,12 +9139,16 @@ function fsAthletes(){
    et non sur l'arbre de la fiche d'avant-séance : c'est ce découpage-là qui
    porte les clés des relevés, donc le seul qui ne puisse pas se décaler. */
 var _frAth=null;
-var FR_LH=58;
-/* Deux dispositions : les pulsations prennent une colonne, donc tout se
-   resserre quand elles sont là. Rien ne bouge quand elles ne le sont pas. */
-var FR_SANS={nom:26, vise:430, reel:632, ecart:790};
-var FR_AVEC={nom:26, vise:330, reel:506, fc:648, ecart:788};
+/* Une grille, pas un tableau. Le tableau redisait la cible à chaque ligne
+   — « 171–179 m » vingt fois de suite — et collait « dans la cible » sur
+   les quinze fractions réussies. Deux mille pixels de haut pour dire une
+   seule chose : c'était bon, sauf trois fois.
+
+   La cible se dit maintenant UNE fois, dans le bandeau du bloc. Chaque
+   fraction devient une case, et c'est sa couleur qui parle. L'écart n'est
+   écrit que lorsqu'il y en a un : une case verte n'a rien à ajouter. */
 var FR_TEINTE={ok:'#15803D', lent:'#B45309', vif:'#1D4ED8'};
+var FR_GRIS='#94A3B8';
 
 /* Combien de chronos cet athlète a-t-il sur cette séance, ce jour-là. */
 function fsCombien(athId,titre){
@@ -9162,13 +9166,16 @@ function frDonnees(athId){
   var repos=((a.recs||{})[_fsDate]||{})[s.title]||{};
   var lignes=fsLignes(s);
   lignes.forEach(function(l,i){ l.i=i; });
-  var rows=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
+  var rows=[], blocs=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
   lignes.forEach(function(l){
     if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
     var c=fsCible(l,a.vma);
     var mes=c?c.mes:fsMesure(l);
     var haut='', bas='';
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
+    /* Un bloc porte son intitulé et sa cible une seule fois ; ses fractions
+       deviennent les cases de sa grille. */
+    var bloc={lbl:l.lbl, viseHaut:haut, viseBas:bas, cells:[]};
     var nEff=Math.max(1,l.n||1), vu=false;
     for(var k=0;k<nEff;k++){
       var reel=notes[fsCle(l.i,k)];
@@ -9182,6 +9189,7 @@ function frDonnees(athId){
         saute++;
         rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                    reel:'non couru', np:true, ecTxt:'', ecCls:''});
+        bloc.cells.push({num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:''});
         vu=true; continue;
       }
       var fcE=pouls[fsCleFC(l.i,k,false)], fcR=pouls[fsCleFC(l.i,k,true)];
@@ -9203,15 +9211,19 @@ function frDonnees(athId){
       var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
+      var valeur=fsEcritVal(reel,mes)+(mes==='d'?' m':'');
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
-                 reel:fsEcritVal(reel,mes)+(mes==='d'?' m':''), fcE:fcE, fcR:fcR, tR:tR,
+                 reel:valeur, fcE:fcE, fcR:fcR, tR:tR,
                  basRec:basRec, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+      bloc.cells.push({num:fsNumero(l,k), reel:valeur, np:false, fcE:fcE, basRec:basRec,
+                       ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
+    if(bloc.cells.length) blocs.push(bloc);
   });
   if(!n) return null;
-  return {s:s, a:a, date:_fsDate, rows:rows, n:n, ok:ok, lent:lent, vif:vif, saute:saute,
-          avecFC:avecFC, fcMoy:fcN?Math.round(fcSom/fcN):null};
+  return {s:s, a:a, date:_fsDate, rows:rows, blocs:blocs, n:n, ok:ok, lent:lent, vif:vif,
+          saute:saute, avecFC:avecFC, fcMoy:fcN?Math.round(fcSom/fcN):null};
 }
 /* Le bilan en une phrase, sous le tableau. */
 function frBilan(f){
@@ -9226,9 +9238,20 @@ function frBilan(f){
   if(f.fcMoy) L.push('FC moyenne sur les efforts : '+f.fcMoy);
   return L.join('   ·   ');
 }
+/* ══ Les chips du bas : le bilan en pastilles, aux mêmes couleurs que les
+   cases. Une ligne de texte gris ne se lisait pas ; quatre pastilles se
+   voient sans être lues. ══ */
+function frChips(f){
+  var L=[{t:f.n+' temps relevé'+(f.n>1?'s':''), c:'#475569'}];
+  if(f.ok)   L.push({t:f.ok+' dans la cible',   c:FR_TEINTE.ok});
+  if(f.lent) L.push({t:f.lent+' plus lent'+(f.lent>1?'s':''),   c:FR_TEINTE.lent});
+  if(f.vif)  L.push({t:f.vif+' plus rapide'+(f.vif>1?'s':''),   c:FR_TEINTE.vif});
+  if(f.saute)L.push({t:f.saute+' non couru'+(f.saute>1?'s':''), c:FR_GRIS});
+  if(f.fcMoy)L.push({t:'FC moyenne '+f.fcMoy, c:'#BE123C'});
+  return L;
+}
 function frImage(f,ech){
   ech=ech||2;
-  var FR_COL=f.avecFC?FR_AVEC:FR_SANS;
   var sousT=[];
   var jour=fpDateLisible(f.date); if(jour)sousT.push(jour);
   sousT.push(f.a.pseudo||'Athlète');
@@ -9236,11 +9259,37 @@ function frImage(f,ech){
 
   var g=fpEnteteMesure(f.s.title,'Résultats',sousT);
   var hEntete=g.h;
-  var hTete=44, hPied=46;
-  var hCarte=18+hTete+f.rows.length*FR_LH+hPied+14;
-  var H=hEntete+hCarte+FP_PAD;
+
+  /* Avec les pulsations, une case porte une ligne de plus : elle grandit,
+     et on en met moins par rangée pour que « réc 0'30" · 128 » tienne. */
+  var COLS=f.avecFC?4:5, GAP=10, IN=26;
+  var H_BANDE=54, H_CELL=f.avecFC?106:78;
+  var cw=FP_W-FP_PAD*2, grilleW=cw-IN*2;
+  var cellW=(grilleW-GAP*(COLS-1))/COLS;
 
   var cv=document.createElement('canvas');
+  var c0=cv.getContext('2d');
+  var mesure=function(t,px,poids){ c0.font=(poids||'700')+' '+px+'px '+FP_POLICE;
+                                   return c0.measureText(t).width; };
+
+  /* Les pastilles du bilan peuvent passer à la ligne : on les place avant
+     de connaître la hauteur, sinon le pied déborderait de la carte. */
+  var chips=frChips(f), placees=[], px=0, py=0, LIG=38;
+  chips.forEach(function(ch){
+    var w=mesure(ch.t,14,'800')+26;
+    if(px&&px+w>grilleW){ px=0; py+=LIG; }
+    placees.push({t:ch.t,c:ch.c,x:px,y:py,w:w});
+    px+=w+8;
+  });
+  var hPied=20+py+LIG;
+
+  var hBlocs=f.blocs.reduce(function(sum,b){
+    var rangs=Math.ceil(b.cells.length/COLS);
+    return sum+H_BANDE+rangs*H_CELL+(rangs-1)*GAP+20;
+  },0);
+  var hCarte=22+hBlocs+hPied;
+  var H=hEntete+hCarte+FP_PAD;
+
   cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
   var c=cv.getContext('2d'); c.scale(ech,ech);
   var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
@@ -9249,70 +9298,82 @@ function frImage(f,ech){
   fpRelief(c,FP_W-118,hEntete*0.46);
   fpEnteteTracer(c,g);
 
-  var cx=FP_PAD, cy=hEntete, cw=FP_W-FP_PAD*2;
+  var cx=FP_PAD, cy=hEntete;
   c.fillStyle='#FFFFFF'; fpRect(c,cx,cy,cw,hCarte,16); c.fill();
 
-  /* L'en-tête des colonnes : sans lui, « 3:22 » et « 3:18 » se ressemblent. */
-  var ty=cy+18+26;
-  f1(12.5,'800'); c.fillStyle='#94A3B8';
-  c.save(); c.letterSpacing='1.2px';
-  c.fillText('EFFORT',cx+FR_COL.nom,ty);
-  c.fillText('VISÉ',cx+FR_COL.vise,ty);
-  c.fillText('RÉEL',cx+FR_COL.reel,ty);
-  if(f.avecFC) c.fillText('FC',cx+FR_COL.fc,ty);
-  c.fillText('ÉCART',cx+FR_COL.ecart,ty);
-  c.restore();
-  c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
-  c.beginPath(); c.moveTo(cx+26,ty+14); c.lineTo(cx+cw-26,ty+14); c.stroke();
+  var gx=cx+IN, y=cy+22;
 
-  var ly=cy+18+hTete;
-  f.rows.forEach(function(r,i){
-    if(i){ c.strokeStyle='#F1F5F9'; c.lineWidth=1;
-           c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke(); }
-    var mid=ly+FR_LH/2;
+  f.blocs.forEach(function(b){
+    /* ── Le bandeau du bloc : son intitulé à gauche, sa cible à droite,
+       dite une seule fois pour toutes ses fractions. ── */
+    c.fillStyle='#F1F5F9'; fpRect(c,gx,y,grilleW,H_BANDE-10,10); c.fill();
+    var bm=y+(H_BANDE-10)/2;
 
-    if(r.nom){
-      f1(18,'700'); c.fillStyle='#0F172A';
-      c.fillText(fpCoupe(c,r.nom,FR_COL.vise-FR_COL.nom-70),cx+FR_COL.nom,mid+(r.num?0:6));
-      if(r.num){ f1(13,'800'); c.fillStyle='#94A3B8';
-                 c.fillText('n° '+r.num,cx+FR_COL.nom,mid+20); }
-    }else if(r.num){
-      f1(15,'800'); c.fillStyle='#64748B';
-      c.fillText('n° '+r.num,cx+FR_COL.nom,mid+6);
+    f1(18,'800'); c.fillStyle='#0F172A';
+    c.fillText(fpCoupe(c,b.lbl||'Effort',grilleW*0.48),gx+14,bm+6);
+
+    c.save(); c.textAlign='right';
+    if(b.viseHaut){
+      f1(16.5,'800'); c.fillStyle='#334155';
+      c.fillText(b.viseHaut,gx+grilleW-14,bm+(b.viseBas?-2:6));
+      if(b.viseBas){ f1(12.5,'600'); c.fillStyle=FR_GRIS;
+                     c.fillText(b.viseBas,gx+grilleW-14,bm+16); }
+    }else{
+      f1(14,'700'); c.fillStyle='#CBD5E1';
+      c.fillText('sans cible',gx+grilleW-14,bm+6);
     }
+    c.restore();
+    y+=H_BANDE;
 
-    if(r.viseHaut){ f1(19,'800'); c.fillStyle='#334155'; }
-    else { f1(15,'700'); c.fillStyle='#CBD5E1'; }
-    c.fillText(r.viseHaut||'sans cible',cx+FR_COL.vise,mid+(r.viseBas?0:6));
-    if(r.viseBas){ f1(13.5,'600'); c.fillStyle='#94A3B8';
-                   c.fillText(r.viseBas,cx+FR_COL.vise,mid+20); }
+    /* ── Les cases : une par fraction. La couleur dit l'essentiel, le
+       chiffre dit la mesure, et l'écart ne s'écrit que s'il existe. ── */
+    b.cells.forEach(function(cel,i){
+      var col=i%COLS, rang=Math.floor(i/COLS);
+      var x=gx+col*(cellW+GAP), cyy=y+rang*(H_CELL+GAP);
+      var teinte=cel.np?FR_GRIS:(FR_TEINTE[cel.ecCls]||'#475569');
 
-    if(r.np){ f1(16,'700'); c.fillStyle='#94A3B8'; }
-    else { f1(23,'800'); c.fillStyle='#0F172A'; }
-    c.fillText(r.reel,cx+FR_COL.reel,mid+(r.viseBas?2:7));
+      c.fillStyle=cel.np?'#F8FAFC':teinte+'12';
+      fpRect(c,x,cyy,cellW,H_CELL,12); c.fill();
+      c.strokeStyle=cel.np?'#E2E8F0':teinte+'33'; c.lineWidth=1.2;
+      fpRect(c,x+0.6,cyy+0.6,cellW-1.2,H_CELL-1.2,12); c.stroke();
 
-    /* Les deux pulsations l'une sous l'autre : l'effort en grand, la récup
-       en petit. C'est la chute entre les deux qui se lit. */
-    if(f.avecFC&&(r.fcE!=null||r.basRec)){
-      if(r.fcE!=null){ f1(20,'800'); c.fillStyle='#BE123C';
-                       c.fillText(String(r.fcE),cx+FR_COL.fc,mid+(r.basRec?0:6)); }
-      if(r.basRec){ f1(13,'700'); c.fillStyle='#94A3B8';
-                    c.fillText(r.basRec,cx+FR_COL.fc,mid+(r.fcE!=null?20:6)); }
-    }
+      f1(11.5,'800'); c.fillStyle=FR_GRIS;
+      c.save(); c.letterSpacing='0.8px';
+      c.fillText('N° '+cel.num,x+13,cyy+21);
+      c.restore();
 
-    if(r.ecTxt){
-      f1(16,'800');
-      var t=r.ecTxt, w=c.measureText(t).width+22, col=FR_TEINTE[r.ecCls]||'#475569';
-      c.fillStyle=col+'1A'; fpRect(c,cx+FR_COL.ecart,mid-16,w,32,8); c.fill();
-      c.fillStyle=col; c.fillText(t,cx+FR_COL.ecart+11,mid+(r.viseBas?2:6));
-    }
-    ly+=FR_LH;
+      if(cel.np){
+        f1(16,'700'); c.fillStyle=FR_GRIS;
+        c.fillText('non couru',x+13,cyy+50);
+      }else{
+        f1(23,'800'); c.fillStyle='#0F172A';
+        c.fillText(fpCoupe(c,cel.reel,cellW-26),x+13,cyy+50);
+        if(cel.ecTxt&&cel.ecCls!=='ok'){
+          f1(13,'800'); c.fillStyle=teinte;
+          c.fillText(cel.ecTxt,x+13,cyy+72);
+        }
+      }
+      if(f.avecFC&&(cel.fcE!=null||cel.basRec)){
+        var bouts=[];
+        if(cel.fcE!=null) bouts.push('♥ '+cel.fcE);
+        if(cel.basRec) bouts.push(cel.basRec);
+        f1(12,'700'); c.fillStyle='#64748B';
+        c.fillText(fpCoupe(c,bouts.join('  ·  '),cellW-26),x+13,cyy+H_CELL-12);
+      }
+    });
+    y+=Math.ceil(b.cells.length/COLS)*H_CELL
+      +(Math.ceil(b.cells.length/COLS)-1)*GAP+20;
   });
 
+  /* ── Le bilan, en pastilles ── */
   c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
-  c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke();
-  f1(15,'700'); c.fillStyle='#64748B';
-  c.fillText(frBilan(f),cx+FR_COL.nom,ly+29);
+  c.beginPath(); c.moveTo(gx,y+0.5); c.lineTo(gx+grilleW,y+0.5); c.stroke();
+  var py0=y+20;
+  placees.forEach(function(ch){
+    c.fillStyle=ch.c+'14'; fpRect(c,gx+ch.x,py0+ch.y,ch.w,30,15); c.fill();
+    f1(14,'800'); c.fillStyle=ch.c;
+    c.fillText(ch.t,gx+ch.x+13,py0+ch.y+20);
+  });
   return cv;
 }
 function frTexte(f){
