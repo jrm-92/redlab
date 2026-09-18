@@ -6,9 +6,10 @@
 --  Le bloc pose la préparation, puis génère une séance par semaine à la
 --  même heure et au même endroit, à partir de la date de la première.
 --
---  Relancer le même bloc deux fois ne crée pas de doublon : les lignes
---  déjà présentes sont ignorées. Pour corriger une valeur après coup, il
---  faut la modifier dans le Table Editor, pas relancer le bloc.
+--  Deux préparations ne peuvent pas porter le même identifiant. Si celui
+--  qu'on donne est déjà pris, le bloc s'arrête et le dit — il ne crée rien
+--  à moitié. Pour corriger une valeur après coup, il faut la modifier dans
+--  le Table Editor, pas relancer le bloc.
 --
 --  Pour DEUX séances par semaine (le mardi ET le samedi, par exemple) :
 --  lancer le bloc une première fois tel quel, puis une seconde fois en
@@ -58,14 +59,22 @@ begin
     raise exception 'L''identifiant « % » contient autre chose que des lettres, chiffres, tiret ou souligné. Stripe le refuserait.', v_id;
   end if;
 
+  -- Deux préparations ne peuvent pas porter le même identifiant : c'est lui
+  -- qui revient de Stripe à chaque paiement, et il désigne UNE préparation.
+  -- Le partager ferait compter les inscrits de l'une sur l'autre. On refuse
+  -- bruyamment plutôt que de ne rien faire en silence — sans ça, un second
+  -- passage avec le même identifiant semblerait réussir sans rien créer.
+  if exists (select 1 from public.preparations where id = v_id) then
+    raise exception 'Une préparation porte déjà l''identifiant « % ». Choisis-en un autre, par exemple en y mettant l''année.', v_id;
+  end if;
+
   insert into public.preparations
     (id, evenement, duree_prepa, prix, places, inscrits,
      lieu, sous_lieu, stripe, ancv, lien_course, actif)
   values
     (v_id, v_evenement, v_duree_prepa, v_prix, v_places, 0,
      v_lieu, v_sous_lieu, nullif(v_stripe,''), nullif(v_ancv,''),
-     nullif(v_lien_course,''), true)
-  on conflict (id) do nothing;
+     nullif(v_lien_course,''), true);
 
   for i in 1..v_nb_semaines loop
     insert into public.preparation_seances
