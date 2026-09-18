@@ -685,6 +685,11 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fsm-n{color:var(--muted2);white-space:nowrap}
   .fsm-v{color:var(--text);font-weight:800}
   .fsm-rien{color:var(--muted2);font-weight:600}
+  .fsm-r--sautee td{background:rgba(248,113,113,.10)}
+  .fsm-r--sautee .fsm-v{color:#F87171}
+  .fsm-r--courte td{background:rgba(251,191,36,.10)}
+  .fsm-r--courte .fsm-v{color:#FBBF24}
+  .fsm-pq{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:1px}
   .fsm-note{font-size:12px;line-height:1.5;color:var(--muted2);margin-top:10px}
   /* La proposition d'envoi : elle n'existe que lorsqu'il y a des chronos, et
      s'efface à l'impression — on n'envoie rien depuis une feuille papier. */
@@ -9180,8 +9185,14 @@ function fsFractions(s){
   lignes.forEach(function(l){
     if(l.soft) return;
     var nEff=Math.max(1,l.n||1);
+    /* La consigne, pour pouvoir la comparer au tour. Elle porte sur l'axe
+       INVERSE de ce qu'on relève : sur « 1000 m » on note le temps et on
+       compare la distance ; sur « 30 s » on note la distance et on compare
+       la durée. C'est ce qui permet de reconnaître une fraction sautée. */
+    var ref=(l.d>0) ? {quoi:'d', val:l.d}
+          : (l.sec>0 ? {quoi:'t', val:l.sec} : null);
     for(var k=0;k<nEff;k++)
-      out.push({i:l.i, k:k, lbl:l.lbl, mes:fsMesure(l), num:fsNumero(l,k)});
+      out.push({i:l.i, k:k, lbl:l.lbl, mes:fsMesure(l), num:fsNumero(l,k), ref:ref});
   });
   return out;
 }
@@ -9201,21 +9212,40 @@ function fsMontreAligner(tours,fracs){
     var r=(i+1<tours.length && tours[i+1].rec) ? tours[i+1] : null;
     eff.push({t:tours[i], r:r});
   }
-  var lignes=[], n=Math.min(eff.length,fracs.length);
+  var lignes=[], n=Math.min(eff.length,fracs.length), sautees=0, courtes=0;
   for(var j=0;j<n;j++){
     var f=fracs[j], e=eff[j];
     /* Sur une fraction en distance on note le temps ; sur une fraction en
        durée, la distance couverte. La même règle qu'à la saisie. */
     var brut=(f.mes==='d') ? e.t.d : e.t.t;
+
+    /* L'alignement se fait par rang : le n-ième effort remplit la n-ième
+       fraction. Il suppose donc que ce qui manque manque à la FIN. Un trou
+       au milieu — une fraction sautée dont la montre a quand même coupé un
+       tour, très court — décalerait tout le reste d'un cran sans que rien
+       ne le signale. On compare donc chaque tour à sa consigne : un tour
+       qui ne fait pas le tiers de ce qui était prévu n'est pas une contre-
+       performance, c'est une fraction non courue. Entre le tiers et les
+       deux tiers, on ne tranche pas : on le dit. */
+    var mesure=f.ref ? (f.ref.quoi==='d' ? e.t.d : e.t.t) : null;
+    var part=(f.ref && f.ref.val>0 && mesure!=null && mesure>=0) ? (mesure/f.ref.val) : null;
+    var doute=null;
+    if(part!=null){
+      if(part<1/3){ doute='sautee'; sautees++; }
+      else if(part<2/3){ doute='courte'; courtes++; }
+    }
+
     lignes.push({
-      f:f,
-      val:(brut!=null&&brut>0)?Math.round(brut):null,
-      fcE:(e.t.hr!=null&&e.t.hr>0)?Math.round(e.t.hr):null,
-      rec:(e.r&&e.r.t!=null&&e.r.t>0)?Math.round(e.r.t):null,
-      fcR:(e.r&&e.r.hr!=null&&e.r.hr>0)?Math.round(e.r.hr):null
+      f:f, doute:doute, part:part,
+      val:(doute==='sautee') ? FS_NP
+         : ((brut!=null&&brut>0)?Math.round(brut):null),
+      fcE:(doute==='sautee'||e.t.hr==null||e.t.hr<=0)?null:Math.round(e.t.hr),
+      rec:(doute==='sautee'||!e.r||e.r.t==null||e.r.t<=0)?null:Math.round(e.r.t),
+      fcR:(doute==='sautee'||!e.r||e.r.hr==null||e.r.hr<=0)?null:Math.round(e.r.hr)
     });
   }
-  return {lignes:lignes, efforts:eff.length, fractions:fracs.length};
+  return {lignes:lignes, efforts:eff.length, fractions:fracs.length,
+          sautees:sautees, courtes:courtes};
 }
 
 /* La séance déjà importée pour cet athlète, ce jour-là — celle du tableau
@@ -9278,16 +9308,49 @@ function fsMontreFermer(){
 
 function fsMontreHTML(al,nom,ath){
   var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  /* Le bandeau dit d'abord si les comptes tombent, puis ce qui cloche.
+     Les deux inquiétudes ne sont pas la même : un tour trop court est
+     signalé mais n'a pas décalé les rangs — la montre lui a quand même
+     coupé un tour. Le décalage, lui, vient d'une fraction sautée SANS
+     tour du tout : les comptes ne tombent plus, et tout ce qui suit
+     glisse d'un cran sans rien dire. */
   var mot, ton;
-  if(!al.efforts){ mot='Aucun tour d’effort dans ce fichier. La montre n’a pas découpé la séance.'; ton='mal'; }
-  else if(al.efforts===al.fractions){ mot=al.efforts+' tours d’effort pour '+al.fractions+' fractions : tout correspond.'; ton='ok'; }
-  else if(al.efforts<al.fractions){ mot=al.efforts+' tours d’effort pour '+al.fractions+' fractions. Les '+(al.fractions-al.efforts)+' dernières resteront vides.'; ton='moyen'; }
-  else { mot=al.efforts+' tours d’effort pour seulement '+al.fractions+' fractions. Les '+(al.efforts-al.fractions)+' tours en trop sont ignorés — vérifie que c’est bien la bonne séance.'; ton='moyen'; }
+  if(!al.efforts){ mot='Aucun tour d\u2019effort dans ce fichier. La montre n\u2019a pas découpé la séance.'; ton='mal'; }
+  else if(al.efforts===al.fractions){
+    mot=al.efforts+' tours d\u2019effort pour '+al.fractions+' fractions : les comptes tombent.';
+    ton='ok';
+  }
+  else if(al.efforts<al.fractions){
+    mot=al.efforts+' tours d\u2019effort pour '+al.fractions+' fractions. Les '+(al.fractions-al.efforts)
+       +' dernières resteront vides. Si l\u2019arrêt n\u2019a pas eu lieu à la fin mais en cours de route,'
+       +' tout ce qui suit est décalé d\u2019un cran : vérifie les numéros.';
+    ton='moyen';
+  }
+  else {
+    mot=al.efforts+' tours d\u2019effort pour seulement '+al.fractions+' fractions. Les '
+       +(al.efforts-al.fractions)+' tours en trop sont ignorés \u2014 vérifie que c\u2019est bien la bonne séance.';
+    ton='moyen';
+  }
+  if(al.sautees||al.courtes){
+    var ajout=[];
+    if(al.sautees) ajout.push(al.sautees+' tour'+(al.sautees>1?'s':'')+' trop court'+(al.sautees>1?'s':'')
+      +' pour être une fraction courue, proposé'+(al.sautees>1?'s':'')+' en « non couru »');
+    if(al.courtes) ajout.push(al.courtes+' tour'+(al.courtes>1?'s':'')+' bien en dessous de la consigne');
+    mot+=' '+ajout.join(', ')+'.';
+    if(ton==='ok') ton='moyen';
+  }
 
+  var dit=function(ln){
+    if(!ln.doute||!ln.f.ref) return '';
+    var att=(ln.f.ref.quoi==='t') ? fHMS(ln.f.ref.val) : ln.f.ref.val+' m';
+    return '<small class="fsm-pq">'+Math.round(ln.part*100)+' % des '+e(att)+' prévus</small>';
+  };
   var corps=al.lignes.map(function(ln){
-    var v=ln.val==null?'—':(ln.f.mes==='d' ? ln.val+' m' : fHMS(ln.val));
-    return '<tr><td class="fsm-n">n° '+e(ln.f.num)+'</td>'
-      +'<td class="fsm-v">'+e(v)+'</td>'
+    var v=(ln.val===FS_NP) ? 'non couru'
+        : (ln.val==null?'—':(ln.f.mes==='d' ? ln.val+' m' : fHMS(ln.val)));
+    return '<tr class="'+(ln.doute?'fsm-r--'+ln.doute:'')+'">'
+      +'<td class="fsm-n">n° '+e(ln.f.num)+'</td>'
+      +'<td class="fsm-v">'+e(v)+dit(ln)+'</td>'
       +'<td>'+(ln.fcE!=null?e(ln.fcE):'<span class="fsm-rien">—</span>')+'</td>'
       +'<td>'+(ln.rec!=null?e(fHMS(ln.rec)):'<span class="fsm-rien">—</span>')+'</td>'
       +'<td>'+(ln.fcR!=null?e(ln.fcR):'<span class="fsm-rien">—</span>')+'</td></tr>';
@@ -9326,7 +9389,10 @@ function fsMontreAppliquer(){
   a.recs[_fsDate] =a.recs[_fsDate] ||{}; a.recs[_fsDate][t] =a.recs[_fsDate][t] ||{};
   p.lignes.forEach(function(ln){
     var cle=fsCle(ln.f.i,ln.f.k);
-    if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    /* « x » n'est pas un chiffre : c'est la marque « non couru », et elle
+       se pose comme telle. */
+    if(ln.val===FS_NP) a.perfs[_fsDate][t][cle]=FS_NP;
+    else if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
     if(ln.fcE!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,false)]=ln.fcE;
     if(ln.fcR!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,true)] =ln.fcR;
     if(ln.rec!=null&&ln.rec>0) a.recs[_fsDate][t][cle]=ln.rec;
