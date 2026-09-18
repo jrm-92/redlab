@@ -1,96 +1,92 @@
 -- ═══════════════════════════════════════════════════════════════════════
---  REDING RUNNING — Créer une préparation et ses séances hebdomadaires
---  À coller dans SQL Editor. Tout ce qu'il y a à remplir est en haut,
---  entre les deux lignes « À REMPLIR ». Le reste ne se touche pas.
+--  REDING RUNNING — Les séances hebdomadaires d'une préparation
 --
---  Le bloc pose la préparation, puis génère une séance par semaine à la
---  même heure et au même endroit, à partir de la date de la première.
+--  En deux temps, chacun là où il est le plus simple.
 --
---  Deux préparations ne peuvent pas porter le même identifiant. Si celui
---  qu'on donne est déjà pris, le bloc s'arrête et le dit — il ne crée rien
---  à moitié. Pour corriger une valeur après coup, il faut la modifier dans
---  le Table Editor, pas relancer le bloc.
+--  ÉTAPE 1 — la préparation, à la main dans le Table Editor.
+--    Table Editor → preparations → bouton vert « Insert » → « Insert row ».
+--    Il n'y a que sept cases à remplir :
 --
---  Pour DEUX séances par semaine (le mardi ET le samedi, par exemple) :
---  lancer le bloc une première fois tel quel, puis une seconde fois en
---  changeant seulement la date de la première séance, l'heure, le titre,
---  et en ajoutant « -B » à la fin du préfixe des séances.
+--      id            course-chatou-saint-germain-en-laye-2027
+--                    lettres, chiffres, tiret, souligné. RIEN d'autre :
+--                    cet identifiant voyage jusqu'à Stripe et revient
+--                    avec le paiement. Mets l'année, tu pourras refaire
+--                    la même course l'an prochain.
+--      evenement     10k Chatou - Saint-Germain-en-Laye
+--                    sans la date : elle a sa propre case maintenant.
+--      date_course   2027-05-09
+--      duree_prepa   Préparation 10k - 12 semaines
+--      prix          135€
+--      stripe        le lien de paiement
+--      lieu          Le Vésinet
+--      sous_lieu     Les ibis
+--
+--    places, inscrits et actif se remplissent tout seuls. ancv et
+--    lien_course se laissent vides tant qu'ils ne servent pas.
+--
+--  ÉTAPE 2 — ses séances, avec le bloc ci-dessous.
+--    Douze lignes saisies à la main, c'est douze fois la même chose et
+--    des dates à compter de sept en sept dans sa tête. Le bloc les pose
+--    d'un coup.
+--
+--  POUR DEUX SÉANCES PAR SEMAINE — le mardi ET le samedi — relance le
+--  bloc une seconde fois en changeant la date de la première, l'heure,
+--  le titre, et en mettant '-B' dans v_suffixe.
 -- ═══════════════════════════════════════════════════════════════════════
 
 do $$
 declare
   -- ══════════════════ À REMPLIR ══════════════════════════════════════
 
-  -- L'identifiant de la préparation. Lettres, chiffres, tiret et
-  -- souligné UNIQUEMENT : c'est lui qui voyage jusqu'à Stripe, et
-  -- Stripe n'accepte rien d'autre. Pas d'espace, pas d'accent.
-  v_id            text := 'PREPA-10K-2026';
+  -- L'identifiant de la préparation, tel que tu l'as saisi à l'étape 1.
+  v_prep_id       text := 'course-chatou-saint-germain-en-laye-2027';
 
-  -- Le grand titre affiché au-dessus des cartes, avec l'épingle.
-  v_evenement     text := '10k Chatou - Saint-Germain-en-Laye';
-
-  -- La ligne grise sous le titre.
-  v_duree_prepa   text := 'PRÉPARATION 10K - 12 SEMAINES';
-
-  v_prix          text := '120';          -- en euros, sans le symbole
-  v_places        int  := 10;             -- le maximum de participants
-
-  v_lieu          text := 'Départ et Retour';
-  v_sous_lieu     text := 'Place du marché';
-
-  v_stripe        text := '';             -- le lien de paiement Stripe
-  v_ancv          text := '';             -- le lien Chèques-Vacances, ou vide
-  v_lien_course   text := '';             -- la page officielle de la course, ou vide
-
-  -- ── Les séances, toutes identiques d'une semaine à l'autre ──
   v_nb_semaines   int  := 12;
-  v_premiere      date := date '2026-10-03';   -- AAAA-MM-JJ, le jour de la 1re
+  v_premiere      date := date '2027-02-13';   -- AAAA-MM-JJ, jour de la 1re séance
   v_heure         text := '9h30';
   v_duree         text := '1h15';
   v_titre         text := 'Séance 10k';
   v_sous_titre    text := 'Tous niveaux';
   v_description   text := E'Échauffement\nCorps de séance\nRetour au calme';
 
+  -- Vide pour la séance de la semaine. '-B' pour en ajouter une seconde
+  -- le même jour de semaine, sans écraser la première.
+  v_suffixe       text := '';
+
   -- ══════════════════ FIN DE CE QU'IL Y A À REMPLIR ══════════════════
 
   i int;
+  v_posees int := 0;
 begin
-  if v_id !~ '^[A-Za-z0-9_-]+$' then
-    raise exception 'L''identifiant « % » contient autre chose que des lettres, chiffres, tiret ou souligné. Stripe le refuserait.', v_id;
+  if not exists (select 1 from public.preparations where id = v_prep_id) then
+    raise exception 'Aucune préparation ne porte l''identifiant « % ». Crée-la d''abord dans le Table Editor, ou vérifie l''orthographe.', v_prep_id;
   end if;
-
-  -- Deux préparations ne peuvent pas porter le même identifiant : c'est lui
-  -- qui revient de Stripe à chaque paiement, et il désigne UNE préparation.
-  -- Le partager ferait compter les inscrits de l'une sur l'autre. On refuse
-  -- bruyamment plutôt que de ne rien faire en silence — sans ça, un second
-  -- passage avec le même identifiant semblerait réussir sans rien créer.
-  if exists (select 1 from public.preparations where id = v_id) then
-    raise exception 'Une préparation porte déjà l''identifiant « % ». Choisis-en un autre, par exemple en y mettant l''année.', v_id;
-  end if;
-
-  insert into public.preparations
-    (id, evenement, duree_prepa, prix, places, inscrits,
-     lieu, sous_lieu, stripe, ancv, lien_course, actif)
-  values
-    (v_id, v_evenement, v_duree_prepa, v_prix, v_places, 0,
-     v_lieu, v_sous_lieu, nullif(v_stripe,''), nullif(v_ancv,''),
-     nullif(v_lien_course,''), true);
 
   for i in 1..v_nb_semaines loop
     insert into public.preparation_seances
       (id, preparation_id, date, heure, duree, titre, sous_titre, description, actif)
     values
-      (v_id || '-S' || lpad(i::text, 2, '0'),
-       v_id,
+      (v_prep_id || '-S' || lpad(i::text, 2, '0') || v_suffixe,
+       v_prep_id,
        v_premiere + (i - 1) * 7,
        v_heure, v_duree, v_titre, v_sous_titre, nullif(v_description,''), true)
     on conflict (id) do nothing;
+    v_posees := v_posees + 1;
   end loop;
+
+  raise notice '% séances demandées pour « % », de % à %.',
+    v_posees, v_prep_id, v_premiere, v_premiere + (v_nb_semaines - 1) * 7;
 end $$;
 
--- ── Vérification : la préparation et ses séances, telles qu'elles sont ──
-select ps.date, ps.heure, ps.titre, p.evenement, p.places, p.inscrits, p.actif
+-- ── Vérification ──────────────────────────────────────────────────────
+--  Les séances posées, et la date de la course en regard : la dernière
+--  doit tomber avant, et pas trop loin.
+select ps.date       as date_seance,
+       ps.heure,
+       ps.titre,
+       p.date_course,
+       (p.date_course - ps.date) as jours_avant_la_course
   from public.preparation_seances ps
   join public.preparations p on p.id = ps.preparation_id
- where p.id = 'PREPA-10K-2026'          -- ← remets ici le même identifiant
+ where p.id = 'course-chatou-saint-germain-en-laye-2027'   -- ← le même qu'en haut
  order by ps.date;
