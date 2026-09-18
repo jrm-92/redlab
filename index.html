@@ -667,6 +667,30 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
   .fs-date input:focus{border-color:var(--orange)}
   .fs-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  /* Ce que la montre propose, avant d'être écrit. Rien ne part en base
+     sans être passé par ce tableau. */
+  .fsm-box{max-width:min(620px,96vw);max-height:88vh;display:flex;flex-direction:column}
+  .fsm-src{font-size:12.5px;font-weight:700;color:var(--muted2);margin:2px 0 10px;word-break:break-all}
+  .fsm-bilan{border-radius:10px;padding:11px 13px;font-size:13.5px;font-weight:700;line-height:1.45}
+  .fsm-bilan--ok{background:rgba(52,211,153,.12);border:1.5px solid rgba(52,211,153,.45);color:#34D399}
+  .fsm-bilan--moyen{background:rgba(251,191,36,.12);border:1.5px solid rgba(251,191,36,.45);color:#FBBF24}
+  .fsm-bilan--mal{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.45);color:#F87171}
+  .fsm-scroll{overflow:auto;margin-top:12px;min-height:0}
+  .fsm-t{width:100%;border-collapse:collapse;font-size:13px}
+  .fsm-t th{position:sticky;top:0;background:var(--card);text-align:left;font-size:11px;font-weight:800;
+    letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);padding:7px 8px;
+    border-bottom:1.5px solid var(--input-border)}
+  .fsm-t td{padding:7px 8px;border-bottom:1px solid var(--input-border);font-weight:700}
+  .fsm-t tr:last-child td{border-bottom:none}
+  .fsm-n{color:var(--muted2);white-space:nowrap}
+  .fsm-v{color:var(--text);font-weight:800}
+  .fsm-rien{color:var(--muted2);font-weight:600}
+  .fsm-r--sautee td{background:rgba(248,113,113,.10)}
+  .fsm-r--sautee .fsm-v{color:#F87171}
+  .fsm-r--courte td{background:rgba(251,191,36,.10)}
+  .fsm-r--courte .fsm-v{color:#FBBF24}
+  .fsm-pq{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:1px}
+  .fsm-note{font-size:12px;line-height:1.5;color:var(--muted2);margin-top:10px}
   /* La proposition d'envoi : elle n'existe que lorsqu'il y a des chronos, et
      s'efface à l'impression — on n'envoie rien depuis une feuille papier. */
   .fs-fiches{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
@@ -9128,6 +9152,262 @@ function fsAthletes(){
   });
 }
 
+
+/* ══ REMPLIR LES RÉSULTATS DEPUIS LA MONTRE ══
+   La séance part de RedLab vers Nolio comme une structure — échauffement,
+   séries, récups, retour au calme — et Nolio la pose sur la montre. La
+   montre exécute ces étapes une par une et coupe un tour à chacune. Le
+   fichier qui revient porte donc le MÊME découpage que l'écran de saisie,
+   dans le même ordre, puisque les deux descendent de la même séance.
+
+   D'où la règle d'alignement, et sa simplicité : le n-ième tour d'effort
+   remplit la n-ième fraction. La récup d'un effort, c'est le tour de repos
+   qui le suit aussitôt — l'échauffement et le retour au calme sont eux
+   aussi des tours de repos, mais ils ne suivent jamais un effort.
+
+   Rien ne s'écrit sans être montré d'abord. Un fichier qui décalerait tout
+   d'un cran passerait inaperçu jusqu'à la fiche envoyée à l'athlète. */
+var _fsMontre=null;          /* la proposition, en attente de validation */
+var _fsMontreInput=null;
+
+function fsAthCourant(){
+  var tous=fsAthletes();
+  var pris=tous.filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
+  return pris[0]||null;
+}
+
+/* Les fractions à plat, dans l'ordre. Échauffement et retour au calme
+   (les lignes « soft ») n'ont rien à chronométrer et ne comptent pas. */
+function fsFractions(s){
+  var lignes=fsLignes(s);
+  lignes.forEach(function(l,i){ l.i=i; });
+  var out=[];
+  lignes.forEach(function(l){
+    if(l.soft) return;
+    var nEff=Math.max(1,l.n||1);
+    /* La consigne, pour pouvoir la comparer au tour. Elle porte sur l'axe
+       INVERSE de ce qu'on relève : sur « 1000 m » on note le temps et on
+       compare la distance ; sur « 30 s » on note la distance et on compare
+       la durée. C'est ce qui permet de reconnaître une fraction sautée. */
+    var ref=(l.d>0) ? {quoi:'d', val:l.d}
+          : (l.sec>0 ? {quoi:'t', val:l.sec} : null);
+    for(var k=0;k<nEff;k++)
+      out.push({i:l.i, k:k, lbl:l.lbl, mes:fsMesure(l), num:fsNumero(l,k), ref:ref});
+  });
+  return out;
+}
+
+/* Les tours d'un fichier de montre, au format déjà utilisé par le tableau
+   de bord : {t:secondes, d:mètres, hr:FC moyenne, rec:c'est un repos}. */
+async function fsMontreTours(buf,nom){
+  var acts=await window.rlActivitesDuFichier(buf);
+  if(!acts||!acts.length) throw new Error('aucune activité dans ce fichier');
+  return dbFichierResume(acts[0],nom||'').tours||[];
+}
+
+function fsMontreAligner(tours,fracs){
+  var eff=[];
+  for(var i=0;i<tours.length;i++){
+    if(tours[i].rec) continue;
+    var r=(i+1<tours.length && tours[i+1].rec) ? tours[i+1] : null;
+    eff.push({t:tours[i], r:r});
+  }
+  var lignes=[], n=Math.min(eff.length,fracs.length), sautees=0, courtes=0;
+  for(var j=0;j<n;j++){
+    var f=fracs[j], e=eff[j];
+    /* Sur une fraction en distance on note le temps ; sur une fraction en
+       durée, la distance couverte. La même règle qu'à la saisie. */
+    var brut=(f.mes==='d') ? e.t.d : e.t.t;
+
+    /* L'alignement se fait par rang : le n-ième effort remplit la n-ième
+       fraction. Il suppose donc que ce qui manque manque à la FIN. Un trou
+       au milieu — une fraction sautée dont la montre a quand même coupé un
+       tour, très court — décalerait tout le reste d'un cran sans que rien
+       ne le signale. On compare donc chaque tour à sa consigne : un tour
+       qui ne fait pas le tiers de ce qui était prévu n'est pas une contre-
+       performance, c'est une fraction non courue. Entre le tiers et les
+       deux tiers, on ne tranche pas : on le dit. */
+    var mesure=f.ref ? (f.ref.quoi==='d' ? e.t.d : e.t.t) : null;
+    var part=(f.ref && f.ref.val>0 && mesure!=null && mesure>=0) ? (mesure/f.ref.val) : null;
+    var doute=null;
+    if(part!=null){
+      if(part<1/3){ doute='sautee'; sautees++; }
+      else if(part<2/3){ doute='courte'; courtes++; }
+    }
+
+    lignes.push({
+      f:f, doute:doute, part:part,
+      val:(doute==='sautee') ? FS_NP
+         : ((brut!=null&&brut>0)?Math.round(brut):null),
+      fcE:(doute==='sautee'||e.t.hr==null||e.t.hr<=0)?null:Math.round(e.t.hr),
+      rec:(doute==='sautee'||!e.r||e.r.t==null||e.r.t<=0)?null:Math.round(e.r.t),
+      fcR:(doute==='sautee'||!e.r||e.r.hr==null||e.r.hr<=0)?null:Math.round(e.r.hr)
+    });
+  }
+  return {lignes:lignes, efforts:eff.length, fractions:fracs.length,
+          sautees:sautees, courtes:courtes};
+}
+
+/* La séance déjà importée pour cet athlète, ce jour-là — celle du tableau
+   de bord. Quand elle existe, inutile de redemander le fichier. */
+function fsMontreDejaLa(athId){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  if(!a||!a.seances) return null;
+  return a.seances.filter(function(s){
+    return s && s.src==='fichier' && s.tours && s.tours.length
+        && String(s.start_time||'').slice(0,10)===_fsDate;
+  })[0]||null;
+}
+
+function fsMontreOuvrir(){
+  var s=fsSeanceCourante(), ath=fsAthCourant();
+  if(!s||!ath){ alert('Choisis d’abord l’athlète dont tu relèves les résultats.'); return; }
+  var dej=fsMontreDejaLa(ath.id);
+  if(dej){ fsMontreProposer(dej.tours, dej.nom||dej.device||'séance importée', s, ath); return; }
+  if(!_fsMontreInput){
+    _fsMontreInput=document.createElement('input');
+    _fsMontreInput.type='file';
+    _fsMontreInput.hidden=true;
+    /* Pas d'attribut accept : iOS grise les .fit et .tcx, dont il ignore le type. */
+    document.body.appendChild(_fsMontreInput);
+    _fsMontreInput.onchange=async function(ev){
+      var f=(ev.target.files||[])[0];
+      ev.target.value='';
+      if(!f) return;
+      var s2=fsSeanceCourante(), a2=fsAthCourant();
+      if(!s2||!a2) return;
+      try{
+        var fr=new FileReader();
+        var buf=await new Promise(function(res,rej){
+          fr.onerror=function(){ rej(new Error('fichier illisible')); };
+          fr.onload=function(){ res(fr.result); };
+          fr.readAsArrayBuffer(f);
+        });
+        var tours=await fsMontreTours(buf,f.name);
+        fsMontreProposer(tours,f.name,s2,a2);
+      }catch(e){ alert('Ce fichier n’a pas pu être lu : '+(e.message||e)); }
+    };
+  }
+  _fsMontreInput.click();
+}
+
+function fsMontreProposer(tours,nom,s,ath){
+  var al=fsMontreAligner(tours,fsFractions(s));
+  _fsMontre={athId:ath.id, titre:s.title, lignes:al.lignes};
+  rlModalOuvrir('fs-montre', fsMontreHTML(al,nom,ath));
+}
+
+function fsMontreFermer(){
+  rlModalFermer('fs-montre'); _fsMontre=null;
+  /* Le tableau des résultats est resté ouvert derrière : on lui rend Échap. */
+  if(document.getElementById('fs-modal')){
+    _rlEchap=function(e){ if(e.key==='Escape') fsFermer(); };
+    document.addEventListener('keydown',_rlEchap);
+  }
+}
+
+function fsMontreHTML(al,nom,ath){
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  /* Le bandeau dit d'abord si les comptes tombent, puis ce qui cloche.
+     Les deux inquiétudes ne sont pas la même : un tour trop court est
+     signalé mais n'a pas décalé les rangs — la montre lui a quand même
+     coupé un tour. Le décalage, lui, vient d'une fraction sautée SANS
+     tour du tout : les comptes ne tombent plus, et tout ce qui suit
+     glisse d'un cran sans rien dire. */
+  var mot, ton;
+  if(!al.efforts){ mot='Aucun tour d\u2019effort dans ce fichier. La montre n\u2019a pas découpé la séance.'; ton='mal'; }
+  else if(al.efforts===al.fractions){
+    mot=al.efforts+' tours d\u2019effort pour '+al.fractions+' fractions : les comptes tombent.';
+    ton='ok';
+  }
+  else if(al.efforts<al.fractions){
+    mot=al.efforts+' tours d\u2019effort pour '+al.fractions+' fractions. Les '+(al.fractions-al.efforts)
+       +' dernières resteront vides. Si l\u2019arrêt n\u2019a pas eu lieu à la fin mais en cours de route,'
+       +' tout ce qui suit est décalé d\u2019un cran : vérifie les numéros.';
+    ton='moyen';
+  }
+  else {
+    mot=al.efforts+' tours d\u2019effort pour seulement '+al.fractions+' fractions. Les '
+       +(al.efforts-al.fractions)+' tours en trop sont ignorés \u2014 vérifie que c\u2019est bien la bonne séance.';
+    ton='moyen';
+  }
+  if(al.sautees||al.courtes){
+    var ajout=[];
+    if(al.sautees) ajout.push(al.sautees+' tour'+(al.sautees>1?'s':'')+' trop court'+(al.sautees>1?'s':'')
+      +' pour être une fraction courue, proposé'+(al.sautees>1?'s':'')+' en « non couru »');
+    if(al.courtes) ajout.push(al.courtes+' tour'+(al.courtes>1?'s':'')+' bien en dessous de la consigne');
+    mot+=' '+ajout.join(', ')+'.';
+    if(ton==='ok') ton='moyen';
+  }
+
+  var dit=function(ln){
+    if(!ln.doute||!ln.f.ref) return '';
+    var att=(ln.f.ref.quoi==='t') ? fHMS(ln.f.ref.val) : ln.f.ref.val+' m';
+    return '<small class="fsm-pq">'+Math.round(ln.part*100)+' % des '+e(att)+' prévus</small>';
+  };
+  var corps=al.lignes.map(function(ln){
+    var v=(ln.val===FS_NP) ? 'non couru'
+        : (ln.val==null?'—':(ln.f.mes==='d' ? ln.val+' m' : fHMS(ln.val)));
+    return '<tr class="'+(ln.doute?'fsm-r--'+ln.doute:'')+'">'
+      +'<td class="fsm-n">n° '+e(ln.f.num)+'</td>'
+      +'<td class="fsm-v">'+e(v)+dit(ln)+'</td>'
+      +'<td>'+(ln.fcE!=null?e(ln.fcE):'<span class="fsm-rien">—</span>')+'</td>'
+      +'<td>'+(ln.rec!=null?e(fHMS(ln.rec)):'<span class="fsm-rien">—</span>')+'</td>'
+      +'<td>'+(ln.fcR!=null?e(ln.fcR):'<span class="fsm-rien">—</span>')+'</td></tr>';
+  }).join('');
+
+  return '<div class="pl-modal-box fsm-box">'
+    +'<div class="pl-modal-top"><b>Remplir depuis la montre</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="fsMontreFermer()">×</button></div>'
+    +'<div class="fsm-src">'+e(nom)+' · '+e(ath.nom)+'</div>'
+    +'<div class="fsm-bilan fsm-bilan--'+ton+'">'+e(mot)+'</div>'
+    +(al.lignes.length
+      ? '<div class="fsm-scroll"><table class="fsm-t"><thead><tr>'
+        +'<th>Fraction</th><th>Relevé</th><th>FC eff.</th><th>Récup</th><th>FC réc.</th>'
+        +'</tr></thead><tbody>'+corps+'</tbody></table></div>'
+        +'<div class="fsm-note">Les fréquences cardiaques sont les moyennes du tour, '
+        +'comme les affichent Garmin et Nolio. Ce qui est déjà noté et qui n’apparaît '
+        +'pas ici n’est pas effacé.</div>'
+      : '')
+    +'<div class="fs-act">'
+      +(al.lignes.length
+        ? '<button type="button" class="lc-save" onclick="fsMontreAppliquer()">Remplir les '+al.lignes.length+' fraction'+(al.lignes.length>1?'s':'')+'</button>'
+        : '')
+      +'<button type="button" class="lc-cancel" onclick="fsMontreFermer()">Annuler</button>'
+    +'</div></div>';
+}
+
+function fsMontreAppliquer(){
+  var p=_fsMontre; if(!p||!p.lignes.length) return;
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===p.athId;});
+  if(!a){ fsMontreFermer(); return; }
+  var t=p.titre;
+  a.perfs=a.perfs||{}; a.fcs=a.fcs||{}; a.recs=a.recs||{};
+  a.perfs[_fsDate]=a.perfs[_fsDate]||{}; a.perfs[_fsDate][t]=a.perfs[_fsDate][t]||{};
+  a.fcs[_fsDate]  =a.fcs[_fsDate]  ||{}; a.fcs[_fsDate][t]  =a.fcs[_fsDate][t]  ||{};
+  a.recs[_fsDate] =a.recs[_fsDate] ||{}; a.recs[_fsDate][t] =a.recs[_fsDate][t] ||{};
+  p.lignes.forEach(function(ln){
+    var cle=fsCle(ln.f.i,ln.f.k);
+    /* « x » n'est pas un chiffre : c'est la marque « non couru », et elle
+       se pose comme telle. */
+    if(ln.val===FS_NP) a.perfs[_fsDate][t][cle]=FS_NP;
+    else if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    if(ln.fcE!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,false)]=ln.fcE;
+    if(ln.fcR!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,true)] =ln.fcR;
+    if(ln.rec!=null&&ln.rec>0) a.recs[_fsDate][t][cle]=ln.rec;
+  });
+  /* On ne laisse pas de coquilles vides derrière soi. */
+  [a.perfs,a.fcs,a.recs].forEach(function(m){
+    if(m[_fsDate]&&m[_fsDate][t]&&!Object.keys(m[_fsDate][t]).length) delete m[_fsDate][t];
+    if(m[_fsDate]&&!Object.keys(m[_fsDate]).length) delete m[_fsDate];
+  });
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  fsMontreFermer();
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
+
 /* ══ LA FICHE DES RÉSULTATS ══
    Les chronos étaient relevés, rangés, résumés par une pastille sur le
    calendrier — et ils s'arrêtaient là. L'athlète, lui, ne recevait rien.
@@ -9139,12 +9419,16 @@ function fsAthletes(){
    et non sur l'arbre de la fiche d'avant-séance : c'est ce découpage-là qui
    porte les clés des relevés, donc le seul qui ne puisse pas se décaler. */
 var _frAth=null;
-var FR_LH=58;
-/* Deux dispositions : les pulsations prennent une colonne, donc tout se
-   resserre quand elles sont là. Rien ne bouge quand elles ne le sont pas. */
-var FR_SANS={nom:26, vise:430, reel:632, ecart:790};
-var FR_AVEC={nom:26, vise:330, reel:506, fc:648, ecart:788};
+/* Une grille, pas un tableau. Le tableau redisait la cible à chaque ligne
+   — « 171–179 m » vingt fois de suite — et collait « dans la cible » sur
+   les quinze fractions réussies. Deux mille pixels de haut pour dire une
+   seule chose : c'était bon, sauf trois fois.
+
+   La cible se dit maintenant UNE fois, dans le bandeau du bloc. Chaque
+   fraction devient une case, et c'est sa couleur qui parle. L'écart n'est
+   écrit que lorsqu'il y en a un : une case verte n'a rien à ajouter. */
 var FR_TEINTE={ok:'#15803D', lent:'#B45309', vif:'#1D4ED8'};
+var FR_GRIS='#94A3B8';
 
 /* Combien de chronos cet athlète a-t-il sur cette séance, ce jour-là. */
 function fsCombien(athId,titre){
@@ -9162,13 +9446,16 @@ function frDonnees(athId){
   var repos=((a.recs||{})[_fsDate]||{})[s.title]||{};
   var lignes=fsLignes(s);
   lignes.forEach(function(l,i){ l.i=i; });
-  var rows=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
+  var rows=[], blocs=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
   lignes.forEach(function(l){
     if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
     var c=fsCible(l,a.vma);
     var mes=c?c.mes:fsMesure(l);
     var haut='', bas='';
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
+    /* Un bloc porte son intitulé et sa cible une seule fois ; ses fractions
+       deviennent les cases de sa grille. */
+    var bloc={lbl:l.lbl, viseHaut:haut, viseBas:bas, cells:[]};
     var nEff=Math.max(1,l.n||1), vu=false;
     for(var k=0;k<nEff;k++){
       var reel=notes[fsCle(l.i,k)];
@@ -9182,6 +9469,7 @@ function frDonnees(athId){
         saute++;
         rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                    reel:'non couru', np:true, ecTxt:'', ecCls:''});
+        bloc.cells.push({num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:''});
         vu=true; continue;
       }
       var fcE=pouls[fsCleFC(l.i,k,false)], fcR=pouls[fsCleFC(l.i,k,true)];
@@ -9203,15 +9491,19 @@ function frDonnees(athId){
       var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
+      var valeur=fsEcritVal(reel,mes)+(mes==='d'?' m':'');
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
-                 reel:fsEcritVal(reel,mes)+(mes==='d'?' m':''), fcE:fcE, fcR:fcR, tR:tR,
+                 reel:valeur, fcE:fcE, fcR:fcR, tR:tR,
                  basRec:basRec, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+      bloc.cells.push({num:fsNumero(l,k), reel:valeur, np:false, fcE:fcE, basRec:basRec,
+                       ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
+    if(bloc.cells.length) blocs.push(bloc);
   });
   if(!n) return null;
-  return {s:s, a:a, date:_fsDate, rows:rows, n:n, ok:ok, lent:lent, vif:vif, saute:saute,
-          avecFC:avecFC, fcMoy:fcN?Math.round(fcSom/fcN):null};
+  return {s:s, a:a, date:_fsDate, rows:rows, blocs:blocs, n:n, ok:ok, lent:lent, vif:vif,
+          saute:saute, avecFC:avecFC, fcMoy:fcN?Math.round(fcSom/fcN):null};
 }
 /* Le bilan en une phrase, sous le tableau. */
 function frBilan(f){
@@ -9226,9 +9518,20 @@ function frBilan(f){
   if(f.fcMoy) L.push('FC moyenne sur les efforts : '+f.fcMoy);
   return L.join('   ·   ');
 }
+/* ══ Les chips du bas : le bilan en pastilles, aux mêmes couleurs que les
+   cases. Une ligne de texte gris ne se lisait pas ; quatre pastilles se
+   voient sans être lues. ══ */
+function frChips(f){
+  var L=[{t:f.n+' temps relevé'+(f.n>1?'s':''), c:'#475569'}];
+  if(f.ok)   L.push({t:f.ok+' dans la cible',   c:FR_TEINTE.ok});
+  if(f.lent) L.push({t:f.lent+' plus lent'+(f.lent>1?'s':''),   c:FR_TEINTE.lent});
+  if(f.vif)  L.push({t:f.vif+' plus rapide'+(f.vif>1?'s':''),   c:FR_TEINTE.vif});
+  if(f.saute)L.push({t:f.saute+' non couru'+(f.saute>1?'s':''), c:FR_GRIS});
+  if(f.fcMoy)L.push({t:'FC moyenne '+f.fcMoy, c:'#BE123C'});
+  return L;
+}
 function frImage(f,ech){
   ech=ech||2;
-  var FR_COL=f.avecFC?FR_AVEC:FR_SANS;
   var sousT=[];
   var jour=fpDateLisible(f.date); if(jour)sousT.push(jour);
   sousT.push(f.a.pseudo||'Athlète');
@@ -9236,11 +9539,37 @@ function frImage(f,ech){
 
   var g=fpEnteteMesure(f.s.title,'Résultats',sousT);
   var hEntete=g.h;
-  var hTete=44, hPied=46;
-  var hCarte=18+hTete+f.rows.length*FR_LH+hPied+14;
-  var H=hEntete+hCarte+FP_PAD;
+
+  /* Avec les pulsations, une case porte une ligne de plus : elle grandit,
+     et on en met moins par rangée pour que « réc 0'30" · 128 » tienne. */
+  var COLS=f.avecFC?4:5, GAP=10, IN=26;
+  var H_BANDE=54, H_CELL=f.avecFC?106:78;
+  var cw=FP_W-FP_PAD*2, grilleW=cw-IN*2;
+  var cellW=(grilleW-GAP*(COLS-1))/COLS;
 
   var cv=document.createElement('canvas');
+  var c0=cv.getContext('2d');
+  var mesure=function(t,px,poids){ c0.font=(poids||'700')+' '+px+'px '+FP_POLICE;
+                                   return c0.measureText(t).width; };
+
+  /* Les pastilles du bilan peuvent passer à la ligne : on les place avant
+     de connaître la hauteur, sinon le pied déborderait de la carte. */
+  var chips=frChips(f), placees=[], px=0, py=0, LIG=38;
+  chips.forEach(function(ch){
+    var w=mesure(ch.t,14,'800')+26;
+    if(px&&px+w>grilleW){ px=0; py+=LIG; }
+    placees.push({t:ch.t,c:ch.c,x:px,y:py,w:w});
+    px+=w+8;
+  });
+  var hPied=20+py+LIG;
+
+  var hBlocs=f.blocs.reduce(function(sum,b){
+    var rangs=Math.ceil(b.cells.length/COLS);
+    return sum+H_BANDE+rangs*H_CELL+(rangs-1)*GAP+20;
+  },0);
+  var hCarte=22+hBlocs+hPied;
+  var H=hEntete+hCarte+FP_PAD;
+
   cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
   var c=cv.getContext('2d'); c.scale(ech,ech);
   var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
@@ -9249,70 +9578,82 @@ function frImage(f,ech){
   fpRelief(c,FP_W-118,hEntete*0.46);
   fpEnteteTracer(c,g);
 
-  var cx=FP_PAD, cy=hEntete, cw=FP_W-FP_PAD*2;
+  var cx=FP_PAD, cy=hEntete;
   c.fillStyle='#FFFFFF'; fpRect(c,cx,cy,cw,hCarte,16); c.fill();
 
-  /* L'en-tête des colonnes : sans lui, « 3:22 » et « 3:18 » se ressemblent. */
-  var ty=cy+18+26;
-  f1(12.5,'800'); c.fillStyle='#94A3B8';
-  c.save(); c.letterSpacing='1.2px';
-  c.fillText('EFFORT',cx+FR_COL.nom,ty);
-  c.fillText('VISÉ',cx+FR_COL.vise,ty);
-  c.fillText('RÉEL',cx+FR_COL.reel,ty);
-  if(f.avecFC) c.fillText('FC',cx+FR_COL.fc,ty);
-  c.fillText('ÉCART',cx+FR_COL.ecart,ty);
-  c.restore();
-  c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
-  c.beginPath(); c.moveTo(cx+26,ty+14); c.lineTo(cx+cw-26,ty+14); c.stroke();
+  var gx=cx+IN, y=cy+22;
 
-  var ly=cy+18+hTete;
-  f.rows.forEach(function(r,i){
-    if(i){ c.strokeStyle='#F1F5F9'; c.lineWidth=1;
-           c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke(); }
-    var mid=ly+FR_LH/2;
+  f.blocs.forEach(function(b){
+    /* ── Le bandeau du bloc : son intitulé à gauche, sa cible à droite,
+       dite une seule fois pour toutes ses fractions. ── */
+    c.fillStyle='#F1F5F9'; fpRect(c,gx,y,grilleW,H_BANDE-10,10); c.fill();
+    var bm=y+(H_BANDE-10)/2;
 
-    if(r.nom){
-      f1(18,'700'); c.fillStyle='#0F172A';
-      c.fillText(fpCoupe(c,r.nom,FR_COL.vise-FR_COL.nom-70),cx+FR_COL.nom,mid+(r.num?0:6));
-      if(r.num){ f1(13,'800'); c.fillStyle='#94A3B8';
-                 c.fillText('n° '+r.num,cx+FR_COL.nom,mid+20); }
-    }else if(r.num){
-      f1(15,'800'); c.fillStyle='#64748B';
-      c.fillText('n° '+r.num,cx+FR_COL.nom,mid+6);
+    f1(18,'800'); c.fillStyle='#0F172A';
+    c.fillText(fpCoupe(c,b.lbl||'Effort',grilleW*0.48),gx+14,bm+6);
+
+    c.save(); c.textAlign='right';
+    if(b.viseHaut){
+      f1(16.5,'800'); c.fillStyle='#334155';
+      c.fillText(b.viseHaut,gx+grilleW-14,bm+(b.viseBas?-2:6));
+      if(b.viseBas){ f1(12.5,'600'); c.fillStyle=FR_GRIS;
+                     c.fillText(b.viseBas,gx+grilleW-14,bm+16); }
+    }else{
+      f1(14,'700'); c.fillStyle='#CBD5E1';
+      c.fillText('sans cible',gx+grilleW-14,bm+6);
     }
+    c.restore();
+    y+=H_BANDE;
 
-    if(r.viseHaut){ f1(19,'800'); c.fillStyle='#334155'; }
-    else { f1(15,'700'); c.fillStyle='#CBD5E1'; }
-    c.fillText(r.viseHaut||'sans cible',cx+FR_COL.vise,mid+(r.viseBas?0:6));
-    if(r.viseBas){ f1(13.5,'600'); c.fillStyle='#94A3B8';
-                   c.fillText(r.viseBas,cx+FR_COL.vise,mid+20); }
+    /* ── Les cases : une par fraction. La couleur dit l'essentiel, le
+       chiffre dit la mesure, et l'écart ne s'écrit que s'il existe. ── */
+    b.cells.forEach(function(cel,i){
+      var col=i%COLS, rang=Math.floor(i/COLS);
+      var x=gx+col*(cellW+GAP), cyy=y+rang*(H_CELL+GAP);
+      var teinte=cel.np?FR_GRIS:(FR_TEINTE[cel.ecCls]||'#475569');
 
-    if(r.np){ f1(16,'700'); c.fillStyle='#94A3B8'; }
-    else { f1(23,'800'); c.fillStyle='#0F172A'; }
-    c.fillText(r.reel,cx+FR_COL.reel,mid+(r.viseBas?2:7));
+      c.fillStyle=cel.np?'#F8FAFC':teinte+'12';
+      fpRect(c,x,cyy,cellW,H_CELL,12); c.fill();
+      c.strokeStyle=cel.np?'#E2E8F0':teinte+'33'; c.lineWidth=1.2;
+      fpRect(c,x+0.6,cyy+0.6,cellW-1.2,H_CELL-1.2,12); c.stroke();
 
-    /* Les deux pulsations l'une sous l'autre : l'effort en grand, la récup
-       en petit. C'est la chute entre les deux qui se lit. */
-    if(f.avecFC&&(r.fcE!=null||r.basRec)){
-      if(r.fcE!=null){ f1(20,'800'); c.fillStyle='#BE123C';
-                       c.fillText(String(r.fcE),cx+FR_COL.fc,mid+(r.basRec?0:6)); }
-      if(r.basRec){ f1(13,'700'); c.fillStyle='#94A3B8';
-                    c.fillText(r.basRec,cx+FR_COL.fc,mid+(r.fcE!=null?20:6)); }
-    }
+      f1(11.5,'800'); c.fillStyle=FR_GRIS;
+      c.save(); c.letterSpacing='0.8px';
+      c.fillText('N° '+cel.num,x+13,cyy+21);
+      c.restore();
 
-    if(r.ecTxt){
-      f1(16,'800');
-      var t=r.ecTxt, w=c.measureText(t).width+22, col=FR_TEINTE[r.ecCls]||'#475569';
-      c.fillStyle=col+'1A'; fpRect(c,cx+FR_COL.ecart,mid-16,w,32,8); c.fill();
-      c.fillStyle=col; c.fillText(t,cx+FR_COL.ecart+11,mid+(r.viseBas?2:6));
-    }
-    ly+=FR_LH;
+      if(cel.np){
+        f1(16,'700'); c.fillStyle=FR_GRIS;
+        c.fillText('non couru',x+13,cyy+50);
+      }else{
+        f1(23,'800'); c.fillStyle='#0F172A';
+        c.fillText(fpCoupe(c,cel.reel,cellW-26),x+13,cyy+50);
+        if(cel.ecTxt&&cel.ecCls!=='ok'){
+          f1(13,'800'); c.fillStyle=teinte;
+          c.fillText(cel.ecTxt,x+13,cyy+72);
+        }
+      }
+      if(f.avecFC&&(cel.fcE!=null||cel.basRec)){
+        var bouts=[];
+        if(cel.fcE!=null) bouts.push('♥ '+cel.fcE);
+        if(cel.basRec) bouts.push(cel.basRec);
+        f1(12,'700'); c.fillStyle='#64748B';
+        c.fillText(fpCoupe(c,bouts.join('  ·  '),cellW-26),x+13,cyy+H_CELL-12);
+      }
+    });
+    y+=Math.ceil(b.cells.length/COLS)*H_CELL
+      +(Math.ceil(b.cells.length/COLS)-1)*GAP+20;
   });
 
+  /* ── Le bilan, en pastilles ── */
   c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
-  c.beginPath(); c.moveTo(cx+26,ly+0.5); c.lineTo(cx+cw-26,ly+0.5); c.stroke();
-  f1(15,'700'); c.fillStyle='#64748B';
-  c.fillText(frBilan(f),cx+FR_COL.nom,ly+29);
+  c.beginPath(); c.moveTo(gx,y+0.5); c.lineTo(gx+grilleW,y+0.5); c.stroke();
+  var py0=y+20;
+  placees.forEach(function(ch){
+    c.fillStyle=ch.c+'14'; fpRect(c,gx+ch.x,py0+ch.y,ch.w,30,15); c.fill();
+    f1(14,'800'); c.fillStyle=ch.c;
+    c.fillText(ch.t,gx+ch.x+13,py0+ch.y+20);
+  });
   return cv;
 }
 function frTexte(f){
@@ -9622,6 +9963,10 @@ function fsBoite(s,th,e,pick,pris,corps){
     +corps
     +'<div class="fs-fiches" id="fs-fiches">'+fsFichesHTML(pris,s.title)+'</div>'
     +'<div class="fs-act">'
+      +(pris.length
+        ? '<button type="button" class="lc-save" onclick="fsMontreOuvrir()"'
+          +' title="Lire un fichier .FIT ou .TCX et remplir les cases">⌚ Remplir depuis la montre</button>'
+        : '')
       +'<button type="button" class="lc-save" onclick="fsImprimer()">⎙ Imprimer</button>'
       +'<button type="button" class="lc-cancel" onclick="fsFermer()">Fermer</button>'
     +'</div></div>';
