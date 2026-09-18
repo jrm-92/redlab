@@ -667,6 +667,25 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fs-date input{background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;padding:7px 10px;outline:none}
   .fs-date input:focus{border-color:var(--orange)}
   .fs-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  /* Ce que la montre propose, avant d'être écrit. Rien ne part en base
+     sans être passé par ce tableau. */
+  .fsm-box{max-width:min(620px,96vw);max-height:88vh;display:flex;flex-direction:column}
+  .fsm-src{font-size:12.5px;font-weight:700;color:var(--muted2);margin:2px 0 10px;word-break:break-all}
+  .fsm-bilan{border-radius:10px;padding:11px 13px;font-size:13.5px;font-weight:700;line-height:1.45}
+  .fsm-bilan--ok{background:rgba(52,211,153,.12);border:1.5px solid rgba(52,211,153,.45);color:#34D399}
+  .fsm-bilan--moyen{background:rgba(251,191,36,.12);border:1.5px solid rgba(251,191,36,.45);color:#FBBF24}
+  .fsm-bilan--mal{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.45);color:#F87171}
+  .fsm-scroll{overflow:auto;margin-top:12px;min-height:0}
+  .fsm-t{width:100%;border-collapse:collapse;font-size:13px}
+  .fsm-t th{position:sticky;top:0;background:var(--card);text-align:left;font-size:11px;font-weight:800;
+    letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);padding:7px 8px;
+    border-bottom:1.5px solid var(--input-border)}
+  .fsm-t td{padding:7px 8px;border-bottom:1px solid var(--input-border);font-weight:700}
+  .fsm-t tr:last-child td{border-bottom:none}
+  .fsm-n{color:var(--muted2);white-space:nowrap}
+  .fsm-v{color:var(--text);font-weight:800}
+  .fsm-rien{color:var(--muted2);font-weight:600}
+  .fsm-note{font-size:12px;line-height:1.5;color:var(--muted2);margin-top:10px}
   /* La proposition d'envoi : elle n'existe que lorsqu'il y a des chronos, et
      s'efface à l'impression — on n'envoie rien depuis une feuille papier. */
   .fs-fiches{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
@@ -9128,6 +9147,201 @@ function fsAthletes(){
   });
 }
 
+
+/* ══ REMPLIR LES RÉSULTATS DEPUIS LA MONTRE ══
+   La séance part de RedLab vers Nolio comme une structure — échauffement,
+   séries, récups, retour au calme — et Nolio la pose sur la montre. La
+   montre exécute ces étapes une par une et coupe un tour à chacune. Le
+   fichier qui revient porte donc le MÊME découpage que l'écran de saisie,
+   dans le même ordre, puisque les deux descendent de la même séance.
+
+   D'où la règle d'alignement, et sa simplicité : le n-ième tour d'effort
+   remplit la n-ième fraction. La récup d'un effort, c'est le tour de repos
+   qui le suit aussitôt — l'échauffement et le retour au calme sont eux
+   aussi des tours de repos, mais ils ne suivent jamais un effort.
+
+   Rien ne s'écrit sans être montré d'abord. Un fichier qui décalerait tout
+   d'un cran passerait inaperçu jusqu'à la fiche envoyée à l'athlète. */
+var _fsMontre=null;          /* la proposition, en attente de validation */
+var _fsMontreInput=null;
+
+function fsAthCourant(){
+  var tous=fsAthletes();
+  var pris=tous.filter(function(a){ return a.vma && _fsSel.indexOf(a.id)>=0; });
+  return pris[0]||null;
+}
+
+/* Les fractions à plat, dans l'ordre. Échauffement et retour au calme
+   (les lignes « soft ») n'ont rien à chronométrer et ne comptent pas. */
+function fsFractions(s){
+  var lignes=fsLignes(s);
+  lignes.forEach(function(l,i){ l.i=i; });
+  var out=[];
+  lignes.forEach(function(l){
+    if(l.soft) return;
+    var nEff=Math.max(1,l.n||1);
+    for(var k=0;k<nEff;k++)
+      out.push({i:l.i, k:k, lbl:l.lbl, mes:fsMesure(l), num:fsNumero(l,k)});
+  });
+  return out;
+}
+
+/* Les tours d'un fichier de montre, au format déjà utilisé par le tableau
+   de bord : {t:secondes, d:mètres, hr:FC moyenne, rec:c'est un repos}. */
+async function fsMontreTours(buf,nom){
+  var acts=await window.rlActivitesDuFichier(buf);
+  if(!acts||!acts.length) throw new Error('aucune activité dans ce fichier');
+  return dbFichierResume(acts[0],nom||'').tours||[];
+}
+
+function fsMontreAligner(tours,fracs){
+  var eff=[];
+  for(var i=0;i<tours.length;i++){
+    if(tours[i].rec) continue;
+    var r=(i+1<tours.length && tours[i+1].rec) ? tours[i+1] : null;
+    eff.push({t:tours[i], r:r});
+  }
+  var lignes=[], n=Math.min(eff.length,fracs.length);
+  for(var j=0;j<n;j++){
+    var f=fracs[j], e=eff[j];
+    /* Sur une fraction en distance on note le temps ; sur une fraction en
+       durée, la distance couverte. La même règle qu'à la saisie. */
+    var brut=(f.mes==='d') ? e.t.d : e.t.t;
+    lignes.push({
+      f:f,
+      val:(brut!=null&&brut>0)?Math.round(brut):null,
+      fcE:(e.t.hr!=null&&e.t.hr>0)?Math.round(e.t.hr):null,
+      rec:(e.r&&e.r.t!=null&&e.r.t>0)?Math.round(e.r.t):null,
+      fcR:(e.r&&e.r.hr!=null&&e.r.hr>0)?Math.round(e.r.hr):null
+    });
+  }
+  return {lignes:lignes, efforts:eff.length, fractions:fracs.length};
+}
+
+/* La séance déjà importée pour cet athlète, ce jour-là — celle du tableau
+   de bord. Quand elle existe, inutile de redemander le fichier. */
+function fsMontreDejaLa(athId){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  if(!a||!a.seances) return null;
+  return a.seances.filter(function(s){
+    return s && s.src==='fichier' && s.tours && s.tours.length
+        && String(s.start_time||'').slice(0,10)===_fsDate;
+  })[0]||null;
+}
+
+function fsMontreOuvrir(){
+  var s=fsSeanceCourante(), ath=fsAthCourant();
+  if(!s||!ath){ alert('Choisis d’abord l’athlète dont tu relèves les résultats.'); return; }
+  var dej=fsMontreDejaLa(ath.id);
+  if(dej){ fsMontreProposer(dej.tours, dej.nom||dej.device||'séance importée', s, ath); return; }
+  if(!_fsMontreInput){
+    _fsMontreInput=document.createElement('input');
+    _fsMontreInput.type='file';
+    _fsMontreInput.hidden=true;
+    /* Pas d'attribut accept : iOS grise les .fit et .tcx, dont il ignore le type. */
+    document.body.appendChild(_fsMontreInput);
+    _fsMontreInput.onchange=async function(ev){
+      var f=(ev.target.files||[])[0];
+      ev.target.value='';
+      if(!f) return;
+      var s2=fsSeanceCourante(), a2=fsAthCourant();
+      if(!s2||!a2) return;
+      try{
+        var fr=new FileReader();
+        var buf=await new Promise(function(res,rej){
+          fr.onerror=function(){ rej(new Error('fichier illisible')); };
+          fr.onload=function(){ res(fr.result); };
+          fr.readAsArrayBuffer(f);
+        });
+        var tours=await fsMontreTours(buf,f.name);
+        fsMontreProposer(tours,f.name,s2,a2);
+      }catch(e){ alert('Ce fichier n’a pas pu être lu : '+(e.message||e)); }
+    };
+  }
+  _fsMontreInput.click();
+}
+
+function fsMontreProposer(tours,nom,s,ath){
+  var al=fsMontreAligner(tours,fsFractions(s));
+  _fsMontre={athId:ath.id, titre:s.title, lignes:al.lignes};
+  rlModalOuvrir('fs-montre', fsMontreHTML(al,nom,ath));
+}
+
+function fsMontreFermer(){
+  rlModalFermer('fs-montre'); _fsMontre=null;
+  /* Le tableau des résultats est resté ouvert derrière : on lui rend Échap. */
+  if(document.getElementById('fs-modal')){
+    _rlEchap=function(e){ if(e.key==='Escape') fsFermer(); };
+    document.addEventListener('keydown',_rlEchap);
+  }
+}
+
+function fsMontreHTML(al,nom,ath){
+  var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
+  var mot, ton;
+  if(!al.efforts){ mot='Aucun tour d’effort dans ce fichier. La montre n’a pas découpé la séance.'; ton='mal'; }
+  else if(al.efforts===al.fractions){ mot=al.efforts+' tours d’effort pour '+al.fractions+' fractions : tout correspond.'; ton='ok'; }
+  else if(al.efforts<al.fractions){ mot=al.efforts+' tours d’effort pour '+al.fractions+' fractions. Les '+(al.fractions-al.efforts)+' dernières resteront vides.'; ton='moyen'; }
+  else { mot=al.efforts+' tours d’effort pour seulement '+al.fractions+' fractions. Les '+(al.efforts-al.fractions)+' tours en trop sont ignorés — vérifie que c’est bien la bonne séance.'; ton='moyen'; }
+
+  var corps=al.lignes.map(function(ln){
+    var v=ln.val==null?'—':(ln.f.mes==='d' ? ln.val+' m' : fHMS(ln.val));
+    return '<tr><td class="fsm-n">n° '+e(ln.f.num)+'</td>'
+      +'<td class="fsm-v">'+e(v)+'</td>'
+      +'<td>'+(ln.fcE!=null?e(ln.fcE):'<span class="fsm-rien">—</span>')+'</td>'
+      +'<td>'+(ln.rec!=null?e(fHMS(ln.rec)):'<span class="fsm-rien">—</span>')+'</td>'
+      +'<td>'+(ln.fcR!=null?e(ln.fcR):'<span class="fsm-rien">—</span>')+'</td></tr>';
+  }).join('');
+
+  return '<div class="pl-modal-box fsm-box">'
+    +'<div class="pl-modal-top"><b>Remplir depuis la montre</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="fsMontreFermer()">×</button></div>'
+    +'<div class="fsm-src">'+e(nom)+' · '+e(ath.nom)+'</div>'
+    +'<div class="fsm-bilan fsm-bilan--'+ton+'">'+e(mot)+'</div>'
+    +(al.lignes.length
+      ? '<div class="fsm-scroll"><table class="fsm-t"><thead><tr>'
+        +'<th>Fraction</th><th>Relevé</th><th>FC eff.</th><th>Récup</th><th>FC réc.</th>'
+        +'</tr></thead><tbody>'+corps+'</tbody></table></div>'
+        +'<div class="fsm-note">Les fréquences cardiaques sont les moyennes du tour, '
+        +'comme les affichent Garmin et Nolio. Ce qui est déjà noté et qui n’apparaît '
+        +'pas ici n’est pas effacé.</div>'
+      : '')
+    +'<div class="fs-act">'
+      +(al.lignes.length
+        ? '<button type="button" class="lc-save" onclick="fsMontreAppliquer()">Remplir les '+al.lignes.length+' fraction'+(al.lignes.length>1?'s':'')+'</button>'
+        : '')
+      +'<button type="button" class="lc-cancel" onclick="fsMontreFermer()">Annuler</button>'
+    +'</div></div>';
+}
+
+function fsMontreAppliquer(){
+  var p=_fsMontre; if(!p||!p.lignes.length) return;
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===p.athId;});
+  if(!a){ fsMontreFermer(); return; }
+  var t=p.titre;
+  a.perfs=a.perfs||{}; a.fcs=a.fcs||{}; a.recs=a.recs||{};
+  a.perfs[_fsDate]=a.perfs[_fsDate]||{}; a.perfs[_fsDate][t]=a.perfs[_fsDate][t]||{};
+  a.fcs[_fsDate]  =a.fcs[_fsDate]  ||{}; a.fcs[_fsDate][t]  =a.fcs[_fsDate][t]  ||{};
+  a.recs[_fsDate] =a.recs[_fsDate] ||{}; a.recs[_fsDate][t] =a.recs[_fsDate][t] ||{};
+  p.lignes.forEach(function(ln){
+    var cle=fsCle(ln.f.i,ln.f.k);
+    if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    if(ln.fcE!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,false)]=ln.fcE;
+    if(ln.fcR!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,true)] =ln.fcR;
+    if(ln.rec!=null&&ln.rec>0) a.recs[_fsDate][t][cle]=ln.rec;
+  });
+  /* On ne laisse pas de coquilles vides derrière soi. */
+  [a.perfs,a.fcs,a.recs].forEach(function(m){
+    if(m[_fsDate]&&m[_fsDate][t]&&!Object.keys(m[_fsDate][t]).length) delete m[_fsDate][t];
+    if(m[_fsDate]&&!Object.keys(m[_fsDate]).length) delete m[_fsDate];
+  });
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  fsMontreFermer();
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
+
 /* ══ LA FICHE DES RÉSULTATS ══
    Les chronos étaient relevés, rangés, résumés par une pastille sur le
    calendrier — et ils s'arrêtaient là. L'athlète, lui, ne recevait rien.
@@ -9683,6 +9897,10 @@ function fsBoite(s,th,e,pick,pris,corps){
     +corps
     +'<div class="fs-fiches" id="fs-fiches">'+fsFichesHTML(pris,s.title)+'</div>'
     +'<div class="fs-act">'
+      +(pris.length
+        ? '<button type="button" class="lc-save" onclick="fsMontreOuvrir()"'
+          +' title="Lire un fichier .FIT ou .TCX et remplir les cases">⌚ Remplir depuis la montre</button>'
+        : '')
       +'<button type="button" class="lc-save" onclick="fsImprimer()">⎙ Imprimer</button>'
       +'<button type="button" class="lc-cancel" onclick="fsFermer()">Fermer</button>'
     +'</div></div>';
