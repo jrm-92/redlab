@@ -9469,7 +9469,8 @@ function frDonnees(athId){
         saute++;
         rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                    reel:'non couru', np:true, ecTxt:'', ecCls:''});
-        bloc.cells.push({num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:''});
+        bloc.cells.push({num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:'',
+                         serie:(l.sets>1&&l.reps>1)?(Math.floor(k/l.reps)+1):0});
         vu=true; continue;
       }
       var fcE=pouls[fsCleFC(l.i,k,false)], fcR=pouls[fsCleFC(l.i,k,true)];
@@ -9488,14 +9489,25 @@ function frDonnees(athId){
          cœur au bout. Une colonne de plus ne tiendrait pas en largeur. */
       var basRec=[]; if(tR!=null) basRec.push(fHMS(tR)); if(fcR!=null) basRec.push(fcR);
       basRec=basRec.length?('réc '+basRec.join(' \u00b7 ')):'';
+      /* L'allure réelle de la fraction, en minutes au kilomètre : c'est
+         la seule unité qui se compare d'une séance à l'autre. Une distance
+         parcourue en un temps imposé et un temps mis sur une distance
+         imposée s'y ramènent tous les deux. */
+      var all='';
+      if(mes==='d'&&l.sec>0&&reel>0)      all=fAll(l.sec*1000/reel)+'/km';
+      else if(mes==='t'&&l.d>0&&reel>0)   all=fAll(reel*1000/l.d)+'/km';
+      /* La série à laquelle appartient la fraction : 0 quand la ligne n'en
+         compte qu'une. Elle sert à casser la grille au bon endroit. */
+      var serie=(l.sets>1&&l.reps>1)?(Math.floor(k/l.reps)+1):0;
       var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
       var valeur=fsEcritVal(reel,mes)+(mes==='d'?' m':'');
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
-                 reel:valeur, fcE:fcE, fcR:fcR, tR:tR,
+                 reel:valeur, allure:all, fcE:fcE, fcR:fcR, tR:tR,
                  basRec:basRec, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
-      bloc.cells.push({num:fsNumero(l,k), reel:valeur, np:false, fcE:fcE, basRec:basRec,
+      bloc.cells.push({num:fsNumero(l,k), reel:valeur, allure:all, serie:serie,
+                       np:false, fcE:fcE, basRec:basRec,
                        ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
@@ -9530,6 +9542,20 @@ function frChips(f){
   if(f.fcMoy)L.push({t:'FC moyenne '+f.fcMoy, c:'#BE123C'});
   return L;
 }
+/* La place de chaque case dans la grille. Une séance en deux séries —
+   « 2 × (10 × 30/30) » — alignait ses vingt fractions à la file : la
+   deuxième série commençait au milieu d'une rangée dès que le compte ne
+   tombait pas juste. Chaque série repart donc de la gauche. */
+function frGrille(cells,COLS){
+  var pos=[], col=0, rang=0, precedente=null;
+  cells.forEach(function(cel){
+    if(precedente!==null&&cel.serie&&cel.serie!==precedente&&col!==0){ col=0; rang++; }
+    pos.push({col:col,rang:rang});
+    precedente=cel.serie||precedente;
+    col++; if(col>=COLS){ col=0; rang++; }
+  });
+  return {pos:pos, rangs:rang+(col?1:0)};
+}
 function frImage(f,ech){
   ech=ech||2;
   var sousT=[];
@@ -9563,8 +9589,11 @@ function frImage(f,ech){
   });
   var hPied=20+py+LIG;
 
+  /* La grille de chaque bloc est posée une fois pour toutes : la hauteur
+     de la carte et le tracé doivent compter les mêmes rangées. */
+  f.blocs.forEach(function(b){ b.grille=frGrille(b.cells,COLS); });
   var hBlocs=f.blocs.reduce(function(sum,b){
-    var rangs=Math.ceil(b.cells.length/COLS);
+    var rangs=b.grille.rangs;
     return sum+H_BANDE+rangs*H_CELL+(rangs-1)*GAP+20;
   },0);
   var hCarte=22+hBlocs+hPied;
@@ -9608,8 +9637,8 @@ function frImage(f,ech){
     /* ── Les cases : une par fraction. La couleur dit l'essentiel, le
        chiffre dit la mesure, et l'écart ne s'écrit que s'il existe. ── */
     b.cells.forEach(function(cel,i){
-      var col=i%COLS, rang=Math.floor(i/COLS);
-      var x=gx+col*(cellW+GAP), cyy=y+rang*(H_CELL+GAP);
+      var pl=b.grille.pos[i];
+      var x=gx+pl.col*(cellW+GAP), cyy=y+pl.rang*(H_CELL+GAP);
       var teinte=cel.np?FR_GRIS:(FR_TEINTE[cel.ecCls]||'#475569');
 
       c.fillStyle=cel.np?'#F8FAFC':teinte+'12';
@@ -9626,8 +9655,19 @@ function frImage(f,ech){
         f1(16,'700'); c.fillStyle=FR_GRIS;
         c.fillText('non couru',x+13,cyy+50);
       }else{
+        /* L'allure se pose au bout de la même ligne que la mesure : c'est
+           le côté droit de la case, qui ne servait à rien, et les deux se
+           lisent d'un seul regard — « 180 m », donc « 2:47/km ». */
+        var wAll=0;
+        if(cel.allure){ f1(13,'700'); wAll=c.measureText(cel.allure).width+10; }
         f1(23,'800'); c.fillStyle='#0F172A';
-        c.fillText(fpCoupe(c,cel.reel,cellW-26),x+13,cyy+50);
+        c.fillText(fpCoupe(c,cel.reel,cellW-26-wAll),x+13,cyy+50);
+        if(cel.allure){
+          c.save(); c.textAlign='right';
+          f1(13,'700'); c.fillStyle='#64748B';
+          c.fillText(cel.allure,x+cellW-13,cyy+50);
+          c.restore();
+        }
         if(cel.ecTxt&&cel.ecCls!=='ok'){
           f1(13,'800'); c.fillStyle=teinte;
           c.fillText(cel.ecTxt,x+13,cyy+72);
@@ -9641,8 +9681,7 @@ function frImage(f,ech){
         c.fillText(fpCoupe(c,bouts.join('  ·  '),cellW-26),x+13,cyy+H_CELL-12);
       }
     });
-    y+=Math.ceil(b.cells.length/COLS)*H_CELL
-      +(Math.ceil(b.cells.length/COLS)-1)*GAP+20;
+    y+=b.grille.rangs*H_CELL+(b.grille.rangs-1)*GAP+20;
   });
 
   /* ── Le bilan, en pastilles ── */
@@ -9675,7 +9714,8 @@ function frTexte(f){
        ressemblerait à une donnée manquante. */
     L.push('• '+(r.nom?r.nom+' ':'')+(r.num?'n° '+r.num:'')
              +(r.viseHaut?' — visé '+r.viseHaut:' — sans cible')
-             +'  |  réel '+r.reel+fc+(r.ecTxt?'  ('+r.ecTxt+')':''));
+             +'  |  réel '+r.reel+(r.allure?' ('+r.allure+')':'')
+             +fc+(r.ecTxt?'  ('+r.ecTxt+')':''));
   });
   L.push(''); L.push(frBilan(f));
   return L.join('\n');
