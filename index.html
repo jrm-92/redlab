@@ -2620,7 +2620,19 @@ table.lm-laps tbody tr{cursor:pointer}
                 </button>
               </div>
               <div id="cs-assistant" style="margin-bottom:18px"></div>
-              <div class="info-box" id="cs-modele-note" style="margin-bottom:20px"></div>
+              <div class="info-box" id="cs-modele-note" style="margin-bottom:12px"></div>
+              <!-- Comment faire les tests. Le choix des durées était expliqué,
+                   les conditions ne l'étaient nulle part — or c'est d'elles que
+                   dépend la qualité des chiffres. Un test mal mené donne une
+                   droite propre et fausse : rien ne le signalera. -->
+              <div class="info-box" style="margin-bottom:20px">
+                <b>Comment mener les tests</b><br>
+                • <b>Un test par jour</b>, 24 h de repos au minimum entre deux. Enchaînés le même jour, les suivants sont faussés par la fatigue.<br>
+                • <b>Maximal, mais régulier</b> : partir trop vite et finir en marchant donne une distance plus courte que l'effort réel.<br>
+                • <b>Terrain plat et dur</b>, un jour sans vent. Piste ou route.<br>
+                • <b>Échauffement complet</b> : le modèle suppose que l'aérobie démarre instantanément, ce qui est faux. Un athlète mal échauffé perd les premières secondes et sa VC sort trop basse.<br>
+                • <b>Le protocole compte</b> : deux athlètes testés sur des durées différentes ne sont pas comparables. Note lesquelles ont servi.
+              </div>
               <div class="cs-race" id="cs-race-1">
                 <label>Performance 1</label>
                 <input type="hidden" id="csr-type-1" value="t3"><div class="cdd" id="cdd-1" style="margin-bottom:8px"></div>
@@ -3347,9 +3359,9 @@ function resetAll(){
 
 /* ══ ZONES ══ */
 const ZONES_VC=[
-  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile — base aérobie, filière lipidique'},
-  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues, allure marathon'},
-  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, efforts 30 min à 1h30 (2×20 min, 3×15 min)'},
+  {z:1,n:'Modéré',                     pct:'60–80%',  lo:0.60,hi:0.81, fcLo:45, fcHi:65,  cls:'z1',col:'#94A3B8', talk:'Conversation fluide',        rpe:'2–3',  use:'Récupération active, footing facile — base aérobie, filière lipidique, aucune fatigue centrale'},
+  {z:2,n:'Intermédiaire / Lourd (SV1)',pct:'81–94%',  lo:0.81,hi:0.95, fcLo:65, fcHi:80,  cls:'z2',col:'#60A5FA', talk:'Parole par phrases courtes', rpe:'4–5',  use:'Endurance active, sorties longues, allure marathon — glycogène et graisses'},
+  {z:3,n:'Élevé / Seuil (SV2−)',       pct:'95–99%',  lo:0.95,hi:1.00, fcLo:80, fcHi:88,  cls:'z3',col:'#34D399', talk:'Parole rude, soutenue',      rpe:'6–7',  use:'Tempo, efforts 30 min à 1h30 (2×20 min, 3×15 min) — adaptations métaboliques clés'},
   {z:4,n:'Sévère / VO₂max',            pct:'100–106%',lo:1.00,hi:1.07, fcLo:88, fcHi:96,  cls:'z4',col:'#FB923C', talk:'Respiration intense',        rpe:'8–9',  use:'Intervalles longs 1-6 min (1000-1600 m), allure 10 km — puissance aérobie'},
   {z:5,n:'Maximal / Anaérobie',        pct:'≥ 107%',  lo:1.07,hi:1.30, fcLo:96, fcHi:100, cls:'z5',col:'#F87171', talk:'Effort explosif, apnée',     rpe:'9–10', open:1, use:'Sprints, 30/30, 200-400 m — vitesse neuromusculaire, capacité anaérobie'},
 ];
@@ -3631,7 +3643,7 @@ function renderZones(){
   const vcNote='';
 
   const zNote=isReal
-    ? 'Zones <b>Vitesse Critique</b> — 5 domaines physiologiques (SV1 ≈ 82-85 % VC · SV2 = 100 % VC = seuil). Allures calculées sur la VC réelle, pas sur la VMA. Modèle distance-temps (Nixon et al. 2021).'
+    ? 'Zones <b>Vitesse Critique</b> — 5 domaines physiologiques, en % de la VC. Le <b>SV1</b> tient dans la zone 2 (81–94 %) ; le <b>SV2</b>, c’est la VC elle-même (100 %). Allures calculées sur la VC réelle, pas sur la VMA.'
     : 'Zones <b>VMA</b> — référentiel Reding Running. Allures en % de VMA, fourchettes cardiaques en <b>% de FC max</b> (et non de FC de réserve). La durée possible indique ce qu\'on peut tenir dans la zone, pas ce qu\'il faut y faire.';
   /* Les noms de zones citent SV1, SV2 et VO₂max sans jamais les définir : la
      légende le fait ici, sous la table plutôt que dedans — .tbl-wrap défile
