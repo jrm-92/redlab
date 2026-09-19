@@ -9609,18 +9609,6 @@ function frBilan(f){
   if(f.fcMoy) L.push('FC moyenne sur les efforts : '+f.fcMoy);
   return L.join('   ·   ');
 }
-/* ══ Les chips du bas : le bilan en pastilles, aux mêmes couleurs que les
-   cases. Une ligne de texte gris ne se lisait pas ; quatre pastilles se
-   voient sans être lues. ══ */
-function frChips(f){
-  var L=[{t:f.n+' temps relevé'+(f.n>1?'s':''), c:'#94A3B8'}];
-  if(f.ok)   L.push({t:f.ok+' dans la cible',   c:FR_TEINTE.ok});
-  if(f.lent) L.push({t:f.lent+' plus lent'+(f.lent>1?'s':''),   c:FR_TEINTE.lent});
-  if(f.vif)  L.push({t:f.vif+' plus rapide'+(f.vif>1?'s':''),   c:FR_TEINTE.vif});
-  if(f.saute)L.push({t:f.saute+' non couru'+(f.saute>1?'s':''), c:FR_GRIS});
-  if(f.fcMoy)L.push({t:'FC moyenne '+f.fcMoy, c:'#FB7185'});
-  return L;
-}
 /* La place de chaque case dans la grille. Une séance en deux séries —
    « 2 × (10 × 30/30) » — alignait ses vingt fractions à la file : la
    deuxième série commençait au milieu d'une rangée dès que le compte ne
@@ -9746,20 +9734,6 @@ function frImage(f,ech){
   var RAIL=5, TXT=RAIL+14;
 
   var cv=document.createElement('canvas');
-  var c0=cv.getContext('2d');
-  var mesure=function(t,px,poids){ c0.font=(poids||'700')+' '+px+'px '+FP_POLICE;
-                                   return c0.measureText(t).width; };
-
-  /* Les pastilles du bilan peuvent passer à la ligne : on les place avant
-     de connaître la hauteur, sinon le pied déborderait de l'image. */
-  var chips=frChips(f), placees=[], px=0, py=0, LIG=42;
-  chips.forEach(function(ch){
-    var w=mesure(ch.t,14.5,'800')+30;
-    if(px&&px+w>cw){ px=0; py+=LIG; }
-    placees.push({t:ch.t,c:ch.c,x:px,y:py,w:w});
-    px+=w+10;
-  });
-  var hPied=py+LIG+10;
 
   /* La grille de chaque bloc est posée une fois pour toutes : la hauteur de
      l'image et le tracé doivent compter les mêmes rangées. */
@@ -9777,7 +9751,7 @@ function frImage(f,ech){
     if(f.serie.avecV)  courbes.push('allure');
   }
   var hCourbes=courbes.length*(FR_H_COURBE+16);
-  var H=hEntete+2+hBlocs+hCourbes+hPied+FP_PAD;
+  var H=hEntete+2+hBlocs+hCourbes+FP_PAD;
 
   cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
   var c=cv.getContext('2d'); c.scale(ech,ech);
@@ -9908,15 +9882,6 @@ function frImage(f,ech){
     }
   }
 
-  /* ── Le bilan, en pastilles ── */
-  var py0=y+6;
-  placees.forEach(function(ch){
-    c.fillStyle=ch.c+'1F'; fpRect(c,FP_PAD+ch.x,py0+ch.y,ch.w,32,16); c.fill();
-    c.strokeStyle=ch.c+'3D'; c.lineWidth=1.2;
-    fpRect(c,FP_PAD+ch.x+0.6,py0+ch.y+0.6,ch.w-1.2,32-1.2,16); c.stroke();
-    f1(14.5,'800'); c.fillStyle=ch.c;
-    c.fillText(ch.t,FP_PAD+ch.x+15,py0+ch.y+21);
-  });
   return cv;
 }
 function frTexte(f){
