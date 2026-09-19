@@ -972,6 +972,14 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fp-date-x{background:none;border:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:4px 6px}
   .fp-date-x:hover{color:var(--orange)}
   .fp-astuce{font-size:11.5px;color:var(--muted2);margin-top:7px;line-height:1.45}
+  /* L'interrupteur des courbes : une case à cocher qui se voit, posée juste
+     au-dessus de l'aperçu qu'elle change. */
+  .fp-opt{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px;cursor:pointer;
+          background:var(--input-bg);border:1.5px solid var(--input-border);
+          border-radius:9px;padding:10px 12px}
+  .fp-opt input{margin:2px 0 0;width:17px;height:17px;accent-color:#FF6B35;flex-shrink:0;cursor:pointer}
+  .fp-opt span{font-size:12.5px;line-height:1.5;color:var(--text)}
+  .fp-opt small{display:block;color:var(--muted2);font-size:11.5px;margin-top:2px}
   .fp-ok{font-size:12.5px;font-weight:700;color:#34D399}
   @media (max-width:560px){ .fp-actions .fp-btn{flex:1} }
   .pl-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:520px;width:100%;padding:18px;max-height:82vh;display:flex;flex-direction:column}
@@ -9168,6 +9176,15 @@ function fsAthletes(){
    Rien ne s'écrit sans être montré d'abord. Un fichier qui décalerait tout
    d'un cran passerait inaperçu jusqu'à la fiche envoyée à l'athlète. */
 var _fsMontre=null;          /* la proposition, en attente de validation */
+/* ══ LES COURBES DE LA SÉANCE ══
+   Le fichier de la montre ne porte pas que des tours : il porte un point
+   par seconde, avec le cœur et la vitesse. Les tours servent à remplir les
+   fractions ; ces points-là servent à tracer la séance telle qu'elle s'est
+   déroulée. On les garde de côté au moment de la lecture du fichier — ils
+   ne sont pas enregistrés, ils vivent le temps de la visite. */
+var _frSerieBrute=null;      /* ce que le dernier fichier lu contenait */
+var _frSerie=null;           /* la même, rattachée à un athlète et une séance */
+var _frCourbes=false;        /* le coach a demandé les courbes */
 var _fsMontreInput=null;
 
 function fsAthCourant(){
@@ -9202,7 +9219,54 @@ function fsFractions(s){
 async function fsMontreTours(buf,nom){
   var acts=await window.rlActivitesDuFichier(buf);
   if(!acts||!acts.length) throw new Error('aucune activité dans ce fichier');
+  _frSerieBrute=frSerieDepuisActivite(acts[0]);
   return dbFichierResume(acts[0],nom||'').tours||[];
+}
+
+/* Les points d'une activité, ramenés à ce qu'une courbe large de 900 pixels
+   peut montrer. Au-delà, on empile des traits sur le même pixel : on moyenne
+   donc par tranches de temps égales, ce qui lisse aussi le bruit de la
+   montre sans rien inventer. */
+var FR_PTS=420;
+function frSerieDepuisActivite(act){
+  var bruts=[], t0=null, dPrec=null, tPrec=null;
+  (act&&act.laps||[]).forEach(function(l){
+    (l.points||[]).forEach(function(p){
+      if(p==null||p.t==null) return;
+      if(t0==null) t0=p.t;
+      var v=(typeof p.speed==='number'&&p.speed>0)?p.speed:null;
+      /* Un TCX ne porte pas toujours la vitesse : on la déduit de la
+         distance, qui, elle, y est presque toujours. */
+      if(v==null&&typeof p.dist==='number'&&dPrec!=null&&tPrec!=null){
+        var dt=(p.t-tPrec)/1000, dd=p.dist-dPrec;
+        if(dt>0&&dd>=0&&dt<30) v=dd/dt;
+      }
+      if(typeof p.dist==='number'){ dPrec=p.dist; tPrec=p.t; }
+      bruts.push({t:(p.t-t0)/1000,
+                  hr:(typeof p.hr==='number'&&p.hr>0)?p.hr:null,
+                  v:(v!=null&&v>0.3&&v<12)?v:null});
+    });
+  });
+  if(bruts.length<20) return null;
+  var duree=bruts[bruts.length-1].t;
+  if(!(duree>60)) return null;
+
+  var pas=duree/FR_PTS, pts=[];
+  for(var i=0;i<FR_PTS;i++){
+    var a=i*pas, b=a+pas, sh=0, nh=0, sv=0, nv=0;
+    for(var k=0;k<bruts.length;k++){
+      var x=bruts[k];
+      if(x.t<a) continue;
+      if(x.t>=b) break;
+      if(x.hr!=null){ sh+=x.hr; nh++; }
+      if(x.v!=null){ sv+=x.v; nv++; }
+    }
+    pts.push({t:a+pas/2, hr:nh?sh/nh:null, v:nv?sv/nv:null});
+  }
+  var avecFC=pts.some(function(x){return x.hr!=null;});
+  var avecV =pts.some(function(x){return x.v!=null;});
+  if(!avecFC&&!avecV) return null;
+  return {pts:pts, duree:duree, avecFC:avecFC, avecV:avecV};
 }
 
 function fsMontreAligner(tours,fracs){
@@ -9293,6 +9357,14 @@ function fsMontreOuvrir(){
 
 function fsMontreProposer(tours,nom,s,ath){
   var al=fsMontreAligner(tours,fsFractions(s));
+  /* La série suit la séance à laquelle elle appartient : la fiche ne la
+     tracera que si les trois — athlète, date, séance — concordent. */
+  if(_frSerieBrute){
+    _frSerie={athId:ath.id, date:_fsDate, titre:s.title,
+              pts:_frSerieBrute.pts, duree:_frSerieBrute.duree,
+              avecFC:_frSerieBrute.avecFC, avecV:_frSerieBrute.avecV};
+    _frSerieBrute=null;
+  }
   _fsMontre={athId:ath.id, titre:s.title, lignes:al.lignes};
   rlModalOuvrir('fs-montre', fsMontreHTML(al,nom,ath));
 }
@@ -9427,8 +9499,11 @@ var _frAth=null;
    La cible se dit maintenant UNE fois, dans le bandeau du bloc. Chaque
    fraction devient une case, et c'est sa couleur qui parle. L'écart n'est
    écrit que lorsqu'il y en a un : une case verte n'a rien à ajouter. */
-var FR_TEINTE={ok:'#15803D', lent:'#B45309', vif:'#1D4ED8'};
-var FR_GRIS='#94A3B8';
+/* Les teintes de la fiche, lues sur fond sombre : un vert et un ambre qui
+   tiennent sur le bleu nuit de la maison, là où le vert forêt et le brun
+   d'avant s'y éteignaient. */
+var FR_TEINTE={ok:'#34D399', lent:'#FBBF24', vif:'#60A5FA'};
+var FR_GRIS='#64748B';
 
 /* Combien de chronos cet athlète a-t-il sur cette séance, ce jour-là. */
 function fsCombien(athId,titre){
@@ -9455,7 +9530,21 @@ function frDonnees(athId){
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
     /* Un bloc porte son intitulé et sa cible une seule fois ; ses fractions
        deviennent les cases de sa grille. */
-    var bloc={lbl:l.lbl, viseHaut:haut, viseBas:bas, cells:[]};
+    /* Une ligne en séries donne un panneau par série : « 2 × (10 × 30/30) »
+       se lit comme deux blocs de dix, pas comme vingt fractions à la file.
+       Le titre de la fiche porte déjà le compte, chaque panneau n'a donc
+       qu'à dire laquelle il est. */
+    var multi=(l.sets>1&&l.reps>1);
+    var panneaux={}, ordre=[];
+    var pousse=function(serie,cell){
+      var cle=multi?serie:0;
+      if(!panneaux[cle]){
+        panneaux[cle]={lbl:multi?('Série '+serie):l.lbl,
+                       viseHaut:haut, viseBas:bas, cells:[]};
+        ordre.push(cle);
+      }
+      panneaux[cle].cells.push(cell);
+    };
     var nEff=Math.max(1,l.n||1), vu=false;
     for(var k=0;k<nEff;k++){
       var reel=notes[fsCle(l.i,k)];
@@ -9463,13 +9552,15 @@ function frDonnees(athId){
       if(!np&&(typeof reel!=='number'||reel<=0)) continue;
       /* « 5 × 1 km » cinq fois de suite n'apprend rien : le libellé ouvre
          la série, les numéros suffisent ensuite. */
+      var serie=multi?(Math.floor(k/l.reps)+1):0;
       if(np){
         /* Une fraction sautée se dit : sans elle, l'athlète compterait quatre
            lignes là où il en attend cinq et croirait sa fiche incomplète. */
         saute++;
         rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                    reel:'non couru', np:true, ecTxt:'', ecCls:''});
-        bloc.cells.push({num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:''});
+        pousse(serie,{num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:'',
+                      serie:serie});
         vu=true; continue;
       }
       var fcE=pouls[fsCleFC(l.i,k,false)], fcR=pouls[fsCleFC(l.i,k,true)];
@@ -9488,22 +9579,36 @@ function frDonnees(athId){
          cœur au bout. Une colonne de plus ne tiendrait pas en largeur. */
       var basRec=[]; if(tR!=null) basRec.push(fHMS(tR)); if(fcR!=null) basRec.push(fcR);
       basRec=basRec.length?('réc '+basRec.join(' \u00b7 ')):'';
+      /* L'allure réelle de la fraction, en minutes au kilomètre : c'est
+         la seule unité qui se compare d'une séance à l'autre. Une distance
+         parcourue en un temps imposé et un temps mis sur une distance
+         imposée s'y ramènent tous les deux. */
+      var all='';
+      if(mes==='d'&&l.sec>0&&reel>0)      all=fAll(l.sec*1000/reel)+'/km';
+      else if(mes==='t'&&l.d>0&&reel>0)   all=fAll(reel*1000/l.d)+'/km';
       var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
       var valeur=fsEcritVal(reel,mes)+(mes==='d'?' m':'');
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
-                 reel:valeur, fcE:fcE, fcR:fcR, tR:tR,
+                 reel:valeur, allure:all, fcE:fcE, fcR:fcR, tR:tR,
                  basRec:basRec, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
-      bloc.cells.push({num:fsNumero(l,k), reel:valeur, np:false, fcE:fcE, basRec:basRec,
-                       ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+      pousse(serie,{num:fsNumero(l,k), reel:valeur, allure:all, serie:serie,
+                    np:false, fcE:fcE, basRec:basRec,
+                    ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
-    if(bloc.cells.length) blocs.push(bloc);
+    ordre.forEach(function(cle){
+      if(panneaux[cle].cells.length) blocs.push(panneaux[cle]);
+    });
   });
   if(!n) return null;
+  /* Les courbes de la montre, si celles qu'on a en mémoire sont bien celles
+     de cet athlète, ce jour-là, sur cette séance. */
+  var serie=(_frSerie&&_frSerie.athId===athId&&_frSerie.date===_fsDate
+             &&_frSerie.titre===s.title)?_frSerie:null;
   return {s:s, a:a, date:_fsDate, rows:rows, blocs:blocs, n:n, ok:ok, lent:lent, vif:vif,
-          saute:saute, avecFC:avecFC, fcMoy:fcN?Math.round(fcSom/fcN):null};
+          saute:saute, avecFC:avecFC, fcMoy:fcN?Math.round(fcSom/fcN):null, serie:serie};
 }
 /* Le bilan en une phrase, sous le tableau. */
 function frBilan(f){
@@ -9518,17 +9623,111 @@ function frBilan(f){
   if(f.fcMoy) L.push('FC moyenne sur les efforts : '+f.fcMoy);
   return L.join('   ·   ');
 }
-/* ══ Les chips du bas : le bilan en pastilles, aux mêmes couleurs que les
-   cases. Une ligne de texte gris ne se lisait pas ; quatre pastilles se
-   voient sans être lues. ══ */
-function frChips(f){
-  var L=[{t:f.n+' temps relevé'+(f.n>1?'s':''), c:'#475569'}];
-  if(f.ok)   L.push({t:f.ok+' dans la cible',   c:FR_TEINTE.ok});
-  if(f.lent) L.push({t:f.lent+' plus lent'+(f.lent>1?'s':''),   c:FR_TEINTE.lent});
-  if(f.vif)  L.push({t:f.vif+' plus rapide'+(f.vif>1?'s':''),   c:FR_TEINTE.vif});
-  if(f.saute)L.push({t:f.saute+' non couru'+(f.saute>1?'s':''), c:FR_GRIS});
-  if(f.fcMoy)L.push({t:'FC moyenne '+f.fcMoy, c:'#BE123C'});
-  return L;
+/* La place de chaque case dans la grille. Une séance en deux séries —
+   « 2 × (10 × 30/30) » — alignait ses vingt fractions à la file : la
+   deuxième série commençait au milieu d'une rangée dès que le compte ne
+   tombait pas juste. Chaque série repart donc de la gauche. */
+function frGrille(cells,COLS){
+  var pos=[], col=0, rang=0, precedente=null;
+  cells.forEach(function(cel){
+    if(precedente!==null&&cel.serie&&cel.serie!==precedente&&col!==0){ col=0; rang++; }
+    pos.push({col:col,rang:rang});
+    precedente=cel.serie||precedente;
+    col++; if(col>=COLS){ col=0; rang++; }
+  });
+  return {pos:pos, rangs:rang+(col?1:0)};
+}
+/* ══ LES DEUX COURBES ══
+   Le cœur et l'allure ne se mesurent pas dans la même unité : les mettre
+   sur un seul cadre à deux échelles ferait dire n'importe quoi à leurs
+   croisements. Deux cadres, donc, l'un sous l'autre, avec le même axe du
+   temps — c'est la comparaison qui compte, pas la superposition. */
+var FR_H_COURBE=180;
+function frMinMax(pts,cle){
+  var lo=null, hi=null;
+  pts.forEach(function(p){ var v=p[cle]; if(v==null) return;
+    if(lo==null||v<lo) lo=v; if(hi==null||v>hi) hi=v; });
+  return (lo==null)?null:{lo:lo, hi:hi};
+}
+/* Une courbe d'allure prise telle quelle est illisible : une seconde à
+   l'arrêt vaut une allure de trente minutes au kilomètre et écrase tout le
+   reste. On borne donc l'échelle sur le gros du peloton des points. */
+function frBornes(vals,bas,haut){
+  var t=vals.slice().sort(function(a,b){return a-b;});
+  var q=function(x){ return t[Math.min(t.length-1,Math.max(0,Math.round(x*(t.length-1))))]; };
+  return {lo:q(bas), hi:q(haut)};
+}
+function frCourbe(c,o){
+  var x0=o.x, y0=o.y, w=o.w, h=FR_H_COURBE;
+  var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
+  var fi=function(t,p){c.font='italic '+(p||'800')+' '+t+'px '+FP_POLICE;};
+
+  c.fillStyle='#111A2C'; fpRect(c,x0,y0,w,h,18); c.fill();
+  c.strokeStyle='#1F2B44'; c.lineWidth=1.4;
+  fpRect(c,x0+0.7,y0+0.7,w-1.4,h-1.4,18); c.stroke();
+
+  var IN=24, px0=x0+IN+44, px1=x0+w-IN, py0=y0+52, py1=y0+h-30;
+
+  fi(17,'800'); c.fillStyle='#F8FAFC';
+  c.fillText(o.titre,x0+IN,y0+30);
+  c.save(); c.textAlign='right';
+  f1(13.5,'800'); c.fillStyle=o.couleur;
+  c.fillText(o.resume,x0+w-IN,y0+30);
+  c.restore();
+
+  /* Quatre repères horizontaux, assez pâles pour rester derrière la courbe. */
+  var N=4;
+  for(var i=0;i<=N;i++){
+    var yy=py1-(py1-py0)*i/N;
+    c.strokeStyle='#1A2438'; c.lineWidth=1;
+    c.beginPath(); c.moveTo(px0,yy+0.5); c.lineTo(px1,yy+0.5); c.stroke();
+    c.save(); c.textAlign='right';
+    f1(11,'700'); c.fillStyle='#4C5B76';
+    /* Sur la courbe d'allure, c'est le plus rapide qui est en haut : les
+       repères suivent, sinon l'axe dit l'inverse du tracé. */
+    var rep=o.hautEnBas ? (o.hi-(o.hi-o.lo)*i/N) : (o.lo+(o.hi-o.lo)*i/N);
+    c.fillText(o.etiquette(rep),px0-12,yy+4);
+    c.restore();
+  }
+
+  /* Le temps, en cinq repères. */
+  for(var k=0;k<=4;k++){
+    var xx=px0+(px1-px0)*k/4;
+    c.save(); c.textAlign=k===0?'left':(k===4?'right':'center');
+    f1(11,'700'); c.fillStyle='#4C5B76';
+    c.fillText(fHMS(o.duree*k/4),xx,py1+20);
+    c.restore();
+  }
+
+  var vers=function(p){
+    var v=o.val(p); if(v==null) return null;
+    var q=Math.min(1,Math.max(0,(v-o.lo)/(o.hi-o.lo||1)));
+    return {x:px0+(px1-px0)*(p.t/(o.duree||1)), y:py1-(py1-py0)*(o.hautEnBas?1-q:q)};
+  };
+
+  /* L'aire d'abord, la ligne par-dessus : le remplissage donne le volume,
+     le trait donne la valeur. Les trous — cardio perdu, arrêt — coupent la
+     courbe au lieu d'être reliés par une droite qui n'a pas existé. */
+  var segments=[], cour=[];
+  o.pts.forEach(function(p){
+    var q=vers(p);
+    if(q) cour.push(q); else if(cour.length){ segments.push(cour); cour=[]; }
+  });
+  if(cour.length) segments.push(cour);
+
+  segments.forEach(function(seg){
+    if(seg.length<2) return;
+    var grad=c.createLinearGradient(0,py0,0,py1);
+    grad.addColorStop(0,o.couleur+'3D'); grad.addColorStop(1,o.couleur+'05');
+    c.fillStyle=grad;
+    c.beginPath(); c.moveTo(seg[0].x,py1);
+    seg.forEach(function(q){ c.lineTo(q.x,q.y); });
+    c.lineTo(seg[seg.length-1].x,py1); c.closePath(); c.fill();
+
+    c.strokeStyle=o.couleur; c.lineWidth=2; c.lineJoin='round'; c.lineCap='round';
+    c.beginPath(); seg.forEach(function(q,i){ i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y); });
+    c.stroke();
+  });
 }
 function frImage(f,ech){
   ech=ech||2;
@@ -9540,120 +9739,163 @@ function frImage(f,ech){
   var g=fpEnteteMesure(f.s.title,'Résultats',sousT);
   var hEntete=g.h;
 
-  /* Avec les pulsations, une case porte une ligne de plus : elle grandit,
-     et on en met moins par rangée pour que « réc 0'30" · 128 » tienne. */
-  var COLS=f.avecFC?4:5, GAP=10, IN=26;
-  var H_BANDE=54, H_CELL=f.avecFC?106:78;
+  /* Avec les pulsations, une fraction porte une ligne de plus : elle
+     grandit, et on en met moins par rangée. */
+  var COLS=f.avecFC?4:5, GAP=16, IN=24;
+  var H_BANDE=58, H_CELL=f.avecFC?100:76;
   var cw=FP_W-FP_PAD*2, grilleW=cw-IN*2;
   var cellW=(grilleW-GAP*(COLS-1))/COLS;
+  var RAIL=5, TXT=RAIL+14;
 
   var cv=document.createElement('canvas');
-  var c0=cv.getContext('2d');
-  var mesure=function(t,px,poids){ c0.font=(poids||'700')+' '+px+'px '+FP_POLICE;
-                                   return c0.measureText(t).width; };
 
-  /* Les pastilles du bilan peuvent passer à la ligne : on les place avant
-     de connaître la hauteur, sinon le pied déborderait de la carte. */
-  var chips=frChips(f), placees=[], px=0, py=0, LIG=38;
-  chips.forEach(function(ch){
-    var w=mesure(ch.t,14,'800')+26;
-    if(px&&px+w>grilleW){ px=0; py+=LIG; }
-    placees.push({t:ch.t,c:ch.c,x:px,y:py,w:w});
-    px+=w+8;
+  /* La grille de chaque bloc est posée une fois pour toutes : la hauteur de
+     l'image et le tracé doivent compter les mêmes rangées. */
+  f.blocs.forEach(function(b){
+    b.grille=frGrille(b.cells,COLS);
+    b.hP=H_BANDE+18+b.grille.rangs*H_CELL+(b.grille.rangs-1)*GAP+20;
   });
-  var hPied=20+py+LIG;
+  var hBlocs=f.blocs.reduce(function(sum,b){ return sum+b.hP+16; },0);
 
-  var hBlocs=f.blocs.reduce(function(sum,b){
-    var rangs=Math.ceil(b.cells.length/COLS);
-    return sum+H_BANDE+rangs*H_CELL+(rangs-1)*GAP+20;
-  },0);
-  var hCarte=22+hBlocs+hPied;
-  var H=hEntete+hCarte+FP_PAD;
+  /* Les courbes, quand le coach les a demandées et que le fichier de la
+     montre en portait. Le cœur d'abord — c'est lui qu'on regarde. */
+  var courbes=[];
+  if(_frCourbes&&f.serie){
+    if(f.serie.avecFC) courbes.push('fc');
+    if(f.serie.avecV)  courbes.push('allure');
+  }
+  var hCourbes=courbes.length*(FR_H_COURBE+16);
+  var H=hEntete+2+hBlocs+hCourbes+FP_PAD;
 
   cv.width=Math.round(FP_W*ech); cv.height=Math.round(H*ech);
   var c=cv.getContext('2d'); c.scale(ech,ech);
   var f1=function(t,p){c.font=(p||'700')+' '+t+'px '+FP_POLICE;};
+  var fi=function(t,p){c.font='italic '+(p||'800')+' '+t+'px '+FP_POLICE;};
 
+  /* ── Le fond, d'un bout à l'autre ───────────────────────────────────
+     La carte blanche coupait l'image en deux : un bandeau aux couleurs de
+     la maison, puis un tableur. Tout est sombre, et les chiffres portent
+     la lumière. ── */
   c.fillStyle='#0B1220'; c.fillRect(0,0,FP_W,H);
   fpRelief(c,FP_W-118,hEntete*0.46);
+  fpRelief(c,110,H-90);
   fpEnteteTracer(c,g);
 
-  var cx=FP_PAD, cy=hEntete;
-  c.fillStyle='#FFFFFF'; fpRect(c,cx,cy,cw,hCarte,16); c.fill();
-
-  var gx=cx+IN, y=cy+22;
+  var y=hEntete+2;
 
   f.blocs.forEach(function(b){
-    /* ── Le bandeau du bloc : son intitulé à gauche, sa cible à droite,
+    /* ── Le panneau du bloc : son intitulé à gauche, sa cible à droite,
        dite une seule fois pour toutes ses fractions. ── */
-    c.fillStyle='#F1F5F9'; fpRect(c,gx,y,grilleW,H_BANDE-10,10); c.fill();
-    var bm=y+(H_BANDE-10)/2;
+    c.fillStyle='#111A2C'; fpRect(c,FP_PAD,y,cw,b.hP,18); c.fill();
+    c.strokeStyle='#1F2B44'; c.lineWidth=1.4;
+    fpRect(c,FP_PAD+0.7,y+0.7,cw-1.4,b.hP-1.4,18); c.stroke();
 
-    f1(18,'800'); c.fillStyle='#0F172A';
-    c.fillText(fpCoupe(c,b.lbl||'Effort',grilleW*0.48),gx+14,bm+6);
+    var gx=FP_PAD+IN, bm=y+H_BANDE/2;
+
+    fi(20,'800'); c.fillStyle='#F8FAFC';
+    c.fillText(fpCoupe(c,b.lbl||'Effort',grilleW*0.5),gx,bm+7);
 
     c.save(); c.textAlign='right';
     if(b.viseHaut){
-      f1(16.5,'800'); c.fillStyle='#334155';
-      c.fillText(b.viseHaut,gx+grilleW-14,bm+(b.viseBas?-2:6));
-      if(b.viseBas){ f1(12.5,'600'); c.fillStyle=FR_GRIS;
-                     c.fillText(b.viseBas,gx+grilleW-14,bm+16); }
+      fi(17.5,'800'); c.fillStyle='#FF8856';
+      c.fillText(b.viseHaut,gx+grilleW,bm+(b.viseBas?-1:7));
+      if(b.viseBas){ f1(12.5,'600'); c.fillStyle='#5A6B88';
+                     c.fillText(b.viseBas,gx+grilleW,bm+18); }
     }else{
-      f1(14,'700'); c.fillStyle='#CBD5E1';
-      c.fillText('sans cible',gx+grilleW-14,bm+6);
+      f1(14,'700'); c.fillStyle='#3A4964';
+      c.fillText('sans cible',gx+grilleW,bm+7);
     }
     c.restore();
-    y+=H_BANDE;
 
-    /* ── Les cases : une par fraction. La couleur dit l'essentiel, le
-       chiffre dit la mesure, et l'écart ne s'écrit que s'il existe. ── */
+    c.strokeStyle='#1C2740'; c.lineWidth=1.2;
+    c.beginPath(); c.moveTo(gx,y+H_BANDE+0.5); c.lineTo(gx+grilleW,y+H_BANDE+0.5); c.stroke();
+
+    /* ── Les fractions. Plus de case autour de chacune : un bandeau de
+       couleur à gauche dit l'essentiel, le chiffre porte la mesure, et
+       l'allure se pose au bout de la même ligne. ── */
+    var y0=y+H_BANDE+18;
     b.cells.forEach(function(cel,i){
-      var col=i%COLS, rang=Math.floor(i/COLS);
-      var x=gx+col*(cellW+GAP), cyy=y+rang*(H_CELL+GAP);
-      var teinte=cel.np?FR_GRIS:(FR_TEINTE[cel.ecCls]||'#475569');
+      var pl=b.grille.pos[i];
+      var x=gx+pl.col*(cellW+GAP), cy=y0+pl.rang*(H_CELL+GAP);
+      var teinte=cel.np?'#33415C':(FR_TEINTE[cel.ecCls]||'#64748B');
 
-      c.fillStyle=cel.np?'#F8FAFC':teinte+'12';
-      fpRect(c,x,cyy,cellW,H_CELL,12); c.fill();
-      c.strokeStyle=cel.np?'#E2E8F0':teinte+'33'; c.lineWidth=1.2;
-      fpRect(c,x+0.6,cyy+0.6,cellW-1.2,H_CELL-1.2,12); c.stroke();
+      /* Le fond d'une fraction non courue la met en retrait sans l'effacer. */
+      if(cel.np){ c.fillStyle='#0E1626'; fpRect(c,x,cy,cellW,H_CELL,10); c.fill(); }
 
-      f1(11.5,'800'); c.fillStyle=FR_GRIS;
-      c.save(); c.letterSpacing='0.8px';
-      c.fillText('N° '+cel.num,x+13,cyy+21);
+      c.fillStyle=teinte; fpRect(c,x,cy+1,RAIL,H_CELL-2,RAIL/2); c.fill();
+
+      f1(11,'800'); c.fillStyle='#4C5B76';
+      c.save(); c.letterSpacing='0.9px';
+      c.fillText('N° '+cel.num,x+TXT,cy+20);
       c.restore();
 
       if(cel.np){
-        f1(16,'700'); c.fillStyle=FR_GRIS;
-        c.fillText('non couru',x+13,cyy+50);
+        fi(18,'700'); c.fillStyle='#4C5B76';
+        c.fillText('non couru',x+TXT,cy+50);
       }else{
-        f1(23,'800'); c.fillStyle='#0F172A';
-        c.fillText(fpCoupe(c,cel.reel,cellW-26),x+13,cyy+50);
+        var wAll=0;
+        if(cel.allure){ f1(13,'800'); wAll=c.measureText(cel.allure).width+10; }
+        fi(26,'900'); c.fillStyle='#FFFFFF';
+        c.fillText(fpCoupe(c,cel.reel,cellW-TXT-12-wAll),x+TXT,cy+50);
+        if(cel.allure){
+          c.save(); c.textAlign='right';
+          f1(13,'800'); c.fillStyle='#FF8856';
+          c.fillText(cel.allure,x+cellW-10,cy+50);
+          c.restore();
+        }
         if(cel.ecTxt&&cel.ecCls!=='ok'){
-          f1(13,'800'); c.fillStyle=teinte;
-          c.fillText(cel.ecTxt,x+13,cyy+72);
+          f1(12.5,'800'); c.fillStyle=teinte;
+          c.fillText(cel.ecTxt,x+TXT,cy+70);
         }
       }
       if(f.avecFC&&(cel.fcE!=null||cel.basRec)){
         var bouts=[];
         if(cel.fcE!=null) bouts.push('♥ '+cel.fcE);
         if(cel.basRec) bouts.push(cel.basRec);
-        f1(12,'700'); c.fillStyle='#64748B';
-        c.fillText(fpCoupe(c,bouts.join('  ·  '),cellW-26),x+13,cyy+H_CELL-12);
+        f1(11.5,'700'); c.fillStyle='#5A6B88';
+        c.fillText(fpCoupe(c,bouts.join('  ·  '),cellW-TXT-10),x+TXT,cy+H_CELL-11);
       }
     });
-    y+=Math.ceil(b.cells.length/COLS)*H_CELL
-      +(Math.ceil(b.cells.length/COLS)-1)*GAP+20;
+    y+=b.hP+16;
   });
 
-  /* ── Le bilan, en pastilles ── */
-  c.strokeStyle='#E2E8F0'; c.lineWidth=1.4;
-  c.beginPath(); c.moveTo(gx,y+0.5); c.lineTo(gx+grilleW,y+0.5); c.stroke();
-  var py0=y+20;
-  placees.forEach(function(ch){
-    c.fillStyle=ch.c+'14'; fpRect(c,gx+ch.x,py0+ch.y,ch.w,30,15); c.fill();
-    f1(14,'800'); c.fillStyle=ch.c;
-    c.fillText(ch.t,gx+ch.x+13,py0+ch.y+20);
-  });
+  /* ── Les courbes ── */
+  if(courbes.length){
+    var S=f.serie;
+    if(courbes.indexOf('fc')>=0){
+      var mm=frMinMax(S.pts,'hr');
+      var som=0, cnt=0;
+      S.pts.forEach(function(p){ if(p.hr!=null){ som+=p.hr; cnt++; } });
+      var marge=Math.max(4,(mm.hi-mm.lo)*0.08);
+      frCourbe(c,{x:FP_PAD, y:y, w:cw, titre:'Fréquence cardiaque',
+        resume:'moy '+Math.round(som/cnt)+'  ·  max '+Math.round(mm.hi)+' bpm',
+        couleur:'#FB7185', pts:S.pts, duree:S.duree,
+        lo:Math.max(0,mm.lo-marge), hi:mm.hi+marge, hautEnBas:false,
+        val:function(p){ return p.hr; },
+        etiquette:function(v){ return Math.round(v)+''; }});
+      y+=FR_H_COURBE+16;
+    }
+    if(courbes.indexOf('allure')>=0){
+      /* On raisonne en secondes au kilomètre : c'est l'unité de la fiche.
+         Plus c'est petit, plus c'est rapide — la courbe monte donc quand
+         l'athlète accélère, comme on s'y attend. */
+      var all=[];
+      S.pts.forEach(function(p){ if(p.v!=null) all.push(1000/p.v); });
+      var b=frBornes(all,0.03,0.95);
+      var etendue=Math.max(20,b.hi-b.lo);
+      var lo=Math.max(120,b.lo-etendue*0.08), hi=b.hi+etendue*0.08;
+      var sv=0, sn=0;
+      S.pts.forEach(function(p){ if(p.v!=null){ sv+=p.v; sn++; } });
+      frCourbe(c,{x:FP_PAD, y:y, w:cw, titre:'Allure',
+        resume:'moy '+fAll(1000/(sv/sn))+'/km',
+        couleur:'#FF8856', pts:S.pts, duree:S.duree,
+        lo:lo, hi:hi, hautEnBas:true,
+        val:function(p){ return p.v==null?null:Math.min(hi,Math.max(lo,1000/p.v)); },
+        etiquette:function(v){ return fAll(v); }});
+      y+=FR_H_COURBE+16;
+    }
+  }
+
   return cv;
 }
 function frTexte(f){
@@ -9675,7 +9917,8 @@ function frTexte(f){
        ressemblerait à une donnée manquante. */
     L.push('• '+(r.nom?r.nom+' ':'')+(r.num?'n° '+r.num:'')
              +(r.viseHaut?' — visé '+r.viseHaut:' — sans cible')
-             +'  |  réel '+r.reel+fc+(r.ecTxt?'  ('+r.ecTxt+')':''));
+             +'  |  réel '+r.reel+(r.allure?' ('+r.allure+')':'')
+             +fc+(r.ecTxt?'  ('+r.ecTxt+')':''));
   });
   L.push(''); L.push(frBilan(f));
   return L.join('\n');
@@ -9690,6 +9933,14 @@ function frHTML(f){
     +'<button type="button" class="fp-x" onclick="frFermer()" aria-label="Fermer">✕</button></div>'
     +'<div class="fp-note"><b>'+esc(f.a.pseudo||'Athlète')+'</b> — ce qui était visé, ce qui a été couru, et l’écart. '
     +'Envoie-lui l’image : elle se lit sans rien ouvrir d’autre.</div>'
+    +(f.serie
+       ? '<label class="fp-opt"><input type="checkbox" id="fr-courbes"'
+         +(_frCourbes?' checked':'')+' onchange="frBasculeCourbes(this.checked)">'
+         +'<span>Ajouter les courbes de la séance'
+         +'<small>'+(f.serie.avecFC?'Fréquence cardiaque':'')
+         +(f.serie.avecFC&&f.serie.avecV?' et allure':(f.serie.avecV?'Allure':''))
+         +', d’après le fichier de la montre que tu viens de charger.</small></span></label>'
+       : '')
     +'<div class="fp-apercu"><img id="fr-img" alt="Fiche des résultats"></div>'
     +'<div class="fp-astuce">Sur téléphone, tu peux aussi appuyer longuement sur l’image pour l’enregistrer ou la partager.</div>'
     +'<div class="fp-actions">'
@@ -9713,6 +9964,16 @@ function frOuvrir(athId){
   if(_rlEchap) document.removeEventListener('keydown',_rlEchap);
   _rlEchap=function(e){ if(e.key==='Escape') frFermer(); };
   document.addEventListener('keydown',_rlEchap);
+  fpLogoPret(function(){
+    var g=frDonnees(_frAth); if(!g) return;
+    var img=document.getElementById('fr-img'); if(!img) return;
+    img.src=frImage(g,2).toDataURL('image/png');
+  });
+}
+/* La case cochée ne change que l'image : rien n'est enregistré, et la
+   fiche se redessine sur place. */
+function frBasculeCourbes(ouvert){
+  _frCourbes=!!ouvert;
   fpLogoPret(function(){
     var g=frDonnees(_frAth); if(!g) return;
     var img=document.getElementById('fr-img'); if(!img) return;
