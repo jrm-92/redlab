@@ -9530,7 +9530,21 @@ function frDonnees(athId){
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
     /* Un bloc porte son intitulé et sa cible une seule fois ; ses fractions
        deviennent les cases de sa grille. */
-    var bloc={lbl:l.lbl, viseHaut:haut, viseBas:bas, cells:[]};
+    /* Une ligne en séries donne un panneau par série : « 2 × (10 × 30/30) »
+       se lit comme deux blocs de dix, pas comme vingt fractions à la file.
+       Le titre de la fiche porte déjà le compte, chaque panneau n'a donc
+       qu'à dire laquelle il est. */
+    var multi=(l.sets>1&&l.reps>1);
+    var panneaux={}, ordre=[];
+    var pousse=function(serie,cell){
+      var cle=multi?serie:0;
+      if(!panneaux[cle]){
+        panneaux[cle]={lbl:multi?('Série '+serie):l.lbl,
+                       viseHaut:haut, viseBas:bas, cells:[]};
+        ordre.push(cle);
+      }
+      panneaux[cle].cells.push(cell);
+    };
     var nEff=Math.max(1,l.n||1), vu=false;
     for(var k=0;k<nEff;k++){
       var reel=notes[fsCle(l.i,k)];
@@ -9538,14 +9552,15 @@ function frDonnees(athId){
       if(!np&&(typeof reel!=='number'||reel<=0)) continue;
       /* « 5 × 1 km » cinq fois de suite n'apprend rien : le libellé ouvre
          la série, les numéros suffisent ensuite. */
+      var serie=multi?(Math.floor(k/l.reps)+1):0;
       if(np){
         /* Une fraction sautée se dit : sans elle, l'athlète compterait quatre
            lignes là où il en attend cinq et croirait sa fiche incomplète. */
         saute++;
         rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                    reel:'non couru', np:true, ecTxt:'', ecCls:''});
-        bloc.cells.push({num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:'',
-                         serie:(l.sets>1&&l.reps>1)?(Math.floor(k/l.reps)+1):0});
+        pousse(serie,{num:fsNumero(l,k), reel:'non couru', np:true, ecTxt:'', ecCls:'',
+                      serie:serie});
         vu=true; continue;
       }
       var fcE=pouls[fsCleFC(l.i,k,false)], fcR=pouls[fsCleFC(l.i,k,true)];
@@ -9571,9 +9586,6 @@ function frDonnees(athId){
       var all='';
       if(mes==='d'&&l.sec>0&&reel>0)      all=fAll(l.sec*1000/reel)+'/km';
       else if(mes==='t'&&l.d>0&&reel>0)   all=fAll(reel*1000/l.d)+'/km';
-      /* La série à laquelle appartient la fraction : 0 quand la ligne n'en
-         compte qu'une. Elle sert à casser la grille au bon endroit. */
-      var serie=(l.sets>1&&l.reps>1)?(Math.floor(k/l.reps)+1):0;
       var r=c?fsEcart(reel,c.lo,c.hi,mes):null;
       n++;
       if(r){ if(r.cls==='ok')ok++; else if(r.cls==='lent')lent++; else vif++; }
@@ -9581,12 +9593,14 @@ function frDonnees(athId){
       rows.push({nom:vu?'':l.lbl, num:fsNumero(l,k), viseHaut:haut, viseBas:bas,
                  reel:valeur, allure:all, fcE:fcE, fcR:fcR, tR:tR,
                  basRec:basRec, ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
-      bloc.cells.push({num:fsNumero(l,k), reel:valeur, allure:all, serie:serie,
-                       np:false, fcE:fcE, basRec:basRec,
-                       ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
+      pousse(serie,{num:fsNumero(l,k), reel:valeur, allure:all, serie:serie,
+                    np:false, fcE:fcE, basRec:basRec,
+                    ecTxt:r?r.txt:'', ecCls:r?r.cls:''});
       vu=true;
     }
-    if(bloc.cells.length) blocs.push(bloc);
+    ordre.forEach(function(cle){
+      if(panneaux[cle].cells.length) blocs.push(panneaux[cle]);
+    });
   });
   if(!n) return null;
   /* Les courbes de la montre, si celles qu'on a en mémoire sont bien celles
