@@ -675,7 +675,7 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fsm-bilan--ok{background:rgba(52,211,153,.12);border:1.5px solid rgba(52,211,153,.45);color:#34D399}
   .fsm-bilan--moyen{background:rgba(251,191,36,.12);border:1.5px solid rgba(251,191,36,.45);color:#FBBF24}
   .fsm-bilan--mal{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.45);color:#F87171}
-  .fsm-scroll{overflow:auto;margin-top:12px;min-height:0}
+  .fsm-scroll{overflow:auto;margin-top:12px;min-height:0;flex:1 1 auto}
   .fsm-t{width:100%;border-collapse:collapse;font-size:13px}
   .fsm-t th{position:sticky;top:0;background:var(--card);text-align:left;font-size:11px;font-weight:800;
     letter-spacing:.6px;text-transform:uppercase;color:var(--muted2);padding:7px 8px;
@@ -687,8 +687,22 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .fsm-rien{color:var(--muted2);font-weight:600}
   .fsm-r--sautee td{background:rgba(248,113,113,.10)}
   .fsm-r--sautee .fsm-v{color:#F87171}
-  .fsm-r--courte td{background:rgba(251,191,36,.10)}
-  .fsm-r--courte .fsm-v{color:#FBBF24}
+  .fsm-r--courte td,.fsm-r--longue td{background:rgba(251,191,36,.10)}
+  .fsm-r--courte .fsm-v,.fsm-r--longue .fsm-v{color:#FBBF24}
+  .fsm-reg{margin-top:10px;border:1.5px solid var(--input-border);border-radius:12px;
+             padding:9px 10px;flex:0 0 auto}
+  .fsm-reg-t{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+             color:var(--muted2);margin-bottom:7px}
+  /* La règle globale « label » met tout en majuscules espacées : ici le texte
+     est une phrase, pas une étiquette de formulaire. */
+  .fsm-reg-l{display:flex;align-items:center;gap:8px;margin:0 0 6px;
+             text-transform:none;letter-spacing:0}
+  .fsm-reg-l span{flex:0 0 76px;font-size:12px;font-weight:700;color:var(--muted2)}
+  .fsm-reg-l select{flex:1 1 auto;width:100%;min-width:0;font-family:var(--font);
+             font-size:12.5px;font-weight:700;padding:6px 8px;border-radius:9px;
+             border:1.5px solid var(--input-border);background:var(--input-bg);color:var(--text)}
+  .fsm-reg-n{font-size:11px;line-height:1.45;color:var(--muted2);font-weight:600}
+  .fsm-tr{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);opacity:.8;margin-top:1px}
   .fsm-pq{display:block;font-size:10.5px;font-weight:700;color:var(--muted2);margin-top:1px}
   .fsm-note{font-size:12px;line-height:1.5;color:var(--muted2);margin-top:10px}
   /* La proposition d'envoi : elle n'existe que lorsqu'il y a des chronos, et
@@ -9180,10 +9194,21 @@ function fsAthletes(){
    fichier qui revient porte donc le MÊME découpage que l'écran de saisie,
    dans le même ordre, puisque les deux descendent de la même séance.
 
-   D'où la règle d'alignement, et sa simplicité : le n-ième tour d'effort
-   remplit la n-ième fraction. La récup d'un effort, c'est le tour de repos
-   qui le suit aussitôt — l'échauffement et le retour au calme sont eux
-   aussi des tours de repos, mais ils ne suivent jamais un effort.
+   D'où la règle d'alignement, et sa simplicité : le n-ième tour retenu
+   remplit la n-ième fraction. La récup d'un effort, c'est le tour qui le
+   suit aussitôt.
+
+   Reste à savoir QUELS tours sont les fractions, et ça, le fichier ne le
+   dit pas toujours. Un .fit marque ses tours de repos : l'échauffement et
+   les récups se reconnaissent, on les saute. Un .tcx ne marque rien — tous
+   ses tours se disent « Active », y compris l'échauffement de trois
+   kilomètres. Les prendre tous à la suite mettait l'échauffement dans la
+   première fraction et décalait toute la séance.
+
+   On propose donc un découpage plutôt que de l'imposer : on essaie les
+   départs possibles et les deux façons de compter (tous les tours, ou un
+   sur deux), on garde celui dont les tours ressemblent le plus aux
+   consignes, et on laisse le coach le corriger dans la fenêtre.
 
    Rien ne s'écrit sans être montré d'abord. Un fichier qui décalerait tout
    d'un cran passerait inaperçu jusqu'à la fiche envoyée à l'athlète. */
@@ -9281,13 +9306,89 @@ function frSerieDepuisActivite(act){
   return {pts:pts, duree:duree, avecFC:avecFC, avecV:avecV};
 }
 
-function fsMontreAligner(tours,fracs){
+/* ══ QUELS TOURS SONT LES FRACTIONS ══
+   Une montre ne découpe pas toujours la séance comme la séance est écrite.
+   Trois cas reviennent :
+     — elle a marqué les repos (les fichiers .fit le font) : on suit ses
+       marques, et on ne garde que les tours d'effort ;
+     — elle a coupé un tour par effort ET un tour par récup, sans rien
+       marquer (c'est le cas des .tcx) : les fractions sont un tour sur deux ;
+     — elle a coupé un tour par fraction et rien d'autre : tous les tours
+       à la suite.
+   Dans les trois cas il reste l'échauffement au début, qui n'est pas une
+   fraction. D'où deux réglages, et deux seulement : à partir de quel tour
+   on commence, et si on prend tous les tours ou un sur deux.
+
+   « pas » vaut 0 (suivre les repos marqués), 1 (tous les tours à la suite)
+   ou 2 (un tour sur deux). « depart » est le numéro du tour — celui que la
+   montre affiche, qui commence à 1 — où se trouve la première fraction. */
+function fsMontreEfforts(tours,choix){
+  var depart=Math.max(1, Math.min(tours.length||1, choix&&choix.depart||1));
+  var pas=(choix&&choix.pas!=null)?choix.pas:1;
   var eff=[];
-  for(var i=0;i<tours.length;i++){
-    if(tours[i].rec) continue;
-    var r=(i+1<tours.length && tours[i+1].rec) ? tours[i+1] : null;
-    eff.push({t:tours[i], r:r});
+  if(pas===0){
+    for(var i=depart-1;i<tours.length;i++){
+      if(tours[i].rec) continue;
+      var r=(i+1<tours.length && tours[i+1].rec) ? tours[i+1] : null;
+      eff.push({t:tours[i], r:r, n:i+1});
+    }
+  }else{
+    var p=Math.max(1,pas);
+    for(var k=depart-1;k<tours.length;k+=p)
+      eff.push({t:tours[k], r:(p>1?(tours[k+1]||null)
+                                 :((k+1<tours.length&&tours[k+1].rec)?tours[k+1]:null)), n:k+1});
   }
+  return eff;
+}
+
+/* La note d'un découpage : à quel point les tours retenus ressemblent aux
+   consignes, et combien de fractions ils couvrent. Un tour qui fait 30 s
+   là où 30 s étaient prévues vaut 1 ; un échauffement de 15 min pris pour
+   une fraction de 30 s vaut presque 0. C'est ce qui permet de proposer
+   d'emblée le bon découpage plutôt que de partir du tour 1. */
+function fsMontreNote(tours,fracs,choix){
+  if(!tours.length||!fracs.length) return 0;
+  var eff=fsMontreEfforts(tours,choix);
+  var n=Math.min(eff.length,fracs.length), som=0, cpt=0;
+  for(var j=0;j<n;j++){
+    var f=fracs[j];
+    if(!f.ref||!(f.ref.val>0)) continue;
+    cpt++;
+    var m=(f.ref.quoi==='d') ? eff[j].t.d : eff[j].t.t;
+    if(m==null||!(m>0)) continue;
+    var part=m/f.ref.val;
+    som+=(part>1 ? 1/part : part);
+  }
+  var couverture=n/fracs.length;
+  if(!cpt) return couverture*0.5;   /* rien à comparer : on ne départage pas */
+  return (som/cpt)*couverture;
+}
+
+/* Le découpage proposé à l'ouverture : celui qui note le mieux. On ne
+   cherche le départ que dans les premiers tours — un échauffement peut
+   être coupé en plusieurs morceaux, il ne fait jamais vingt tours. */
+var FSM_DEPART_MAX=12;
+function fsMontreChoixAuto(tours,fracs){
+  var aRec=tours.some(function(t){ return !!t.rec; });
+  var defaut={depart:1, pas:aRec?0:1};
+  if(!tours.length||!fracs.length) return defaut;
+  var dMax=Math.min(tours.length, FSM_DEPART_MAX);
+  var cands=[], pasPossibles=aRec?[0,1,2]:[1,2];
+  pasPossibles.forEach(function(p){
+    for(var d=1;d<=dMax;d++) cands.push({depart:d, pas:p});
+  });
+  var best=defaut, note=-1;
+  cands.forEach(function(c){
+    var v=fsMontreNote(tours,fracs,c);
+    if(v>note+1e-9){ note=v; best=c; }
+  });
+  return best;
+}
+
+function fsMontreAligner(tours,fracs,choix){
+  tours=tours||[];
+  choix=choix||fsMontreChoixAuto(tours,fracs);
+  var eff=fsMontreEfforts(tours,choix);
   var lignes=[], n=Math.min(eff.length,fracs.length), sautees=0, courtes=0;
   for(var j=0;j<n;j++){
     var f=fracs[j], e=eff[j];
@@ -9295,24 +9396,28 @@ function fsMontreAligner(tours,fracs){
        durée, la distance couverte. La même règle qu'à la saisie. */
     var brut=(f.mes==='d') ? e.t.d : e.t.t;
 
-    /* L'alignement se fait par rang : le n-ième effort remplit la n-ième
-       fraction. Il suppose donc que ce qui manque manque à la FIN. Un trou
-       au milieu — une fraction sautée dont la montre a quand même coupé un
-       tour, très court — décalerait tout le reste d'un cran sans que rien
-       ne le signale. On compare donc chaque tour à sa consigne : un tour
-       qui ne fait pas le tiers de ce qui était prévu n'est pas une contre-
-       performance, c'est une fraction non courue. Entre le tiers et les
-       deux tiers, on ne tranche pas : on le dit. */
+    /* L'alignement se fait par rang : le n-ième tour retenu remplit la
+       n-ième fraction. Il suppose donc que ce qui manque manque à la FIN.
+       Un trou au milieu — une fraction sautée dont la montre a quand même
+       coupé un tour, très court — décalerait tout le reste d'un cran sans
+       que rien ne le signale. On compare donc chaque tour à sa consigne :
+       un tour qui ne fait pas le tiers de ce qui était prévu n'est pas une
+       contre-performance, c'est une fraction non courue. Entre le tiers et
+       les deux tiers, on ne tranche pas : on le dit. */
     var mesure=f.ref ? (f.ref.quoi==='d' ? e.t.d : e.t.t) : null;
     var part=(f.ref && f.ref.val>0 && mesure!=null && mesure>=0) ? (mesure/f.ref.val) : null;
     var doute=null;
     if(part!=null){
       if(part<1/3){ doute='sautee'; sautees++; }
       else if(part<2/3){ doute='courte'; courtes++; }
+      /* Un tour qui fait trois fois la consigne n'est pas une fraction
+         courue trop lentement : c'est un échauffement, un retour au calme
+         ou une récup pris pour une fraction. Le découpage est à revoir. */
+      else if(part>3){ doute='longue'; courtes++; }
     }
 
     lignes.push({
-      f:f, doute:doute, part:part,
+      f:f, doute:doute, part:part, tour:e.n,
       val:(doute==='sautee') ? FS_NP
          : ((brut!=null&&brut>0)?Math.round(brut):null),
       fcE:(doute==='sautee'||e.t.hr==null||e.t.hr<=0)?null:Math.round(e.t.hr),
@@ -9321,7 +9426,8 @@ function fsMontreAligner(tours,fracs){
     });
   }
   return {lignes:lignes, efforts:eff.length, fractions:fracs.length,
-          sautees:sautees, courtes:courtes};
+          sautees:sautees, courtes:courtes, choix:choix,
+          aRec:tours.some(function(t){ return !!t.rec; })};
 }
 
 /* La séance déjà importée pour cet athlète, ce jour-là — celle du tableau
@@ -9368,7 +9474,8 @@ function fsMontreOuvrir(){
 }
 
 function fsMontreProposer(tours,nom,s,ath){
-  var al=fsMontreAligner(tours,fsFractions(s));
+  var fracs=fsFractions(s);
+  var al=fsMontreAligner(tours,fracs);
   /* La série suit la séance à laquelle elle appartient : la fiche ne la
      tracera que si les trois — athlète, date, séance — concordent. */
   if(_frSerieBrute){
@@ -9377,8 +9484,24 @@ function fsMontreProposer(tours,nom,s,ath){
               avecFC:_frSerieBrute.avecFC, avecV:_frSerieBrute.avecV};
     _frSerieBrute=null;
   }
-  _fsMontre={athId:ath.id, titre:s.title, lignes:al.lignes};
-  rlModalOuvrir('fs-montre', fsMontreHTML(al,nom,ath));
+  /* On garde les tours bruts : changer le découpage, c'est refaire
+     l'alignement sur place, sans redemander le fichier. */
+  _fsMontre={athId:ath.id, titre:s.title, lignes:al.lignes,
+             tours:tours, fracs:fracs, nom:nom, ath:ath, choix:al.choix};
+  rlModalOuvrir('fs-montre', fsMontreHTML(al,nom,ath,tours));
+}
+
+/* Le coach corrige le découpage : on refait la proposition avec les mêmes
+   tours et on remplace le contenu de la fenêtre, sans la refermer. */
+function fsMontreRegler(champ,valeur){
+  var p=_fsMontre; if(!p||!p.tours) return;
+  var c={depart:p.choix.depart, pas:p.choix.pas};
+  c[champ]=parseInt(valeur,10)||0;
+  if(champ==='depart'&&!(c.depart>0)) c.depart=1;
+  var al=fsMontreAligner(p.tours,p.fracs,c);
+  p.lignes=al.lignes; p.choix=al.choix;
+  var host=document.getElementById('fs-montre');
+  if(host) host.innerHTML=fsMontreHTML(al,p.nom,p.ath,p.tours);
 }
 
 function fsMontreFermer(){
@@ -9390,7 +9513,7 @@ function fsMontreFermer(){
   }
 }
 
-function fsMontreHTML(al,nom,ath){
+function fsMontreHTML(al,nom,ath,tours){
   var e=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); };
   /* Le bandeau dit d'abord si les comptes tombent, puis ce qui cloche.
      Les deux inquiétudes ne sont pas la même : un tour trop court est
@@ -9419,10 +9542,45 @@ function fsMontreHTML(al,nom,ath){
     var ajout=[];
     if(al.sautees) ajout.push(al.sautees+' tour'+(al.sautees>1?'s':'')+' trop court'+(al.sautees>1?'s':'')
       +' pour être une fraction courue, proposé'+(al.sautees>1?'s':'')+' en « non couru »');
-    if(al.courtes) ajout.push(al.courtes+' tour'+(al.courtes>1?'s':'')+' bien en dessous de la consigne');
+    if(al.courtes) ajout.push(al.courtes+' tour'+(al.courtes>1?'s':'')+' loin de la consigne');
     mot+=' '+ajout.join(', ')+'.';
     if(ton==='ok') ton='moyen';
   }
+
+  /* Le contenu d'un tour, dit en clair : c'est ce qui permet de reconnaître
+     l'échauffement dans la liste et de pointer le bon départ. */
+  var tourTexte=function(t,i){
+    var bouts=[];
+    if(t.t!=null&&t.t>0) bouts.push(fHMS(Math.round(t.t)));
+    if(t.d!=null&&t.d>0) bouts.push(Math.round(t.d)+' m');
+    if(t.rec) bouts.push('repos');
+    return 'n\u00b0 '+(i+1)+(bouts.length?' \u2014 '+bouts.join(' \u00b7 '):'');
+  };
+  var ch=al.choix||{depart:1,pas:1};
+  var optDepart=(tours||[]).map(function(t,i){
+    return '<option value="'+(i+1)+'"'+((i+1)===ch.depart?' selected':'')+'>'
+      +e(tourTexte(t,i))+'</option>';
+  }).join('');
+  var optPas=[];
+  if(al.aRec) optPas.push([0,'les efforts marqués par la montre']);
+  optPas.push([1,'tous les tours à la suite']);
+  optPas.push([2,'un tour sur deux']);
+  var reglage=(tours&&tours.length)
+    ? '<div class="fsm-reg">'
+      +'<div class="fsm-reg-t">Quels tours de la montre sont les fractions</div>'
+      +'<label class="fsm-reg-l"><span>1re fraction</span>'
+        +'<select onchange="fsMontreRegler(\'depart\',this.value)">'+optDepart+'</select></label>'
+      +'<label class="fsm-reg-l"><span>Ensuite</span>'
+        +'<select onchange="fsMontreRegler(\'pas\',this.value)">'
+        +optPas.map(function(o){
+            return '<option value="'+o[0]+'"'+(o[0]===ch.pas?' selected':'')+'>'+e(o[1])+'</option>';
+          }).join('')
+        +'</select></label>'
+      +'<div class="fsm-reg-n">Un tour sur deux, quand la montre a coupé un tour par effort '
+      +'et un tour par récup. Et l\u2019échauffement, pour elle, est un tour comme un autre : '
+      +'c\u2019est ici qu\u2019on le met de côté.</div>'
+      +'</div>'
+    : '';
 
   var dit=function(ln){
     if(!ln.doute||!ln.f.ref) return '';
@@ -9433,7 +9591,7 @@ function fsMontreHTML(al,nom,ath){
     var v=(ln.val===FS_NP) ? 'non couru'
         : (ln.val==null?'—':(ln.f.mes==='d' ? ln.val+' m' : fHMS(ln.val)));
     return '<tr class="'+(ln.doute?'fsm-r--'+ln.doute:'')+'">'
-      +'<td class="fsm-n">n° '+e(ln.f.num)+'</td>'
+      +'<td class="fsm-n">n° '+e(ln.f.num)+'<small class="fsm-tr">tour '+e(ln.tour)+'</small></td>'
       +'<td class="fsm-v">'+e(v)+dit(ln)+'</td>'
       +'<td>'+(ln.fcE!=null?e(ln.fcE):'<span class="fsm-rien">—</span>')+'</td>'
       +'<td>'+(ln.rec!=null?e(fHMS(ln.rec)):'<span class="fsm-rien">—</span>')+'</td>'
@@ -9445,6 +9603,7 @@ function fsMontreHTML(al,nom,ath){
       +'<button type="button" class="pl-modal-x" onclick="fsMontreFermer()">×</button></div>'
     +'<div class="fsm-src">'+e(nom)+' · '+e(ath.nom)+'</div>'
     +'<div class="fsm-bilan fsm-bilan--'+ton+'">'+e(mot)+'</div>'
+    +reglage
     +(al.lignes.length
       ? '<div class="fsm-scroll"><table class="fsm-t"><thead><tr>'
         +'<th>Fraction</th><th>Relevé</th><th>FC eff.</th><th>Récup</th><th>FC réc.</th>'
