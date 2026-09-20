@@ -795,6 +795,17 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
   .kw-b--b{background:rgba(96,165,250,.15);color:#60A5FA}
   .kw-hl{background:rgba(255,107,26,.28);border-radius:3px;color:var(--text)}
 
+  /* Une étude de référence : le titre, qui l'a écrite et quand, ce qu'elle
+     dit. Le lien ouvre la publication. */
+  .kw-etude-grp{margin-bottom:16px}
+  .kw-etude-cat{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:8px}
+  .kw-etude{display:block;text-decoration:none;border:1px solid var(--border);border-radius:11px;
+            padding:11px 13px;margin-bottom:8px;background:rgba(255,255,255,.02);transition:border-color .15s,background .15s}
+  .kw-etude:hover{border-color:var(--orange);background:rgba(255,107,26,.05)}
+  .kw-etude-t{font-size:13px;font-weight:800;color:var(--text);line-height:1.45}
+  .kw-etude-m{font-size:11px;font-weight:700;color:var(--muted2);margin:3px 0 5px}
+  .kw-etude-s{font-size:12px;color:var(--text2);line-height:1.6}
+
   @media(max-width:700px){
     /* Le tableau devient une pile de fiches : chaque cellule porte son
        intitulé, le scroll horizontal disparaît. */
@@ -804,9 +815,16 @@ input[type=range].rsl::-moz-range-thumb{width:17px;height:17px;border-radius:50%
     .kw-t tbody,.kw-t tr{display:block;width:auto}
     .kw-t tr{border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:9px;background:rgba(255,255,255,.02)}
     .kw-t td{display:flex!important;gap:10px;align-items:baseline;border:none!important;padding:4px 0!important;font-size:12.5px}
-    .kw-t td::before{content:attr(data-lbl);flex:0 0 40%;min-width:0;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);line-height:1.5}
+    .kw-t td::before{content:attr(data-lbl);flex:0 0 38%;min-width:0;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);line-height:1.5}
+    /* La valeur : une seule colonne, qui prend tout ce qui reste. */
+    .kw-t td>.kw-v{flex:1 1 0;min-width:0;line-height:1.5}
     .kw-t td.kw-k{display:block!important;font-size:14px;font-weight:900;color:var(--text);padding:0 0 7px!important;margin-bottom:5px;border-bottom:1px solid var(--border)!important}
     .kw-t td.kw-k::before{display:none}
+    /* Empilée, la comparaison perd ses deux en-têtes de colonne : l'intitulé
+       de chaque ligne reprend donc leur couleur, vert pour le long, bleu
+       pour le court. */
+    .kw-t td.kw-long::before{color:#34D399}
+    .kw-t td.kw-court::before{color:#60A5FA}
   }
   .pd-l{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px}
   .pd-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
@@ -11975,13 +11993,19 @@ function kwTh(t){ return '<th style="padding:8px 10px;font-size:9.5px;font-weigh
 function kwTd(v,lbl,opt){
   opt=opt||{};
   var st='padding:9px 10px;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border);vertical-align:'+(opt.top?'top':'middle')+(opt.st?(';'+opt.st):'');
-  return '<td class="'+(opt.cls||'')+'" data-lbl="'+String(lbl||'').replace(/"/g,'&quot;')+'" style="'+st+'">'+v+'</td>';
+  /* La valeur est enveloppée, et ce n'est pas cosmétique. Sous 700 px la
+     cellule devient une boîte flex pour poser son intitulé à gauche : sans
+     enveloppe, CHAQUE morceau de la valeur devient une colonne de plus.
+     « Essentiellement <b>FC</b> (+ vitesse) » s'affichait en trois colonnes
+     qui se repliaient chacune de leur côté. Enveloppée, la valeur est un
+     seul bloc et le texte coule normalement. */
+  return '<td class="'+(opt.cls||'')+'" data-lbl="'+String(lbl||'').replace(/"/g,'&quot;')+'" style="'+st+'"><div class="kw-v">'+v+'</div></td>';
 }
 function kwCle(v,lbl){ return kwTd(v,lbl,{cls:'kw-k',st:'font-weight:800;color:var(--text)'}); }
 function kwBadge(v,ton){ return '<span class="kw-b'+(ton?' kw-b--'+ton:'')+'">'+v+'</span>'; }
 function kwTable(cols,corps,minw){
   return '<div class="kw-t" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse'+(minw?(';min-width:'+minw+'px'):'')+'">'
-    +'<thead><tr>'+cols.map(function(c){return typeof c==='string'?kwTh(c):c;}).join('')+'</tr></thead>'
+    +'<thead><tr>'+cols.map(kwTh).join('')+'</tr></thead>'
     +'<tbody>'+corps+'</tbody></table></div>';
 }
 function kwDetails(titre,corps){
@@ -12050,7 +12074,9 @@ const PL_COMBINE=[
 function plDomainTimeHTML(){
   var rows=PL_DOMTIME.map(function(r){
     return '<tr>'+kwCle(r[0],'Domaine')
-      +kwTd(kwBadge(r[1]),'Intensité (% VMA)')
+      /* « Sprint » n'est pas un pourcentage : il ne prend pas la pastille
+         orange des intensités chiffrées. */
+      +kwTd(kwBadge(r[1],/%/.test(r[1])?'':'n'),'Intensité (% VMA)')
       +kwTd(r[2],'Format d\u2019effort')
       +kwTd(kwBadge(r[3],'v'),'Temps de travail effectif')
       +kwTd(r[4],'Récup',{st:'white-space:nowrap'})+'</tr>';
@@ -13045,69 +13071,71 @@ function plDates(){
 const PL_DJOURS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 /* La fiche marathon. Les chiffres qu'on vient chercher restent à l'écran ;
    le raisonnement qui les justifie passe derrière un repli. */
-function plPeriodHTML(){
-  var li='font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:8px';
+/* ══ LA CHARGE ══
+   L'ACWR et l'affûtage disent tous les deux la même chose — combien on en
+   met et quand on en retire — et ils se lisent avec les délais de
+   récupération, pas à côté. Ils vivent donc dans l'onglet « Récupération
+   et charge ».
+
+   Trois blocs sont partis d'ici : les repères de kilométrage marathon, la
+   séquence finale J-10 → J-0 et la liste « périodisation & cycles ». Ils
+   redisaient, en dur et pour le seul marathon, ce que le planificateur
+   calcule déjà pour la distance et la durée réelles de la prépa. */
+function plChargeHTML(){
   var tuile=function(v,lbl,ton){
     return '<div style="flex:1 1 130px;min-width:0;padding:11px 13px;border:1px solid var(--border);border-radius:11px;background:rgba(255,255,255,.02)">'
       +'<div style="font-size:18px;font-weight:900;color:'+(ton==='v'?'#34D399':(ton==='r'?'#F87171':'var(--orange)'))+';line-height:1.2">'+v+'</div>'
       +'<div style="font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2);margin-top:3px">'+lbl+'</div></div>';
   };
-  var tapRows=[['S-3','J-21 → J-15','−20 à −30 %',''],
-               ['S-2','J-14 → J-8','−40 à −50 %',''],
-               ['S-1','J-7 → J-0','−60 à −70 %','Fraîcheur maximale, on garde de courts rappels d\u2019allure']]
+  var tapRows=[['S-3','J-21 \u2192 J-15','\u221220 \u00e0 \u221230 %',''],
+               ['S-2','J-14 \u2192 J-8','\u221240 \u00e0 \u221250 %',''],
+               ['S-1','J-7 \u2192 J-0','\u221260 \u00e0 \u221270 %','Fra\u00eecheur maximale, on garde de courts rappels d\u2019allure']]
     .map(function(r){
-      return '<tr>'+kwCle(r[0],'Semaine')+kwTd(r[1],'Période')
-        +kwTd(kwBadge(r[2],'r'),'Volume')+kwTd(r[3]||'—','Note',{st:'color:var(--muted)'})+'</tr>';
+      return '<tr>'+kwCle(r[0],'Semaine')+kwTd(r[1],'P\u00e9riode')
+        +kwTd(kwBadge(r[2],'r'),'Volume')+kwTd(r[3]||'\u2014','Note',{st:'color:var(--muted)'})+'</tr>';
     }).join('');
 
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
-    +kwTitre('Marathon — repères de charge')
-    +'<div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px">'
-      +tuile('40 km/sem','Minimum pour finir')
-      +tuile('60–80 km/sem','Cible amateur','v')
-      +tuile('90–130 km/sem','Élite')
-      +tuile('30–32 km','Sortie longue max')
-    +'</div>'
-    +kwDetails('Sur quoi reposent ces repères',
-       'La sortie longue plafonne à <b>30–32 km</b>, ou <b>2 h 45 d\u2019effort</b> : au-delà, le coût de récupération dépasse le gain. '
-      +'La régularité et la sortie longue priment sur le pic ponctuel — même si la plus grosse semaine reste un fort prédicteur de performance '
-      +'(<i>Vickers &amp; Vertosick, 2016</i>).')
-    +'</div>'
-
-    +'<div class="card" style="padding:22px;margin-bottom:14px">'
-    +kwTitre('ACWR — le ratio de fatigue','Rapport entre la charge de la semaine et la charge moyenne du mois.')
+    +kwTitre('ACWR \u2014 le ratio de fatigue','Rapport entre la charge de la semaine et la charge moyenne du mois.')
     +'<div style="margin:2px auto 16px;max-width:320px;text-align:center;font-family:Georgia,serif;font-size:17px;color:var(--text)">ACWR = <span style="display:inline-block;vertical-align:middle;margin-left:6px"><span style="display:block;border-bottom:1px solid var(--text);padding:0 8px">Volume sur 7 jours</span><span style="display:block;padding:0 8px">Moyenne volume sur 28 jours</span></span></div>'
     +'<div style="display:flex;gap:9px;flex-wrap:wrap">'
-      +tuile('0,8 – 1,3','Zone sûre · progression optimale','v')
-      +tuile('&gt; 1,5','Zone danger · risque décuplé','r')
+      +tuile('0,8 \u2013 1,3','Zone s\u00fbre \u00b7 progression optimale','v')
+      +tuile('&gt; 1,5','Zone danger \u00b7 risque d\u00e9cupl\u00e9','r')
     +'</div>'
     +'</div>'
 
     +'<div class="card" style="padding:22px;margin-bottom:14px">'
-    +kwTitre('Affûtage','Réduction de volume par rapport à la plus grosse semaine.')
-    +kwTable(['Semaine','Période','Volume','Note'],tapRows)
-    +kwDetails('Compétition test',
-       'Un <b>semi-marathon à J-21</b>, avec des portions jouées à allure marathon. Il valide l\u2019allure, l\u2019équipement et la nutrition '
-      +'assez tôt pour qu\u2019il reste le temps de corriger.')
-    +'</div>'
-
-    +'<div class="card" style="padding:22px;margin-bottom:14px">'
-    +kwTitre('La séquence finale — J-10 à J-0')
-    +'<ul style="margin:0;padding-left:18px">'
-    +'<li style="'+li+'"><b>J-10</b> — dernière séance spécifique courte : 6 à 8 km cumulés à allure marathon.</li>'
-    +'<li style="'+li+'"><b>J-7</b> — dernier footing long léger : 1 h 15 maximum, dont 15 min à allure marathon.</li>'
-    +'<li style="'+li+'"><b>J-6 à J-1</b> — repos maximal. Deux footings de 30 min au plus, par exemple J-4 et J-2 avec 3 à 4 lignes droites.</li>'
-    +'</ul>'
-    +'</div>'
-
-    +'<div class="card" style="padding:22px;margin-bottom:14px">'
-    +kwTitre('Périodisation &amp; cycles')
-    +'<ul style="margin:0;padding-left:18px">'
-    +'<li style="'+li+'"><b>Logique Canova</b> — du général au spécifique : base → développement (seuil) → spécifique (AS42) → affûtage.</li>'
-    +'<li style="'+li+'"><b>Progression</b> — '+kwBadge('+10 %/sem maximum','r')+'</li>'
-    +'<li style="'+li+'"><b>Cycle 3:1</b> — trois semaines de charge, une de décharge à −30/−40 % de volume, pour assimiler.</li>'
-    +'<li style="'+li+'"><b>Ajustement des zones</b> — pas de test VMA en cours de prépa. On ajuste les allures au ressenti et à la réussite des séances spécifiques.</li>'
-    +'</ul>'
+    +kwTitre('Aff\u00fbtage','R\u00e9duction de volume par rapport \u00e0 la plus grosse semaine.')
+    +kwTable(['Semaine','P\u00e9riode','Volume','Note'],tapRows)
+    +kwDetails('Comp\u00e9tition test',
+       'Un <b>semi-marathon \u00e0 J-21</b>, avec des portions jou\u00e9es \u00e0 allure marathon. Il valide l\u2019allure, l\u2019\u00e9quipement et la nutrition '
+      +'assez t\u00f4t pour qu\u2019il reste le temps de corriger.')
+    +'</div>';
+}
+/* ══ LES ÉTUDES DE RÉFÉRENCE ══
+   La liste existait depuis longtemps dans le fichier et n'était affichée
+   nulle part : elle est maintenant l'onglet « Fiches & méthodes ». */
+function plStudiesHTML(){
+  var ordre=[], par={};
+  PL_STUDIES.forEach(function(e){
+    if(!par[e.cat]){ par[e.cat]=[]; ordre.push(e.cat); }
+    par[e.cat].push(e);
+  });
+  var corps=ordre.map(function(c){
+    return '<div class="kw-etude-grp">'
+      +'<div class="kw-etude-cat">'+esc(c)+'</div>'
+      +par[c].map(function(e){
+        return '<a class="kw-etude" href="'+esc(e.url)+'" target="_blank" rel="noopener">'
+          +'<div class="kw-etude-t">'+esc(e.title)+'</div>'
+          +'<div class="kw-etude-m">'+esc(e.au)+' \u00b7 '+esc(String(e.yr))+'</div>'
+          +'<div class="kw-etude-s">'+esc(e.sum)+'</div></a>';
+      }).join('')
+      +'</div>';
+  }).join('');
+  return '<div class="card" style="padding:22px;margin-bottom:14px">'
+    +kwTitre('\u00c9tudes de r\u00e9f\u00e9rence','Les travaux sur lesquels reposent les rep\u00e8res de REDLAB. Chaque titre ouvre la publication.')
+    +corps
+    +'<div style="font-size:11px;color:var(--muted2)">Liste revue le '+esc(PL_STUDIES_UPD)+'.</div>'
     +'</div>';
 }
 function plVO2HTML(){
@@ -13123,14 +13151,14 @@ function plVO2HTML(){
   ];
   var rows=FR.map(function(r){
     return '<tr>'+kwCle(r[0],'Paramètre')
-      +kwTd(r[1],'Fractionné long',{top:true,st:'background:rgba(52,211,153,0.06)'})
-      +kwTd(r[2],'Fractionné court',{top:true,st:'background:rgba(96,165,250,0.06)'})+'</tr>';
+      +kwTd(r[1],'Fractionné long',{top:true,cls:'kw-long',st:'background:rgba(52,211,153,0.06)'})
+      +kwTd(r[2],'Fractionné court',{top:true,cls:'kw-court',st:'background:rgba(96,165,250,0.06)'})+'</tr>';
   }).join('');
   return '<div class="card" style="padding:22px;margin-bottom:14px">'
     +kwTitre('VMA / VO₂max — fractionné long ou court','Deux façons d\u2019atteindre le même objectif : accumuler du temps au-dessus de 90 % de VO₂max.')
     +kwTable(['Paramètre',
-              kwTh('<span style="color:#34D399">Fractionné long</span>'),
-              kwTh('<span style="color:#60A5FA">Fractionné court</span>')],rows,600)
+              '<span style="color:#34D399">Fractionné long</span>',
+              '<span style="color:#60A5FA">Fractionné court</span>'],rows,600)
     +'</div>';
 }
 var PL_STUDIES_UPD='23/07/2026';
@@ -13178,7 +13206,7 @@ const PL_RENFO_COL=['Demi-fond · 10 km','Semi · Marathon','Trail','Ultra (rout
 function plRenfoHTML(){
   var rows=PL_RENFO.map(function(r){
     var cells=r.tout
-      ? '<td colspan="4" data-lbl="Toutes distances" style="padding:9px 10px;font-size:12px;color:var(--muted2);border-bottom:1px solid var(--border);vertical-align:top;font-style:italic">'+r.tout+'</td>'
+      ? '<td colspan="4" data-lbl="Toutes distances" style="padding:9px 10px;font-size:12px;color:var(--muted2);border-bottom:1px solid var(--border);vertical-align:top;font-style:italic"><div class="kw-v">'+r.tout+'</div></td>'
       : r.cols.map(function(c,i){ return kwTd(c,PL_RENFO_COL[i],{top:true,st:'font-size:12px'}); }).join('');
     return '<tr>'+kwCle(r.ph,'Phase')+cells+'</tr>';
   }).join('');
@@ -13259,7 +13287,7 @@ async function fetchPubmedLive(){
    sienne, et la recherche traverse tout — parce qu'un coach qui tape
    « lactate » ne sait pas, et n'a pas à savoir, dans quel onglet ça vit. */
 const KW_TABS=[
- {id:'recup', ico:'⏱', lbl:'Récupération'},
+ {id:'recup', ico:'⏱', lbl:'Récupération et charge'},
  {id:'zones', ico:'📊', lbl:'Zones & intensités'},
  {id:'renfo', ico:'🏋', lbl:'Renforcement'},
  {id:'fiches',ico:'📖', lbl:'Fiches & méthodes'}
@@ -13282,10 +13310,10 @@ function renderKnowledge(){
       +'<div class="kw-cnt" id="kw-cnt"></div>'
     +'</div>'
     +'<div id="kw-body">'
-      +'<div class="kw-sec" data-kw="recup">'+plRecovHTML()+'</div>'
+      +'<div class="kw-sec" data-kw="recup">'+plRecovHTML()+plChargeHTML()+'</div>'
       +'<div class="kw-sec" data-kw="zones">'+plSpeSessHTML()+plDomainTimeHTML()+plVO2HTML()+'</div>'
       +'<div class="kw-sec" data-kw="renfo">'+plRenfoHTML()+'</div>'
-      +'<div class="kw-sec" data-kw="fiches">'+plPeriodHTML()+pubmedLiveHTML()+'</div>'
+      +'<div class="kw-sec" data-kw="fiches">'+plStudiesHTML()+pubmedLiveHTML()+'</div>'
       +'<div class="kw-vide" id="kw-vide" hidden>Rien ne correspond à cette recherche.<br>Essaie « seuil », « glycogène », « affûtage », « 10 km »…</div>'
     +'</div>';
   kwApplique();
