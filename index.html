@@ -3253,6 +3253,23 @@ function generate(){
     S.fcMax=null;S.fcRest=null;S.fcReserve=null;
   }
 
+  /* Le profil calculé ci-dessus va, dans les secondes qui suivent, s'écrire
+     tout seul sur la fiche de l'athlète déjà rattaché (athAutoSave, appelé
+     par saveLS ci-dessous) — sans qu'on ait rien demandé. C'est très bien
+     pour corriger une VMA mal tapée, mais ça l'est moins pour un nouveau
+     test : la mauvaise date, la mauvaise VMA, ou tout simplement le mauvais
+     athlète resteraient invisibles jusqu'à ce qu'on tombe dessus plus tard.
+     On le demande donc, une fois, avant que ça parte. Un « Annuler » détache
+     le calcul de l'athlète — même geste que pour un homonyme non rattaché,
+     un peu plus haut — pour que rien ne s'enregistre tant que le coach n'a
+     pas cliqué Enregistrer lui-même. */
+  var _dejaLie=athRattache();
+  if(_dejaLie){
+    if(!confirm('Enregistrer une nouvelle mesure pour '+_dejaLie.pseudo+' ?\n\nElle s’ajoutera à son historique, datée d’aujourd’hui.\n\nAnnuler : ce calcul reste affiché, mais rien n’est enregistré sur sa fiche.')){
+      S.athId=null;
+    }
+  }
+
   S.testDate=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   updPseudo();
   renderDashboard();
@@ -4486,6 +4503,67 @@ function athHomonyme(pseudo,saufId){
   })||null;
 }
 
+/* ══ CRÉER UN ATHLÈTE ══
+   Jusqu'ici, la seule façon d'ajouter un athlète était de passer par tout
+   le formulaire de test : sa VMA, éventuellement sa FC, cliquer Analyser,
+   puis Enregistrer. Impossible de simplement noter un nom pour plus tard.
+   Ce chemin-ci ne crée rien tout de suite — il n'écrit dans la liste aucune
+   fiche à moitié remplie, avec une VMA à zéro que le reste de l'écran ne
+   saurait pas afficher. Il remet Saisie à zéro sous ce nom, prêt pour la
+   première mesure ; c'est cette première mesure, enregistrée normalement,
+   qui fait exister l'athlète. */
+function athCreerOuvrir(){
+  rlModalOuvrir('ath-creer',
+    '<div class="pl-modal-box" style="max-width:380px">'
+    +'<div class="pl-modal-top"><b>Nouvel athlète</b><span style="flex:1"></span>'
+      +'<button type="button" class="pl-modal-x" onclick="rlModalFermer(\'ath-creer\')">×</button></div>'
+    +'<div class="lc-field"><label>Prénom ou pseudo</label>'
+      +'<input type="text" id="ath-creer-inp" maxlength="30" placeholder="Jean" onkeydown="if(event.key===\'Enter\'){event.preventDefault();athCreerValider();}"></div>'
+    +'<div id="ath-creer-err" style="display:none;color:#F87171;font-size:12.5px;margin:-4px 0 10px;line-height:1.5"></div>'
+    +'<div style="font-size:12.5px;color:var(--muted2);line-height:1.6;margin-bottom:14px">Ouvre une fiche Saisie vierge à son nom. C’est sa première VMA (ou son premier test) qui l’enregistrera dans la liste des athlètes.</div>'
+    +'<div style="display:flex;gap:10px;justify-content:flex-end">'
+      +'<button type="button" class="lc-cancel" onclick="rlModalFermer(\'ath-creer\')">Annuler</button>'
+      +'<button type="button" class="lc-save" onclick="athCreerValider()">Créer</button>'
+    +'</div></div>');
+  setTimeout(function(){var i=document.getElementById('ath-creer-inp');if(i)i.focus();},50);
+}
+function athCreerValider(){
+  var inp=document.getElementById('ath-creer-inp');
+  var nom=(inp&&inp.value||'').trim();
+  var err=document.getElementById('ath-creer-err');
+  if(!nom){
+    if(err){err.textContent='Donne un prénom ou un pseudo.';err.style.display='block';}
+    if(inp)inp.focus();
+    return;
+  }
+  var h=athHomonyme(nom,null);
+  if(h){
+    if(err){
+      err.innerHTML='Un athlète nommé « '+rlJsStr(nom)+' » existe déjà.<br><button type="button" class="lc-cancel" style="padding:6px 12px;font-size:12.5px;margin-top:6px" onclick="rlModalFermer(\'ath-creer\');loadAthlete('+h.id+');go(\'athletes\')">Charger son profil à la place</button>';
+      err.style.display='block';
+    }
+    return;
+  }
+  rlModalFermer('ath-creer');
+  /* Le profil de travail repart à zéro : sans ça, la VMA, les records ou le
+     plan de l'athlète précédemment ouvert atterriraient sur cette fiche
+     neuve dès la première frappe. */
+  Object.assign(S,{
+    athId:null,mode:'vma',vma:null,csKmh:null,dp:null,csMethod:null,csR2:null,
+    fcMax:null,fcRest:null,fcReserve:null,d3:0,d6:0,d12:0,fc3:null,fc6:null,fc12:null,
+    pseudo:nom,testDate:null,records:{},raceHistory:[],goal:{id:'',t:null,date:''},
+    plan:null,analyses:[],csPts:null
+  });
+  var pi=document.getElementById('pseudo-inp'); if(pi)pi.value=nom;
+  var vi=document.getElementById('vma-inp'); if(vi)vi.value='';
+  var fm=document.getElementById('fc-max'); if(fm)fm.value='';
+  var fr=document.getElementById('fc-rest'); if(fr)fr.value='';
+  setMode('vma');
+  updPseudo();
+  go('input');
+  setTimeout(function(){var v=document.getElementById('vma-inp');if(v)v.focus();},80);
+}
+
 function saveCurrentAthlete(silencieux){
   if(!S.vma||!S.pseudo){return;}
   const athletes=getAthletes();
@@ -5139,6 +5217,10 @@ function renderAthletes(){
          masqué au profit de l'en-tête compact, et les boutons partaient avec
          lui — « Republier tous les espaces » était introuvable sur téléphone. -->
     <div class="ath-barre">
+        <button class="btn-save-athlete" onclick="athCreerOuvrir()" style="margin:0">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+          <span>+ Nouvel athlète</span>
+        </button>
         <button class="btn-save-athlete" onclick="athSaveCurrent(this)" style="margin:0">
           <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           <span>Enregistrer le profil ouvert</span>
@@ -5157,7 +5239,7 @@ function renderAthletes(){
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:8px">Aucun athlète enregistré</div>
-        <div style="font-size:13px;line-height:1.6;max-width:360px;margin:0 auto">Générez un profil depuis l'onglet <strong style="color:var(--orange)">Saisie</strong>, puis cliquez sur <strong style="color:var(--orange)">Enregistrer</strong> dans le tableau de bord.</div>
+        <div style="font-size:13px;line-height:1.6;max-width:360px;margin:0 auto">Cliquez <strong style="color:var(--orange)">+ Nouvel athlète</strong> ci-dessus pour en noter un, ou générez directement un profil depuis l'onglet <strong style="color:var(--orange)">Saisie</strong>.</div>
       </div>`;
     return;
   }
@@ -14048,10 +14130,11 @@ function athSwitcherOpen(){
     var on=(S.pseudo&&a.pseudo===S.pseudo);
     var main=(a.mode==='tests'&&a.csKmh)?('VC '+a.csKmh.toFixed(1)):('VMA '+(a.vma?a.vma.toFixed(1):'—'));
     return '<button type="button" class="ath-it'+(on?' on':'')+'" onclick="switchAthlete('+a.id+');var m=document.getElementById(\'ath-modal\');if(m)m.remove()"><span class="ath-it-av">'+String(a.pseudo).slice(0,2).toUpperCase()+'</span><span class="ath-it-tx"><b>'+String(a.pseudo).replace(/</g,'&lt;')+'</b><span>'+main+' km/h'+(on?' · actuel':'')+'</span></span></button>';
-  }).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;line-height:1.6">Aucun athlète enregistré. Génère un profil dans <b>Saisie</b> puis clique <b>Enregistrer</b> sur le dashboard.</div>';
+  }).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;line-height:1.6">Aucun athlète enregistré. « + Nouvel athlète » ci-dessous en ouvre un.</div>';
   host.innerHTML='<div class="pl-modal-box" style="max-width:400px"><div class="pl-modal-top"><b>Changer d\'athlète</b><span style="flex:1"></span><button type="button" class="pl-modal-x" onclick="var m=document.getElementById(\'ath-modal\');if(m)m.remove()">×</button></div>'
     +'<div style="max-height:60vh;overflow:auto">'+items+'</div>'
-    +'<button class="lc-cancel" style="margin-top:12px;width:100%" onclick="var m=document.getElementById(\'ath-modal\');if(m)m.remove();go(\'athletes\')">Gérer les athlètes</button></div>';
+    +'<button class="lc-save" style="margin-top:12px;width:100%" onclick="var m=document.getElementById(\'ath-modal\');if(m)m.remove();athCreerOuvrir()">+ Nouvel athlète</button>'
+    +'<button class="lc-cancel" style="margin-top:8px;width:100%" onclick="var m=document.getElementById(\'ath-modal\');if(m)m.remove();go(\'athletes\')">Gérer les athlètes</button></div>';
   document.body.appendChild(host);
 }
 function athFabUpdate(){
