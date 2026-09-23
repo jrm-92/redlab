@@ -1360,7 +1360,7 @@ function ecranZones(d){
       var fb=fcBornes(z,estVC,d.fcMax,d.fcRest,fcRes);
       meta.push('<span><b>'+fb[0]+'–'+fb[1]+'</b> bpm</span>');
     }
-    if(z.dur) meta.push('<span>tenable <b>'+esc(z.dur).toLowerCase()+'</b></span>');
+    if(z.dur) meta.push('<span><b>'+esc(z.dur).toLowerCase()+'</b></span>');
     h+='<div class="zcard" id="z-'+z.z+'" style="border-left-color:'+z.col+'">'
       +'<div class="zt"><span class="zbadge" style="background:'+z.col+'22;color:'+z.col+'">Z'+z.z+'</span>'
       +'<span class="zn">'+esc(z.n)+'</span>'
