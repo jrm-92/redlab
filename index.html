@@ -8926,6 +8926,74 @@ function fsSec(txt){
    parcourus qui disent tout. La règle se déduit de la ligne elle-même, donc
    rien n'est à ranger en plus et rien n'est à migrer. */
 function fsMesure(l){ return (l&&l.d>0)?'t':'d'; }
+/* ══ FORCER DISTANCE OU TEMPS ══
+   La règle ci-dessus se trompe quand l'effort n'a pas eu lieu comme prévu :
+   sur un 1000 m que l'athlète a arrêté à mi-parcours, il n'y a pas de temps
+   sur 1000 m à noter — juste la distance parcourue. Le coach peut alors
+   forcer l'unité, effort par effort et jour par jour.
+
+   Le choix est mémorisé à part des résultats eux-mêmes (a.perfsMes), jamais
+   avec eux : le nombre brut rangé dans a.perfs n'a de sens qu'avec l'unité
+   qui l'accompagnait au moment où il a été tapé. Le mélanger au choix
+   changerait le sens d'un chrono déjà noté sans que rien ne le signale. */
+function fsMesLire(athId,titre,i,iso){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  iso=iso||_fsDate;
+  var j=a&&a.perfsMes&&a.perfsMes[iso]&&a.perfsMes[iso][titre];
+  return (j&&j[i])||null;
+}
+/* L'unité qui régit VRAIMENT cette fraction ce jour-là : celle forcée par
+   le coach, sinon celle du modèle. */
+function fsMesEffectif(l,athId,titre,iso){
+  return fsMesLire(athId,titre,l.i,iso)||fsMesure(l);
+}
+/* La cible, dans l'unité effectivement en vigueur. Forcer l'unité inverse ce
+   qu'on compare : sur un effort en distance fixe, il n'y a alors plus de
+   fourchette de temps à viser — la distance EST la consigne, et ce qu'on
+   relève, c'est jusqu'où l'athlète est allé. La cible se réduit donc à ce
+   chiffre-là, sans fourchette ni verdict coloré — inventer une conversion
+   pace par pace n'apporterait qu'une fausse précision. */
+function fsCibleEff(l,vma,athId,titre,iso){
+  var c=fsCible(l,vma);
+  var naturel=c?c.mes:fsMesure(l);
+  var force=fsMesLire(athId,titre,l.i,iso);
+  if(!force||force===naturel) return {c:c, mes:naturel};
+  if(force==='d'&&l.d>0) return {c:{mes:'d', txt:l.d+' m', lo:null, hi:null}, mes:'d'};
+  if(force==='t'&&l.sec>0) return {c:{mes:'t', txt:fHMS(l.sec), lo:null, hi:null}, mes:'t'};
+  // Ni distance ni durée fixe dans le modèle (fartlek libre, par exemple) :
+  // rien de solide à donner comme consigne dans l'autre sens, la bascule
+  // change alors seulement l'unité de saisie, pas l'affichage de la cible.
+  return {c:c, mes:force};
+}
+/* Bascule l'unité d'un effort. Si des relevés existent déjà pour lui
+   aujourd'hui, ils ont été tapés dans l'ancienne unité : les garder les
+   ferait relire dans la nouvelle, silencieusement faux. On prévient, et on
+   les efface si le coach confirme — jamais sans le dire. */
+function fsMesBascule(athId,titre,i,naturel){
+  var actuel=fsMesLire(athId,titre,i)||naturel;
+  var voulu=(actuel==='d')?'t':'d';
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===athId;});
+  if(!a) return;
+  var perfsJour=(a.perfs&&a.perfs[_fsDate]&&a.perfs[_fsDate][titre])||{};
+  var dejaNote=Object.keys(perfsJour).some(function(cle){ return fsCleLigne(cle)===i; });
+  if(dejaNote){
+    if(!confirm('Changer d’unité efface ce qui est déjà noté aujourd’hui pour cet effort — sinon ces chiffres seraient relus dans la mauvaise unité.\n\nContinuer ?')) return;
+    Object.keys(perfsJour).forEach(function(cle){ if(fsCleLigne(cle)===i) delete perfsJour[cle]; });
+    if(a.perfs[_fsDate]&&a.perfs[_fsDate][titre]&&!Object.keys(a.perfs[_fsDate][titre]).length) delete a.perfs[_fsDate][titre];
+    if(a.perfs[_fsDate]&&!Object.keys(a.perfs[_fsDate]).length) delete a.perfs[_fsDate];
+  }
+  a.perfsMes=a.perfsMes||{};
+  a.perfsMes[_fsDate]=a.perfsMes[_fsDate]||{};
+  a.perfsMes[_fsDate][titre]=a.perfsMes[_fsDate][titre]||{};
+  if(voulu===naturel) delete a.perfsMes[_fsDate][titre][i];
+  else a.perfsMes[_fsDate][titre][i]=voulu;
+  if(!Object.keys(a.perfsMes[_fsDate][titre]).length) delete a.perfsMes[_fsDate][titre];
+  if(!Object.keys(a.perfsMes[_fsDate]).length) delete a.perfsMes[_fsDate];
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
 /* « 148 », « 148 m » ou « 148,5 » donnent tous 148 mètres. */
 function fsMetres(txt){
   var t=String(txt==null?'':txt).trim().toLowerCase().replace(',','.').replace(/\s*m$/,'').trim();
@@ -9166,6 +9234,7 @@ function plFaitBilan(iso,titre,ov){
   if(!t) return null;
   var seance=(ov&&typeof plSeanceAjustee==='function')?plSeanceAjustee(t.s,ov):t.s;
   var lignes=fsLignes(seance);
+  lignes.forEach(function(l,i){ l.i=i; });
   /* On parcourt les relevés, pas les lignes : une ligne porte autant de
      chronos qu'elle a de répétitions, et les clés le disent. */
   var n=0, ok=0, lent=0, vif=0;
@@ -9175,8 +9244,8 @@ function plFaitBilan(iso,titre,ov){
     var l=lignes[fsCleLigne(cle)];
     if(!l) return;
     n++;
-    var c=fsCible(l,a.vma);
-    var r=c?fsEcart(reel,c.lo,c.hi,c.mes):null;
+    var eff=fsCibleEff(l,a.vma,a.id,titre,iso);
+    var r=eff.c?fsEcart(reel,eff.c.lo,eff.c.hi,eff.mes):null;
     if(!r) return;
     if(r.cls==='ok') ok++; else if(r.cls==='lent') lent++; else vif++;
   });
@@ -9335,7 +9404,15 @@ function fsAthCourant(){
 }
 
 /* Les fractions à plat, dans l'ordre. Échauffement et retour au calme
-   (les lignes « soft ») n'ont rien à chronométrer et ne comptent pas. */
+   (les lignes « soft ») n'ont rien à chronométrer et ne comptent pas.
+
+   L'unité vient toujours du modèle (fsMesure), jamais d'une bascule forcée :
+   un tour de montre porte à la fois sa distance et sa durée, donc rien
+   n'empêcherait de le relire dans l'unité forcée — mais si le coach a
+   forcé la distance ici pour dire « il s'est arrêté avant les 1000 m »,
+   remplir automatiquement depuis la montre écrirait quand même un temps
+   sur 1000 m complets, contredisant la raison même de la bascule. Une
+   fraction forcée reste donc à remplir à la main. */
 function fsFractions(s){
   var lignes=fsLignes(s);
   lignes.forEach(function(l,i){ l.i=i; });
@@ -9736,10 +9813,20 @@ function fsMontreAppliquer(){
   a.recs[_fsDate] =a.recs[_fsDate] ||{}; a.recs[_fsDate][t] =a.recs[_fsDate][t] ||{};
   p.lignes.forEach(function(ln){
     var cle=fsCle(ln.f.i,ln.f.k);
+    /* Un effort dont le coach a forcé l'unité (par exemple : « il s'est
+       arrêté avant la fin, je note la distance ») garde cette raison
+       d'être même face à un fichier de montre. La montre porte le tour
+       entier, dans l'unité NATURELLE du modèle — l'écrire ici contredirait
+       la bascule sans un mot. On saute la valeur, le coach la tape lui-même
+       s'il le faut ; FC et récup, eux, ne dépendent d'aucune unité. */
+    var force=fsMesLire(a.id,t,ln.f.i);
+    var ecrireVal=!force||force===ln.f.mes;
     /* « x » n'est pas un chiffre : c'est la marque « non couru », et elle
        se pose comme telle. */
-    if(ln.val===FS_NP) a.perfs[_fsDate][t][cle]=FS_NP;
-    else if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    if(ecrireVal){
+      if(ln.val===FS_NP) a.perfs[_fsDate][t][cle]=FS_NP;
+      else if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    }
     if(ln.fcE!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,false)]=ln.fcE;
     if(ln.fcR!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,true)] =ln.fcR;
     if(ln.rec!=null&&ln.rec>0) a.recs[_fsDate][t][cle]=ln.rec;
@@ -9799,8 +9886,8 @@ function frDonnees(athId){
   var rows=[], blocs=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
   lignes.forEach(function(l){
     if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
-    var c=fsCible(l,a.vma);
-    var mes=c?c.mes:fsMesure(l);
+    var eff=fsCibleEff(l,a.vma,athId,s.title);
+    var c=eff.c, mes=eff.mes;
     var haut='', bas='';
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
     /* Un bloc porte son intitulé et sa cible une seule fois ; ses fractions
@@ -10394,17 +10481,28 @@ function fsCartesHTML(s,a,lignes,e){
         +(cib?' · '+e(cib):'')+'</span></div>';
       return;
     }
-    var c=fsCible(l,a.vma);
-    var mes=c?c.mes:fsMesure(l);
+    var naturel=fsMesure(l);
+    var eff=fsCibleEff(l,a.vma,a.id,s.title);
+    var c=eff.c, mes=eff.mes;
     var nEff=Math.max(1,l.n||1);
     var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
     var prevu=fsRecPrevue(l);
     var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
     bornes+=' data-mes="'+mes+'"';
+    /* Le choix ne se propose que si l'effort porte une distance OU une
+       durée fixe : sur un exercice sans l'une ni l'autre (montées de
+       genoux, gammes...), les deux unités relèvent déjà la même chose et la
+       bascule n'aurait rien à inverser. */
+    var bascule=(l.d>0||l.sec>0)
+      ? '<div class="db-vue fsc-mes" role="group" aria-label="Ce qu’on relève pour '+e(l.lbl)+'">'
+        +'<button type="button" class="db-vue-b'+(mes==='t'?' active':'')+'" onclick="fsMesBascule('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',\''+naturel+'\')" title="Noter un temps">Temps</button>'
+        +'<button type="button" class="db-vue-b'+(mes==='d'?' active':'')+'" onclick="fsMesBascule('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',\''+naturel+'\')" title="Noter une distance">Distance</button>'
+        +'</div>'
+      : '';
 
     out+='<div class="fsc-bloc">'
       +'<div class="fsc-tete"><b>'+e(l.lbl)+'</b>'
-      +(consigne?'<span>récup '+e(consigne)+'</span>':'')+'</div>'
+      +(consigne?'<span>récup '+e(consigne)+'</span>':'')+bascule+'</div>'
       +'<div class="fsc-cible">'+(c?c.txt:'<span style="color:var(--muted2)">sans cible</span>')+'</div>'
       +'<div class="fsc-fracs">';
 
