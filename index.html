@@ -12622,6 +12622,7 @@ function plOutilsOuvrir(iso,si){
   };
   var corps='<div class="plo-liste">'
     +b('voir','\uD83D\uDC41','Voir le détail','la séance en entier, telle qu\u2019elle est écrite')
+    +b('feuille','\uD83D\uDCC4','Fiche de séance','l\u2019image à envoyer à l\u2019athlète, cible par phase')
     +b('duree','\u270E','Régler la durée','raccourcir ou rallonger la séance pour ce jour-là')
     +b('montre','\u2193','Envoyer sur la montre','le fichier .fit à importer dans Garmin, COROS, Suunto')
     +b('res','\u25A4','Résultats','noter les chronos et les pulsations de ce jour-là')
@@ -12642,13 +12643,26 @@ function plOutilsFaire(act,iso,si){
   var titre=sx.t;
   if(act==='del'&&!confirm('Retirer « '+titre+' » du '+iso+' ?')) return;
   rlModalFermer('pl-outils');
-  if(act==='voir')   return plApercuOuvrir(titre,iso,si);
-  if(act==='duree')  return plDureeOuvrir(iso,si);
-  if(act==='montre') return wktExportJour(iso,si);
-  if(act==='res')    return fsOuvrirPlan(iso,si);
-  if(act==='copie')  return plDaySessCopy(iso,si);
-  if(act==='del')    return plDaySessDel(iso,si);
+  if(act==='voir')    return plApercuOuvrir(titre,iso,si);
+  if(act==='feuille') return plFeuilleOuvrir(titre,iso);
+  if(act==='duree')   return plDureeOuvrir(iso,si);
+  if(act==='montre')  return wktExportJour(iso,si);
+  if(act==='res')     return fsOuvrirPlan(iso,si);
+  if(act==='copie')   return plDaySessCopy(iso,si);
+  if(act==='del')     return plDaySessDel(iso,si);
   if(act==='bouge'){ _plGrab={iso:iso,i:si}; plUpd(); }
+}
+/* La fiche de séance (celle qu'on envoie à l'athlète — Polar n'importe
+   aucun fichier) s'ouvrait déjà depuis la Bibliothèque, mais pas depuis
+   une séance posée au calendrier du plan : il fallait la retrouver par son
+   nom, à la main. Elle s'appuie sur le même repère que « Résultats »
+   (fsOuvrirPlan) — le titre retrouve la séance dans la bibliothèque — et
+   pré-remplit sa date avec le jour où elle est posée. */
+function plFeuilleOuvrir(titre,iso){
+  var t=(typeof libParTitre==='function')?libParTitre(titre):null;
+  if(!t){ alert('Séance introuvable dans la bibliothèque : « '+titre+' ».'); return; }
+  _fpDate=iso;
+  fpOuvrir(t.kind,t.idx);
 }
 function plDayTap(iso){
   if(!_plGrab)return;
