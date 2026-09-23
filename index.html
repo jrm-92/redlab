@@ -2378,7 +2378,6 @@ table.lm-laps tbody tr{cursor:pointer}
     <button class="mh-btn" id="mbn-dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Fiche</span></button>
     <button class="mh-btn" id="mbn-library" onclick="go('library')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg><span>Séances</span></button>
     <button class="mh-btn" id="mbn-extrapol" onclick="go('extrapol')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Extrapo</span></button>
-    <button class="mh-btn" id="mbn-planif" onclick="go('planif')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Plan</span></button>
     <button class="mh-btn" id="mbn-knowledge" onclick="go('knowledge')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Infos</span></button>
     <button class="mh-btn" id="mbn-watch" onclick="go('watch')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13.5 13.5"/><path d="M9 3h6M9 21h6"/></svg><span>Montre</span></button>
     <button class="mh-btn" id="mbn-athletes" onclick="go('athletes')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg><span>Athlètes</span></button>
@@ -2415,10 +2414,6 @@ table.lm-laps tbody tr{cursor:pointer}
       <button class="nav-btn" id="sbn-extrapol" onclick="go('extrapol')">
         <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><polyline points="19 9 14 14 10 10 6 14"/></svg>
         Extrapolation
-      </button>
-      <button class="nav-btn" id="sbn-planif" onclick="go('planif')">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h3M8 18h6"/></svg>
-        Planification
       </button>
       <button class="nav-btn" id="sbn-knowledge" onclick="go('knowledge')">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h5"/></svg>
@@ -2754,6 +2749,17 @@ table.lm-laps tbody tr{cursor:pointer}
             <div id="db-goal"></div>
           </div>
 
+          <!-- Plan de préparation — déplacé depuis l'ancien onglet « Plan » :
+               un aperçu du plan vivait déjà juste en dessous (lecture seule),
+               plus la peine d'un onglet séparé pour le construire. -->
+          <div class="db-section" id="db-planif-section">
+            <div class="db-section-hd">
+              <div class="db-section-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h3M8 18h6"/></svg></div>
+              <div class="db-section-title" data-tip-cle="phases">Plan de préparation</div>
+            </div>
+            <div id="planif-wrap"></div>
+          </div>
+
           <!-- Calendrier préparation -->
           <div class="db-section" id="db-plan-section" style="display:none">
             <div class="db-section-hd">
@@ -2900,11 +2906,6 @@ table.lm-laps tbody tr{cursor:pointer}
       <!-- ══════════ PANEL EXTRAPOLATION ══════════ -->
       <div id="p-extrapol" class="panel">
         <div id="extrapol-wrap" style="padding:36px 28px 80px"></div>
-      </div>
-
-      <!-- ══════════ PANEL PLANIFICATION ══════════ -->
-      <div id="p-planif" class="panel">
-        <div id="planif-wrap" style="padding:36px 28px 80px"></div>
       </div>
 
       <!-- ══════════ PANEL CONNAISSANCES ══════════ -->
@@ -3078,7 +3079,6 @@ function go(id){
   if(ac){const n=getAthletes().length;ac.textContent=n>0?n:'';ac.style.display=n>0?'':'none';}
   if(id==='library') renderLibrary();
   if(id==='extrapol') renderExtrapol();
-  if(id==='planif') renderPlanif();
   if(id==='knowledge') renderKnowledge();
   if(id==='watch'&&window.__lmResize)window.__lmResize();
   if(typeof athBarPoser==='function') athBarPoser();
@@ -3452,6 +3452,10 @@ function renderDashboard(){
   renderCSPredictions();
   renderCsModel();
   renderGoalSection();
+  /* Le plan a rejoint Saisie (déplacé depuis l'ancien onglet Plan) : il se
+     redessine désormais ici, au même rythme que le reste du profil calculé,
+     au lieu d'attendre qu'on clique sur un onglet qui n'existe plus. */
+  if(typeof renderPlanif==='function') renderPlanif();
   renderDashPlan();
   renderRecords();
   renderDashAnalyses();
@@ -5601,7 +5605,7 @@ function renderDashPlan(){
   const _unit=plUnit();
   /* Le calendrier « Réalisé » redessine la même grille que « Prévu », mais il
      est reconstruit à part, après que cette fonction a rendu les globales du
-     plan à l'onglet Plan. Tout ce dont il a besoin est donc figé ici, tant que
+     plan à la section Plan de préparation. Tout ce dont il a besoin est donc figé ici, tant que
      _plSessions contient encore les séances de CE plan. */
   window._dashCal={col:p.col, race:(_plDate2||null), inter:(_plDi||null),
     obj:p.id, nom:(_plNom||''), time:(_plTime||''),
@@ -5878,8 +5882,8 @@ function dbListeHTML(rows){
    séance réalisée s'ouvre au clic sur son détail complet.
 
    La grille est reconstruite à partir de window._dashCal, figé par
-   renderDashPlan : les globales du plan appartiennent à l'onglet Plan et ont
-   déjà été rendues quand cette vue s'affiche. */
+   renderDashPlan : les globales du plan appartiennent à la section Plan de
+   préparation et ont déjà été rendues quand cette vue s'affiche. */
 function dbEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function dbIsoDe(d){ return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'); }
 
@@ -8922,6 +8926,74 @@ function fsSec(txt){
    parcourus qui disent tout. La règle se déduit de la ligne elle-même, donc
    rien n'est à ranger en plus et rien n'est à migrer. */
 function fsMesure(l){ return (l&&l.d>0)?'t':'d'; }
+/* ══ FORCER DISTANCE OU TEMPS ══
+   La règle ci-dessus se trompe quand l'effort n'a pas eu lieu comme prévu :
+   sur un 1000 m que l'athlète a arrêté à mi-parcours, il n'y a pas de temps
+   sur 1000 m à noter — juste la distance parcourue. Le coach peut alors
+   forcer l'unité, effort par effort et jour par jour.
+
+   Le choix est mémorisé à part des résultats eux-mêmes (a.perfsMes), jamais
+   avec eux : le nombre brut rangé dans a.perfs n'a de sens qu'avec l'unité
+   qui l'accompagnait au moment où il a été tapé. Le mélanger au choix
+   changerait le sens d'un chrono déjà noté sans que rien ne le signale. */
+function fsMesLire(athId,titre,i,iso){
+  var a=(typeof getAthletes==='function'?getAthletes():[]).find(function(x){return x.id===athId;});
+  iso=iso||_fsDate;
+  var j=a&&a.perfsMes&&a.perfsMes[iso]&&a.perfsMes[iso][titre];
+  return (j&&j[i])||null;
+}
+/* L'unité qui régit VRAIMENT cette fraction ce jour-là : celle forcée par
+   le coach, sinon celle du modèle. */
+function fsMesEffectif(l,athId,titre,iso){
+  return fsMesLire(athId,titre,l.i,iso)||fsMesure(l);
+}
+/* La cible, dans l'unité effectivement en vigueur. Forcer l'unité inverse ce
+   qu'on compare : sur un effort en distance fixe, il n'y a alors plus de
+   fourchette de temps à viser — la distance EST la consigne, et ce qu'on
+   relève, c'est jusqu'où l'athlète est allé. La cible se réduit donc à ce
+   chiffre-là, sans fourchette ni verdict coloré — inventer une conversion
+   pace par pace n'apporterait qu'une fausse précision. */
+function fsCibleEff(l,vma,athId,titre,iso){
+  var c=fsCible(l,vma);
+  var naturel=c?c.mes:fsMesure(l);
+  var force=fsMesLire(athId,titre,l.i,iso);
+  if(!force||force===naturel) return {c:c, mes:naturel};
+  if(force==='d'&&l.d>0) return {c:{mes:'d', txt:l.d+' m', lo:null, hi:null}, mes:'d'};
+  if(force==='t'&&l.sec>0) return {c:{mes:'t', txt:fHMS(l.sec), lo:null, hi:null}, mes:'t'};
+  // Ni distance ni durée fixe dans le modèle (fartlek libre, par exemple) :
+  // rien de solide à donner comme consigne dans l'autre sens, la bascule
+  // change alors seulement l'unité de saisie, pas l'affichage de la cible.
+  return {c:c, mes:force};
+}
+/* Bascule l'unité d'un effort. Si des relevés existent déjà pour lui
+   aujourd'hui, ils ont été tapés dans l'ancienne unité : les garder les
+   ferait relire dans la nouvelle, silencieusement faux. On prévient, et on
+   les efface si le coach confirme — jamais sans le dire. */
+function fsMesBascule(athId,titre,i,naturel){
+  var actuel=fsMesLire(athId,titre,i)||naturel;
+  var voulu=(actuel==='d')?'t':'d';
+  var liste=(typeof getAthletes==='function'?getAthletes():[]);
+  var a=liste.find(function(x){return x.id===athId;});
+  if(!a) return;
+  var perfsJour=(a.perfs&&a.perfs[_fsDate]&&a.perfs[_fsDate][titre])||{};
+  var dejaNote=Object.keys(perfsJour).some(function(cle){ return fsCleLigne(cle)===i; });
+  if(dejaNote){
+    if(!confirm('Changer d’unité efface ce qui est déjà noté aujourd’hui pour cet effort — sinon ces chiffres seraient relus dans la mauvaise unité.\n\nContinuer ?')) return;
+    Object.keys(perfsJour).forEach(function(cle){ if(fsCleLigne(cle)===i) delete perfsJour[cle]; });
+    if(a.perfs[_fsDate]&&a.perfs[_fsDate][titre]&&!Object.keys(a.perfs[_fsDate][titre]).length) delete a.perfs[_fsDate][titre];
+    if(a.perfs[_fsDate]&&!Object.keys(a.perfs[_fsDate]).length) delete a.perfs[_fsDate];
+  }
+  a.perfsMes=a.perfsMes||{};
+  a.perfsMes[_fsDate]=a.perfsMes[_fsDate]||{};
+  a.perfsMes[_fsDate][titre]=a.perfsMes[_fsDate][titre]||{};
+  if(voulu===naturel) delete a.perfsMes[_fsDate][titre][i];
+  else a.perfsMes[_fsDate][titre][i]=voulu;
+  if(!Object.keys(a.perfsMes[_fsDate][titre]).length) delete a.perfsMes[_fsDate][titre];
+  if(!Object.keys(a.perfsMes[_fsDate]).length) delete a.perfsMes[_fsDate];
+  if(typeof _saveAthletes==='function') _saveAthletes(liste);
+  var h=document.getElementById('fs-modal');
+  if(h) h.innerHTML=fsHTML();
+}
 /* « 148 », « 148 m » ou « 148,5 » donnent tous 148 mètres. */
 function fsMetres(txt){
   var t=String(txt==null?'':txt).trim().toLowerCase().replace(',','.').replace(/\s*m$/,'').trim();
@@ -9162,6 +9234,7 @@ function plFaitBilan(iso,titre,ov){
   if(!t) return null;
   var seance=(ov&&typeof plSeanceAjustee==='function')?plSeanceAjustee(t.s,ov):t.s;
   var lignes=fsLignes(seance);
+  lignes.forEach(function(l,i){ l.i=i; });
   /* On parcourt les relevés, pas les lignes : une ligne porte autant de
      chronos qu'elle a de répétitions, et les clés le disent. */
   var n=0, ok=0, lent=0, vif=0;
@@ -9171,8 +9244,8 @@ function plFaitBilan(iso,titre,ov){
     var l=lignes[fsCleLigne(cle)];
     if(!l) return;
     n++;
-    var c=fsCible(l,a.vma);
-    var r=c?fsEcart(reel,c.lo,c.hi,c.mes):null;
+    var eff=fsCibleEff(l,a.vma,a.id,titre,iso);
+    var r=eff.c?fsEcart(reel,eff.c.lo,eff.c.hi,eff.mes):null;
     if(!r) return;
     if(r.cls==='ok') ok++; else if(r.cls==='lent') lent++; else vif++;
   });
@@ -9331,7 +9404,15 @@ function fsAthCourant(){
 }
 
 /* Les fractions à plat, dans l'ordre. Échauffement et retour au calme
-   (les lignes « soft ») n'ont rien à chronométrer et ne comptent pas. */
+   (les lignes « soft ») n'ont rien à chronométrer et ne comptent pas.
+
+   L'unité vient toujours du modèle (fsMesure), jamais d'une bascule forcée :
+   un tour de montre porte à la fois sa distance et sa durée, donc rien
+   n'empêcherait de le relire dans l'unité forcée — mais si le coach a
+   forcé la distance ici pour dire « il s'est arrêté avant les 1000 m »,
+   remplir automatiquement depuis la montre écrirait quand même un temps
+   sur 1000 m complets, contredisant la raison même de la bascule. Une
+   fraction forcée reste donc à remplir à la main. */
 function fsFractions(s){
   var lignes=fsLignes(s);
   lignes.forEach(function(l,i){ l.i=i; });
@@ -9732,10 +9813,20 @@ function fsMontreAppliquer(){
   a.recs[_fsDate] =a.recs[_fsDate] ||{}; a.recs[_fsDate][t] =a.recs[_fsDate][t] ||{};
   p.lignes.forEach(function(ln){
     var cle=fsCle(ln.f.i,ln.f.k);
+    /* Un effort dont le coach a forcé l'unité (par exemple : « il s'est
+       arrêté avant la fin, je note la distance ») garde cette raison
+       d'être même face à un fichier de montre. La montre porte le tour
+       entier, dans l'unité NATURELLE du modèle — l'écrire ici contredirait
+       la bascule sans un mot. On saute la valeur, le coach la tape lui-même
+       s'il le faut ; FC et récup, eux, ne dépendent d'aucune unité. */
+    var force=fsMesLire(a.id,t,ln.f.i);
+    var ecrireVal=!force||force===ln.f.mes;
     /* « x » n'est pas un chiffre : c'est la marque « non couru », et elle
        se pose comme telle. */
-    if(ln.val===FS_NP) a.perfs[_fsDate][t][cle]=FS_NP;
-    else if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    if(ecrireVal){
+      if(ln.val===FS_NP) a.perfs[_fsDate][t][cle]=FS_NP;
+      else if(ln.val!=null&&ln.val>0) a.perfs[_fsDate][t][cle]=ln.val;
+    }
     if(ln.fcE!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,false)]=ln.fcE;
     if(ln.fcR!=null) a.fcs[_fsDate][t][fsCleFC(ln.f.i,ln.f.k,true)] =ln.fcR;
     if(ln.rec!=null&&ln.rec>0) a.recs[_fsDate][t][cle]=ln.rec;
@@ -9795,8 +9886,8 @@ function frDonnees(athId){
   var rows=[], blocs=[], n=0, ok=0, lent=0, vif=0, saute=0, fcN=0, fcSom=0, avecFC=false;
   lignes.forEach(function(l){
     if(l.soft) return;                 /* échauffement, retour au calme : rien à chronométrer */
-    var c=fsCible(l,a.vma);
-    var mes=c?c.mes:fsMesure(l);
+    var eff=fsCibleEff(l,a.vma,athId,s.title);
+    var c=eff.c, mes=eff.mes;
     var haut='', bas='';
     if(c){ var m=String(c.txt).split('<small>'); haut=m[0]; bas=(m[1]||'').replace('</small>',''); }
     /* Un bloc porte son intitulé et sa cible une seule fois ; ses fractions
@@ -10390,17 +10481,28 @@ function fsCartesHTML(s,a,lignes,e){
         +(cib?' · '+e(cib):'')+'</span></div>';
       return;
     }
-    var c=fsCible(l,a.vma);
-    var mes=c?c.mes:fsMesure(l);
+    var naturel=fsMesure(l);
+    var eff=fsCibleEff(l,a.vma,a.id,s.title);
+    var c=eff.c, mes=eff.mes;
     var nEff=Math.max(1,l.n||1);
     var consigne=[l.rec,l.recSet].filter(Boolean).join(' · ');
     var prevu=fsRecPrevue(l);
     var bornes=(c&&c.lo!=null&&c.hi!=null)?(' data-lo="'+c.lo+'" data-hi="'+c.hi+'"'):'';
     bornes+=' data-mes="'+mes+'"';
+    /* Le choix ne se propose que si l'effort porte une distance OU une
+       durée fixe : sur un exercice sans l'une ni l'autre (montées de
+       genoux, gammes...), les deux unités relèvent déjà la même chose et la
+       bascule n'aurait rien à inverser. */
+    var bascule=(l.d>0||l.sec>0)
+      ? '<div class="db-vue fsc-mes" role="group" aria-label="Ce qu’on relève pour '+e(l.lbl)+'">'
+        +'<button type="button" class="db-vue-b'+(mes==='t'?' active':'')+'" onclick="fsMesBascule('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',\''+naturel+'\')" title="Noter un temps">Temps</button>'
+        +'<button type="button" class="db-vue-b'+(mes==='d'?' active':'')+'" onclick="fsMesBascule('+a.id+',\''+rlJsStr(s.title)+'\','+l.i+',\''+naturel+'\')" title="Noter une distance">Distance</button>'
+        +'</div>'
+      : '';
 
     out+='<div class="fsc-bloc">'
       +'<div class="fsc-tete"><b>'+e(l.lbl)+'</b>'
-      +(consigne?'<span>récup '+e(consigne)+'</span>':'')+'</div>'
+      +(consigne?'<span>récup '+e(consigne)+'</span>':'')+bascule+'</div>'
       +'<div class="fsc-cible">'+(c?c.txt:'<span style="color:var(--muted2)">sans cible</span>')+'</div>'
       +'<div class="fsc-fracs">';
 
@@ -12520,6 +12622,7 @@ function plOutilsOuvrir(iso,si){
   };
   var corps='<div class="plo-liste">'
     +b('voir','\uD83D\uDC41','Voir le détail','la séance en entier, telle qu\u2019elle est écrite')
+    +b('feuille','\uD83D\uDCC4','Fiche de séance','l\u2019image à envoyer à l\u2019athlète, cible par phase')
     +b('duree','\u270E','Régler la durée','raccourcir ou rallonger la séance pour ce jour-là')
     +b('montre','\u2193','Envoyer sur la montre','le fichier .fit à importer dans Garmin, COROS, Suunto')
     +b('res','\u25A4','Résultats','noter les chronos et les pulsations de ce jour-là')
@@ -12540,13 +12643,26 @@ function plOutilsFaire(act,iso,si){
   var titre=sx.t;
   if(act==='del'&&!confirm('Retirer « '+titre+' » du '+iso+' ?')) return;
   rlModalFermer('pl-outils');
-  if(act==='voir')   return plApercuOuvrir(titre,iso,si);
-  if(act==='duree')  return plDureeOuvrir(iso,si);
-  if(act==='montre') return wktExportJour(iso,si);
-  if(act==='res')    return fsOuvrirPlan(iso,si);
-  if(act==='copie')  return plDaySessCopy(iso,si);
-  if(act==='del')    return plDaySessDel(iso,si);
+  if(act==='voir')    return plApercuOuvrir(titre,iso,si);
+  if(act==='feuille') return plFeuilleOuvrir(titre,iso);
+  if(act==='duree')   return plDureeOuvrir(iso,si);
+  if(act==='montre')  return wktExportJour(iso,si);
+  if(act==='res')     return fsOuvrirPlan(iso,si);
+  if(act==='copie')   return plDaySessCopy(iso,si);
+  if(act==='del')     return plDaySessDel(iso,si);
   if(act==='bouge'){ _plGrab={iso:iso,i:si}; plUpd(); }
+}
+/* La fiche de séance (celle qu'on envoie à l'athlète — Polar n'importe
+   aucun fichier) s'ouvrait déjà depuis la Bibliothèque, mais pas depuis
+   une séance posée au calendrier du plan : il fallait la retrouver par son
+   nom, à la main. Elle s'appuie sur le même repère que « Résultats »
+   (fsOuvrirPlan) — le titre retrouve la séance dans la bibliothèque — et
+   pré-remplit sa date avec le jour où elle est posée. */
+function plFeuilleOuvrir(titre,iso){
+  var t=(typeof libParTitre==='function')?libParTitre(titre):null;
+  if(!t){ alert('Séance introuvable dans la bibliothèque : « '+titre+' ».'); return; }
+  _fpDate=iso;
+  fpOuvrir(t.kind,t.idx);
 }
 function plDayTap(iso){
   if(!_plGrab)return;
@@ -12860,7 +12976,7 @@ function plToDash(){
 /* opts.ro : calendrier en lecture seule, pour le tableau de bord. Le tableau
    de bord restaure les variables globales du plan juste après l'affichage —
    une commande d'édition y modifierait un état déjà remplacé. L'édition reste
-   donc dans l'onglet Plan. */
+   donc dans la section Plan de préparation, juste au-dessus. */
 /* ══ LES KILOMÈTRES QUE LES SÉANCES REPRÉSENTENT ══
    La charge hebdomadaire est une intention : le coach écrit 65 km. Ce qu'il
    a réellement posé au calendrier, c'est autre chose — et rien ne le lui
@@ -13046,7 +13162,7 @@ function plCalendarHTML(p,weeks,opts){
     +(hasOv?'<button type="button" class="plc-reset" onclick="plVolReset()">↺ Réinitialiser (auto)</button>':''))+'</div></div>';
   var grabBar=(_plGrab&&!RO)?('<div class="plc-grab">Séance prise — touche le jour où la déposer'
     +' <button type="button" onclick="plGrabCancel()">annuler</button></div>'):'';
-  var hint=RO?'<div class="plc-hint">Vue du plan enregistré. Les modifications se font dans l\u2019onglet <b>Plan</b>.</div>'
+  var hint=RO?'<div class="plc-hint">Vue du plan enregistré. Pour le modifier, remonte jusqu\u2019au <b>Plan de préparation</b>, juste au-dessus.</div>'
     :'<div class="plc-hint">Chaque ligne = une semaine du <b>lundi au dimanche</b>. Règle la <b>charge (km)</b> et coche <b>Décharge</b> par semaine ; clique <b>« + séance »</b> sur un jour pour y poser une séance. 🏁 = course, ★ = course prépa.</div>';
   return head+grabBar+hint
     +'<div class="hscroll plw-scroll"><div class="plw-inner">'
@@ -13514,9 +13630,12 @@ function renderPlanif(){
   const princ=p.principes.map(x=>'<li style="font-size:13.5px;color:var(--text2);line-height:1.7;margin-bottom:8px">'+x+'</li>').join('');
   const reco=plRecoWeeks(p);
   const recoPh=plPhases(p,reco);
+  /* Le bandeau d'athlète et le grand intitulé « Planification » n'ont plus
+     lieu d'être : Saisie affiche déjà l'un en haut de l'écran, et l'autre
+     dans le titre de cette section — les répéter ici referait ce qu'on
+     vient de défaire. Reste l'essentiel : comment s'en servir. */
   wrap.innerHTML=
-    '<div class="input-hero" style="margin-bottom:20px"><div class="tool-eyebrow">Outils</div><div class="input-hero-title">Planification</div><div class="input-hero-sub">Assistant de préparation : réponds au questionnaire, l’outil propose une durée, une répartition, une charge et un calendrier. Ajuste ce que tu veux.</div></div>'
-    +toolAthleteBar()
+    '<div style="font-size:12.5px;color:var(--muted2);line-height:1.6;margin-bottom:16px">Réponds au questionnaire, l’outil propose une durée, une répartition, une charge et un calendrier. Ajuste ce que tu veux.</div>'
     +(plPlansSources().length
       ? '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
         +'<button type="button" class="lib-create-btn" style="margin:0" onclick="plImportOpen()" title="Recopier la trame d\'un plan existant et la recaler sur la date de course de cet athlète">⤵ Reprendre le plan d\'un autre athlète</button>'
@@ -13563,7 +13682,7 @@ function renderPlanif(){
     // c'est le calendrier que le coach vient chercher.
     +'<div id="pl-imp-msg" style="display:none;font-size:13px;font-weight:700;line-height:1.6;border:1px solid var(--border2);border-radius:10px;padding:11px 14px;margin-bottom:14px"></div>'
     +'<div class="card" style="padding:22px;margin-bottom:14px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Calendrier de la prépa</div><div id="pl-cal">'+plCalendarHTML(p,weeks)+'</div></div>'
-    +'<div style="display:flex;justify-content:center;margin-top:16px"><button onclick="plToDash()" style="display:inline-flex;align-items:center;gap:9px;background:'+p.col+';border:none;border-radius:11px;color:#fff;font-family:var(--font);font-size:14px;font-weight:800;padding:13px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.28)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Ajouter ce plan au dashboard</button></div>'
+    +'<div style="display:flex;justify-content:center;margin-top:16px"><button onclick="plToDash()" style="display:inline-flex;align-items:center;gap:9px;background:'+p.col+';border:none;border-radius:11px;color:#fff;font-family:var(--font);font-size:14px;font-weight:800;padding:13px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.28)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Confirmer cet objectif</button></div>'
     +'<div id="pl-dash-msg" style="text-align:center;font-size:12.5px;font-weight:700;margin-top:8px;min-height:16px"></div>'
     // ── Principes + radar ──
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px">'
