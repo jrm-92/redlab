@@ -69,6 +69,13 @@ alter table public.inscriptions enable row level security;
 -- l'espace personnel, qui sont eux aussi des comptes connectés.
 drop policy if exists "le coach lit les inscriptions" on public.inscriptions;
 
+-- Droit d'accès API (obligatoire depuis le 30 octobre 2026, voir
+-- schema.sql) : service_role seul, celui de la fonction stripe-webhook.
+-- Ni anon ni authenticated n'apparaissent ici — c'est voulu, voir plus
+-- haut : personne d'autre que le tableau de bord ne doit atteindre cette
+-- table.
+grant select, insert, update on public.inscriptions to service_role;
+
 -- ── Vérification ───────────────────────────────────────────────────────
 --  Ne doit afficher AUCUNE ligne.
 select tablename, policyname, cmd, roles::text

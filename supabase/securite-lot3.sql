@@ -20,6 +20,12 @@ create policy "coach supprime ses jetons" on public.polar_tokens
   for delete to authenticated
   using (coach_id = auth.uid());
 
+-- Le pendant côté API Data (obligatoire depuis le 30 octobre 2026, voir
+-- schema.sql) : sans lui, la policy ci-dessus resterait inatteignable
+-- depuis le navigateur. Toujours pas de SELECT ni d'UPDATE : la garantie
+-- structurelle décrite en tête de fichier ne bouge pas.
+grant delete on public.polar_tokens to authenticated;
+
 -- Vérification — doit lister UNE seule ligne pour polar_tokens, en DELETE.
 select tablename, policyname, cmd, roles::text
   from pg_policies
