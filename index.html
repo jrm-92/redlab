@@ -6404,84 +6404,30 @@ function ytId(url){
 }
 function ytLien(url){ var i=ytId(url); return i?('https://www.youtube.com/watch?v='+i):''; }
 const LIB_SESSIONS=[
-  // ── Veille séances · sources reconnues ──
-  {theme:'entretien',title:'Endurance faible intensité (MAF)',tag:'FC ≤ 180−âge',desc:'Développe l’endurance de base en aérobie stricte, sous le seuil. À placer en début de cycle pour construire le foncier.',warm:'—',blocks:[{r:1,m:50,pct:65}],cool:'—',src:'Dr Phil Maffetone — méthode MAF (180-Formula)'},
+  // ── Bibliothèque restreinte au choix du coach (24/09/2026) ──
   {theme:'vo2',title:'5 × 1000 m à allure I',tag:'VO2max · allure I',desc:'Fractions à l’allure « Intervalle » (≈ allure 3000–5000 m) : maximise le temps passé proche de VO2max.',warm:'20 min + gammes',blocks:[{r:5,d:1000,pct:[95,100],rec:'3’ jog'}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (allure I)'},
-  {theme:'seuil',title:'Cruise intervals à allure T',tag:'seuil · ~87% VMA',desc:'Fractionné au seuil (allure « T » de Daniels) : récup courte pour accumuler du volume au seuil sans fatigue excessive.',warm:'20 min',blocks:[{r:5,d:1500,pct:87,rec:'1’'}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (allure T)'},
-  {theme:'seuil',title:'Double seuil (méthode norvégienne)',tag:'2 séances / jour',desc:'Deux séances de seuil dans la journée à intensité contrôlée (lactate ~2–4,5 mmol) : matin 5×6 min, après-midi 10×1000 m. Gros volume au seuil, fatigue maîtrisée.',warm:'20 min (chaque séance)',blocks:[{r:5,m:6,pct:86,rec:'1’'},{r:10,d:1000,pct:88,rec:'1’'}],cool:'10 min',src:'Méthode norvégienne — M. Bakken / Casado, Foster, Bakken & Tjelta (Sports Medicine, 2022)'},
-  {theme:'5k',title:'Répétitions à allure R',tag:'5K · vitesse',desc:'Répétitions courtes à l’allure « R » de Daniels (≈ allure mile/3000) avec récup complète : économie de course et vitesse spécifique.',warm:'20 min + 4 lignes',blocks:[{r:8,d:400,pct:[100,105],rec:'récup complète (~2’)'}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (allure R)'},
   {theme:'seuil',title:'Tempo continu au seuil',tag:'10K · ~88% VMA',desc:'Tempo continu à l’allure seuil lactique (≈ allure 15 km–semi) : la séance clé de Pfitzinger pour préparer le 10 km.',warm:'20 min',blocks:[{r:1,d:8000,pct:88}],cool:'10 min',src:'Pete Pfitzinger — Advanced Marathoning / Faster Road Racing'},
-  {theme:'semi',title:'Bloc allure spécifique semi',tag:'semi · ~87% VMA',desc:'2 × 6 km à l’allure semi avec récup courte : habitue le corps à tenir l’allure de course sur du volume.',warm:'20 min',blocks:[{r:2,d:6000,pct:[86,88],rec:'3’'}],cool:'10 min',src:'Approche Renato Canova (allure spécifique)'},
-  {theme:'marathon',title:'Bloc spécifique Canova',tag:'marathon · ~103% AS',desc:'3 × 7 km légèrement plus vite que l’allure marathon, récup 1 km à allure marathon : la séance signature de Canova pour « rendre l’allure marathon facile ».',warm:'20 min',blocks:[{r:3,d:7000,pct:82,rec:'1 km à allure marathon'}],cool:'10 min',src:'Renato Canova — marathon specific (runningwritings.com)'},
-  {theme:'marathon',title:'Tempo à allure marathon (Hansons)',tag:'marathon · allure objectif',desc:'Tempo continu à l’allure objectif marathon, à construire jusqu’à ~16 km : pilier de la méthode Hansons pour ancrer l’allure de course.',warm:'15 min',blocks:[{r:1,d:12000,pct:80}],cool:'10 min',src:'Hansons Marathon Method — K. & K. Hanson / L. Humphrey'},
-  // ── Veille élargie · séances signatures ──
-  {theme:'entretien',title:'Sortie longue foncière (base Lydiard)',tag:'90–120 min · 65–72%',desc:'Longue sortie en endurance pour développer la capacité aérobie et l’endurance de fond. Fondation de la méthode Lydiard.',warm:'—',blocks:[{r:1,m:100,pct:[65,72]}],cool:'—',src:'Arthur Lydiard — construction de la base aérobie'},
   {theme:'vo2',title:'Mona Fartlek (20 min)',tag:'fartlek · 5K→mile',desc:'Fartlek de 20 min à récup active (« float ») : 2×90s, 4×60s, 4×30s, 4×15s en accélérant à mesure que les fractions raccourcissent. Efficace et réalisable partout.',warm:'15 min',blocks:[{r:2,sec:90,pct:95,rec:'90s float actif'},{r:4,sec:60,pct:100,rec:'60s float'},{r:4,sec:30,pct:105,rec:'30s float'},{r:4,sec:15,pct:110,rec:'15s float'}],cool:'10 min',src:'Chris Wardlaw / Steve Moneghetti — « Mona Fartlek »'},
   {theme:'vo2',title:'Billat 30-30 (2 blocs)',tag:'vVMA · 30s/30s',desc:'Alternance 30s à vVMA (100% VMA) / 30s footing à ~50%, jusqu’à 9 répétitions par bloc, 2 blocs. Maximise le temps passé proche de VO2max.',warm:'20 min',blocks:[{r:9,sec:30,pct:100,rec:'30s @ 50% VMA',sets:2,recSet:'3 min'}],cool:'10 min',src:'Véronique Billat — protocole 30-30 (Billat et al., 2000)'},
-  {theme:'vo2',title:'6 × 1000 m à allure 5K',tag:'VO2max · récup 2’',desc:'Intervalles à l’allure 5 km (≈ 95–97% VMA) avec récup 2 min : séance VO2max de référence du plan Pfitzinger.',warm:'20 min',blocks:[{r:6,d:1000,pct:[95,97],rec:'2’ jog'}],cool:'10 min',src:'Pete Pfitzinger — Advanced Marathoning (intervalles VO2max)'},
-  {theme:'5k',title:'2 × 2000 m à allure 5K',tag:'5K · spécifique',desc:'Deux fractions longues à l’allure objectif 5 km : ancre l’allure de course et la résistance spécifique. Récup 3–4 min.',warm:'20 min + 4 lignes',blocks:[{r:2,d:2000,pct:[95,97],rec:'3–4’'}],cool:'10 min',src:'Jack Daniels — allure I / spécifique 5K'},
-  {theme:'10k',title:'5 × 1000 m à allure 10K',tag:'10K · spécifique',desc:'Intervalles à l’allure objectif 10 km (≈ 90% VMA), récup courte 90 s : développe la résistance spécifique à l’allure de course.',warm:'20 min',blocks:[{r:5,d:1000,pct:90,rec:'90s'}],cool:'10 min',src:'Allure spécifique 10K (Daniels / Pfitzinger)'},
-  {theme:'semi',title:'Sortie longue + 2 × 4 km à allure semi',tag:'semi · endurance spécifique',desc:'Sortie longue de ~1h30 incluant 2 × 4 km à l’allure semi : travaille l’endurance spécifique en état de fatigue.',warm:'—',blocks:[{r:1,m:30,pct:70},{r:2,d:4000,pct:[86,88],rec:'5’ footing'},{r:1,m:20,pct:70}],cool:'—',src:'Pete Pfitzinger — Faster Road Racing'},
-  {theme:'marathon',title:'Yasso 800s',tag:'10 × 800 m · repère',desc:'10 × 800 m à un rythme où le temps (min:s) égale l’objectif marathon (h:min), récup footing de durée égale. Séance-repère popularisée par Bart Yasso — utile à l’entraînement, mais prédicteur imparfait.',warm:'20 min',blocks:[{r:10,d:800,pct:90,rec:'footing durée égale'}],cool:'10 min',src:'Bart Yasso — Runner’s World (1994)'},
   {theme:'entretien',title:'Footing endurance fondamentale',tag:'~65% VMA',desc:'La base : développer l’endurance aérobie en aisance respiratoire totale, capable de tenir une conversation.',warm:'—',blocks:[{r:1,m:50,pct:65}],cool:'—'},
   {theme:'entretien',title:'Footing + lignes droites',tag:'65% + accélérations',desc:'Footing tranquille suivi de lignes pour entretenir la vivacité et la qualité de foulée.',warm:'15 min footing',blocks:[{r:1,m:25,pct:65},{r:6,d:100,pct:100,rec:'retour marche'}],cool:'5 min souple'},
   {theme:'entretien',title:'Fartlek nature',tag:'jeu d’allures',desc:'Alternance libre vite / lent au ressenti, selon le terrain, sans regarder la montre.',warm:'15 min footing',blocks:[{r:10,m:1,pct:[85,90],rec:'1 min lent'}],cool:'10 min footing'},
-
-  {theme:'vo2',title:'30/30 classique',tag:'~105% VMA',desc:'Le grand classique du développement de la VO2max. Effort court et intense, récup courte.',warm:'20 min + gammes',blocks:[{sets:2,r:8,sec:30,pct:105,rec:'30s trot',recSet:'3 min'}],cool:'10 min footing'},
-  {theme:'vo2',title:'10 × 400 m',tag:'100% VMA',desc:'Format piste de référence pour la puissance aérobie et la tolérance à l’effort.',warm:'20 min + 4 lignes',blocks:[{r:10,d:400,pct:100,rec:"1'15 trot"}],cool:'10 min footing'},
-  {theme:'vo2',title:'5 × 1000 m',tag:'100–102% VMA',desc:'Fractions longues à VMA : lucidité et capacité à maintenir l’intensité.',warm:'20 min + gammes',blocks:[{r:5,d:1000,pct:[100,102],rec:"2'"}],cool:'10 min footing'},
-
   {theme:'seuil',title:'Seuil continu 2 × 15 min',tag:'~85% VMA',desc:'Repousser le seuil : allure « confortablement difficile », régulière et maîtrisée.',warm:'20 min',blocks:[{r:2,m:15,pct:85,rec:"3'"}],cool:'10 min'},
   {theme:'seuil',title:'3 × 10 min au seuil',tag:'~87% VMA',desc:'Fractionné au seuil un peu plus soutenu, avec récupération courte.',warm:'20 min',blocks:[{r:3,m:10,pct:87,rec:"2'30"}],cool:'10 min'},
-  {theme:'seuil',title:'4 × 2000 m au seuil',tag:'~88% VMA',desc:'Travail du seuil sur distance : gestion de l’allure et régularité.',warm:'20 min + 3 lignes',blocks:[{r:4,d:2000,pct:88,rec:"2'"}],cool:'10 min'},
-
-  {theme:'5k',title:'6 × 500 m allure 5K',tag:'~95% VMA',desc:'Séance spécifique 5K : caler l’allure course sur des fractions courtes.',warm:'20 min + gammes',blocks:[{r:6,d:500,pct:95,rec:"1'30"}],cool:'10 min'},
-  {theme:'5k',title:'5 × 1000 m allure 5K',tag:'93–95% VMA',desc:'Fractions au format course pour ancrer le rythme du 5K.',warm:'20 min',blocks:[{r:5,d:1000,pct:[93,95],rec:"2'"}],cool:'10 min'},
-  {theme:'5k',title:'2 × (6 × 300 m)',tag:'100% VMA',desc:'Vitesse spécifique et capacité à relancer sur la fin de course.',warm:'20 min + 4 lignes',blocks:[{sets:2,r:6,d:300,pct:100,rec:'45s',recSet:'3 min'}],cool:'10 min'},
-
-  {theme:'10k',title:'5 × 2000 m allure 10K',tag:'~90% VMA',desc:'La séance reine du 10K : du volume à l’allure spécifique.',warm:'20 min',blocks:[{r:5,d:2000,pct:90,rec:"2'"}],cool:'10 min'},
   {theme:'10k',title:'3 × 3000 m',tag:'88–90% VMA',desc:'Fractions longues proches de l’allure 10K, endurance de vitesse.',warm:'20 min',blocks:[{r:3,d:3000,pct:[88,90],rec:"2'30"}],cool:'10 min'},
-  {theme:'10k',title:'2 × 4 km allure 10K',tag:'~90% VMA',desc:'Gros blocs à l’allure course pour la solidité physique et mentale.',warm:'20 min',blocks:[{r:2,d:4000,pct:90,rec:"3'"}],cool:'10 min'},
-
-  {theme:'semi',title:'2 × 5 km allure semi',tag:'~85% VMA',desc:'Blocs à l’allure spécifique semi-marathon.',warm:'20 min',blocks:[{r:2,d:5000,pct:85,rec:"3'"}],cool:'10 min'},
-  {theme:'semi',title:'3 × 4 km',tag:'84–86% VMA',desc:'Fractionné long autour de l’allure semi.',warm:'20 min',blocks:[{r:3,d:4000,pct:[84,86],rec:"2'30"}],cool:'10 min'},
-  {theme:'semi',title:'Sortie longue + 2 × 20 min',tag:'1h30 · allure semi',desc:'Sortie longue intégrant deux blocs à l’allure objectif.',warm:'30 min footing',blocks:[{r:2,m:20,pct:85,rec:"5'"}],cool:'20 min footing'},
-
-  {theme:'marathon',title:'2 × 8 km allure marathon',tag:'~80% VMA',desc:'Ancrer l’allure marathon sur un gros volume fractionné.',warm:'20 min',blocks:[{r:2,d:8000,pct:80,rec:"3'"}],cool:'10 min'},
-  {theme:'marathon',title:'Sortie longue + 3 × 15 min AM',tag:'2h · allure marathon',desc:'Endurance spécifique : blocs à l’allure marathon dans le long.',warm:'40 min footing',blocks:[{r:3,m:15,pct:80,rec:"5'"}],cool:'reste en endurance'},
-  {theme:'marathon',title:'30 km progressif',tag:'finish ~80% VMA',desc:'Sortie longue progressive, terminée à l’allure marathon.',warm:'—',blocks:[{r:1,m:120,pct:[70,80]}],cool:'—'},
-  {theme:'seuil',title:'Tempo 20 min à allure T',tag:'seuil · le classique',desc:'LE tempo de référence : 20 minutes continues à l’allure T (≈ 88 % VMA), « confortablement difficile ». À maîtriser avant les variantes plus longues.',warm:'20 min',blocks:[{r:1,m:20,pct:88}],cool:'10 min',src:'Jack Daniels — Daniels’ Running Formula (tempo run)'},
-  {theme:'seuil',title:'Progressif 45 min (fin au seuil)',tag:'progressif · 70→88%',desc:'Course progressive à la kényane : départ facile, accélération continue jusqu’au seuil sur le dernier quart. Développe le contrôle d’allure et l’endurance au seuil sans traumatisme.',warm:'—',blocks:[{r:1,m:35,pct:[70,80]},{r:1,m:10,pct:88}],cool:'5 min',src:'Renato Canova / entraînement kényan — progressive run'},
-  {theme:'5k',title:'Affûtage 5K : 4 × 400 m allure course',tag:'J-4 à J-6 · volume réduit',desc:'Rappel d’allure la semaine de course : volume divisé, intensité conservée. Jambes vives sans fatigue résiduelle.',warm:'15 min + 2 lignes',blocks:[{r:4,d:400,pct:[95,97],rec:'2’ marche/trot'}],cool:'10 min',src:'Mujika & Padilla / Bosquet et al. 2007 (méta-analyse du tapering)'},
-  {theme:'10k',title:'Affûtage 10K : 3 × 1000 m allure course',tag:'J-4 à J-6 · rappel d’allure',desc:'Trois fractions à l’allure objectif, récup généreuse : entretenir la vitesse spécifique pendant la décharge, sans entamer la fraîcheur.',warm:'15 min',blocks:[{r:3,d:1000,pct:90,rec:'3’'}],cool:'10 min',src:'Mujika & Padilla / Bosquet et al. 2007 (méta-analyse du tapering)'},
-  {theme:'semi',title:'Affûtage semi : 3 × 2 km allure course',tag:'J-5 à J-7 · volume réduit',desc:'Dernier rappel de l’allure semi avant la course, volume minimal. La méta-analyse du tapering : réduire le volume de 40-60 % sur 8-14 jours en gardant l’intensité.',warm:'15 min',blocks:[{r:3,d:2000,pct:[86,88],rec:'3’'}],cool:'10 min',src:'Bosquet et al. 2007, Med Sci Sports Exerc (méta-analyse du tapering)'},
-  {theme:'marathon',title:'Répétition générale (J-14)',tag:'dress rehearsal · 13 km',desc:'Deux semaines avant : 13 km dont 8-10 km à l’allure marathon, en tenue et ravitaillement de course. Valide l’allure, l’équipement et la nutrition.',warm:'—',blocks:[{r:1,d:4000,pct:70},{r:1,d:9000,pct:80}],cool:'—',src:'Pete Pfitzinger — Advanced Marathoning (dress rehearsal)'},
-  // ── Panel 5K — séances spécifiques (ajout) ──
   {theme:'5k',title:'La séance mixte (5K)',tag:'5K · ladder mixte',desc:'Séance complète en escalier : fractions courtes rapides puis pyramide descendante 1200→400 m avec des allures de plus en plus vives (5 km → 3000 → 2000 → VMA). Développe la résistance à l’allure de course et la vitesse spécifique.',warm:'20 min + gammes + 3–4 lignes',blocks:[{r:4,d:300,pct:[95,98],rec:'55s marche (2’15 après la série)'},{r:1,d:1200,pct:[93,95],rec:'2’30'},{r:1,d:1000,pct:95,rec:'2’30 marche'},{r:1,d:800,pct:[95,98],rec:'2’ marche'},{r:1,d:600,pct:[98,100],rec:'1’30 marche'},{r:1,d:400,pct:[100,101]}],cool:'10 min footing'},
-  {theme:'5k',title:'Répétitions de 1000 m (5K)',tag:'6–8 × 1000 m · progressif',desc:'6 à 8 × 1000 m en négatif : départ quelques secondes plus lent que l’allure 5 km visée, milieu à l’allure visée, dernier légèrement plus rapide (allure 3000). Ancre l’allure de course et la gestion de l’effort.',warm:'20 min + 4 lignes',blocks:[{r:6,d:1000,pct:[93,96],rec:'2’30 à 3’ (marche ou trot léger)'}],cool:'10 min'},
-  {theme:'5k',title:'6 × 1000 m à variation d’allure',tag:'5K · changements de rythme',desc:'Chaque 1000 m combine une portion à allure 10 km et une portion à allure 5 km, avec une part de 5 km croissante à chaque répétition. Travaille le changement de rythme et la lucidité en fatigue.',warm:'20 min + gammes',blocks:[{label:'Rép 1',r:1,rec:'2’30',segs:[{d:800,pct:90,lbl:'allure 10 km'},{d:200,pct:94,lbl:'allure 5 km'}]},{label:'Rép 2',r:1,rec:'2’30',segs:[{d:700,pct:90,lbl:'allure 10 km'},{d:300,pct:94,lbl:'allure 5 km'}]},{label:'Rép 3',r:1,rec:'2’30',segs:[{d:600,pct:90,lbl:'allure 10 km'},{d:400,pct:94,lbl:'allure 5 km'}]},{label:'Rép 4',r:1,rec:'2’30',segs:[{d:500,pct:90,lbl:'allure 10 km'},{d:500,pct:94,lbl:'allure 5 km'}]},{label:'Rép 5',r:1,rec:'2’30',segs:[{d:400,pct:90,lbl:'allure 10 km'},{d:600,pct:94,lbl:'allure 5 km'}]},{label:'Rép 6',r:1,rec:'2’30',segs:[{d:300,pct:90,lbl:'allure 10 km'},{d:700,pct:94,lbl:'allure 5 km'}]}],cool:'10 min'},
-  {theme:'5k',title:'Blocs d’accélération (Heymans)',tag:'5K · 3 × (1000-600-400)',desc:'Trois séries d’une descente 1000 → 600 → 400 m, chaque fraction plus rapide que la précédente : allure 5 km, puis 3000, puis VMA. 6 km de qualité. Inspirée de John Heymans.',warm:'20 min + 4 lignes',blocks:[{label:'3 × (1000-600-400)',r:1,rec:'1’30 entre fractions · 3–4’ entre séries',segs:[{d:1000,pct:94,lbl:'allure 5 km'},{d:600,pct:97,lbl:'allure 3000'},{d:400,pct:100,lbl:'VMA'}]}],cool:'10 min',src:'Inspirée de John Heymans'},
   {theme:'5k',title:'Navette de lactate — Lactate Shuttle',tag:'5K · clairance lactate',desc:'6 à 10 fois (400 m rapide / 400 m actif) enchaînés sans pause : le 1er 400 m à l’allure 5 km, le 2e couru 10–12 s plus lent, en continu. Améliore la clairance du lactate et la capacité à récupérer en courant.',warm:'20 min + gammes',blocks:[{label:'6 à 10 × (400 / 400)',r:1,rec:'enchaîné, sans pause entre les fractions',segs:[{d:400,pct:94,lbl:'allure 5 km'},{d:400,pct:84,lbl:'récup active (~10–12 s plus lent)'}]}],cool:'10 min'},
-  {theme:'5k',title:'Activation semaine de course (5K)',tag:'J-3/J-4 · fraîcheur',desc:'Séance d’activation le mercredi avant la course : un bloc continu à allure semi/marathon, des 600 m à allure 5 km pour réveiller la vitesse spécifique, puis un 400 m plus vif. Volume faible, on reste frais.',warm:'15 min + 2 lignes',blocks:[{r:1,m:8,pct:[80,86],rec:'2’'},{r:6,d:600,pct:[93,95],rec:'2’'},{r:1,d:400,pct:[95,98]}],cool:'10 min footing'},
-  // ── Panel transversal — endurance / seuil / mixtes (ajout) ──
   {theme:'entretien',title:'Jog long progressif (haut de Zone 2)',tag:'EF · haut de Zone 2',desc:'Sortie de 60 à 90 min (progression au fil des semaines) à 70–75 % de FC Max (max 80 %). Départ en footing doux 1–2 km puis calage au rythme de croisière en haut de Zone 2/EF, sans basculer vers l’allure marathon. Développe l’endurance de base et la durabilité.',warm:'1–2 km footing doux (inclus)',blocks:[{r:1,m:75,pct:[72,76]}],cool:'—',src:'Endurance fondamentale · haut de Zone 2'},
-  {theme:'marathon',title:'Bloc d’endurance long — 30/20/10 min',tag:'marathon/semi · endurance spécifique',desc:'Trois blocs continus dégressifs en durée et progressifs en allure : 30 min autour du SV1 (allure marathon + 10–20 s), 20 min à l’allure marathon, 10 min un peu plus vite (effort très contrôlé). Bénéfique du 5 km au marathon.',warm:'20–30 min footing',blocks:[{r:1,m:30,pct:78,rec:'3–4 min (jog/marche)'},{r:1,m:20,pct:80,rec:'3–4 min (jog/marche)'},{r:1,m:10,pct:[82,84]}],cool:'10 min footing'},
   {theme:'seuil',title:'8 km progressif (SV1 → SV2)',tag:'10K/semi/marathon · progressif',desc:'8 km d’affilée en continu, du SV1 (allure marathon + 15 s) jusqu’à frôler le SV2 (allure semi) — FC de ~75 % à ~90 % FC Max. Option pic de forme : les 500 à 800 derniers mètres à l’allure 10 km. Contrôle d’allure et endurance au seuil.',warm:'15 min footing',blocks:[{r:1,d:8000,pct:[78,86]}],cool:'10 min footing'},
-  {theme:'seuil',title:'Répétitions de 3000 m — 5 × 3000 m',tag:'semi/marathon · progressif',desc:'3 à 5 × 3000 m (ou 10 min) progressifs : premier sous l’allure marathon (SV1, allure marathon + 5–15 s), chaque répétition 4–5 s/km plus rapide que la précédente, la dernière proche de l’allure semi/10 km. Récup 3–4 min au jog. Endurance au seuil et gestion d’allure.',warm:'20 min + 3 lignes',blocks:[{r:5,d:3000,pct:[80,86],rec:'3–4 min jog'}],cool:'10 min footing'},
-  {theme:'vo2',title:'5 × 2000 m « découpé »',tag:'5/10K/semi · rythmes alternés',desc:'3 à 6 × 2000 m en continu sur piste, en alternant modéré / rapide sur des blocs de plus en plus courts au sein de chaque 2000 m (400+400, 300+300, 200+200, 100+100). Travaille les changements de rythme et la tolérance au lactate. Infiniment varié.',warm:'20 min + gammes',blocks:[{label:'3 à 6 × 2000 m (découpé)',r:5,rec:'jog 2–3 min entre les 2000 m',segs:[{d:400,pct:79,lbl:'modéré (AM+5s)'},{d:400,pct:90,lbl:'rapide (10 km)'},{d:300,pct:79,lbl:'modéré'},{d:300,pct:92,lbl:'rapide (8 km)'},{d:200,pct:79,lbl:'modéré'},{d:200,pct:94,lbl:'rapide (5 km)'},{d:100,pct:79,lbl:'modéré'},{d:100,pct:97,lbl:'rapide (3 km)'}]}],cool:'10 min footing'},
   {theme:'10k',title:'Séance combinée — 3 × (9’ steady / 5’ vite)',tag:'10K/semi/5K · steady + relance',desc:'Trois enchaînements 9 min steady (SV1, allure marathon + 20 s ou haut de Z2), récup courte 1 min 30, puis 5 min à l’allure 10 km (changement de rythme marqué). Récup longue 3–4 min entre les blocs. Alterne endurance active et effort spécifique.',warm:'15–20 min footing',blocks:[{r:3,m:9,pct:[76,78],rec:'1’30 (jog/marche)'},{r:3,m:5,pct:90,rec:'3–4 min entre blocs'}],cool:'10 min footing'},
 ];
 const LIB_PHASE={
-  'Endurance faible intensité (MAF)':'gen','Sortie longue foncière (base Lydiard)':'gen','Footing endurance fondamentale':'gen','Footing + lignes droites':'gen','Fartlek nature':'gen','Progressif 45 min (fin au seuil)':'gen',
-  '5 × 1000 m à allure I':'dev','Billat 30-30 (2 blocs)':'dev','6 × 1000 m à allure 5K':'dev','30/30 classique':'dev','10 × 400 m':'dev','5 × 1000 m':'dev','Mona Fartlek (20 min)':'dev',
-  'Cruise intervals à allure T':'dev','Double seuil (méthode norvégienne)':'dev','Seuil continu 2 × 15 min':'dev','3 × 10 min au seuil':'dev','4 × 2000 m au seuil':'dev','Tempo 20 min à allure T':'dev',
-  'Répétitions à allure R':'spe','2 × 2000 m à allure 5K':'spe','6 × 500 m allure 5K':'spe','5 × 1000 m allure 5K':'spe','2 × (6 × 300 m)':'spe',
-  'Tempo continu au seuil':'spe','5 × 1000 m à allure 10K':'spe','5 × 2000 m allure 10K':'spe','3 × 3000 m':'spe','2 × 4 km allure 10K':'spe',
-  'Bloc allure spécifique semi':'spe','Sortie longue + 2 × 4 km à allure semi':'spe','2 × 5 km allure semi':'spe','3 × 4 km':'spe','Sortie longue + 2 × 20 min':'spe',
-  'Bloc spécifique Canova':'spe','Tempo à allure marathon (Hansons)':'spe','Yasso 800s':'spe','2 × 8 km allure marathon':'spe','Sortie longue + 3 × 15 min AM':'spe','30 km progressif':'spe','Répétition générale (J-14)':'aff',
-  'Affûtage 5K : 4 × 400 m allure course':'aff','Affûtage 10K : 3 × 1000 m allure course':'aff','Affûtage semi : 3 × 2 km allure course':'aff',
-  'La séance mixte (5K)':'spe','Répétitions de 1000 m (5K)':'spe','6 × 1000 m à variation d’allure':'spe','Blocs d’accélération (Heymans)':'spe','Navette de lactate — Lactate Shuttle':'spe','Activation semaine de course (5K)':'aff',
-  'Jog long progressif (haut de Zone 2)':'gen','Bloc d’endurance long — 30/20/10 min':'spe','8 km progressif (SV1 → SV2)':'dev','Répétitions de 3000 m — 5 × 3000 m':'spe','5 × 2000 m « découpé »':'dev','Séance combinée — 3 × (9’ steady / 5’ vite)':'dev',
+  'Footing endurance fondamentale':'gen','Footing + lignes droites':'gen','Fartlek nature':'gen',
+  '5 × 1000 m à allure I':'dev','Billat 30-30 (2 blocs)':'dev','Mona Fartlek (20 min)':'dev',
+  'Seuil continu 2 × 15 min':'dev','3 × 10 min au seuil':'dev',
+  'Tempo continu au seuil':'spe','3 × 3000 m':'spe',
+  'La séance mixte (5K)':'spe','Navette de lactate — Lactate Shuttle':'spe',
+  'Jog long progressif (haut de Zone 2)':'gen','8 km progressif (SV1 → SV2)':'dev','Séance combinée — 3 × (9’ steady / 5’ vite)':'dev',
 };
 function libPhaseOf(sess){return LIB_PHASE[sess.title]||'dev';}
 const LIB_ORDER={
@@ -6489,93 +6435,26 @@ const LIB_ORDER={
   'Footing endurance fondamentale':{n:1,when:'Toute la prépa'},
   'Footing + lignes droites':{n:2,when:'Toute la prépa'},
   'Fartlek nature':{n:3,when:'Toute la prépa'},
-  'Endurance faible intensité (MAF)':{n:4,when:'Toute la prépa'},
-  'Sortie longue foncière (base Lydiard)':{n:5,when:'Toute la prépa'},
   'Mona Fartlek (20 min)':{n:6,when:'Entretien qualité'},
   // VO2max : bloc développement
-  '30/30 classique':{n:1,when:'S-10 · pour débuter'},
   'Billat 30-30 (2 blocs)':{n:2,when:'S-9'},
-  '10 × 400 m':{n:3,when:'S-9 → S-8'},
-  '5 × 1000 m':{n:4,when:'S-8'},
   '5 × 1000 m à allure I':{n:5,when:'S-7'},
-  '6 × 1000 m à allure 5K':{n:6,when:'S-6'},
   // Seuil : progression douce → avancé
-  'Progressif 45 min (fin au seuil)':{n:1,when:'S-12 → S-10 · pour débuter'},
-  'Tempo 20 min à allure T':{n:2,when:'S-11 → S-9'},
   '3 × 10 min au seuil':{n:3,when:'S-10 → S-8'},
   'Seuil continu 2 × 15 min':{n:4,when:'S-9 → S-7'},
-  'Cruise intervals à allure T':{n:5,when:'S-8 → S-7'},
-  '4 × 2000 m au seuil':{n:6,when:'S-7 → S-6'},
-  'Double seuil (méthode norvégienne)':{n:7,when:'S-8 → S-6 · avancé'},
-  // Spé 5K
-  'Répétitions à allure R':{n:1,when:'S-6 · pour débuter le bloc'},
-  '2 × (6 × 300 m)':{n:2,when:'S-5'},
-  '6 × 500 m allure 5K':{n:3,when:'S-4'},
-  '5 × 1000 m allure 5K':{n:4,when:'S-3'},
-  '2 × 2000 m à allure 5K':{n:5,when:'J-10 · dernière grosse spé'},
-  'Affûtage 5K : 4 × 400 m allure course':{n:6,when:'J-4 → J-6'},
   // Spé 10K
   'Tempo continu au seuil':{n:1,when:'S-6 · pour débuter le bloc'},
-  '5 × 1000 m à allure 10K':{n:2,when:'S-5'},
   '3 × 3000 m':{n:3,when:'S-4'},
-  '5 × 2000 m allure 10K':{n:4,when:'S-3'},
-  '2 × 4 km allure 10K':{n:5,when:'J-10 · dernière grosse spé'},
-  'Affûtage 10K : 3 × 1000 m allure course':{n:6,when:'J-4 → J-6'},
-  // Spé semi
-  '3 × 4 km':{n:1,when:'S-6 · pour débuter le bloc'},
-  '2 × 5 km allure semi':{n:2,when:'S-5'},
-  'Sortie longue + 2 × 4 km à allure semi':{n:3,when:'S-4'},
-  'Sortie longue + 2 × 20 min':{n:4,when:'S-3'},
-  'Bloc allure spécifique semi':{n:5,when:'J-10 · dernière grosse spé'},
-  'Affûtage semi : 3 × 2 km allure course':{n:6,when:'J-5 → J-7'},
-  // Spé marathon
-  'Tempo à allure marathon (Hansons)':{n:1,when:'S-8 → S-6 · pour débuter le bloc'},
-  '2 × 8 km allure marathon':{n:2,when:'S-6'},
-  'Sortie longue + 3 × 15 min AM':{n:3,when:'S-5'},
-  'Yasso 800s':{n:4,when:'S-4 · séance repère'},
-  'Bloc spécifique Canova':{n:5,when:'S-4'},
-  '30 km progressif':{n:6,when:'S-3 · dernière très longue'},
-  'Répétition générale (J-14)':{n:7,when:'J-14 · dernière grosse spé'},
 };
 function libOrderOf(sess){return LIB_ORDER[sess.title]||null;}
 const LIB_VARS={
   'Jog long progressif (haut de Zone 2)':{same:'Sur tapis : +0,1 à 0,3 km/h chaque kilomètre (progression continue)',easy:'45–60 min à allure EF stable (bas de Zone 2)'},
-  'Bloc d’endurance long — 30/20/10 min':{same:'2 × 20 min · 2 × 30 min · 3 × 20 min · 40 min + 30 min',easy:'20 – 15 – 10 min, récup 3 min'},
   '8 km progressif (SV1 → SV2)':{same:'6 km (prépa 5/10K) · 10 · 12 · 14 km · ou en durée (20–60 min)',easy:'6 km progressif SV1 → SV2'},
-  'Répétitions de 3000 m — 5 × 3000 m':{same:'3 à 8 × 3000 m · 4–5 × 2000 m · 3 × 4000 m très progressif',easy:'3 × 3000 m progressif, récup 3–4 min'},
   'Séance combinée — 3 × (9’ steady / 5’ vite)':{same:'4 × (9’/5’) pour spé marathon/semi',easy:'2 × (9’/5’) pour un volume plus faible'},
   'La séance mixte (5K)':{same:'2 × (1600 m – 1200 m – 800 m – 400 m) — 8 km de qualité, récup 1’30 / 3’ entre séries',easy:'1200 – 1000 – 800 – 600 – 400 m (une seule descente), récup 2’30'},
-  '6 × 1000 m à variation d’allure':{same:'6 à 8 × 1000 m (800 m allure 10K/semi + 200 m allure 1500 m), récup 1’30',easy:'5 × 1000 m (700 m allure 10K + 300 m allure 5K), récup 2’30'},
-  'Activation semaine de course (5K)':{same:'Option B : 10 à 15 × (1 min vite / 1 min lent), en partant allure 10 km pour finir allure 5 km / 3000',easy:'6 min allure semi + 4 × 500 m allure 5K (récup 2’) + 2 lignes'},
-  // ── Spé 5K ──
-  'Répétitions à allure R':{same:'10 × 300 m à R récup 2′ · 6 × 400 m + 4 × 200 m',easy:'6 × 300 m à R, récup complète 2′30'},
-  '2 × (6 × 300 m)':{same:'3 × (4 × 300 m) · 12 × 300 m récup 45″',easy:'2 × (4 × 300 m), récup 1′ / 4′ entre blocs'},
-  '6 × 500 m allure 5K':{same:'5 × 600 m récup 1′30 · 8 × 400 m récup 1′',easy:'4 × 500 m récup 2′'},
-  '5 × 1000 m allure 5K':{same:'4 × 1200 m récup 2′30 · 3 × 1000 m + 2 × 500 m (finish vite)',easy:'4 × 800 m récup 2′30'},
-  '2 × 2000 m à allure 5K':{same:'3 × 1600 m récup 4′ · 2000 m + 2 × 1000 m',easy:'2 × 1500 m récup 4′'},
-  'Affûtage 5K : 4 × 400 m allure course':{same:'3 × 500 m allure course récup 2′',easy:'3 × 300 m + 4 lignes droites'},
   // ── Spé 10K ──
   'Tempo continu au seuil':{same:'2 × 5 km au seuil récup 3′',easy:'Tempo 6 km · ou 2 × 3 km récup 3′'},
-  '5 × 1000 m à allure 10K':{same:'6 × 1000 m récup 1′15 · 4 × 1200 m récup 1′30',easy:'4 × 1000 m récup 2′'},
   '3 × 3000 m':{same:'4000 + 3000 + 2000 m (récup 3′) · 2 × 4000 m',easy:'3 × 2000 m récup 3′'},
-  '5 × 2000 m allure 10K':{same:'4 × 2500 m récup 2′ · 3 × 3000 m récup 2′30',easy:'4 × 1600 m récup 2′30'},
-  '2 × 4 km allure 10K':{same:'3 × 3 km récup 3′ · 8 km continu à AS10 + 5″/km',easy:'2 × 3 km récup 4′'},
-  'Affûtage 10K : 3 × 1000 m allure course':{same:'2 × 1500 m allure course récup 3′',easy:'2 × 1000 m récup 3′'},
-  // ── Spé semi ──
-  '3 × 4 km':{same:'2 × 6 km récup 3′ · 4-4-3-3 km récup 2′30',easy:'3 × 3 km récup 3′'},
-  '2 × 5 km allure semi':{same:'10 km continu à AS21 + 5″/km',easy:'2 × 4 km récup 4′'},
-  'Sortie longue + 2 × 4 km à allure semi':{same:'Sortie longue + 3 × 3 km AS21',easy:'Sortie longue 1h15 + 1 × 5 km AS21 en fin'},
-  'Sortie longue + 2 × 20 min':{same:'Sortie longue + 40 min continu AS21 en fin de sortie',easy:'Sortie longue + 2 × 12 min AS21'},
-  'Bloc allure spécifique semi':{same:'12 km continu à AS21 (répétition générale)',easy:'2 × 5 km récup 4′'},
-  'Affûtage semi : 3 × 2 km allure course':{same:'4 × 1500 m AS21 récup 2′30',easy:'2 × 2 km récup 3′'},
-  // ── Spé marathon ──
-  'Tempo à allure marathon (Hansons)':{same:'Progression Hansons : monter jusqu\u2019à 16 km AM',easy:'8\u201310 km AM continu'},
-  '2 × 8 km allure marathon':{same:'3 × 6 km AM, récup 1 km footing',easy:'2 × 6 km AM récup 1 km'},
-  'Sortie longue + 3 × 15 min AM':{same:'Sortie longue 2h dont 2 × 25 min AM',easy:'Sortie longue 1h45 dont 2 × 10 min AM'},
-  'Yasso 800s':{same:'8 × 1000 m même logique de temps',easy:'6 × 800 m (progresser vers 10 au fil de la prépa)'},
-  'Bloc spécifique Canova':{same:'2 × 10 km à AM + 3″/km, récup 1 km AM',easy:'3 × 5 km légèrement plus vite qu\u2019AM, récup 1 km footing'},
-  '30 km progressif':{same:'32\u201335 km dont 3 derniers km à AM (confirmés)',easy:'24\u201326 km progressif, finish à AM + 10″/km'},
-  'Répétition générale (J-14)':{same:'15 km dont 10 km AM',easy:'10 km dont 6 km AM'},
 };
 let libPhase='all';
 let libTheme='all';
