@@ -167,6 +167,28 @@ create policy "athlete efface ses charges" on public.muscu_charges
 
 
 -- ══════════════════════════════════════════════════════════════════════════
+--  GRANTS POUR L'API DATA
+--
+--  Depuis le 30 octobre 2026, Supabase n'accorde plus cet accès tout seul
+--  à une table nouvellement créée : il faut le dire explicitement, ici, en
+--  plus des règles RLS ci-dessus. Sans lui, l'API renvoie une erreur de
+--  permission même si la règle RLS correspondante existe — ce grant ouvre
+--  la porte, RLS décide ensuite qui entre.
+--
+--  polar_tokens n'apparaît volontairement pas pour authenticated : voir
+--  securite-lot3.sql, qui lui accorde seulement le DELETE.
+-- ══════════════════════════════════════════════════════════════════════════
+grant select, insert           on public.polar_pending    to authenticated;
+grant select, delete           on public.polar_links      to authenticated;
+grant select, delete           on public.polar_exercises  to authenticated;
+grant select, insert, update, delete on public.muscu_charges to authenticated;
+
+grant select, insert, update, delete on
+  public.polar_pending, public.polar_links, public.polar_tokens,
+  public.polar_exercises, public.muscu_charges
+  to service_role;
+
+-- ══════════════════════════════════════════════════════════════════════════
 --  CONTRÔLE — ce qui doit s'afficher après le Run
 --
 --  Cinq lignes, rls_actif = true partout, et ceci :
